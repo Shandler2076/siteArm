@@ -109,15 +109,16 @@ Le **reçu** (présent, perdu, numéro) **n'est pas enregistré** sur la fiche. 
 - Le **membre dépose lui-même** sa photo depuis son espace personnel.
 - Exigences : photo en **tenue de l'Armée du Salut**. Les caractéristiques précises (cadrage, fond, etc.) seront fixées par l'église et affichées sur la page de dépôt.
 - Le site vérifie automatiquement le format (JPEG/PNG), la taille maximale et les dimensions minimales.
-- **La photo est soumise à validation** par le bureau de la paroisse (Président ou Secrétaire) ou par le BN, qui l'accepte ou la refuse avec un motif. Tant qu'elle n'est pas acceptée, l'ancienne photo (ou un emplacement vide) reste affichée.
+- **La photo est soumise à validation par le Bureau national uniquement**, qui l'accepte ou la refuse avec un motif (les bureaux de paroisse ne valident pas, pour éviter tout arrangement local). Tant qu'elle n'est pas acceptée, l'ancienne photo (ou un emplacement vide) reste affichée.
 - La fiche d'identification PDF générée à l'enregistrement ne comporte donc pas encore de photo ; le membre et les bureaux peuvent **régénérer la fiche** une fois la photo validée.
+- Le BN dispose d'une **file d'attente des photos à valider** (photo, nom, matricule, boutons Accepter / Refuser + motif).
 
 ### 3.5 Qui modifie quoi
 
 | Informations | Qui peut modifier |
 |---|---|
 | Téléphone, WhatsApp, email, quartier, ville, profession, personne à contacter | Le membre lui-même, et le bureau de sa paroisse |
-| Photo d'identité | Le membre (dépôt) ; validation par le bureau de paroisse ou le BN |
+| Photo d'identité | Le membre (dépôt) ; validation par le BN uniquement |
 | Nom, prénoms, sexe, date et lieu de naissance, situation matrimoniale, NPI, photo du CIP | BN uniquement |
 | Année, paroisse et région d'intégration, matricule | Personne en temps normal. **Correction exceptionnelle par le BN** avec motif obligatoire, inscrite au journal. Si l'année ou la région change, un nouveau matricule est attribué et l'ancien reste noté sur la fiche. |
 
@@ -179,12 +180,19 @@ Après le départ d'un membre (mutation validée), l'ancienne paroisse, l'ancien
 1. Le site fournit un **modèle Excel officiel** à télécharger : colonnes fixes, listes déroulantes (sexe, situation matrimoniale, paroisses), consignes de saisie (format de date…).
 2. Chaque **région** remplit le modèle avec ses nouveaux membres et **l'envoie au Secrétaire national** (hors site).
 3. Le **Secrétaire national dépose le fichier** sur le site, en indiquant la région concernée → création d'un **lot**.
-4. Le site **vérifie chaque ligne** et affiche un **rapport** :
-   - lignes correctes ;
-   - **doublons possibles** (avec un membre existant ou au sein du fichier) ;
-   - **erreurs** (champ obligatoire vide, date invalide, paroisse inconnue ou hors de la région…), avec le numéro de ligne.
-   Un lot contenant des erreurs ne peut pas être validé : le fichier est corrigé et redéposé. Les doublons possibles doivent être tranchés ligne par ligne (garder / écarter).
-5. Le BN **valide le lot**.
+4. **Écran de contrôle du lot (aperçu avant génération).** Le site lit le fichier **sans rien créer** et affiche un tableau de toutes les lignes, **telles que le site les a comprises** (nom, prénoms, sexe, date de naissance, paroisse, année d'intégration…), avec pour chaque ligne un état :
+   - ✅ **correcte** ;
+   - ⚠️ **doublon possible** (avec un membre existant ou au sein du fichier), avec lien vers la fiche existante pour comparer ;
+   - ❌ **erreur** (champ obligatoire vide, date invalide, paroisse inconnue ou hors de la région…), avec explication.
+   Un résumé indique : nombre de lignes, répartition par année d'intégration et par paroisse, nombre de lignes correctes / à vérifier / en erreur.
+   Sur cet écran, le BN peut :
+   - **corriger directement une ligne** (petites erreurs de saisie), la correction étant inscrite au journal ;
+   - **écarter une ligne** (elle ne sera pas créée) ;
+   - trancher chaque doublon possible (**garder** ou **écarter**) ;
+   - **enregistrer le lot en brouillon** et y revenir plus tard ;
+   - ou **redéposer un fichier corrigé** par la région.
+   Le lot est sauvegardé tel quel tant qu'il n'est pas validé : **aucun matricule, aucun compte n'existe à ce stade.**
+5. **Confirmation finale.** Le bouton « Valider et générer » n'est actif que lorsqu'il ne reste **aucune erreur ni aucun doublon non tranché**. Un écran récapitulatif s'affiche (« 47 membres vont être créés pour la région 03 : 30 en 2026, 17 en 2015… ») et demande une confirmation explicite. Le BN **valide le lot**.
 6. Le site génère **en une seule fois** : les matricules, les comptes avec mots de passe provisoires, les affectations, **un PDF regroupant toutes les fiches d'identification**, une **liste récapitulative** (nom → matricule) pour la région, et les notifications aux bureaux concernés.
 7. Le lot et son fichier d'origine restent archivés (consultables par le BN).
 
@@ -247,8 +255,8 @@ Les types exacts de sanctions seront repris du règlement intérieur.
 | Espace | Pour qui | Contenu |
 |---|---|---|
 | **Espace membre** | Tout membre connecté | Sa fiche, son parcours, ses fonctions, ses sanctions éventuelles, sa fiche PDF, le dépôt de sa photo, la modification de ses coordonnées, le changement de mot de passe, ses notifications |
-| **Espace bureau** | Titulaires d'une fonction avec droit de gérer (paroisse, circuit, région) | Membres de son périmètre, anciens membres, listes, demandes et avis de mutation, signalement de décès, validation des photos, réinitialisation des mots de passe (paroisse) |
-| **Espace Bureau national** | Titulaires d'une fonction nationale avec droit de gérer | Tout ce qui précède pour tout le pays + enregistrement individuel et par lots, validation des mutations, sanctions, confirmation des décès, gestion des bureaux et des fonctions, gestion des régions, circuits et paroisses, journal |
+| **Espace bureau** | Titulaires d'une fonction avec droit de gérer (paroisse, circuit, région) | Membres de son périmètre, anciens membres, listes, demandes et avis de mutation, signalement de décès, réinitialisation des mots de passe (paroisse) |
+| **Espace Bureau national** | Titulaires d'une fonction nationale avec droit de gérer | Tout ce qui précède pour tout le pays + enregistrement individuel et par lots (avec écran de contrôle), validation des photos, validation des mutations, sanctions, confirmation des décès, gestion des bureaux et des fonctions, gestion des régions, circuits et paroisses, journal |
 
 Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sélecteur d'unité).
 
@@ -273,7 +281,7 @@ Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sél
 | Valider une mutation | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Signaler un décès | ❌ | ✅ | ❌ | ❌ | ✅ |
 | Confirmer un décès | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Valider une photo | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Valider une photo | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Enregistrer des membres (individuel, lot) | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Gérer bureaux, fonctions, territoire | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Réinitialiser un mot de passe | ❌ | Ses membres | ❌ | ❌ | ✅ |
@@ -337,7 +345,8 @@ Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sél
 - toutes les lignes de la matrice des droits (9.1), notamment : membre simple bloqué sur la fiche d'un autre ; paroisse bloquée hors de son périmètre ; perte des droits à la fin d'un mandat ; photo du CIP refusée hors BN ;
 - mutations (validée → mises à jour ; refusée → aucun changement) ;
 - sanctions (changement de statut, exclu ne peut plus se connecter, expiration automatique) ;
-- import par lots (détection des erreurs et doublons, tout ou rien) ;
+- import par lots (aperçu sans aucune création, détection des erreurs et doublons, corrections et lignes écartées, validation bloquée tant qu'il reste des erreurs, tout ou rien) ;
+- validation des photos réservée au BN ;
 - listes (périmètre respecté, inscription au journal).
 
 ### 12.2 Parcours d'une modification
