@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block titre %}Listes — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "bureaux/_entete_unite.html" %}
+  <form method="get" class="filtres">
+    <details{% if not page %} open{% endif %}>
+      <summary>Filtres et colonnes</summary>
+      {{ form.non_field_errors }}
+      <input type="hidden" name="envoye" value="1">
+      <div class="grille-filtres">
+        {% for champ in form %}{% if champ.name != "envoye" and champ.name != "colonnes" %}
+          <div class="champ{% if champ.name == 'statut' %} choix choix--grille{% endif %}">
+            <span>{{ champ.label }}</span>
+            {{ champ }}
+            {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+      <div class="champ choix choix--grille">
+        <span>{{ form.colonnes.label }}</span>
+        {{ form.colonnes }}
+      </div>
+    </details>
+    <button type="submit" class="bouton">Afficher la liste</button>
+  </form>
+
+  {% if page %}
+    <div class="resume">{% for r in resume %}<span class="pastille">{{ r }}</span>{% endfor %}</div>
+    <p><strong>{{ page.paginator.count }} membre{{ page.paginator.count|pluralize }}</strong></p>
+    <div class="actions actions--deux">
+      <a class="bouton bouton--secondaire" href="{% url 'listes:liste_pdf' unite.cle %}?{{ requete }}">Télécharger en PDF</a>
+      <a class="bouton bouton--secondaire" href="{% url 'listes:liste_excel' unite.cle %}?{{ requete }}">Télécharger en Excel</a>
+    </div>
+    <div class="tableau-defilant">
+      <table class="tableau tableau--souple">
+        <thead><tr>{% for e in entetes %}<th>{{ e }}</th>{% endfor %}</tr></thead>
+        <tbody>
+          {% for rangee in rangees %}
+            <tr>{% for v in rangee %}<td>{{ v|default_if_none:"" }}</td>{% endfor %}</tr>
+          {% empty %}
+            <tr><td colspan="{{ entetes|length }}" class="aide">Aucun membre ne correspond.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if page.has_other_pages %}
+      <nav class="pagination">
+        {% if page.has_previous %}<a href="?{{ requete }}&amp;page={{ page.previous_page_number }}">← Précédent</a>{% endif %}
+        <span>Page {{ page.number }} / {{ page.paginator.num_pages }}</span>
+        {% if page.has_next %}<a href="?{{ requete }}&amp;page={{ page.next_page_number }}">Suivant →</a>{% endif %}
+      </nav>
+    {% endif %}
+  {% endif %}
+</section>
+{% endblock %}

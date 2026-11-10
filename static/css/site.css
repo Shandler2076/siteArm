@@ -112,3 +112,20 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .bouton:disabled { background: #C9D1DE; cursor: not-allowed; }
 .case { display: flex; gap: 10px; align-items: center; margin: 12px 0; font-weight: 600; }
 .case input { width: 22px; height: 22px; }
+/* Listes et statistiques (étape 5) */
+.filtres details { margin: 10px 0; }
+.filtres summary { cursor: pointer; font-weight: 700; color: var(--marine); padding: 6px 0; }
+.grille-filtres { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 0 12px; }
+.grille-filtres .champ { margin: 8px 0; }
+.choix--grille > div { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 2px 12px; }
+.choix--grille input[type="checkbox"] { width: 20px; height: 20px; }
+.actions--deux { grid-template-columns: 1fr 1fr; }
+.tableau--souple { min-width: 0; }
+.tableau--souple td, .tableau--souple th { white-space: nowrap; }
+.grille-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 12px 0; }
+.stat { border: 1px solid #DDE3EE; border-radius: 10px; padding: 10px 14px; }
+.stat h2 { font-size: 1rem; margin: 0 0 6px; color: var(--marine); }
+.stat ul { list-style: none; padding: 0; margin: 0; }
+.stat li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #DDE3EE; }
+.stat li:last-child { border-bottom: 0; }
+.stat .nombre { font-weight: 800; color: var(--marine); min-width: 2.5em; text-align: right; }

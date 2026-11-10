@@ -26,6 +26,11 @@
     <li><a href="{% url 'bureaux:bn_installer' %}">Installer un bureau</a></li>
     <li><a href="{% url 'bureaux:bn_fonctions' %}">Fonctions et droits</a></li>
     <li><a href="{% url 'bureaux:bn_echeances' %}">Mandats à échéance</a></li>
+    {% if espace_national %}
+    <li><a href="{% url 'listes:liste' 'national' %}">Listes nationales</a></li>
+    <li><a href="{% url 'listes:statistiques' 'national' %}">Statistiques nationales</a></li>
+    {% endif %}
+    <li><a href="{% url 'listes:tranches' %}">Tranches d'âge des statistiques</a></li>
   </ul>
   {% endif %}
 </section>

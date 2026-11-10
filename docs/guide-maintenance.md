@@ -172,3 +172,26 @@ Circuit : **région → Secrétaire national → site**.
    créés à chaque impression) et « Liste récapitulative » à renvoyer à la région.
 
 Les fichiers déposés sont archivés dans `prive/lots/` (à sauvegarder avec la base).
+
+## 17. Listes et statistiques
+
+- Code : `apps/listes`. Toutes les listes partent de `membres_visibles(unite)` (gardien des
+  périmètres) ; les filtres sont appliqués en base (`apps/listes/filtres.py::membres_filtres`).
+- **Âge**, calculé au jour près à la date du jour (`apps/listes/ages.py`) :
+  « moins de X ans » = âge < X ; « plus de Y ans » = âge > Y (40 ans pile n'est pas « plus de 40 ») ;
+  « entre X et Y ans » = bornes incluses. Un membre sans date de naissance n'apparaît que dans
+  « Âge non renseigné ».
+- **Tranches d'âge** des statistiques : modifiables par le BN (accueil → « Tranches d'âge des
+  statistiques », adresse `/bureau/bn/tranches-age/`). On saisit des bornes : « 18, 40 » (par défaut)
+  donne moins de 18 / 18 à 40 / plus de 40 ; « 18, 40, 60 » ajoute 41 à 60.
+- **Chaque chiffre des statistiques est un lien vers la liste** filtrée correspondante : le nombre
+  est calculé avec exactement les mêmes filtres que la liste (`apps/listes/statistiques.py`).
+  Un test vérifie cette égalité pour toutes les unités.
+- **Exports** : PDF et Excel des listes, PDF des statistiques. La photo du CIP et le NPI ne figurent
+  jamais dans une liste. Dans l'Excel, aucun texte n'est interprété comme une formule.
+- **Journal** (`apps/journal`, fonction `journaliser`) : chaque téléchargement (liste PDF, liste
+  Excel, statistiques PDF) et chaque changement de tranches d'âge y est inscrit (auteur, unité,
+  filtres, nombre de lignes). Consultation provisoire : administration technique → Journal.
+  La page de consultation du BN viendra à l'étape 7. Le simple affichage à l'écran n'est pas inscrit.
+- **Grade** : filtre, colonne et statistique arriveront avec le module 2 (ajouter une entrée dans
+  `COLONNES_LISTE`, un champ dans `FiltreListeForm` et une section dans `calculer_statistiques`).
