@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.comptes",
     "apps.organisation",
+    "apps.membres",
     "axes",
 ]
 
@@ -130,6 +131,8 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+# Fichiers privés (photos, CIP) : jamais servis directement, seulement via des vues contrôlées.
+PRIVATE_MEDIA_ROOT = BASE_DIR / "prive"
 WHITENOISE_USE_FINDERS = DEBUG or EN_TEST
 WHITENOISE_AUTOREFRESH = DEBUG or EN_TEST
 STORAGES = {
