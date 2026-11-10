@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titre %}Mandats à échéance — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Mandats à échéance</h1>
+  <p class="aide">Mandats qui finissent dans les 60 jours, et mandats échus non renouvelés. Un mandat échu n'est jamais coupé automatiquement : installez le nouveau bureau.</p>
+  <ul class="liste-membres">
+    {% for l in lignes %}
+      <li>
+        <strong>{{ l.mandat.fonction.nom }} — {{ l.unite.libelle }}</strong>
+        <span>{{ l.mandat.membre.matricule }} · {{ l.mandat.membre.nom_complet }}</span>
+        <span>{% if l.echu %}<strong class="erreur">Échu depuis le {{ l.mandat.date_fin_prevue|date:"d/m/Y" }}</strong>{% else %}Fin prévue le {{ l.mandat.date_fin_prevue|date:"d/m/Y" }}{% endif %}
+          · <a href="{% url 'bureaux:bn_installer' %}?niveau={{ l.unite.niveau }}{% if l.unite.objet %}&unite={{ l.unite.objet.pk }}{% endif %}">Installer le nouveau bureau</a></span>
+      </li>
+    {% empty %}
+      <li class="aide">Aucun mandat à échéance.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

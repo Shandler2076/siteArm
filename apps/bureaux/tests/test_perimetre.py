@@ -150,4 +150,3 @@ def test_libelle_sans_doublon_paroisse(territoire):
 
     p = Paroisse.objects.create(circuit=territoire["Ekpe A"], nom="Paroisse Saint Michel de X")
     assert P.Unite("paroisse", p).libelle == "Paroisse Saint Michel de X"
-

@@ -101,3 +101,24 @@ def fonctions(request):
         for valeur, libelle in Niveau.choices
     ]
     return render(request, "bureaux/bn_fonctions.html", {"par_niveau": par_niveau})
+
+
+@bn_requis
+def echeances(request):
+    from django.utils import timezone
+
+    from apps.bureaux.models import Mandat
+    from apps.bureaux.services import DELAI_ALERTE
+
+    j = timezone.localdate()
+    mandats = (
+        Mandat.objects.en_cours(j)
+        .filter(date_fin_prevue__lte=j + DELAI_ALERTE)
+        .select_related("fonction", "membre", "paroisse", "circuit", "region")
+        .order_by("date_fin_prevue")
+    )
+    lignes = [
+        {"mandat": m, "unite": Unite(m.fonction.niveau, m.unite), "echu": m.date_fin_prevue <= j}
+        for m in mandats
+    ]
+    return render(request, "bureaux/bn_echeances.html", {"lignes": lignes})

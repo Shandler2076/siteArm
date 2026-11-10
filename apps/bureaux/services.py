@@ -114,3 +114,56 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
             lambda: notifier([compte], f"Votre mot de passe a été réinitialisé par {auteur}.")
         )
     return contenu
+
+
+DELAI_ALERTE = datetime.timedelta(days=60)
+
+
+def _destinataires_echeance(mandat: Mandat):
+    from apps.bureaux.perimetre import Unite, titulaires_gestion
+
+    unite = Unite(mandat.fonction.niveau, mandat.unite)
+    return [
+        mandat.membre.compte,
+        *titulaires_gestion(unite),
+        *titulaires_gestion(Unite("national", None)),
+    ]
+
+
+def alertes_echeances(jour: datetime.date | None = None) -> tuple[int, int]:
+    """Prévient 60 jours avant la fin prévue, puis quand le mandat est échu. Ne coupe rien."""
+    from django.utils import timezone
+
+    from apps.bureaux.perimetre import Unite
+    from apps.notifications.services import notifier
+
+    j = jour or timezone.localdate()
+    echeances = echus = 0
+    mandats = (
+        Mandat.objects.en_cours(j)
+        .filter(date_fin_prevue__lte=j + DELAI_ALERTE)
+        .select_related("fonction", "membre__compte", "paroisse", "circuit", "region")
+    )
+    for m in mandats:
+        unite = Unite(m.fonction.niveau, m.unite)
+        texte = f"Le mandat de {m.fonction.nom} ({unite.libelle}) de {m.membre.nom_complet}"
+        fin = m.date_fin_prevue.strftime("%d/%m/%Y")
+        if m.date_fin_prevue > j and m.alerte_echeance_le is None:
+            notifier(
+                _destinataires_echeance(m),
+                f"{texte} arrive à échéance le {fin}.",
+                "/bureau/bn/echeances/",
+            )
+            m.alerte_echeance_le = j
+            m.save(update_fields=["alerte_echeance_le"])
+            echeances += 1
+        elif m.date_fin_prevue <= j and m.alerte_echu_le is None:
+            notifier(
+                _destinataires_echeance(m),
+                f"{texte} est échu depuis le {fin} et n'a pas été renouvelé.",
+                "/bureau/bn/echeances/",
+            )
+            m.alerte_echu_le = j
+            m.save(update_fields=["alerte_echu_le"])
+            echus += 1
+    return echeances, echus
