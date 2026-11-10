@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titre %}Tranches d'âge des statistiques{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="aide">Bureau national</p>
+  <h1>Tranches d'âge des statistiques</h1>
+  <p>Tranches actuelles :</p>
+  <div class="resume">{% for t in tranches %}<span class="pastille">{{ t.libelle }}</span>{% endfor %}</div>
+  <p class="aide">Exemple : « 18, 40 » donne moins de 18 ans, 18 à 40 ans, plus de 40 ans ;
+    « 18, 40, 60 » ajoute 41 à 60 ans. « Plus de 40 ans » commence à 41 ans.</p>
+  <form method="post">
+    {% csrf_token %}
+    <label class="champ">
+      <span>{{ form.bornes.label }}</span>
+      {{ form.bornes }}
+      {% for e in form.bornes.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
+    </label>
+    <button type="submit" class="bouton">Enregistrer</button>
+  </form>
+</section>
+{% endblock %}

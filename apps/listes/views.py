@@ -1,5 +1,6 @@
 from urllib.parse import urlencode
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -8,11 +9,15 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.bureaux.perimetre import unite_depuis_cle
-from apps.journal.models import LISTE_EXCEL, LISTE_PDF, STATISTIQUES_PDF
+from apps.bureaux.views_bn import bn_requis
+from apps.journal.models import LISTE_EXCEL, LISTE_PDF, STATISTIQUES_PDF, TRANCHES_AGE
 from apps.journal.services import journaliser
+from apps.listes.ages import tranches_depuis_bornes
 from apps.listes.colonnes import COLONNES_LISTE, lignes, preparer
 from apps.listes.exports import liste_excel, liste_pdf, statistiques_pdf
 from apps.listes.filtres import FiltreListeForm, membres_filtres, resume_filtres
+from apps.listes.forms import BornesForm
+from apps.listes.models import ReglageStatistiques
 from apps.listes.statistiques import calculer_statistiques
 from apps.membres.models import Statut
 
@@ -120,3 +125,21 @@ def liste_pdf_vue(request, cle):
 @login_required
 def liste_excel_vue(request, cle):
     return _export(request, cle, liste_excel, LISTE_EXCEL, "xlsx", TYPE_XLSX)
+
+
+@bn_requis
+def tranches(request):
+    reglage = ReglageStatistiques.courant()
+    form = BornesForm(request.POST or None, initial={"bornes": reglage.bornes.replace(",", ", ")})
+    if request.method == "POST" and form.is_valid():
+        avant, apres = reglage.bornes, form.cleaned_data["bornes"]
+        reglage.bornes = apres
+        reglage.save(update_fields=["bornes"])
+        journaliser(request.user, TRANCHES_AGE, avant=avant, apres=apres)
+        messages.success(request, "Tranches d'âge enregistrées.")
+        return redirect("listes:tranches")
+    return render(
+        request,
+        "listes/tranches.html",
+        {"form": form, "tranches": tranches_depuis_bornes(reglage.liste_bornes)},
+    )

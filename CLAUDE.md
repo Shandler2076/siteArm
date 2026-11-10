@@ -33,6 +33,11 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Droits BNC : `apps/bureaux/backends.py::MandatBackend` traduit un mandat national de gestion en
   permissions `membres.gerer_membres` / `membres.voir_cip` (vérifier avec `has_perm`).
 - Notifications : `apps/notifications/services.py::notifier` / `notifier_unite`.
+- Journal : `apps/journal/services.py::journaliser(par, action, unite="", **details)` (minimal ;
+  page de consultation BN à l'étape 7). Chaque export de liste/statistiques y est inscrit.
+- Listes et statistiques (`apps/listes`) : filtres en base (`membres_filtres`), âge au jour près
+  (`ages.py` : « plus de 40 » = 41 ans et plus), chaque chiffre de statistique = nombre de lignes de
+  la liste qu'il ouvre (mêmes filtres). Jamais de NPI ni de photo du CIP dans une liste.
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.
 - Lots Excel (`apps/lots`) : AUCUNE création de membre avant `valider_lot` (tout ou rien) ; validation
   des lignes par `apps/membres/forms.py::valider_futur_membre` (mêmes règles que l'individuel).
