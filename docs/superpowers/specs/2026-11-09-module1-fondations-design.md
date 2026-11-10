@@ -2,7 +2,7 @@
 
 **Projet :** Site de gestion des membres de l'Armée du Salut — Bénin
 **Date :** 9 novembre 2026
-**Statut :** En attente de validation
+**Statut :** Validé le 10 novembre 2026
 **Langue du site :** français
 
 ---
@@ -58,7 +58,7 @@ National
 - Chaque **région** reçoit un **code numérique à 2 chiffres**, attribué une fois pour toutes. Un code n'est **jamais réattribué**, même si la région est fermée ou divisée.
 - Chaque circuit est rattaché à une région ; chaque paroisse à un circuit.
 - On ne supprime jamais une région, un circuit ou une paroisse : on la **ferme** (l'historique reste intact).
-- La liste initiale des régions, circuits et paroisses est fournie par l'église et chargée au démarrage.
+- La liste initiale des régions, circuits et paroisses est fournie par l'église et chargée au démarrage (version provisoire : `docs/donnees/regions-circuits-paroisses.md`, 13 régions, 87 circuits, 427 paroisses ; version définitive attendue après le 25 décembre).
 
 ---
 
@@ -74,7 +74,7 @@ National
 | Contact | Téléphone, numéro WhatsApp, email (facultatif), quartier, ville | |
 | Autres | Profession actuelle, personne à contacter en cas d'urgence (nom + téléphone) | |
 | Intégration | Année d'intégration, paroisse d'intégration, région d'intégration | **Non modifiables** (sauf correction exceptionnelle, voir 3.5) |
-| Matricule | `AAAA-RR-NNNN` | Généré automatiquement, définitif |
+| Matricule | `AAAA-RRAS-NNNN` (ex. `2015-01AS-0157`) | Généré automatiquement, définitif |
 | Affectation actuelle | Paroisse (→ circuit → région) | Mise à jour uniquement par mutation validée |
 | Fonctions | Mandats en cours et passés | Voir section 5 |
 | Statut | Actif, Sanctionné, Exclu, Décédé | Termes définitifs selon le règlement intérieur |
@@ -85,10 +85,12 @@ Le **reçu** (présent, perdu, numéro) **n'est pas enregistré** sur la fiche. 
 
 ### 3.2 Matricule
 
-- **Format :** `AAAA-RR-NNNN` — exemple : `2026-03-0157`
+- **Format :** `AAAA-RRAS-NNNN` — exemple : `2015-01AS-0157`
   - `AAAA` : année d'intégration (4 chiffres)
   - `RR` : code de la région d'intégration (2 chiffres)
+  - `AS` : lettres fixes signifiant **« Armée du Salut »**, toujours présentes
   - `NNNN` : numéro d'ordre (4 chiffres)
+- **Lecture de l'exemple :** membre intégré en **2015**, dans la région de code **01**, **157ᵉ** membre enregistré pour cette année et cette région.
 - **Compteur :** un compteur distinct **par couple (année d'intégration, région d'intégration)**, qui commence à 0001.
 - **Génération :** le numéro suivant est pris et le compteur incrémenté **dans une seule opération verrouillée** en base de données. Deux enregistrements simultanés ne peuvent jamais produire le même matricule.
 - **Membres des années passées :** on saisit l'année réelle d'intégration ; le numéro d'ordre suit l'ordre de saisie sur le site (il n'existe pas de registre antérieur).
@@ -341,7 +343,7 @@ Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sél
 ### 12.1 Tests automatiques
 
 Écrits **avant** le code de chaque fonctionnalité. Couvrent au minimum :
-- format et unicité du matricule, y compris en enregistrements simultanés ; séparation des compteurs par année et région ;
+- format `AAAA-RRAS-NNNN` et unicité du matricule, y compris en enregistrements simultanés ; séparation des compteurs par année et région ;
 - toutes les lignes de la matrice des droits (9.1), notamment : membre simple bloqué sur la fiche d'un autre ; paroisse bloquée hors de son périmètre ; perte des droits à la fin d'un mandat ; photo du CIP refusée hors BN ;
 - mutations (validée → mises à jour ; refusée → aucun changement) ;
 - sanctions (changement de statut, exclu ne peut plus se connecter, expiration automatique) ;
