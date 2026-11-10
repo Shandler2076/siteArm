@@ -135,3 +135,99 @@ def verifier_ligne(ligne: LigneLot) -> None:
     ligne.doublons = []
     ligne.etat = EtatLigne.ERREUR if erreurs else EtatLigne.CORRECTE
     ligne.save()
+
+
+# --- Doublons et contrôle du lot ---------------------------------------------------------
+
+
+def _cle_identite(donnees: dict) -> str:
+    return f"{cle_nom(donnees.get('nom', ''))} | {cle_nom(donnees.get('prenoms', ''))}"
+
+
+def _meme_personne(a: dict, b: dict) -> bool:
+    if a.get("npi") and a.get("npi") == b.get("npi"):
+        return True
+    if _cle_identite(a) != _cle_identite(b):
+        return False
+    da, db = a.get("date_naissance"), b.get("date_naissance")
+    return not da or not db or da == db
+
+
+def controler_lot(lot) -> None:
+    """Vérifie chaque ligne non écartée puis recherche les doublons (base et fichier)."""
+    from apps.membres.services import doublons_possibles
+
+    lignes = list(lot.lignes.exclude(etat=EtatLigne.ECARTEE).order_by("numero"))
+    anciens = {ligne.pk: (ligne.etat, list(ligne.doublons)) for ligne in lignes}
+    for ligne in lignes:
+        verifier_ligne(ligne)
+    valides = [ligne for ligne in lignes if ligne.etat == EtatLigne.CORRECTE]
+    for ligne in valides:
+        d = ligne.donnees
+        date = datetime.date.fromisoformat(d["date_naissance"]) if d.get("date_naissance") else None
+        trouves = [
+            m.matricule
+            for m in doublons_possibles(
+                nom=d["nom"], prenoms=d["prenoms"], date_naissance=date, npi=d.get("npi", "")
+            )
+        ]
+        trouves += [
+            f"ligne {autre.numero}"
+            for autre in valides
+            if autre is not ligne and _meme_personne(d, autre.donnees)
+        ]
+        if not trouves:
+            continue
+        etat_avant, doublons_avant = anciens[ligne.pk]
+        garde = etat_avant == EtatLigne.GARDEE and sorted(doublons_avant) == sorted(trouves)
+        ligne.etat = EtatLigne.GARDEE if garde else EtatLigne.DOUBLON
+        ligne.doublons = trouves
+        ligne.save(update_fields=["etat", "doublons"])
+
+
+def _remplir(lot, fichier) -> None:
+    from apps.lots.lecture import lire_classeur
+
+    lignes = lire_classeur(fichier)  # peut lever FichierInvalide : rien n'est modifié
+    lot.lignes.all().delete()
+    LigneLot.objects.bulk_create([LigneLot(lot=lot, numero=n, brutes=_json(b)) for n, b in lignes])
+    controler_lot(lot)
+
+
+def _json(brutes: dict) -> dict:
+    return {
+        k: (v.isoformat() if isinstance(v, (datetime.date, datetime.datetime)) else v)
+        for k, v in brutes.items()
+    }
+
+
+def creer_lot(*, region: Region, fichier, par):
+    """Crée un lot en brouillon à partir du fichier. Aucun membre n'est créé."""
+    from django.db import transaction
+
+    from apps.lots.lecture import lire_classeur
+    from apps.lots.models import Lot
+
+    lire_classeur(fichier)  # contrôle de forme avant de créer quoi que ce soit
+    with transaction.atomic():
+        lot = Lot.objects.create(region=region, cree_par=par, nom_fichier=fichier.name[:200])
+        fichier.seek(0)
+        lot.fichier.save(f"lot-{lot.pk}.xlsx", fichier, save=True)
+        fichier.seek(0)
+        _remplir(lot, fichier)
+    return lot
+
+
+def remplacer_fichier(lot, fichier, par) -> None:
+    from django.db import transaction
+
+    from apps.lots.models import EtatLot
+
+    if lot.etat != EtatLot.BROUILLON:
+        raise ValueError("Un lot validé ne peut plus être modifié.")
+    with transaction.atomic():
+        _remplir(lot, fichier)
+        fichier.seek(0)
+        lot.fichier.save(f"lot-{lot.pk}.xlsx", fichier, save=False)
+        lot.nom_fichier = fichier.name[:200]
+        lot.save()
