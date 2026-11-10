@@ -33,6 +33,14 @@
       <li class="aide">Aucune fonction.</li>
     {% endfor %}
   </ul>
-  {% block actions %}{% endblock %}
+  {% if unite.niveau == "paroisse" %}
+  <div class="actions">
+    <form method="post" action="{% url 'bureaux:reinitialiser' unite.cle membre.matricule %}">
+      {% csrf_token %}
+      <button type="submit" class="bouton">Mot de passe oublié : imprimer une fiche avec un nouveau mot de passe</button>
+    </form>
+    <p class="aide">L'ancien mot de passe ne fonctionnera plus. Le membre devra choisir le sien à la connexion.</p>
+  </div>
+  {% endif %}
 </section>
 {% endblock %}

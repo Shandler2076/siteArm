@@ -4,9 +4,11 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import Http404
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 from apps.bureaux.perimetre import (
     anciens_membres,
+    est_bn,
     membres_visibles,
     unite_depuis_cle,
     unites_gerees,
@@ -64,3 +66,18 @@ def anciens(request, cle):
         actuelle = a.membre.affectation_actuelle
         lignes.append({"affectation": a, "membre": a.membre, "actuelle": actuelle})
     return render(request, "bureaux/anciens.html", {"unite": unite, "lignes": lignes})
+
+
+@login_required
+@require_POST
+def reinitialiser(request, cle, matricule):
+    from apps.bureaux.services import reinitialiser_mot_de_passe
+    from apps.membres.views_bn import _reponse_pdf
+
+    unite = unite_depuis_cle(request.user, cle)
+    membre = membres_visibles(unite).filter(matricule=matricule).first()
+    if membre is None:
+        raise Http404
+    if unite.niveau != "paroisse" and not est_bn(request.user):
+        raise PermissionDenied
+    return _reponse_pdf(reinitialiser_mot_de_passe(cible=membre, par=request.user), matricule)

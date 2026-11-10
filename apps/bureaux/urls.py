@@ -11,4 +11,9 @@ urlpatterns = [
     path("<str:cle>/membres/", views.membres, name="membres"),
     path("<str:cle>/membres/<str:matricule>/", views.fiche_membre, name="fiche_membre"),
     path("<str:cle>/anciens/", views.anciens, name="anciens"),
+    path(
+        "<str:cle>/membres/<str:matricule>/reinitialiser/",
+        views.reinitialiser,
+        name="reinitialiser",
+    ),
 ]

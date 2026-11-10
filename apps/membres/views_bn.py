@@ -1,8 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
-from django.core.exceptions import PermissionDenied, ValidationError
+from django.core.exceptions import ValidationError
 from django.db import transaction
-from django.http import Http404, HttpResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -14,7 +14,6 @@ from apps.membres.services import (
     CapaciteMatriculeAtteinte,
     doublons_possibles,
     enregistrer_membre,
-    generer_mot_de_passe_provisoire,
 )
 
 gerer_membres = permission_required("membres.gerer_membres", raise_exception=True)
@@ -83,20 +82,10 @@ def _reponse_pdf(contenu: bytes, matricule: str) -> HttpResponse:
 @require_POST
 def fiche_identifiants_pdf(request, matricule):
     """Nouveau mot de passe provisoire et fiche avec identifiants (mot de passe jamais stocké)."""
+    from apps.bureaux.services import reinitialiser_mot_de_passe
+
     membre = get_object_or_404(Membre, matricule=matricule)
-    compte = membre.compte
-    if compte is None:
-        raise Http404("Ce membre n'a pas de compte.")
-    if not request.user.is_superuser and (
-        compte.is_superuser
-        or not compte.get_all_permissions() <= request.user.get_all_permissions()
-    ):
-        raise PermissionDenied("Ce compte a plus de droits que le vôtre.")
-    mot_de_passe = generer_mot_de_passe_provisoire()
-    contenu = fiche_identification_pdf(membre, mot_de_passe)  # avant toute modification du compte
-    compte.set_password(mot_de_passe)
-    compte.doit_changer_mot_de_passe = True
-    compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
+    contenu = reinitialiser_mot_de_passe(cible=membre, par=request.user)
     return _reponse_pdf(contenu, matricule)
 
 
