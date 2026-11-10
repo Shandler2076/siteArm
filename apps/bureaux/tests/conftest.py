@@ -60,3 +60,20 @@ def donner_mandat(db):
         return m
 
     return donner
+
+
+@pytest.fixture
+def monde(territoire, nouveau_membre, donner_mandat):
+    t = territoire
+    d = datetime.date(2025, 1, 1)
+    m1, m2, m3, m4 = (
+        nouveau_membre(t[p], n)
+        for p, n in [("P1", "Adjovi"), ("P2", "Bio"), ("P3", "Chabi"), ("P4", "Dossou")]
+    )
+    sec_p1 = nouveau_membre(t["P1"], "Secretaire")
+    donner_mandat(sec_p1, "Secrétaire paroissial", t["P1"], debut=d)
+    chef = nouveau_membre(t["P2"], "Chef")
+    donner_mandat(chef, "Chef de Section de Circuit", t["Ekpe A"], debut=d)
+    tresorier = nouveau_membre(t["P1"], "Tresorier")
+    donner_mandat(tresorier, "Trésorier paroissial", t["P1"], debut=d)
+    return dict(t, m1=m1, m2=m2, m3=m3, m4=m4, sec_p1=sec_p1, chef=chef, tresorier=tresorier)
