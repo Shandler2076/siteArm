@@ -3,6 +3,7 @@
 import datetime
 
 from django.db import transaction
+from django.db.models import Q
 
 from apps.bureaux.models import Fonction, Mandat
 from apps.bureaux.perimetre import Unite
@@ -37,11 +38,28 @@ def installer_bureau(
             raise InstallationRefusee(
                 f"{membre.nom_complet} ({membre.matricule}) n'est pas un membre actif."
             )
+    if unite.niveau == "national" and not any(f.droit_gerer for f in titulaires):
+        raise InstallationRefusee(
+            "Le Bureau National doit avoir au moins un Président ou Secrétaire national "
+            "(une fonction qui gère le site) : sinon plus personne ne pourrait gérer le site."
+        )
+    plus_recent = (
+        _mandats_de_l_unite(unite)
+        .filter(date_debut__gte=date_debut)
+        .order_by("-date_debut")
+        .first()
+    )
+    if plus_recent is not None:
+        raise InstallationRefusee(
+            "Un bureau plus récent existe déjà (installé le "
+            f"{plus_recent.date_debut:%d/%m/%Y}) : choisissez une date de début postérieure."
+        )
     date_txt = date_debut.strftime("%d/%m/%Y")
     with transaction.atomic():
+        # Tous les mandats encore ouverts de l'unité (aucun ne commence après date_debut).
         anciens = list(
             _mandats_de_l_unite(unite)
-            .en_cours(date_debut)
+            .filter(Q(date_fin__isnull=True) | Q(date_fin__gt=date_debut))
             .select_related("fonction", "membre__compte")
         )
         for m in anciens:
@@ -101,7 +119,14 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
     else:
         paroisses = [u for u in unites_gerees(par) if u.niveau == "paroisse"]
         dans_ma_paroisse = any(membres_visibles(u).filter(pk=cible.pk).exists() for u in paroisses)
-        if not dans_ma_paroisse or unites_gerees(compte) or est_bn(compte):
+        droits_particuliers = (
+            compte.is_staff
+            or compte.is_superuser
+            or bool(compte.get_all_permissions())
+            or bool(unites_gerees(compte))
+            or est_bn(compte)
+        )
+        if not dans_ma_paroisse or droits_particuliers:
             raise PermissionDenied("Vous ne pouvez pas réinitialiser ce compte.")
     mot_de_passe = generer_mot_de_passe_provisoire()
     contenu = fiche_identification_pdf(cible, mot_de_passe)  # avant de toucher au compte
@@ -149,11 +174,7 @@ def alertes_echeances(jour: datetime.date | None = None) -> tuple[int, int]:
         texte = f"Le mandat de {m.fonction.nom} ({unite.libelle}) de {m.membre.nom_complet}"
         fin = m.date_fin_prevue.strftime("%d/%m/%Y")
         if m.date_fin_prevue > j and m.alerte_echeance_le is None:
-            notifier(
-                _destinataires_echeance(m),
-                f"{texte} arrive à échéance le {fin}.",
-                "/bureau/bn/echeances/",
-            )
+            notifier(_destinataires_echeance(m), f"{texte} arrive à échéance le {fin}.", "/")
             m.alerte_echeance_le = j
             m.save(update_fields=["alerte_echeance_le"])
             echeances += 1
@@ -161,7 +182,7 @@ def alertes_echeances(jour: datetime.date | None = None) -> tuple[int, int]:
             notifier(
                 _destinataires_echeance(m),
                 f"{texte} est échu depuis le {fin} et n'a pas été renouvelé.",
-                "/bureau/bn/echeances/",
+                "/",  # l'accueil montre à chacun les liens auxquels il a droit
             )
             m.alerte_echu_le = j
             m.save(update_fields=["alerte_echu_le"])

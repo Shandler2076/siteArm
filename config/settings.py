@@ -179,5 +179,12 @@ if not DEBUG:
 DEFAULT_FROM_EMAIL = os.environ.get(
     "DJANGO_DEFAULT_FROM_EMAIL", "Armée du Salut <noreply@localhost>"
 )
-if DEBUG:
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "25"))
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = _bool("DJANGO_EMAIL_USE_TLS", False)
+EMAIL_USE_SSL = _bool("DJANGO_EMAIL_USE_SSL", False)
+EMAIL_TIMEOUT = 10  # secondes : un serveur lent ne bloque pas les pages
+if DEBUG and not os.environ.get("DJANGO_EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

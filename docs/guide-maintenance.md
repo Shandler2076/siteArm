@@ -18,7 +18,8 @@ cp .env.exemple .env               # puis ouvrez .env et adaptez si besoin
 
 Pour que les commandes lisent `.env`, chargez-le dans le terminal :
 `set -a; source .env; set +a` (Linux/Mac). Sous Windows, définissez au moins
-`DJANGO_DEBUG=True` dans le terminal.
+`DJANGO_DEBUG=True` dans le terminal. Un email qui échoue n'interrompt jamais le site : l'erreur est inscrite dans les
+journaux de l'hébergeur.
 
 ## 2. Préparer la base de données et le territoire
 
@@ -147,6 +148,9 @@ nouveau bureau qui le fait.
 ## 15. Emails des notifications
 
 Les notifications sont aussi envoyées par email aux membres qui ont une adresse. En production,
-réglez l'envoi d'emails de l'hébergeur et la variable `DJANGO_DEFAULT_FROM_EMAIL`
+renseignez le serveur d'envoi (fournisseur d'emails) avec les variables `DJANGO_EMAIL_HOST`,
+`DJANGO_EMAIL_PORT`, `DJANGO_EMAIL_HOST_USER`, `DJANGO_EMAIL_HOST_PASSWORD`,
+`DJANGO_EMAIL_USE_TLS`, ainsi que `DJANGO_DEFAULT_FROM_EMAIL`
 (ex. `Armée du Salut <noreply@armeedusalut.bj>`). En développement, les emails s'affichent dans le
-terminal.
+terminal. Un email qui échoue n'interrompt jamais le site : l'erreur est inscrite dans les
+journaux de l'hébergeur.

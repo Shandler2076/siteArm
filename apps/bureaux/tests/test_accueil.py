@@ -8,8 +8,14 @@ def test_accueil_selon_les_mandats(client, monde, donner_mandat):
     assert "Ma fiche" in html
     donner_mandat(monde["sec_p1"], "Président", None, debut=datetime.date(2025, 1, 1))
     html = client.get("/").content.decode()
-    for lien in ["Installer un bureau", "Fonctions et droits", "Mandats à échéance",
-                 "Enregistrer un membre", "Photos à valider", "Espace bureau — Paroisse P1"]:
+    for lien in [
+        "Installer un bureau",
+        "Fonctions et droits",
+        "Mandats à échéance",
+        "Enregistrer un membre",
+        "Photos à valider",
+        "Espace bureau — Paroisse P1",
+    ]:
         assert lien in html, lien
 
 
