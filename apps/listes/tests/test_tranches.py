@@ -33,4 +33,18 @@ def test_refus(client_technique, saisie):
 
 
 def test_lien_accueil(client_technique):
-    assert URL in client_technique.get("/").content.decode()
+    html = client_technique.get("/").content.decode()
+    assert URL in html and "/bureau/national/listes/" in html
+    assert "/bureau/national/statistiques/" in html
+
+
+def test_liens_nationaux_seulement_si_espace_national(client, monde):
+    from django.contrib.auth.models import Permission
+
+    compte = monde["m1"].compte
+    compte.user_permissions.add(Permission.objects.get(codename="gerer_membres"))
+    client.force_login(compte)
+    html = client.get("/").content.decode()
+    assert URL in html  # pages BN de transition : oui
+    assert "/bureau/national/listes/" not in html  # espace national (gardien) : non
+    assert client.get("/bureau/national/listes/").status_code == 404

@@ -82,3 +82,23 @@ def test_tranches_trois_bornes():
         ("plus", 60, None),
     ]
     assert tranches_depuis_bornes([18, 40, 60])[2].libelle == "41 à 60 ans"
+
+
+def test_une_seule_borne():
+    assert [(t.libelle, t.condition, t.x) for t in tranches_depuis_bornes([18])] == [
+        ("Moins de 18 ans", "moins", 18),
+        ("18 ans et plus", "plus", 17),
+    ]
+
+
+@pytest.mark.parametrize("bornes", [[18], [1], [18, 40], [18, 19], [5, 18, 40, 60, 80, 120]])
+def test_tranches_couvrent_tout_le_monde(membre, bornes):
+    autour = {0, 124} | {b + d for b in bornes for d in (-1, 0, 1)}
+    for annees in sorted(a for a in autour if a >= 0):
+        membre(date(2026 - annees, 11, 10))
+        membre(date(2026 - annees, 11, 11))  # un jour avant l'anniversaire
+    nes = Membre.objects.all()
+    total = 0
+    for t in tranches_depuis_bornes(bornes):
+        total += filtrer_age(nes, t.condition, t.x, t.y, J).count()
+    assert total == nes.count()

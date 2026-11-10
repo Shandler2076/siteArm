@@ -45,7 +45,16 @@ class Tranche:
 
 
 def tranches_depuis_bornes(bornes: list[int]) -> list[Tranche]:
-    """[18, 40] → moins de 18 ; 18 à 40 ; plus de 40. [18, 40, 60] ajoute 41 à 60."""
+    """[18, 40] → moins de 18 ; 18 à 40 ; plus de 40. [18, 40, 60] ajoute 41 à 60.
+
+    Une seule borne [18] → moins de 18 ; 18 ans et plus (personne n'est oublié).
+    """
+    if len(bornes) == 1:
+        b = bornes[0]
+        return [
+            Tranche(f"Moins de {b} ans", "moins", b),
+            Tranche(f"{b} ans et plus", "plus", b - 1),
+        ]
     tranches = [Tranche(f"Moins de {bornes[0]} ans", "moins", bornes[0])]
     debut = bornes[0]
     for borne in bornes[1:]:
