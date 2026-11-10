@@ -32,7 +32,10 @@ class Unite:
     def libelle(self) -> str:
         if self.niveau == Niveau.NATIONAL:
             return "Bureau National de Commandement"
-        return f"{LIBELLES[self.niveau]} {self.objet.nom}"
+        prefixe = LIBELLES[self.niveau]
+        if self.objet.nom.lower().startswith(prefixe.lower()):
+            return self.objet.nom  # « Paroisse Saint Michel… » : pas de « Paroisse » en double
+        return f"{prefixe} {self.objet.nom}"
 
 
 def _mandats_de_gestion(jour: datetime.date | None = None):

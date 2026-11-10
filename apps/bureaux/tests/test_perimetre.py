@@ -143,3 +143,10 @@ def test_anciens_membres(monde):
     assert [x.membre.nom for x in anciens] == ["Adjovi"]
     assert "Adjovi" not in _noms(P.membres_visibles(P.Unite("paroisse", monde["P1"])))
     assert list(P.anciens_membres(P.Unite("region", monde["WEME"]))) == []
+
+
+def test_libelle_sans_doublon_paroisse(territoire):
+    from apps.organisation.models import Paroisse
+
+    p = Paroisse.objects.create(circuit=territoire["Ekpe A"], nom="Paroisse Saint Michel de X")
+    assert P.Unite("paroisse", p).libelle == "Paroisse Saint Michel de X"

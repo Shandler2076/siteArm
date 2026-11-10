@@ -79,3 +79,20 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .fonctions li { padding: 8px 0; border-bottom: 1px solid #DDE3EE; }
 .fonctions label { display: flex; gap: 10px; align-items: center; }
 .fonctions input[type="checkbox"] { width: 20px; height: 20px; }
+.onglets { display: flex; gap: 14px; margin: 8px 0 14px; border-bottom: 2px solid #DDE3EE; }
+.onglets a { padding: 6px 2px; color: var(--marine); font-weight: 700; text-decoration: none; }
+.recherche { display: flex; gap: 8px; }
+.recherche input { flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #C9D1DE; border-radius: 8px; }
+.recherche .bouton { width: auto; }
+.liste-membres { list-style: none; padding: 0; }
+.liste-membres li { border-bottom: 1px solid #DDE3EE; }
+.liste-membres a, .liste-membres li > strong { display: block; padding: 10px 2px; color: var(--texte); text-decoration: none; }
+.liste-membres span { display: block; color: var(--gris); font-size: .9rem; }
+.pagination { display: flex; justify-content: space-between; margin-top: 12px; }
+.entete { flex-wrap: nowrap; }
+.entete__marque { min-width: 0; }
+.entete__actions { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+.cloche { margin: 0; }
+.bouton--discret { white-space: nowrap; }
+.recherche input { min-width: 0; }
+@media (max-width: 380px) { .entete__marque small { display: none; } }

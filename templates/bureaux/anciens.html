@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Anciens membres — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "bureaux/_entete_unite.html" %}
+  <p class="aide">Membres passés par votre unité et affectés ailleurs. Lecture seule.</p>
+  <ul class="liste-membres">
+    {% for l in lignes %}
+      <li>
+        <strong>{{ l.membre.nom_complet }}</strong>
+        <span>{{ l.membre.matricule }} · chez vous du {{ l.affectation.date_debut|date:"d/m/Y" }} au {{ l.affectation.date_fin|date:"d/m/Y" }}</span>
+        <span>Aujourd'hui : {% if l.actuelle %}{{ l.actuelle.paroisse.nom }}{% else %}—{% endif %}</span>
+      </li>
+    {% empty %}
+      <li class="aide">Aucun ancien membre.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}
