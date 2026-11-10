@@ -1,3 +1,5 @@
+from urllib.parse import urlencode
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.http import HttpResponse
@@ -6,11 +8,13 @@ from django.urls import reverse
 from django.utils import timezone
 
 from apps.bureaux.perimetre import unite_depuis_cle
-from apps.journal.models import LISTE_EXCEL, LISTE_PDF
+from apps.journal.models import LISTE_EXCEL, LISTE_PDF, STATISTIQUES_PDF
 from apps.journal.services import journaliser
 from apps.listes.colonnes import COLONNES_LISTE, lignes, preparer
-from apps.listes.exports import liste_excel, liste_pdf
+from apps.listes.exports import liste_excel, liste_pdf, statistiques_pdf
 from apps.listes.filtres import FiltreListeForm, membres_filtres, resume_filtres
+from apps.listes.statistiques import calculer_statistiques
+from apps.membres.models import Statut
 
 PAR_PAGE = 100
 
@@ -40,10 +44,49 @@ def liste(request, cle):
     return render(request, "listes/liste.html", contexte)
 
 
+def _statuts(request) -> list[str]:
+    """Actif par défaut ; après envoi du formulaire, les statuts cochés (aucun = tous)."""
+    if not request.GET.get("envoye"):
+        return [Statut.ACTIF]
+    valides = set(Statut.values)
+    return [s for s in request.GET.getlist("statut") if s in valides]
+
+
+def _sections(request, unite):
+    statuts = _statuts(request)
+    sections = calculer_statistiques(unite, statuts, timezone.localdate())
+    base = reverse("listes:liste", args=[unite.cle])
+    for section in sections:
+        for c in section.cellules:
+            c.lien = base + "?" + urlencode(c.filtres, doseq=True)
+    return statuts, sections
+
+
 @login_required
 def statistiques(request, cle):
     unite = unite_depuis_cle(request.user, cle)
-    return render(request, "listes/statistiques.html", {"unite": unite, "sections": []})
+    statuts, sections = _sections(request, unite)
+    return render(
+        request,
+        "listes/statistiques.html",
+        {
+            "unite": unite,
+            "sections": sections,
+            "statuts": statuts,
+            "choix_statuts": Statut.choices,
+            "requete": request.GET.urlencode(),
+        },
+    )
+
+
+@login_required
+def statistiques_pdf_vue(request, cle):
+    unite = unite_depuis_cle(request.user, cle)
+    statuts, sections = _sections(request, unite)
+    contenu = statistiques_pdf(unite, sections, statuts)
+    journaliser(request.user, STATISTIQUES_PDF, unite=unite.cle, statuts=statuts)
+    horodatage = timezone.localtime().strftime("%Y%m%d-%H%M")
+    return telechargement(contenu, "application/pdf", f"statistiques-{cle}-{horodatage}.pdf")
 
 
 TYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

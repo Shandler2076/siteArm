@@ -3,5 +3,34 @@
 {% block contenu %}
 <section class="carte">
   {% include "bureaux/_entete_unite.html" %}
+  <form method="get" class="filtres">
+    <input type="hidden" name="envoye" value="1">
+    <div class="champ choix choix--grille">
+      <span>Statuts comptés</span>
+      <div>
+        {% for valeur, libelle in choix_statuts %}
+          <div><label><input type="checkbox" name="statut" value="{{ valeur }}"{% if valeur in statuts %} checked{% endif %}> {{ libelle }}</label></div>
+        {% endfor %}
+      </div>
+      <small class="aide">Aucune case cochée : tous les statuts.</small>
+    </div>
+    <button type="submit" class="bouton">Mettre à jour</button>
+  </form>
+  <p class="aide">Touchez un chiffre pour ouvrir la liste correspondante (exportable en PDF ou Excel).</p>
+  <div class="grille-stats">
+    {% for section in sections %}
+      <div class="stat">
+        <h2>{{ section.titre }}</h2>
+        <ul>
+          {% for c in section.cellules %}
+            <li><span>{{ c.libelle }}</span> <a href="{{ c.lien }}" class="nombre">{{ c.nombre }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="actions">
+    <a class="bouton bouton--secondaire" href="{% url 'listes:statistiques_pdf' unite.cle %}?{{ requete }}">Télécharger en PDF</a>
+  </div>
 </section>
 {% endblock %}

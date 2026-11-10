@@ -14,6 +14,7 @@ from reportlab.pdfgen import canvas
 from apps.bureaux.perimetre import Unite
 from apps.listes.colonnes import COLONNES_LISTE, lignes, preparer
 from apps.listes.filtres import membres_filtres, resume_filtres
+from apps.membres.models import Statut
 from apps.membres.pdf import GRIS, LOGO_AS, MARINE, OR, _ajuste, _polices
 
 MARGE = 16 * mm
@@ -138,3 +139,44 @@ def liste_excel(unite: Unite, form, aujourdhui: datetime.date) -> tuple[bytes, i
     tampon = io.BytesIO()
     classeur.save(tampon)
     return tampon.getvalue(), total
+
+
+def statistiques_pdf(unite: Unite, sections, statuts: list[str]) -> bytes:
+    _polices()
+    larg, haut = A4
+    tampon = io.BytesIO()
+    c = canvas.Canvas(tampon, pagesize=A4)
+    titre = f"Statistiques — {unite.libelle}"
+    libelles = dict(Statut.choices)
+    sous = ["Statut : " + (", ".join(str(libelles[s]) for s in statuts) or "tous")]
+    c.setTitle(titre)
+    numero = 1
+    y = entete_officiel(c, titre, sous, larg, haut)
+    for section in sections:
+        besoin = (len(section.cellules) + 2) * 6 * mm
+        if y - besoin < 18 * mm and besoin < haut - 60 * mm:
+            pied_de_page(c, numero, larg)
+            c.showPage()
+            numero += 1
+            y = entete_officiel(c, titre, sous, larg, haut)
+        c.setFillColor(MARINE)
+        c.setFont("Sans-Gras", 10.5)
+        c.drawString(MARGE, y, section.titre)
+        y -= 6.5 * mm
+        for cellule in section.cellules:
+            if y < 18 * mm:
+                pied_de_page(c, numero, larg)
+                c.showPage()
+                numero += 1
+                y = entete_officiel(c, titre, sous, larg, haut)
+            c.setFillColor(MARINE)
+            c.setFont("Sans", 9.5)
+            c.drawString(MARGE + 4 * mm, y, _ajuste(cellule.libelle, "Sans", 9.5, 120 * mm))
+            c.setFont("Sans-Gras", 9.5)
+            c.drawRightString(MARGE + 150 * mm, y, str(cellule.nombre))
+            y -= 5.5 * mm
+        y -= 4 * mm
+    pied_de_page(c, numero, larg)
+    c.showPage()
+    c.save()
+    return tampon.getvalue()
