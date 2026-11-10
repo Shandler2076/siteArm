@@ -28,7 +28,11 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   dans une transaction) ; enregistrement : `enregistrer_membre` (tout ou rien).
 - Fichiers sensibles : `stockage_prive` (`PRIVATE_MEDIA_ROOT`, dossier `prive/`), servis uniquement
   par `apps/membres/views_fichiers.py` (404 si pas le droit).
-- Droits BN provisoires (avant l'étape 3) : permissions `membres.gerer_membres`, `membres.voir_cip`.
+- Gardien des périmètres : `apps/bureaux/perimetre.py` est le SEUL endroit qui décide qui voit
+  quels membres (unites_gerees, membres_visibles, unite_depuis_cle…). Toute nouvelle vue passe par lui.
+- Droits BNC : `apps/bureaux/backends.py::MandatBackend` traduit un mandat national de gestion en
+  permissions `membres.gerer_membres` / `membres.voir_cip` (vérifier avec `has_perm`).
+- Notifications : `apps/notifications/services.py::notifier` / `notifier_unite`.
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`).
 
 ## Commandes

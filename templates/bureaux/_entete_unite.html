@@ -1,0 +1,6 @@
+<p class="aide">Espace bureau</p>
+<h1>{{ unite.libelle }}</h1>
+<nav class="onglets">
+  <a href="{% url 'bureaux:membres' unite.cle %}">Membres</a>
+  <a href="{% url 'bureaux:anciens' unite.cle %}">Anciens membres</a>
+</nav>

@@ -117,9 +117,24 @@ def enregistrer_membre(
                 date_debut=date_integration or datetime.date(annee_integration, 1, 1),
                 motif="Intégration",
             )
+        transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
     except Exception:
         cip = membre.photo_cip
         if cip and getattr(cip, "_committed", False) and cip.name:
             cip.storage.delete(cip.name)  # le fichier a été écrit avant l'annulation
         raise
     return ResultatEnregistrement(membre=membre, mot_de_passe=mot_de_passe)
+
+
+def _notifier_nouveau_membre(membre: Membre) -> None:
+    from apps.bureaux.perimetre import Unite
+    from apps.notifications.services import notifier_unite
+
+    paroisse = membre.paroisse_integration
+    message = f"Nouveau membre dans votre périmètre : {membre.matricule} — {membre.nom_complet}"
+    for unite in (
+        Unite("paroisse", paroisse),
+        Unite("circuit", paroisse.circuit),
+        Unite("region", paroisse.circuit.region),
+    ):
+        notifier_unite(unite, message)

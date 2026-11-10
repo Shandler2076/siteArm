@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titre %}Membres — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "bureaux/_entete_unite.html" %}
+  <form method="get" class="recherche">
+    <input type="search" name="q" value="{{ q }}" placeholder="Matricule, nom ou prénoms" aria-label="Rechercher">
+    <button type="submit" class="bouton">Rechercher</button>
+  </form>
+  <p class="aide">{{ page.paginator.count }} membre{{ page.paginator.count|pluralize }}</p>
+  <ul class="liste-membres">
+    {% for m in page %}
+      <li>
+        <a href="{% url 'bureaux:fiche_membre' unite.cle m.matricule %}">
+          <strong>{{ m.nom_complet }}</strong>
+          <span>{{ m.matricule }} · {{ m.get_statut_display }}</span>
+          <span>{% for a in m.affectations.all %}{% if not a.date_fin %}{{ a.paroisse.nom }}{% endif %}{% endfor %} · {{ m.telephone }}</span>
+        </a>
+      </li>
+    {% empty %}
+      <li class="aide">Aucun membre.</li>
+    {% endfor %}
+  </ul>
+  {% if page.has_other_pages %}
+    <nav class="pagination">
+      {% if page.has_previous %}<a href="?page={{ page.previous_page_number }}&q={{ q|urlencode }}">← Précédent</a>{% endif %}
+      <span>Page {{ page.number }} / {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a href="?page={{ page.next_page_number }}&q={{ q|urlencode }}">Suivant →</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

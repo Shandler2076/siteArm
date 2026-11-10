@@ -3,16 +3,28 @@
 <section class="carte">
   <h1>Bienvenue, {{ user.nom_affiche|default:user.identifiant }}</h1>
   {% if user.membre %}
+  <h2>Mon espace</h2>
   <ul class="liens">
     <li><a href="{% url 'membres:ma_fiche' %}">Ma fiche et mon parcours</a></li>
     <li><a href="{% url 'membres:ma_fiche_pdf' %}">Télécharger ma fiche (PDF)</a></li>
   </ul>
   {% endif %}
-  {% if perms.membres.gerer_membres %}
+  {% if mes_unites %}
+  <h2>Espace bureau</h2>
+  <ul class="liens">
+    {% for u in mes_unites %}
+      <li><a href="{% url 'bureaux:membres' u.cle %}">Espace bureau — {{ u.libelle }}</a></li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if est_bn %}
   <h2>Bureau national</h2>
   <ul class="liens">
     <li><a href="{% url 'membres:bn_enregistrer' %}">Enregistrer un membre</a></li>
     <li><a href="{% url 'membres:bn_photos' %}">Photos à valider</a></li>
+    <li><a href="{% url 'bureaux:bn_installer' %}">Installer un bureau</a></li>
+    <li><a href="{% url 'bureaux:bn_fonctions' %}">Fonctions et droits</a></li>
+    <li><a href="{% url 'bureaux:bn_echeances' %}">Mandats à échéance</a></li>
   </ul>
   {% endif %}
 </section>

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titre %}{{ membre.matricule }} — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'bureaux:membres' unite.cle %}">← {{ unite.libelle }}</a></p>
+  <p class="matricule">{{ membre.matricule }}</p>
+  <h1>{{ membre.nom_complet }}</h1>
+  <dl class="fiche">
+    <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
+    <dt>Statut</dt><dd>{{ membre.get_statut_display }}</dd>
+    <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
+    <dt>Date de naissance</dt><dd>{{ membre.date_naissance|date:"d/m/Y"|default:"—" }}</dd>
+    <dt>Téléphone</dt><dd>{{ membre.telephone }}</dd>
+    <dt>WhatsApp</dt><dd>{{ membre.whatsapp|default:"—" }}</dd>
+    <dt>Email</dt><dd>{{ membre.email|default:"—" }}</dd>
+    <dt>Quartier, ville</dt><dd>{{ membre.quartier|default:"—" }}, {{ membre.ville|default:"—" }}</dd>
+    <dt>Profession</dt><dd>{{ membre.profession|default:"—" }}</dd>
+    <dt>Personne à contacter</dt><dd>{{ membre.urgence_nom|default:"—" }} {{ membre.urgence_telephone }}</dd>
+    <dt>Intégration</dt><dd>{{ membre.annee_integration }} — {{ membre.paroisse_integration.nom }} ({{ membre.region_integration.nom }})</dd>
+  </dl>
+  <h2>Parcours</h2>
+  <ol class="parcours">
+    {% for a in parcours %}
+      <li><strong>{{ a.date_debut|date:"d/m/Y" }} → {% if a.date_fin %}{{ a.date_fin|date:"d/m/Y" }}{% else %}aujourd'hui{% endif %}</strong><br>
+        {{ a.paroisse.nom }}<br><small>{{ a.circuit_a_date }} — {{ a.region_a_date.nom }} · {{ a.motif }}</small></li>
+    {% endfor %}
+  </ol>
+  <h2>Fonctions</h2>
+  <ul>
+    {% for m in mandats %}
+      <li>{{ m.fonction.nom }}{% if m.unite %} — {{ m.unite.nom }}{% endif %} : {{ m.date_debut|date:"d/m/Y" }} → {% if m.date_fin %}{{ m.date_fin|date:"d/m/Y" }}{% else %}en cours{% endif %}</li>
+    {% empty %}
+      <li class="aide">Aucune fonction.</li>
+    {% endfor %}
+  </ul>
+  {% if unite.niveau == "paroisse" %}
+  <div class="actions">
+    <form method="post" action="{% url 'bureaux:reinitialiser' unite.cle membre.matricule %}">
+      {% csrf_token %}
+      <button type="submit" class="bouton">Mot de passe oublié : imprimer une fiche avec un nouveau mot de passe</button>
+    </form>
+    <p class="aide">L'ancien mot de passe ne fonctionnera plus. Le membre devra choisir le sien à la connexion.</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

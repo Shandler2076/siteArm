@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titre %}Fonctions et droits — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Fonctions et droits</h1>
+  <p class="aide">Cochez les fonctions dont les titulaires peuvent gérer le site pour leur unité.</p>
+  {% for libelle, fonctions in par_niveau %}
+    <h2>{{ libelle }}</h2>
+    <ul class="fonctions">
+      {% for f in fonctions %}
+        <li>
+          <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="fonction" value="{{ f.pk }}">
+            <label><input type="checkbox" name="droit_gerer" {% if f.droit_gerer %}checked{% endif %} onchange="this.form.submit()"> {{ f.nom }}</label>
+            <noscript><button type="submit">Enregistrer</button></noscript>
+          </form>
+        </li>
+      {% endfor %}
+    </ul>
+  {% endfor %}
+</section>
+{% endblock %}

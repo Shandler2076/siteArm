@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     "apps.comptes",
     "apps.organisation",
     "apps.membres",
+    "apps.bureaux",
+    "apps.notifications",
     "axes",
 ]
 
@@ -51,6 +53,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.comptes.middleware.ChangementMotDePasseObligatoire",
+    "apps.bureaux.middleware.DureeSessionBureau",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
@@ -68,6 +71,8 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.notifications.context_processors.notifications",
+                "apps.bureaux.context_processors.bureaux",
             ],
         },
     },
@@ -86,6 +91,7 @@ AUTH_USER_MODEL = "comptes.Compte"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "apps.comptes.backends.IdentifiantNormaliseBackend",
+    "apps.bureaux.backends.MandatBackend",
 ]
 
 # Blocage après 5 échecs, pendant 15 minutes, par identifiant.
@@ -168,3 +174,17 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Emails (notifications). En développement, les emails s'affichent dans le terminal.
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DJANGO_DEFAULT_FROM_EMAIL", "Armée du Salut <noreply@localhost>"
+)
+EMAIL_HOST = os.environ.get("DJANGO_EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("DJANGO_EMAIL_PORT", "25"))
+EMAIL_HOST_USER = os.environ.get("DJANGO_EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("DJANGO_EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = _bool("DJANGO_EMAIL_USE_TLS", False)
+EMAIL_USE_SSL = _bool("DJANGO_EMAIL_USE_SSL", False)
+EMAIL_TIMEOUT = 10  # secondes : un serveur lent ne bloque pas les pages
+if DEBUG and not os.environ.get("DJANGO_EMAIL_HOST"):
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

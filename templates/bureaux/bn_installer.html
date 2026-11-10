@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titre %}Installer un bureau — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Installer un bureau</h1>
+  {% for e in erreurs %}<p class="message message--error">{{ e }}</p>{% endfor %}
+  {% if not unite %}
+    <form method="get">
+      <div class="champ"><span>Niveau</span>
+        <select name="niveau" onchange="this.form.submit()">
+          <option value="">— choisir —</option>
+          {% for valeur, libelle in niveaux %}<option value="{{ valeur }}" {% if valeur == niveau %}selected{% endif %}>{{ libelle }}</option>{% endfor %}
+        </select>
+      </div>
+      {% if choix_unites %}
+        <div class="champ"><span>Unité</span>
+          <select name="unite">
+            {% for u in choix_unites %}<option value="{{ u.pk }}">{{ u.nom }}</option>{% endfor %}
+          </select>
+        </div>
+      {% endif %}
+      <button type="submit" class="bouton">Continuer</button>
+    </form>
+  {% else %}
+    <h2>{{ unite.libelle }}</h2>
+    <p class="aide">Saisissez le matricule de chaque titulaire. L'ancien bureau sera clôturé à la date de début.</p>
+    <form method="post" novalidate>
+      {% csrf_token %}
+      <input type="hidden" name="niveau" value="{{ unite.niveau }}">
+      {% if unite.objet %}<input type="hidden" name="unite" value="{{ unite.objet.pk }}">{% endif %}
+      <label class="champ champ--requis"><span>Date de début</span><input type="date" name="date_debut" value="{{ date_debut }}"></label>
+      {% for fonction, actuel, saisie in fonctions %}
+        <label class="champ"><span>{{ fonction.nom }}{% if not fonction.membre_du_bureau %} (hors bureau){% endif %}</span>
+          <input type="text" name="fonction_{{ fonction.pk }}" value="{{ saisie }}" placeholder="Matricule" autocapitalize="characters">
+          {% if actuel %}<small class="aide">Actuellement : {{ actuel.membre.matricule }} — {{ actuel.membre.nom_complet }}</small>{% endif %}
+        </label>
+      {% endfor %}
+      <button type="submit" class="bouton">Installer le bureau</button>
+    </form>
+    <p><a href="{% url 'bureaux:bn_installer' %}">Choisir une autre unité</a></p>
+  {% endif %}
+</section>
+{% endblock %}
