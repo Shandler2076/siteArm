@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "apps.organisation",
     "apps.membres",
     "apps.bureaux",
+    "apps.notifications",
     "axes",
 ]
 
@@ -70,6 +71,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.notifications.context_processors.notifications",
             ],
         },
     },
@@ -171,3 +173,10 @@ if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
+# Emails (notifications). En développement, les emails s'affichent dans le terminal.
+DEFAULT_FROM_EMAIL = os.environ.get(
+    "DJANGO_DEFAULT_FROM_EMAIL", "Armée du Salut <noreply@localhost>"
+)
+if DEBUG:
+    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

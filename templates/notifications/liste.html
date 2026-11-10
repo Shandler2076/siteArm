@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titre %}Notifications — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Notifications</h1>
+  <ul class="notifications">
+    {% for n in notifications %}
+      <li class="{% if not n.lue %}non-lue{% endif %}">
+        {% if n.lien %}<a href="{{ n.lien }}">{{ n.message }}</a>{% else %}{{ n.message }}{% endif %}
+        <small>{{ n.date|date:"d/m/Y à H:i" }}</small>
+      </li>
+    {% empty %}
+      <li class="aide">Aucune notification.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

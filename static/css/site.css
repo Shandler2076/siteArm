@@ -67,3 +67,11 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .photos-comparees { display: flex; gap: 12px; }
 .photos-comparees figure { margin: 0; text-align: center; color: var(--gris); font-size: .85rem; }
 .decision { display: grid; gap: 8px; }
+.entete { flex-wrap: wrap; }
+.cloche { position: relative; text-decoration: none; font-size: 1.2rem; margin-left: auto; margin-right: 8px; }
+.cloche__nombre { position: absolute; top: -6px; right: -10px; background: var(--or); color: var(--marine);
+  font-size: .7rem; font-weight: 800; border-radius: 10px; padding: 1px 6px; }
+.notifications { list-style: none; padding: 0; }
+.notifications li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
+.notifications li small { display: block; color: var(--gris); }
+.notifications .non-lue { font-weight: 700; }
