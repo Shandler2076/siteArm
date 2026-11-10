@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "apps.comptes",
     "apps.organisation",
+    "axes",
 ]
 
 MIDDLEWARE = [
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "apps.comptes.middleware.ChangementMotDePasseObligatoire",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "axes.middleware.AxesMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -78,6 +80,32 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "comptes.Compte"
+
+AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
+    "django.contrib.auth.backends.ModelBackend",
+]
+
+# Blocage après 5 échecs, pendant 15 minutes, par identifiant.
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 0.25
+AXES_LOCKOUT_PARAMETERS = ["username"]
+AXES_USERNAME_FORM_FIELD = "username"
+AXES_USERNAME_CALLABLE = "apps.comptes.securite.identifiant_pour_blocage"
+AXES_LOCKOUT_TEMPLATE = "comptes/compte_bloque.html"
+AXES_HTTP_RESPONSE_CODE = 429
+AXES_RESET_ON_SUCCESS = True
+# Blocage volontairement par identifiant seul : bloquer par adresse IP bloquerait tous les
+# membres d'un même cybercafé ou d'un même réseau mobile après 5 échecs cumulés.
+SILENCED_SYSTEM_CHECKS = ["axes.W006"]
+
+# Session : déconnexion après 2 h d'inactivité.
+SESSION_COOKIE_AGE = 7200
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
 
 AUTH_PASSWORD_VALIDATORS = [
     {
