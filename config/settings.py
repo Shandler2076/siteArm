@@ -47,6 +47,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "apps.comptes.middleware.ChangementMotDePasseObligatoire",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -77,6 +78,16 @@ DATABASES = {
 }
 
 AUTH_USER_MODEL = "comptes.Compte"
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "OPTIONS": {"min_length": 8},
+    },
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
+    {"NAME": "apps.comptes.validators.DifferentDeLIdentifiantValidator"},
+]
 
 LANGUAGE_CODE = "fr"
 TIME_ZONE = "Africa/Porto-Novo"
