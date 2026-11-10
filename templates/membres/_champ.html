@@ -1,0 +1,6 @@
+<label class="champ{% if champ.field.required %} champ--requis{% endif %}">
+  <span>{{ champ.label }}</span>
+  {{ champ }}
+  {% if champ.help_text %}<small class="aide">{{ champ.help_text }}</small>{% endif %}
+  {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
+</label>

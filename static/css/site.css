@@ -34,3 +34,22 @@ h1 { color: var(--marine); font-size: 1.5rem; margin: 0 0 8px; }
 .message { padding: 10px 12px; border-radius: 8px; background: #E8F3EA; color: #1E5E2E; }
 .message--error { background: #FBE9EC; color: var(--rouge); }
 .insecable { white-space: nowrap; }
+fieldset { border: 1px solid #DDE3EE; border-radius: 10px; padding: 4px 14px 8px; margin: 16px 0; }
+legend { font-weight: 700; color: var(--marine); padding: 0 6px; }
+.champ select, .champ textarea { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #C9D1DE;
+  border-radius: 8px; background: #fff; }
+.champ--requis > span::after { content: " *"; color: var(--rouge); }
+.choix > div > div { margin: 6px 0; }
+.choix label { display: flex; gap: 8px; align-items: center; font-weight: 400; }
+.alerte { background: #FFF6DD; border-left: 5px solid var(--or); padding: 10px 14px; border-radius: 8px; margin: 12px 0; }
+.alerte h2 { font-size: 1.1rem; margin: 0 0 6px; color: var(--marine); }
+.matricule { display: inline-block; font-size: 1.3rem; font-weight: 800; letter-spacing: .05em; color: #fff;
+  background: var(--marine); padding: 4px 12px; border-radius: 8px; margin: 0 0 8px; }
+.fiche { display: grid; grid-template-columns: minmax(110px, 40%) 1fr; gap: 6px 12px; }
+.fiche dt { color: var(--gris); }
+.fiche dd { margin: 0; font-weight: 600; }
+.liens { list-style: none; padding: 0; display: grid; gap: 10px; }
+.liens a { display: block; padding: 12px 14px; background: #fff; border: 1px solid #DDE3EE; border-radius: 10px;
+  color: var(--marine); font-weight: 700; text-decoration: none; }
+.choix input[type="radio"] { width: 20px; height: 20px; margin: 0; }
+.choix label { justify-content: flex-start; }
