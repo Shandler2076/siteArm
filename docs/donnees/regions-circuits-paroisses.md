@@ -2,11 +2,11 @@
 
 > **Version provisoire** (reçue le 10/11/2026), convertie depuis `les_paroisses.docx`.
 > Elle sera remplacée par la version définitive issue des réformes, attendue après le pèlerinage du 25 décembre.
-> Les **codes de région** ci-dessous sont une **proposition** (ordre du document) : ils deviennent définitifs, et ne sont plus jamais réattribués, au premier enregistrement de membre.
+> Les **codes de région** suivent l'ordre du document, **confirmé par l'église le 10/11/2026** (provisoirement, en attendant la nouvelle répartition du 25 décembre). Ils deviennent définitifs, et ne sont plus jamais réattribués, au premier enregistrement de membre.
 
 ## Récapitulatif
 
-| Code proposé | Région synodale | Circuits | Paroisses |
+| Code | Région synodale | Circuits | Paroisses |
 |---|---|---:|---:|
 | 01 | PORTO-NOVO | 8 | 49 |
 | 02 | COTONOU | 6 | 32 |
