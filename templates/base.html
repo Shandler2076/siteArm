@@ -1,0 +1,30 @@
+{% load static %}<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#14284B">
+  <title>{% block titre %}Armée du Salut — Bénin{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+  <header class="entete">
+    <div class="entete__marque">
+      <span class="entete__filet"></span>
+      <span>Armée du Salut <small>Bénin</small></span>
+    </div>
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'deconnexion' %}">
+        {% csrf_token %}
+        <button type="submit" class="bouton bouton--discret">Déconnexion</button>
+      </form>
+    {% endif %}
+  </header>
+  <main class="page">
+    {% if messages %}
+      {% for message in messages %}<p class="message message--{{ message.tags }}">{{ message }}</p>{% endfor %}
+    {% endif %}
+    {% block contenu %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titre %}Connexion — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte carte--etroite">
+  <h1>Connexion</h1>
+  <p class="aide">Saisissez votre matricule (ex. <span class="insecable">2015-01AS-0157</span>) et votre mot de passe.</p>
+  <form method="post" novalidate>
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+      <div class="message message--error">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+    {% endif %}
+    {% for champ in form %}
+      <label class="champ">
+        <span>{{ champ.label }}</span>
+        {{ champ }}
+        {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
+      </label>
+    {% endfor %}
+    <button type="submit" class="bouton">Se connecter</button>
+  </form>
+  <p class="aide">Mot de passe oublié ? Adressez-vous au bureau de votre paroisse.</p>
+</section>
+{% endblock %}

@@ -1,0 +1,11 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+python_files = ["test_*.py"]
+addopts = "-p no:cacheprovider"
+
+[tool.ruff]
+line-length = 100
+extend-exclude = [".venv", "migrations"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]

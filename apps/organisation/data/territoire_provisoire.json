@@ -1,0 +1,945 @@
+{
+  "source": "docs/donnees/regions-circuits-paroisses.md (version provisoire du 10/11/2026)",
+  "regions": [
+    {
+      "code": "01",
+      "nom": "PORTO-NOVO",
+      "circuits": [
+        {
+          "nom": "Davo",
+          "paroisses": [
+            "Paroisse Saint Michel de TOKPOTA DAVO",
+            "Paroisse Saint Gabriel Jawu de DOWA-GBAGO",
+            "Paroisse Jéhovah Nissi de KOUTONGBE",
+            "Paroisse Sainte Dorcas 1 de KOUTONGBE CEG",
+            "Paroisse Saint Daniel de OUANDO",
+            "Paroisse Jéhovah Adonaï de DONOUKIN",
+            "Paroisse Espérance de DJLADO"
+          ]
+        },
+        {
+          "nom": "Zèbè A",
+          "paroisses": [
+            "Paroisse El Shaddaï de DJAVI ZEBE",
+            "Paroisse Ogo Oluwa Kitan de LINDJA-DANGBO",
+            "Paroisse de DJAVI DONDO",
+            "Paroisse Saint Raphaël de IDIROKO",
+            "Paroisse Saint Moïse de GBANGNITO CENTRE",
+            "Paroisse Saint Uriel de ADJINAN TOKPA",
+            "Paroisse Lumière du Christ de WEKE-KOULETO"
+          ]
+        },
+        {
+          "nom": "Zèbè B",
+          "paroisses": [
+            "Paroisse Béthel de DOSSOUVIE",
+            "Paroisse de ADJARRA HOUNHOUEKO",
+            "Paroisse Ife Oluwa de KPOVIE GBADA 1",
+            "Paroisse Ireti mbe de KPADOVIE",
+            "Paroisse Saint Michel de KPOVIE GBADA 2"
+          ]
+        },
+        {
+          "nom": "Zèbè C",
+          "paroisses": [
+            "Paroisse de DJAVI-ALLADAKO 1",
+            "Paroisse Sainte Trinité de DJAVI-DOTOGODO",
+            "Paroisse Béthel de ADJARA-SOTA",
+            "Paroisse El Béthel ALLADAKO 3",
+            "Paroisse de AGLOGBE IMONTCHE",
+            "Paroisse Mont de délivrance de AGLOGBE AVLANKANME",
+            "Paroisse Nouvelle Jérusalem de ANAGBO",
+            "Paroisse Jérusalem de SEME TCHAKOU"
+          ]
+        },
+        {
+          "nom": "Atchoukpa",
+          "paroisses": [
+            "Paroisse de ATCHOUKPA-HOUINDODJI",
+            "Paroisse Saint Michel de GANMI",
+            "Paroisse Ibukun Orisun lye de AKPAKANME",
+            "Paroisse Jehovah Shalom de HOUNDOTO CENTRE",
+            "Paroisse Imole Ayo de HEHOUN",
+            "Paroisse Taloto Olorun d'ATCHOUKPA ZOUNGO",
+            "Paroisse Jawu Ojomion d'ATCHOUKPA"
+          ]
+        },
+        {
+          "nom": "Ouanho",
+          "paroisses": [
+            "Paroisse Olorun Sogo de ZOUNGUE ATCHOUKPA",
+            "Paroisse Ajaye de OUANHO",
+            "Paroisse Kénani de OUANHO",
+            "Paroisse Ogo Oluwa de MALE",
+            "Paroisse Ifè Oluwa de DATIN",
+            "Paroisse Ireti M'bè de OUANHO",
+            "Paroisse Ogo Oluwa kiitan Ps 72 de ZOUNGUE 2"
+          ]
+        },
+        {
+          "nom": "Vakon A",
+          "paroisses": [
+            "Paroisse Asojė Jesu de VAKON-HLADJEDO",
+            "Paroisse Olorun Ayo de DANME-LOKONON",
+            "Paroisse Alleluya Jesu Jète de ABOGO",
+            "Paroisse Oke Sioni de VAKON SEKANME",
+            "Paroisse Cité de Paix de ABOGO HLIHOUE"
+          ]
+        },
+        {
+          "nom": "Vakon B",
+          "paroisses": [
+            "Paroisse Oluwatunse de DANTO",
+            "Paroisse Bewulah de SOHOME",
+            "Paroisse Oju Oluwa de VAKON ADANHOU"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "02",
+      "nom": "COTONOU",
+      "circuits": [
+        {
+          "nom": "Avotrou",
+          "paroisses": [
+            "Paroisse Nouvelle Jérusalem de AVOTROU",
+            "Paroisse Béthel de TCHAHOUNKPAME",
+            "Paroisse Volonté Divine de SANS FIL",
+            "Paroisse Saint Moïse Oke Igbala de AVOTROU AYIMLONFIDE"
+          ]
+        },
+        {
+          "nom": "Zogbo",
+          "paroisses": [
+            "Paroisse Montagne de l’Eternel de ZOGBO",
+            "Paroisse Saint Michel de HOUEYIHO II",
+            "Paroisse Nouvelle Jérusalem de FIDROSSE KPOTA",
+            "Paroisse Oke Ayo Koseunti de MENONTIN"
+          ]
+        },
+        {
+          "nom": "Jericho",
+          "paroisses": [
+            "Paroisse de JERICHO",
+            "Paroisse AHOUANSORI-AGUE N1",
+            "Paroisse Jordanie de HINDE",
+            "Paroisse Saints Pierre et Paul de GBEDJROMEDE",
+            "Paroisse de MISSESINTO",
+            "Paroisse Nouvelle Jérusalem de DJIDJE 2",
+            "Paroisse Jehovah Jire de ZINVIE"
+          ]
+        },
+        {
+          "nom": "Ayelawadje",
+          "paroisses": [
+            "Paroisse Sainte Trinité de AYELAWADJE",
+            "Paroisse Gräce Divine de AVOTROU AYIMLONFIDE",
+            "Paroisse Nouvelle Jérusalem OIM de KPONDEHOU II",
+            "Paroisse Jehovah Shammah de YENAWA",
+            "Paroisse Saint Pierre Yénawa de ADJA DOGBO FONCOMEY",
+            "Paroisse Bon Samaritain de ADOGLETA"
+          ]
+        },
+        {
+          "nom": "Cococodji",
+          "paroisses": [
+            "Paroisse Belthissata Saint Joël de SAVI",
+            "Paroisse de Jéhovah Shammah de COCOCODJI",
+            "Paroisse de TOVE 2 OUIDAH",
+            "Paroisse Sainte Constantine Shilo de PAHOU AGBOZOUNKPA",
+            "Paroisse J. K. de MAÏBOU HOUEYOGBE",
+            "Paroisse Dieu le veut d’AGANMALOME(KPOMASSE)",
+            "Paroisse Saint Miche de COCOCODJI"
+          ]
+        },
+        {
+          "nom": "Zè",
+          "paroisses": [
+            "Paroisse El Bethel de ZE ADJAME",
+            "Paroisse de Jéhovah Shamah de DJIGBE SESSIVALI",
+            "Paroisse de Jéhovah Jire de SEKOU",
+            "Paroisse de DAGLETA (ALLADA)"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "03",
+      "nom": "HOULENOU",
+      "circuits": [
+        {
+          "nom": "Ekpe A",
+          "paroisses": [
+            "Paroisse Saint Emmanuel de EKPE",
+            "Paroisse Sainte Trinité de EKPE-CEG",
+            "Paroisse Ebenezer de EKPE HOUESSI",
+            "Paroisse Ireti Ogo Oluwa de EKPE AGANMADIN",
+            "Paroisse Oluwa s'Ogo Kenani de HOUNSA GBAME"
+          ]
+        },
+        {
+          "nom": "Ekpe B",
+          "paroisses": [
+            "Paroisse Bethlehem de TCHONVI",
+            "Paroisse de GBAKPODJI",
+            "Paroisse Jesujlo de TCHONVI",
+            "Paroisse Jéhovah Shalom de TCHONVI AGBOLOGOUN"
+          ]
+        },
+        {
+          "nom": "Ketonou A",
+          "paroisses": [
+            "Paroisse de KETONOU CENTRE",
+            "Paroisse de TORRI AGONSA",
+            "Paroisse de DJEHO",
+            "Paroisse Jéhovah Shalom de GOHO",
+            "Paroisse Jesuganho de KETONOU VEDO"
+          ]
+        },
+        {
+          "nom": "Ketonou B",
+          "paroisses": [
+            "Paroisse Saint Paul de GBOKPA",
+            "Paroisse Saint job Ebenezer de GBEHONME",
+            "Paroisse de ‘work and pray’ de GBEHONME de GBAGO",
+            "Paroisse Hefzibah de GBOKPA TOHOME",
+            "Paroisse Ilè Iyanu de DJREGBE GBEFLOME",
+            "Paroisse Ori Oke Jahu de AWANOU",
+            "Paroisse Mont de Délivrance de DJREGBE ATCHAME"
+          ]
+        },
+        {
+          "nom": "Djeffa A",
+          "paroisses": [
+            "Paroisse Oso Whlengan ton de DJEFFA GLEGBONOU",
+            "Paroisse Saint Mathieu de DJEFFA-HOUEDOME",
+            "Paroisse Holy Maïkel Orisun Ibukun de DJEREGBE-GUEME DAHO",
+            "Paroisse Ibukun Orisun Iye de DJEFFA GLEGBONOU DANDJI",
+            "Paroisse Saint Pierre de DJEFFA DJEKPE",
+            "Paroisse Jah Rapha de DJEKPE GLEGBONOU"
+          ]
+        },
+        {
+          "nom": "Djeffa B",
+          "paroisses": [
+            "Paroisse Jérusalem de SEME-PODJI",
+            "Paroisse Saint Michel de SEME AGONGO",
+            "Paroisse Bethlehem de KPODJI II LE GRIOT"
+          ]
+        },
+        {
+          "nom": "Djeffa C",
+          "paroisses": [
+            "Paroisse Saint Moïse de DJEFFA Plage",
+            "Paroisse Saint Michel de PODJI-AGUE",
+            "Paroisse de Jesu ni Ayomi de OKOUN SEME",
+            "Paroisse de DJEFFA GBAGO",
+            "Paroisse PODJI-GBATO"
+          ]
+        },
+        {
+          "nom": "Krake A",
+          "paroisses": [
+            "Paroisse Jérusalem de AHLOME",
+            "Paroisse Ori Oke de HOVIDOKPO 1",
+            "Paroisse Dona Okluno ton de OWODE 1",
+            "Paroisse de OWODE 2",
+            "Paroisse Sainte Daïna de WEKE JESUKOME",
+            "Paroisse Sainte Victorine de HOVIDOKPO 2",
+            "Paroisse Ogo Oluwa kii tan de KETOME",
+            "Paroisse Ibujè Bethlehem de OWODE KPOGUIDI"
+          ]
+        },
+        {
+          "nom": "Krake B",
+          "paroisses": [
+            "Paroisse Saint Michel de KRAKE TOHOME",
+            "Paroisse Oke Isegun de KRAKE AGUE",
+            "Paroisse Jérusalem de KRAKE-PLAGE",
+            "Paroisse de KRAKE PLAGE GUEVEDJI",
+            "Paroisse Jesudegbe de KRAKE GOUDOUME",
+            "Paroisse Olorun Tobi de KRAKE JESUDJRO"
+          ]
+        },
+        {
+          "nom": "Aguegues A",
+          "paroisses": [
+            "Paroisse de AGUEGUE ZOUNGAME CENTRE",
+            "Paroisse de AGUEGUE SOHEKOME",
+            "Paroisse Jesujlo de AGUEGUE"
+          ]
+        },
+        {
+          "nom": "Aguegues B",
+          "paroisses": [
+            "Paroisse Ifè Kristi de AGUEGUE HOUEDOME",
+            "Paroisse de AVAGBODJI DJEKPE",
+            "Paroisse Oluwatunse de BISHOPKONDJI",
+            "Paroisse Beulah de BISHOPKONDJI"
+          ]
+        },
+        {
+          "nom": "PK 10 A",
+          "paroisses": [
+            "Paroisse Igbala Owuro de PK 10",
+            "Paroisse de SEKANDJI",
+            "Paroisse Imole Ayo de PK 10 MARINA",
+            "Paroisse Igbala Jesu de FIFAKOMEY PK 11"
+          ]
+        },
+        {
+          "nom": "PK 10 B",
+          "paroisses": [
+            "Paroisse Nouvelle Jérusalem de DAVATIN",
+            "Paroisse Agbara Metalokan de KPAKPAKANME",
+            "Paroisse OKE ANU de KPAKPAKANME"
+          ]
+        },
+        {
+          "nom": "PK 10 C",
+          "paroisses": [
+            "Paroisse Felodoun de SAFEJO",
+            "Paroisse Oke Israeli de SAGBOKODJI",
+            "Paroisse d'IFE KRISTI",
+            "Paroisse St Raphaël Onireke de OWODE-AKPA"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "04",
+      "nom": "KOVEDJI",
+      "circuits": [
+        {
+          "nom": "Gbokoutou",
+          "paroisses": [
+            "Paroisse de GBOKOUTOU",
+            "Paroisse de SEDJE GBAKPO",
+            "Paroisse Olorun Sogo de KATAGON HOUEGBE",
+            "Paroisse de KOUTI KARO",
+            "Paroisse Jéhovah Jiré de KATAGON CEG",
+            "Paroisse Ibukun Orisun Iye d’AFFADJI-TANME/B"
+          ]
+        },
+        {
+          "nom": "Katagon-Zoungbome",
+          "paroisses": [
+            "Paroisse de KATAGON-ZOUNGBOME",
+            "Paroisse de Oluwa Seun Saint Daniel de HOUNLI N1",
+            "Paroisse de TCHOUKOU-KPEVI Oluwa Tobi Centre",
+            "Paroisse Ore Ofe Jesu de DOKO"
+          ]
+        },
+        {
+          "nom": "Akisatan",
+          "paroisses": [
+            "Paroisse de AKISATAN",
+            "Paroisse de SARIN-KPINLE",
+            "Paroisse de Araromi de YOKO"
+          ]
+        },
+        {
+          "nom": "Akpro-Missérété",
+          "paroisses": [
+            "Paroisse Bethlehem de DANME",
+            "Paroisse Saint Michel de GBEDJI AGBODJRO",
+            "Paroisse Ogo Sioni d’ABOGO CENTRE"
+          ]
+        },
+        {
+          "nom": "Koudjanada",
+          "paroisses": [
+            "Paroisse Oke Imonle Jerusalem de KOUDJANADA",
+            "Paroisse Saint Emmanuel de ZOUNDJI MISSERETE"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "05",
+      "nom": "WEME",
+      "circuits": [
+        {
+          "nom": "Kessounou A",
+          "paroisses": [
+            "Paroisse de KESSOUNOU",
+            "Paroisse Oluwatunse de HETIN",
+            "Paroisse de HETIN GLAHOUNSA",
+            "Paroisse Saint Gabriel de KODONOU"
+          ]
+        },
+        {
+          "nom": "Kessounou B",
+          "paroisses": [
+            "Paroisse de HETIN DAHO",
+            "Paroisse de HETIN FOLIVI",
+            "Paroisse de HETIN DJEKINKINDJI"
+          ]
+        },
+        {
+          "nom": "Gbéko A",
+          "paroisses": [
+            "Paroisse de GBEKO N° 1",
+            "Paroisse Jérusalem de GBEKO N° 2"
+          ]
+        },
+        {
+          "nom": "Gbéko B",
+          "paroisses": [
+            "Paroisse Imole Ayo de DANNOU",
+            "Paroisse de AGBONOU",
+            "Paroisse de DEWEME DAHO",
+            "Paroisse de AGONGUE",
+            "Paroisse de DEWEME KPEVI"
+          ]
+        },
+        {
+          "nom": "Gbéko C",
+          "paroisses": [
+            "Paroisse de GANGBAN CENTRE",
+            "Paroisse de TOGBOTA",
+            "Paroisse de Jéhovah Jiré de GANGBAN II"
+          ]
+        },
+        {
+          "nom": "Dangbo A",
+          "paroisses": [
+            "Paroisse de DANGBO Centre",
+            "Paroisse de AKPAME Centre",
+            "Paroisse Jesutin de MITRO",
+            "Paroisse de El Béthel de AKPAME II",
+            "Paroisse Keffa de DJIGBE-CEG"
+          ]
+        },
+        {
+          "nom": "Dangbo B",
+          "paroisses": [
+            "Paroisse de MITRO-CENTRE",
+            "Paroisse IJADOPIN de MITRO",
+            "Paroisse ZOUNGUE DANGBO",
+            "Paroisse Oluwafemi de MITRO AGBOKOU",
+            "Paroisse Jahou de SAÏ LAGARE CENTRE",
+            "Paroisse Nouvel Jérusalem de FINGNINKANME ZOUNDJI"
+          ]
+        },
+        {
+          "nom": "Dangbo C",
+          "paroisses": [
+            "Paroisse de HOUNLI DODONOU",
+            "Paroisse Sainte Cathérine de HOUEZOUNME KPEVI",
+            "Paroisse Ijadopin de GBODO",
+            "Paroisse de GBEKANDJI Centre",
+            "Paroisse Ogo Oluwa de DANGBO HONME",
+            "Paroisse Terre Pomise « Ayigba Kpagbe ton » d’AKPADJLAME"
+          ]
+        },
+        {
+          "nom": "Adjohoun A",
+          "paroisses": [
+            "Paroisse Oke Ibukun de ADJOHOUN",
+            "Paroisse de GBADA CENTRE",
+            "Paroisse de GBADA GBEFADJI",
+            "Paroisse de GBADA AZOZIN",
+            "Paroisse Oke Zioni de AZOWLISSE",
+            "Paroisse Ife Kristi de ADJOHOUN",
+            "Paroisse Adjide Kristi d'ADJOHOUN KOUHOUE"
+          ]
+        },
+        {
+          "nom": "Adjohoun B",
+          "paroisses": [
+            "Paroisse de SAHORO I",
+            "Paroisse de KPANOUKPADE AGA",
+            "Paroisse de SAHORO II",
+            "Paroisse Saint Bénoît de ADJOHOUN"
+          ]
+        },
+        {
+          "nom": "Akpadanou A",
+          "paroisses": [
+            "Paroisse de SEKODJI",
+            "Paroisse de HOUEDO",
+            "Paroisse de LOLOEKPA"
+          ]
+        },
+        {
+          "nom": "Akpadanou B",
+          "paroisses": [
+            "Paroisse de DEKANME",
+            "Paroisse Bethlehem de KODE",
+            "Paroisse de HLANKPA",
+            "Paroisse de KODE AGUE",
+            "Paroisse HWLENGANHUN GODO TON"
+          ]
+        },
+        {
+          "nom": "Bonou A",
+          "paroisses": [
+            "Paroisse de ATCHONSA",
+            "Paroisse de GBOA",
+            "Paroisse de AFANME"
+          ]
+        },
+        {
+          "nom": "Bonou B",
+          "paroisses": [
+            "Paroisse de BONOU SEKANME",
+            "Paroisse d’AHOUANZONME",
+            "Paroisse d’AHOUANZONME YEGOME",
+            "Paroisse de SOTINKANME",
+            "Paroisse de TATONNOUKON YENAWA"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "06",
+      "nom": "TORRI",
+      "circuits": [
+        {
+          "nom": "Houndomè A",
+          "paroisses": [
+            "Paroisse de Houndomè",
+            "Paroisse Massavo de SEDJE AHOVO",
+            "Paroisse Saint Uriel de AFFANDJI TANME A",
+            "Paroisse de GBETCHOU ALIGANME",
+            "Paroisse Jehovah Jireh de AHOVO AGBOMASSE",
+            "Paroisse Orisun Ileri Aho Akabikahura de AHOVO Centre"
+          ]
+        },
+        {
+          "nom": "Houndomè B",
+          "paroisses": [
+            "Paroisse de AVRANKOU N1",
+            "Paroisse Jesujlo de AVRANKOU LATCHE",
+            "Paroisse Saint Gabriel de AVRANKOU N1",
+            "Paroisse Hosanna de AVRANKOU ALAWA CENTRE",
+            "Paroisse Ori Oke Anu Masemu de ADJARA GANTO AGBOKO"
+          ]
+        },
+        {
+          "nom": "Houndomè C",
+          "paroisses": [
+            "Paroisse de WEFFIN-AGBOKOU B",
+            "Paroisse Oluwa Mbè de AVRANKOU AGAMADIN",
+            "Paroisse Oré Ofè de AVRANKOU LATCHE",
+            "Paroisse Saint Thomas de ANANKPA"
+          ]
+        },
+        {
+          "nom": "Katé A",
+          "paroisses": [
+            "Paroisse de KATE",
+            "Paroisse de Akpata Igbala de AVRANKOU-GBEGO",
+            "Paroisse de SADO A",
+            "Paroisse AVRANKOU GBEGODO",
+            "Paroisse Saint Gabriel de DANTOKPA"
+          ]
+        },
+        {
+          "nom": "Katé B",
+          "paroisses": [
+            "Paroisse de AVRANKOU-GARE",
+            "Paroisse Saint Thomas de AVRANKOU AGOMASSE",
+            "Paroisse de SEDJE SOVI",
+            "Paroisse de AVRANKOU AVALIGBO",
+            "Paroisse Sainte El Morija de AVRANKOU HOUEDAKOME"
+          ]
+        },
+        {
+          "nom": "Banigbé A",
+          "paroisses": [
+            "Paroisse Oluwa Tunshe de BANIGBE LOKOSSA",
+            "Paroisse de BANIGBE ALIGO",
+            "Paroisse de BANIGBE AYIDJEDO",
+            "Paroisse Saint Vincent de ODAN",
+            "Paroisse Saint Jacob BANIGBE MOSSAFEDJO",
+            "Paroisse Oré Ofè Eri Iyanu Itakpako de BANIGBE"
+          ]
+        },
+        {
+          "nom": "Banigbé B",
+          "paroisses": [
+            "Paroisse El Béthel de ZOUNGODO Centre",
+            "Paroisse Saint Mathieu de HEGO ALIGO",
+            "Paroisse Miracle de Dieu de BANIGBE BODE",
+            "Paroisse de BANIGBE Arrondissement"
+          ]
+        },
+        {
+          "nom": "Banigbé C",
+          "paroisses": [
+            "Paroisse de ISOKOU SEDJE",
+            "Paroisse Ifèlodu de DIABATA",
+            "Paroisse B’Oluwa t’Ifè de OGOSHA",
+            "Paroisse Jesu Dego de BANIGBE Gare"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "07",
+      "nom": "PLATEAU I",
+      "circuits": [
+        {
+          "nom": "Sakété A",
+          "paroisses": [
+            "Paroisse Oke Igbala de SAKETE",
+            "Paroisse de SEDJE IGBO AKPA",
+            "Paroisse de SAKETE AKOSSOMBO O. J.",
+            "Paroisse de ADJOHOUN KODE",
+            "Paroisse Ogo Sioni de ZIMON"
+          ]
+        },
+        {
+          "nom": "Sakété B",
+          "paroisses": [
+            "Paroisse de ITAGBOKOU",
+            "Paroisse de ILLASSO",
+            "Paroisse Iyanu Tchele de IGBOZOUNMO",
+            "Paroisse Jérusalem Mont des Oliviers de IGBO AKPA 2"
+          ]
+        },
+        {
+          "nom": "Ayita A",
+          "paroisses": [
+            "Paroisse de AYITA 1",
+            "Paroisse GBOUGBOUTA 1",
+            "Paroisse Ogba Iyanu de GBOUGBOUTA"
+          ]
+        },
+        {
+          "nom": "Ayita B",
+          "paroisses": [
+            "Paroisse de GBAGLA YOVOGBEDJI",
+            "Paroisse AKPATATAN 1 YENAWA",
+            "Paroisse GBAGLA ALIGO",
+            "Paroisse AKPATATAN II"
+          ]
+        },
+        {
+          "nom": "Zian",
+          "paroisses": [
+            "Paroisse de GBOZOUNME KOUYE",
+            "Paroisse Olorun Sogo de ZIAN",
+            "Paroisse Oke Ayo de BAJA",
+            "Paroisse Jéhovah Nissi de AYITA 2",
+            "Paroisse de AYETEDJOU"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "08",
+      "nom": "PLATEAU II",
+      "circuits": [
+        {
+          "nom": "Ikpinlè A",
+          "paroisses": [
+            "Paroisse Oke Awola de IKPINLE CENTRE",
+            "Paroisse Agbayanou de IKPINLE 2",
+            "Paroisse Oke Anu de MANKPOHOU",
+            "Paroisse Itè Anu « Vie Neuve » de IKPINLE SEKANME"
+          ]
+        },
+        {
+          "nom": "Ikpinlè B",
+          "paroisses": [
+            "Paroisse de IGBO ABIYE",
+            "Paroisse de IGBA WRETA Centre",
+            "Paroisse de Oke Ayo de IWERE",
+            "Paroisse Osupa Loga Irawo",
+            "Paroisse Ogo Oluwa de IGBA II",
+            "Paroisse d’AGBOMAHAN"
+          ]
+        },
+        {
+          "nom": "Ikpinlè C",
+          "paroisses": [
+            "Paroisse de KPEDEKPO",
+            "Paroisse Kajola Oke Iye de ITCHAGNI",
+            "Paroisse de HOUEDAME"
+          ]
+        },
+        {
+          "nom": "Ikpinlè D",
+          "paroisses": [
+            "Paroisse Olorun S’ogo OKE AWO",
+            "Paroisse Ile Anu de ATTAN ONIBEJI",
+            "Paroisse de ITA AKADI"
+          ]
+        },
+        {
+          "nom": "Adja-Ouèrè A",
+          "paroisses": [
+            "Paroisse Oke Oluwa Sheyi de ADJA OUERE Centre",
+            "Paroisse de GBAHOUETE KPOTA"
+          ]
+        },
+        {
+          "nom": "Adja-Ouèrè B",
+          "paroisses": [
+            "Paroisse Orisun Iye de ISSALE IBERE",
+            "Paroisse Akpata Igbala de POBE CENTRE",
+            "Paroisse ADEROMU",
+            "Paroisse Fogo Olorun Han de OSSOUMOU 2",
+            "Paroisse Ori Oke Agbaraa Orisun Kaa de KETOU 1",
+            "Paroisse Gorah de POBE 3",
+            "Paroisse Ita Fatolou Ogo Emi"
+          ]
+        },
+        {
+          "nom": "Adja-Ouèrè C",
+          "paroisses": [
+            "Paroisse de AGBONA JESUKON",
+            "Paroisse Orisun Iye de KOKOROKEHUN",
+            "Paroisse Olorun Sogo de IGOÏSSI",
+            "Paroisse Oke Ayo de OBEKE OUERE",
+            "Paroisse de ADJA OUERE 2 OKE ODAN"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "09",
+      "nom": "PLATEAU III",
+      "circuits": [
+        {
+          "nom": "Talala (Pobè)",
+          "paroisses": [
+            "Paroisse Ona Iwa Mimo C&S de BANIGBE-FOUNITI 1",
+            "Paroisse Ona Iwa Mimo C&S de TALALA (POBE)",
+            "Paroisse Agbo Jesu C&S de ICHAFAN",
+            "Paroisse Ona Iwa Mimo C&S de ITTOFFO",
+            "Paroisse Liberty de AFFESSEDA",
+            "Paroisse Agbo Jesu C&S de KOKOROHEHUN",
+            "Paroisse Ona Iwa Mimo C&S de ADJELEMIDE",
+            "Paroisse Ona Iwa Mimo C&S de OKOFIN (POBE)",
+            "Paroisse Ona Iwa Mimo C&S de MOWADANI",
+            "Paroisse Ona Iwa Mimo C&S de ABEKAFE",
+            "Paroisse Ona Iwa Mimo C&S de OLOGO",
+            "Paroisse Ona Iwa Mimo C&S de AYELEFE(TALALA)",
+            "Paroisse Ona Iwa Mimo C&S BANIGBE FOULITI 2 (TALALA)"
+          ]
+        },
+        {
+          "nom": "Mossafedjo",
+          "paroisses": [
+            "Paroisse Ona Iwa Mimo de MOSSAFEDJO",
+            "Paroisse Ona Iwa Mimo de OGOUTAGANGA",
+            "Paroisse Ona Iwa Mimo C&S de IWAYE 1",
+            "Paroisse Ona Iwa Mimo C&S de CHOCHE KADJOLA",
+            "Paroisse de ABADAN",
+            "Paroisse Ona Iwa Mimo Olorunda de IYANAN IGBANAN",
+            "Paroisse de AGBODE ILLOULOFIN",
+            "Paroisse Ona Iwa de OGA 2",
+            "Paroisse Ona Iwa C&S de OGA 1",
+            "Paroisse Ona Iwa Mimo de TOWE",
+            "Paroisse Ona Iwa Mimo de EIFAKATA",
+            "Paroisse Ona Iwa Mimo ERITEDO",
+            "Paroisse Ona Iwa Mimo de AGBODJOUKPA(MOSSAFEDJO)",
+            "Paroisse Ona Iwa Mimo de AGBOKOLOU TOWE",
+            "Paroisse Ona Iwa Mimo C&S Oke Ayo de AKPATE ILLEMEDJI(POBE)"
+          ]
+        },
+        {
+          "nom": "Igbo-Idikpe",
+          "paroisses": [
+            "Paroisse Ona Iwa Mimo C&S de IGBO-DIKPE",
+            "Paroisse Ona Iwa Mimo C&S de AYEGBAMI OKE-ODO",
+            "Paroisse Ona Iwa Mimo C&S de MASSE",
+            "Paroisse Ona Iwa Mimo C&S de OKE-OLA KPEDEKPO",
+            "Paroisse Ona Iwa Mimo C&S ERI-CHOGO ICHOBI KOLOU",
+            "Paroisse Ona Iwa Mimo C&S de ISANHUN",
+            "Paroisse Alpha Omega Aladura de OKE-ATA(POBE)",
+            "Paroisse Alpha Omega Aladura de AKOUHO 2",
+            "Paroisse Alpha Omega Aladura MOSSOUKAGBE",
+            "Paroisse Alpha Omega AKOUHO 1",
+            "Paroisse Alpha Omega Aladura ITARAKA (IKPINLE)"
+          ]
+        },
+        {
+          "nom": "Ayere",
+          "paroisses": [
+            "Paroisse Alpha Omega Orisun Iye de AYERE",
+            "Paroisse Alpha Omega Orisun Iye de OKO OKETA",
+            "Paroisse Alpha Omega Iye de OLOGO",
+            "Paroisse Alpha Omega Iye de ATAN-DJE(AYERE)",
+            "Paroisse Alpha Omega Iye de EWE-KORO"
+          ]
+        },
+        {
+          "nom": "Adja-Ouèrè (Plateau III)",
+          "paroisses": [
+            "Paroisse Itusile Mimo de IHONTA C&S",
+            "Paroisse Itusile Mimo de AFFACHA C&S",
+            "Paroisse Itusile Mimo de ITA-ADELEYE C&S",
+            "Paroisse Itusile Mimo de AYEFELE C&S",
+            "Paroisse liri Oluwase Ile Mefa de IGOÏSSI C&S"
+          ]
+        },
+        {
+          "nom": "Ketou",
+          "paroisses": [
+            "Paroisse Ona Iwa Mimo C&S de Ona Ekpo de KETOU",
+            "Paroisse Ona Iwa Mimo C&S de IWOYE 2",
+            "Paroisse Ona Iwa Mimo C&S de EFFEOUTE",
+            "Paroisse Ona Iwa Mimo C&S de ATANKA",
+            "Paroisse Ona Iwa Mimo C&S OKE-OLA de ATANKA",
+            "Paroisse Ona Iwa Mimo C&S Etitèdo d’ILARA",
+            "Paroisse Alpha Omega Aladura de AWAYA(KETOU)",
+            "Paroisse Ona Iwa Mimo C&S de ATANTCHOUKPA AFFASSIKO",
+            "Paroisse Ona Iwa Mimo C&S de Araromi Oke-Ayo IBEKO OLOKA"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "10",
+      "nom": "TOFFIN",
+      "circuits": [
+        {
+          "nom": "Sô-Tchanhoué",
+          "paroisses": [
+            "Paroisse de SÔ-TCHANHOUE CENTRE",
+            "Paroisse de SÔ-ZOUNKO BETHESDA",
+            "Paroisse de SÔ ZOUNKO ALLELUIA",
+            "Paroisse de SÔ-TCHANHOUE JESU TOKPA",
+            "Paroisse Jesu Degbe de AHOUANSORI LADJI"
+          ]
+        },
+        {
+          "nom": "Houedogbadji",
+          "paroisses": [
+            "Paroisse de HOUEDOGBADJI CENTRE",
+            "Paroisse Jesu Degbe de HOUEDOGBADJI",
+            "Paroisse Jordanie-Tokpa de HOUEDOGBADJI",
+            "Paroisse Jesugo de AGBODJEDO TOTO"
+          ]
+        },
+        {
+          "nom": "Ahome-Hounme",
+          "paroisses": [
+            "Paroisse Saint Raphaël de AHOME-HOUNME CENTRE",
+            "Paroisse Jesu sédè de AHOME-HOUNME",
+            "Paroisse Imole Ayo de KINTO AGUE"
+          ]
+        },
+        {
+          "nom": "Ganvié",
+          "paroisses": [
+            "Paroisse de GANVIE SOKOME CENTRE",
+            "Paroisse Massavo de GANVIE SOKOME",
+            "Paroisse de ZOGBOHOUE",
+            "Paroisse Bethlehem de JESSOUKO LADJI",
+            "Paroisse Itanlehin Jesu de MENONTIN",
+            "Paroisse La Gloire de Dieu de MISSESSINTO"
+          ]
+        },
+        {
+          "nom": "Abomey-Calavi",
+          "paroisses": [
+            "Paroisse Nouvelle Jérusalem de GBODJO",
+            "Paroisse de Heza Bewulah de CALAVI AGAMADIN",
+            "Paroisse Saints Pierre et Paul de ABOMEY-CALAVI",
+            "Paroisse El Béthel de ABOMEY-CALAVI SEME"
+          ]
+        },
+        {
+          "nom": "Makoko",
+          "paroisses": [
+            "Paroisse de DONA OKLOUNONTON DE MAKOKO",
+            "Paroisse de SOGOUNRO",
+            "Paroisse Nazareth de MAKOKO",
+            "Paroisse Abiye de GBADAGRY",
+            "Paroisse Ewakajosin de MAKOKO",
+            "Paroisse Igbala Oluwa de GANVIEKODJI"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "11",
+      "nom": "CENTRE",
+      "circuits": [
+        {
+          "nom": "Bohicon",
+          "paroisses": [
+            "Paroisse \"La Voie du Salut\" de BOHICON 1",
+            "Paroisse de BOHICON 2"
+          ]
+        },
+        {
+          "nom": "Ouinhi",
+          "paroisses": [
+            "Paroisse Imolę Otito de WOKON",
+            "Paroisse ONA IHORI de MOZOUNGODO",
+            "Paroisse Ilé Ànu Oluwa Kisu de DASSO-HOUNKPA (DASSO)",
+            "Paroisse Christ Roi",
+            "Paroisse Terre des Anges de AYIZE",
+            "Paroisse de BOSSA DASSO 3",
+            "Paroisse Orí Ókė Eritedo de BOSSA-FANDJI (DASSO)"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "12",
+      "nom": "COLLINES",
+      "circuits": [
+        {
+          "nom": "Savè",
+          "paroisses": [
+            "Paroisse Oke Igbala de GBONGUI (SAVE)",
+            "Paroisse Saint Michel de BANTE",
+            "Paroisse Oke Sioni Orisun Ayo de SAVE"
+          ]
+        },
+        {
+          "nom": "Ouèssè",
+          "paroisses": [
+            "Paroisse Ebute lyanju de IKEMON",
+            "Paroisse Temi Dire de MALETE"
+          ]
+        }
+      ]
+    },
+    {
+      "code": "13",
+      "nom": "NORD",
+      "circuits": [
+        {
+          "nom": "Parakou 1",
+          "paroisses": [
+            "Paroisse Temple Universitaire (Jéhovah Jireh de PARAKOU)",
+            "Paroisse Orisun Ayo de TITIROU (PARAKOU)",
+            "Paroisse Source de Salut de BAKA (PARAKOU)"
+          ]
+        },
+        {
+          "nom": "Parakou 2",
+          "paroisses": [
+            "Paroisse Dieu est vivant SAWARAROU (PARAKOU)",
+            "Paroisse Olorun Osebi de PARAKOU",
+            "Paroisse Oke Irapada de BEYEROU (PARAKOU)"
+          ]
+        },
+        {
+          "nom": "Parakou 3",
+          "paroisses": [
+            "Paroisse Beulah de PARAKOU",
+            "Paroisse Ona Iwa Mimo de WANSIROU-GAH (PARAKOU)"
+          ]
+        },
+        {
+          "nom": "Atacora",
+          "paroisses": [
+            "Paroisse Ona Iwa Mino de MATERI",
+            "Paroisse Ona Iwa Mimo de DIKADIARI (COBLY)"
+          ]
+        }
+      ]
+    }
+  ]
+}
