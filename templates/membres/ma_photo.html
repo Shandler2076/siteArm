@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block titre %}Ma photo — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Ma photo en tenue</h1>
+  <div class="alerte">
+    <p><strong>Exigences :</strong> photo en tenue de l'Armée du Salut, visage dégagé et de face, fond uni.</p>
+  </div>
+  <p class="aide">Votre photo sera visible sur votre fiche après validation par le Bureau national.</p>
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% include "membres/_champ.html" with champ=form.fichier %}
+    <button type="submit" class="bouton">Envoyer ma photo</button>
+  </form>
+</section>
+{% endblock %}

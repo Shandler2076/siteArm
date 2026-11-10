@@ -30,9 +30,13 @@ def bn(client, compte_bn):
 
 
 @pytest.fixture
-def client_bn(client, compte_bn):
-    client.force_login(compte_bn)
-    return client
+def client_bn(compte_bn):
+    """Client distinct de `client`, pour qu'un test puisse agir comme membre ET comme BN."""
+    from django.test import Client
+
+    c = Client()
+    c.force_login(compte_bn)
+    return c
 
 
 @pytest.fixture

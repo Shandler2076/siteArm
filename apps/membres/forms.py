@@ -46,3 +46,19 @@ class FormulaireCoordonnees(forms.ModelForm):
             "telephone", "whatsapp", "email", "quartier", "ville", "profession",
             "urgence_nom", "urgence_telephone",
         ]
+
+
+class FormulairePhoto(forms.Form):
+    fichier = forms.FileField(
+        label="Photo en tenue",
+        help_text="JPEG ou PNG, 5 Mo au plus, au moins 300 × 300 pixels.",
+        widget=forms.ClearableFileInput(attrs={"accept": "image/jpeg,image/png"}),
+    )
+
+    def clean_fichier(self):
+        from apps.membres.images import PhotoInvalide, verifier_et_preparer_photo
+
+        try:
+            return verifier_et_preparer_photo(self.cleaned_data["fichier"])
+        except PhotoInvalide as e:
+            raise forms.ValidationError(str(e)) from e

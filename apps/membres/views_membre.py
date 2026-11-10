@@ -1,10 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404, HttpResponse
+from django.db import transaction
 from django.shortcuts import redirect, render
 
-from apps.membres.forms import FormulaireCoordonnees
-from apps.membres.models import Membre
+from apps.membres.forms import FormulaireCoordonnees, FormulairePhoto
+from apps.membres.models import EtatPhoto, Membre, PhotoIdentite
 from apps.membres.pdf import fiche_identification_pdf
 
 
@@ -43,3 +44,20 @@ def ma_fiche_pdf(request):
     r["Content-Disposition"] = f'attachment; filename="fiche-{membre.matricule}.pdf"'
     r["Cache-Control"] = "private, no-store"
     return r
+
+
+@login_required
+def ma_photo(request):
+    membre = membre_de(request)
+    form = FormulairePhoto(request.POST or None, request.FILES or None)
+    if request.method == "POST" and form.is_valid():
+        with transaction.atomic():
+            for ancienne in membre.photos.filter(etat=EtatPhoto.EN_ATTENTE):
+                ancienne.fichier.delete(save=False)
+                PhotoIdentite.objects.filter(pk=ancienne.pk).delete()
+            photo = PhotoIdentite(membre=membre)
+            photo.fichier.save(f"{membre.matricule}.jpg", form.cleaned_data["fichier"], save=False)
+            photo.save()
+        messages.success(request, "Photo envoyée. Elle sera visible après validation par le BN.")
+        return redirect("membres:ma_fiche")
+    return render(request, "membres/ma_photo.html", {"form": form, "membre": membre})

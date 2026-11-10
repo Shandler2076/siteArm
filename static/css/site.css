@@ -63,3 +63,7 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .parcours li { position: relative; padding: 4px 0 12px 16px; }
 .parcours li::before { content: ""; position: absolute; left: -8px; top: 8px; width: 13px; height: 13px;
   border-radius: 50%; background: var(--marine); }
+.photo-a-valider { border-top: 1px solid #DDE3EE; padding: 14px 0; }
+.photos-comparees { display: flex; gap: 12px; }
+.photos-comparees figure { margin: 0; text-align: center; color: var(--gris); font-size: .85rem; }
+.decision { display: grid; gap: 8px; }

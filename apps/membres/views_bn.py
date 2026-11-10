@@ -1,11 +1,13 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.membres.forms import FormulaireEnregistrement
-from apps.membres.models import Membre
+from apps.membres.models import EtatPhoto, Membre, PhotoIdentite
 from apps.membres.pdf import fiche_identification_pdf
 from apps.membres.services import (
     CapaciteMatriculeAtteinte,
@@ -86,3 +88,28 @@ def fiche_identifiants_pdf(request, matricule):
 def fiche_pdf(request, matricule):
     membre = get_object_or_404(Membre, matricule=matricule)
     return _reponse_pdf(fiche_identification_pdf(membre), matricule)
+
+
+@login_required
+@gerer_membres
+def photos(request):
+    erreur = None
+    if request.method == "POST":
+        p = get_object_or_404(PhotoIdentite, pk=request.POST.get("photo"), etat=EtatPhoto.EN_ATTENTE)
+        decision = request.POST.get("decision")
+        motif = (request.POST.get("motif") or "").strip()
+        if decision == "refuser" and not motif:
+            erreur = (p.pk, "Indiquez le motif du refus.")
+        elif decision in {"accepter", "refuser"}:
+            with transaction.atomic():
+                if decision == "accepter":
+                    p.membre.photos.filter(etat=EtatPhoto.ACCEPTEE).update(etat=EtatPhoto.REMPLACEE)
+                    p.etat = EtatPhoto.ACCEPTEE
+                else:
+                    p.etat, p.motif_refus = EtatPhoto.REFUSEE, motif
+                p.date_decision, p.decide_par = timezone.now(), request.user
+                p.save()
+            messages.success(request, f"Photo de {p.membre.matricule} : {p.get_etat_display()}.")
+            return redirect("membres:bn_photos")
+    en_attente = PhotoIdentite.objects.filter(etat=EtatPhoto.EN_ATTENTE).select_related("membre")
+    return render(request, "membres/bn_photos.html", {"photos": en_attente, "erreur": erreur})

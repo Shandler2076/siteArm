@@ -4,7 +4,11 @@
 <section class="carte">
   <p class="matricule">{{ membre.matricule }}</p>
   <h1>{{ membre.nom_complet }}</h1>
-  {# photo : tâche 7 #}
+  {% with photo=membre.photo_acceptee %}
+    {% if photo %}<img class="photo" src="{% url 'membres:photo' photo.pk %}" alt="Ma photo">{% endif %}
+  {% endwith %}
+  {% if photo_en_attente %}<p class="aide">Nouvelle photo en attente de validation par le Bureau national.</p>{% endif %}
+  <p><a href="{% url 'membres:ma_photo' %}">Déposer ma photo en tenue</a></p>
   <dl class="fiche">
     <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
     <dt>Statut</dt><dd>{{ membre.get_statut_display }}</dd>
