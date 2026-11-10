@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -97,7 +98,11 @@ AXES_HTTP_RESPONSE_CODE = 429
 AXES_RESET_ON_SUCCESS = True
 # Blocage volontairement par identifiant seul : bloquer par adresse IP bloquerait tous les
 # membres d'un même cybercafé ou d'un même réseau mobile après 5 échecs cumulés.
-SILENCED_SYSTEM_CHECKS = ["axes.W006"]
+SILENCED_SYSTEM_CHECKS = [
+    "axes.W006",
+    # Pas d'inscription à la liste HSTS « preload » : engagement difficile à annuler.
+    "security.W021",
+]
 
 # Session : déconnexion après 2 h d'inactivité.
 SESSION_COOKIE_AGE = 7200
@@ -124,8 +129,31 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / "staticfiles"
+WHITENOISE_USE_FINDERS = DEBUG or EN_TEST
+WHITENOISE_AUTOREFRESH = DEBUG or EN_TEST
+STORAGES = {
+    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "staticfiles": {
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if DEBUG or EN_TEST
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        )
+    },
+}
 
 LOGIN_URL = "connexion"
 LOGIN_REDIRECT_URL = "accueil"
 LOGOUT_REDIRECT_URL = "connexion"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# Sécurité HTTPS en production (l'hébergeur termine le HTTPS devant le site).
+CSRF_TRUSTED_ORIGINS = _liste("DJANGO_CSRF_TRUSTED_ORIGINS")
+X_FRAME_OPTIONS = "DENY"
+SECURE_CONTENT_TYPE_NOSNIFF = True
+if not DEBUG:
+    SECURE_SSL_REDIRECT = not EN_TEST
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
