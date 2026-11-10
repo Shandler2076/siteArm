@@ -50,8 +50,9 @@ def test_bornes_des_dates(monde, donner_mandat):
     m = monde["m3"]
     donner_mandat(m, "Secrétaire paroissial", monde["P3"], debut=datetime.date(2026, 11, 11))
     assert P.unites_gerees(m.compte, AUJ) == []
-    donner_mandat(monde["m4"], "Secrétaire paroissial", monde["P4"],
-                  debut=datetime.date(2024, 1, 1), fin=AUJ)
+    donner_mandat(
+        monde["m4"], "Secrétaire paroissial", monde["P4"], debut=datetime.date(2024, 1, 1), fin=AUJ
+    )
     assert P.unites_gerees(monde["m4"].compte, AUJ) == []
 
 
@@ -97,16 +98,23 @@ def test_membre_simple_ne_voit_que_lui(monde):
 def test_unite_depuis_cle(monde):
     c = monde["sec_p1"].compte
     assert P.unite_depuis_cle(c, f"paroisse-{monde['P1'].pk}").objet == monde["P1"]
-    for cle in [f"paroisse-{monde['P2'].pk}", f"circuit-{monde['Ekpe A'].pk}", "national",
-                "paroisse-x", "nimporte", "paroisse-999999"]:
+    for cle in [
+        f"paroisse-{monde['P2'].pk}",
+        f"circuit-{monde['Ekpe A'].pk}",
+        "national",
+        "paroisse-x",
+        "nimporte",
+        "paroisse-999999",
+    ]:
         with pytest.raises(Http404):
             P.unite_depuis_cle(c, cle)
 
 
 def test_bn_ouvre_toute_unite(monde, compte_technique):
-    assert P.unite_depuis_cle(compte_technique, f"circuit-{monde['Ekpe B'].pk}").objet == monde[
-        "Ekpe B"
-    ]
+    assert (
+        P.unite_depuis_cle(compte_technique, f"circuit-{monde['Ekpe B'].pk}").objet
+        == monde["Ekpe B"]
+    )
     with pytest.raises(Http404):
         P.unite_depuis_cle(compte_technique, "circuit-999999")
 
@@ -123,8 +131,14 @@ def test_anciens_membres(monde):
     a = m1.affectation_actuelle
     a.date_fin = AUJ
     a.save()
-    Affectation.objects.create(membre=m1, paroisse=monde["P4"], circuit_a_date=monde["Dangbo A"],
-                               region_a_date=monde["WEME"], date_debut=AUJ, motif="Mutation")
+    Affectation.objects.create(
+        membre=m1,
+        paroisse=monde["P4"],
+        circuit_a_date=monde["Dangbo A"],
+        region_a_date=monde["WEME"],
+        date_debut=AUJ,
+        motif="Mutation",
+    )
     anciens = P.anciens_membres(P.Unite("paroisse", monde["P1"]))
     assert [x.membre.nom for x in anciens] == ["Adjovi"]
     assert "Adjovi" not in _noms(P.membres_visibles(P.Unite("paroisse", monde["P1"])))

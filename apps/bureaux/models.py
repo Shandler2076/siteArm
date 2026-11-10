@@ -65,7 +65,11 @@ class Mandat(models.Model):
         Circuit, null=True, blank=True, on_delete=models.PROTECT, related_name="mandats"
     )
     region = models.ForeignKey(
-        Region, null=True, blank=True, on_delete=models.PROTECT, related_name="mandats",
+        Region,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="mandats",
         verbose_name="région",
     )
     date_debut = models.DateField("date de début")
@@ -74,8 +78,12 @@ class Mandat(models.Model):
     alerte_echeance_le = models.DateField("alerte d'échéance envoyée le", null=True, blank=True)
     alerte_echu_le = models.DateField("alerte de mandat échu envoyée le", null=True, blank=True)
     installe_par = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-        related_name="+", verbose_name="installé par",
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="installé par",
     )
 
     objects = MandatQuerySet.as_manager()

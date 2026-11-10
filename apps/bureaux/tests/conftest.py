@@ -33,9 +33,16 @@ def nouveau_membre(db, compte_technique):
 
     def fabriquer(paroisse, nom, prenoms="Test"):
         m = enregistrer_membre(
-            donnees={"nom": nom, "prenoms": prenoms, "sexe": "M", "telephone": "0197000000",
-                     "categorie": "actif"},
-            paroisse_integration=paroisse, annee_integration=2015, par=compte_technique,
+            donnees={
+                "nom": nom,
+                "prenoms": prenoms,
+                "sexe": "M",
+                "telephone": "0197000000",
+                "categorie": "actif",
+            },
+            paroisse_integration=paroisse,
+            annee_integration=2015,
+            par=compte_technique,
         ).membre
         m.compte.doit_changer_mot_de_passe = False
         m.compte.save()
@@ -53,8 +60,13 @@ def donner_mandat(db):
         kw = {}
         if unite is not None:
             kw[f.niveau] = unite
-        m = Mandat(membre=membre, fonction=f, date_debut=debut or datetime.date(2025, 1, 1),
-                   date_fin=fin, **kw)
+        m = Mandat(
+            membre=membre,
+            fonction=f,
+            date_debut=debut or datetime.date(2025, 1, 1),
+            date_fin=fin,
+            **kw,
+        )
         m.full_clean()
         m.save()
         return m
@@ -77,3 +89,12 @@ def monde(territoire, nouveau_membre, donner_mandat):
     tresorier = nouveau_membre(t["P1"], "Tresorier")
     donner_mandat(tresorier, "Trésorier paroissial", t["P1"], debut=d)
     return dict(t, m1=m1, m2=m2, m3=m3, m4=m4, sec_p1=sec_p1, chef=chef, tresorier=tresorier)
+
+
+@pytest.fixture
+def client_technique(compte_technique):
+    from django.test import Client
+
+    c = Client()
+    c.force_login(compte_technique)
+    return c

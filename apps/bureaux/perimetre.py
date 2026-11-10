@@ -44,8 +44,10 @@ def _mandats_de_gestion(jour: datetime.date | None = None):
 def unites_gerees(compte, jour: datetime.date | None = None) -> list[Unite]:
     if not getattr(compte, "is_authenticated", False) or not compte.is_active:
         return []
-    mandats = _mandats_de_gestion(jour).filter(membre__compte=compte).select_related(
-        "fonction", "paroisse", "circuit", "region"
+    mandats = (
+        _mandats_de_gestion(jour)
+        .filter(membre__compte=compte)
+        .select_related("fonction", "paroisse", "circuit", "region")
     )
     unites = {Unite(m.fonction.niveau, m.unite) for m in mandats}
     return sorted(unites, key=lambda u: (ORDRE[u.niveau], u.objet.nom if u.objet else ""))
@@ -56,9 +58,11 @@ def est_bn(compte, jour: datetime.date | None = None) -> bool:
         return False
     if compte.is_superuser:
         return True
-    return _mandats_de_gestion(jour).filter(
-        membre__compte=compte, fonction__niveau=Niveau.NATIONAL
-    ).exists()
+    return (
+        _mandats_de_gestion(jour)
+        .filter(membre__compte=compte, fonction__niveau=Niveau.NATIONAL)
+        .exists()
+    )
 
 
 def unite_depuis_cle(compte, cle: str) -> Unite:
@@ -98,16 +102,15 @@ def peut_voir_membre(compte, membre: Membre) -> bool:
         return True
     if est_bn(compte):
         return True
-    return any(
-        membres_visibles(u).filter(pk=membre.pk).exists() for u in unites_gerees(compte)
-    )
+    return any(membres_visibles(u).filter(pk=membre.pk).exists() for u in unites_gerees(compte))
 
 
 def anciens_membres(unite: Unite) -> QuerySet[Affectation]:
     if unite.niveau == Niveau.NATIONAL:
         return Affectation.objects.none()
     champ = {
-        Niveau.PAROISSE: "paroisse", Niveau.CIRCUIT: "circuit_a_date",
+        Niveau.PAROISSE: "paroisse",
+        Niveau.CIRCUIT: "circuit_a_date",
         Niveau.REGION: "region_a_date",
     }[unite.niveau]
     return (
@@ -122,6 +125,4 @@ def titulaires_gestion(unite: Unite, jour: datetime.date | None = None) -> Query
     mandats = _mandats_de_gestion(jour).filter(fonction__niveau=unite.niveau)
     if unite.objet is not None:
         mandats = mandats.filter(**{unite.niveau: unite.objet})
-    return Compte.objects.filter(
-        is_active=True, membre__in=mandats.values("membre")
-    ).distinct()
+    return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
