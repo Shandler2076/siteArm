@@ -23,6 +23,14 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   Sanctionné, Exclu, Démissionnaire, Décédé. Catégorie (actif / d'honneur / sympathisant) sans
   effet sur le matricule. Fonctions et durées de mandat : règlement intérieur (`docs/donnees/`).
 
+## Points techniques
+- Matricule : `apps/membres/services.py::attribuer_matricule` (verrou `select_for_update`, à appeler
+  dans une transaction) ; enregistrement : `enregistrer_membre` (tout ou rien).
+- Fichiers sensibles : `stockage_prive` (`PRIVATE_MEDIA_ROOT`, dossier `prive/`), servis uniquement
+  par `apps/membres/views_fichiers.py` (404 si pas le droit).
+- Droits BN provisoires (avant l'étape 3) : permissions `membres.gerer_membres`, `membres.voir_cip`.
+- PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`).
+
 ## Commandes
 - Tests : `DJANGO_DEBUG=True pytest -q`
 - Style : `ruff check .`

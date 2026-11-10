@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import Http404, HttpResponse
 from django.db import transaction
+from django.http import Http404, HttpResponse
 from django.shortcuts import redirect, render
 
 from apps.membres.forms import FormulaireCoordonnees, FormulairePhoto

@@ -95,7 +95,9 @@ def fiche_pdf(request, matricule):
 def photos(request):
     erreur = None
     if request.method == "POST":
-        p = get_object_or_404(PhotoIdentite, pk=request.POST.get("photo"), etat=EtatPhoto.EN_ATTENTE)
+        p = get_object_or_404(
+            PhotoIdentite, pk=request.POST.get("photo"), etat=EtatPhoto.EN_ATTENTE
+        )
         decision = request.POST.get("decision")
         motif = (request.POST.get("motif") or "").strip()
         if decision == "refuser" and not motif:
