@@ -84,6 +84,10 @@ class FiltreListeForm(forms.Form):
             elif unite.niveau == Niveau.CIRCUIT:
                 paroisses = paroisses.filter(circuit=objet)
             nouveaux["paroisse"] = _ChoixUnite(label="Paroisse", queryset=paroisses, required=False)
+        if unite.niveau == Niveau.NATIONAL:
+            nouveaux["sans_affectation"] = forms.BooleanField(
+                label="Sans affectation actuelle", required=False
+            )
         for nom, champ in nouveaux.items():
             champ.empty_label = "Toutes"
             self.fields[nom] = champ
@@ -131,6 +135,8 @@ def membres_filtres(unite: Unite, donnees: dict, aujourdhui: datetime.date):
     for champ, chemin in lieux.items():
         if donnees.get(champ):
             qs = qs.filter(**{"affectations__date_fin__isnull": True, chemin: donnees[champ]})
+    if donnees.get("sans_affectation"):
+        qs = qs.exclude(affectations__date_fin__isnull=True)
     if donnees.get("fonction"):
         en_cours = Mandat.objects.en_cours(aujourdhui).filter(fonction=donnees["fonction"])
         qs = qs.filter(pk__in=en_cours.values("membre"))
@@ -152,6 +158,8 @@ def resume_filtres(form: FiltreListeForm) -> list[str]:
     for champ, libelle in (("region", "Région"), ("circuit", "Circuit"), ("paroisse", "Paroisse")):
         if d.get(champ):
             resume.append(f"{libelle} : {d[champ].nom}")
+    if d.get("sans_affectation"):
+        resume.append("Sans affectation actuelle")
     if d.get("annee"):
         resume.append(f"Année d'intégration : {d['annee']}")
     if d.get("fonction"):
