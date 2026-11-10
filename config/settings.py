@@ -43,6 +43,8 @@ INSTALLED_APPS = [
     "apps.bureaux",
     "apps.notifications",
     "apps.lots",
+    "apps.journal",
+    "apps.listes",
     "axes",
 ]
 
