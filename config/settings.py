@@ -52,6 +52,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.comptes.middleware.ChangementMotDePasseObligatoire",
+    "apps.bureaux.middleware.DureeSessionBureau",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
@@ -87,6 +88,7 @@ AUTH_USER_MODEL = "comptes.Compte"
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
     "apps.comptes.backends.IdentifiantNormaliseBackend",
+    "apps.bureaux.backends.MandatBackend",
 ]
 
 # Blocage après 5 échecs, pendant 15 minutes, par identifiant.
