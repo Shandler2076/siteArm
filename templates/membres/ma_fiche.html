@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block titre %}Ma fiche — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="matricule">{{ membre.matricule }}</p>
+  <h1>{{ membre.nom_complet }}</h1>
+  {# photo : tâche 7 #}
+  <dl class="fiche">
+    <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
+    <dt>Statut</dt><dd>{{ membre.get_statut_display }}</dd>
+    <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
+    <dt>Date de naissance</dt><dd>{{ membre.date_naissance|date:"d/m/Y"|default:"—" }}</dd>
+    <dt>Lieu de naissance</dt><dd>{{ membre.lieu_naissance|default:"—" }}</dd>
+    <dt>NPI</dt><dd>{{ membre.npi|default:"—" }}</dd>
+    <dt>Intégration</dt><dd>{{ membre.annee_integration }} — {{ membre.paroisse_integration.nom }} ({{ membre.region_integration.nom }})</dd>
+  </dl>
+  <h2>Mes coordonnées</h2>
+  <dl class="fiche">
+    <dt>Téléphone</dt><dd>{{ membre.telephone }}</dd>
+    <dt>WhatsApp</dt><dd>{{ membre.whatsapp|default:"—" }}</dd>
+    <dt>Email</dt><dd>{{ membre.email|default:"—" }}</dd>
+    <dt>Quartier, ville</dt><dd>{{ membre.quartier|default:"—" }}, {{ membre.ville|default:"—" }}</dd>
+    <dt>Profession</dt><dd>{{ membre.profession|default:"—" }}</dd>
+    <dt>Personne à contacter</dt><dd>{{ membre.urgence_nom|default:"—" }} {{ membre.urgence_telephone }}</dd>
+  </dl>
+  <p><a class="bouton bouton--secondaire" href="{% url 'membres:mes_coordonnees' %}">Modifier mes coordonnées</a></p>
+  <h2>Mon parcours</h2>
+  <ol class="parcours">
+    {% for a in parcours %}
+      <li>
+        <strong>{{ a.date_debut|date:"d/m/Y" }} → {% if a.date_fin %}{{ a.date_fin|date:"d/m/Y" }}{% else %}aujourd'hui{% endif %}</strong><br>
+        {{ a.paroisse.nom }}<br>
+        <small>{{ a.circuit_a_date }} — {{ a.region_a_date.nom }} · {{ a.motif }}</small>
+      </li>
+    {% endfor %}
+  </ol>
+  <p><a class="bouton" href="{% url 'membres:ma_fiche_pdf' %}">Télécharger ma fiche (PDF)</a></p>
+</section>
+{% endblock %}

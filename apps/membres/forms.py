@@ -37,3 +37,12 @@ class FormulaireEnregistrement(forms.ModelForm):
     def _post_clean(self):
         # Le matricule et le compte sont créés par le service : on ne valide pas l'instance ici.
         pass
+
+
+class FormulaireCoordonnees(forms.ModelForm):
+    class Meta:
+        model = Membre
+        fields = [
+            "telephone", "whatsapp", "email", "quartier", "ville", "profession",
+            "urgence_nom", "urgence_telephone",
+        ]

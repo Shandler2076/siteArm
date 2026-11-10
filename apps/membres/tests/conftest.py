@@ -54,3 +54,12 @@ def membre_enregistre(paroisse, compte_bn):
         },
         paroisse_integration=paroisse, annee_integration=2015, par=compte_bn,
     )
+
+
+@pytest.fixture
+def client_membre(client, membre_enregistre):
+    c = membre_enregistre.membre.compte
+    c.doit_changer_mot_de_passe = False
+    c.save()
+    client.force_login(c)
+    return client
