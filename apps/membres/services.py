@@ -1,9 +1,20 @@
 """Services métier des membres : matricule, enregistrement, doublons."""
 
-from django.db import IntegrityError, transaction
+import datetime
+import secrets
+from dataclasses import dataclass
 
-from apps.membres.models import CompteurMatricule
-from apps.organisation.models import Region
+from django.db import IntegrityError, transaction
+from django.db.models import Q, QuerySet
+
+from apps.comptes.models import Compte
+from apps.membres.models import Affectation, CompteurMatricule, Membre, cle_nom
+from apps.organisation.models import Paroisse, Region
+
+__all__ = [
+    "CapaciteMatriculeAtteinte", "ResultatEnregistrement", "attribuer_matricule", "cle_nom",
+    "doublons_possibles", "enregistrer_membre", "generer_mot_de_passe_provisoire",
+]
 
 NUMERO_MAX = 9999
 
@@ -31,3 +42,76 @@ def attribuer_matricule(annee: int, region: Region) -> str:
     compteur.dernier_numero += 1
     compteur.save(update_fields=["dernier_numero"])
     return f"{annee:04d}-{region.code}AS-{compteur.dernier_numero:04d}"
+
+
+# --- Enregistrement d'un membre -------------------------------------------------------------
+
+ALPHABET_PROVISOIRE = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789"
+
+
+def generer_mot_de_passe_provisoire() -> str:
+    """10 caractères lisibles (sans 0/O/1/l/I), avec majuscule, minuscule et chiffre."""
+    while True:
+        mdp = "".join(secrets.choice(ALPHABET_PROVISOIRE) for _ in range(10))
+        if (
+            any(c.isupper() for c in mdp)
+            and any(c.islower() for c in mdp)
+            and any(c.isdigit() for c in mdp)
+        ):
+            return mdp
+
+
+def doublons_possibles(
+    *, nom: str, prenoms: str, date_naissance: datetime.date | None, npi: str = ""
+) -> QuerySet[Membre]:
+    """Même NPI, ou même nom et prénoms (écriture normalisée) et même date de naissance."""
+    critere = Q(cle_identite=f"{cle_nom(nom)} | {cle_nom(prenoms)}")
+    if date_naissance:
+        critere &= Q(date_naissance=date_naissance) | Q(date_naissance__isnull=True)
+    if npi:
+        critere |= Q(npi=npi)
+    return Membre.objects.filter(critere)
+
+
+@dataclass(frozen=True)
+class ResultatEnregistrement:
+    membre: Membre
+    mot_de_passe: str
+
+
+def enregistrer_membre(
+    *,
+    donnees: dict,
+    paroisse_integration: Paroisse,
+    annee_integration: int,
+    par: Compte,
+    date_integration: datetime.date | None = None,
+) -> ResultatEnregistrement:
+    """Crée en une seule transaction : matricule, compte, membre et première affectation."""
+    region = paroisse_integration.region
+    with transaction.atomic():
+        matricule = attribuer_matricule(annee_integration, region)
+        membre = Membre(
+            **donnees,
+            annee_integration=annee_integration,
+            paroisse_integration=paroisse_integration,
+            region_integration=region,
+            matricule=matricule,
+            enregistre_par=par,
+        )
+        membre.full_clean(exclude=["compte"])
+        mot_de_passe = generer_mot_de_passe_provisoire()
+        membre.compte = Compte.objects.create_user(
+            matricule, mot_de_passe, nom_affiche=membre.nom_complet,
+            doit_changer_mot_de_passe=True,
+        )
+        membre.save()
+        Affectation.objects.create(
+            membre=membre,
+            paroisse=paroisse_integration,
+            circuit_a_date=paroisse_integration.circuit,
+            region_a_date=region,
+            date_debut=date_integration or datetime.date(annee_integration, 1, 1),
+            motif="Intégration",
+        )
+    return ResultatEnregistrement(membre=membre, mot_de_passe=mot_de_passe)

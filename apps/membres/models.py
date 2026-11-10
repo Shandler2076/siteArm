@@ -1,6 +1,8 @@
 """Membres : fiche, compteur de matricules, parcours (affectations), photos d'identité."""
 
 import datetime
+import re
+import unicodedata
 
 from django.conf import settings
 from django.core.exceptions import PermissionDenied, ValidationError
@@ -37,6 +39,14 @@ class Statut(models.TextChoices):
     EXCLU = "exclu", "Exclu"
     DEMISSIONNAIRE = "demissionnaire", "Démissionnaire"
     DECEDE = "decede", "Décédé"
+
+
+def cle_nom(texte: str) -> str:
+    """Forme de comparaison : sans accents, majuscules, tirets et espaces multiples réduits."""
+    sans_accents = "".join(
+        c for c in unicodedata.normalize("NFKD", texte or "") if not unicodedata.combining(c)
+    )
+    return re.sub(r"[\s\-]+", " ", sans_accents.upper()).strip()
 
 
 valider_telephone = RegexValidator(
@@ -93,6 +103,9 @@ class Membre(models.Model):
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT,
         related_name="membre", verbose_name="compte",
     )
+    cle_identite = models.CharField(
+        "clé de recherche des doublons", max_length=260, editable=False, db_index=True
+    )
     date_enregistrement = models.DateTimeField("date d'enregistrement", auto_now_add=True)
     enregistre_par = models.ForeignKey(
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
@@ -122,6 +135,10 @@ class Membre(models.Model):
             raise ValidationError(
                 {"annee_integration": f"L'année d'intégration doit être entre 1900 et {annee_max}."}
             )
+
+    def save(self, *args, **kwargs):
+        self.cle_identite = f"{cle_nom(self.nom)} | {cle_nom(self.prenoms)}"
+        super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
         raise PermissionDenied("On ne supprime pas un membre.")
