@@ -12,7 +12,7 @@ from apps.membres.models import Affectation
 COLONNES_LISTE: dict[str, tuple[str, float]] = {
     "matricule": ("Matricule", 28),
     "nom": ("Nom", 32),
-    "prenoms": ("Prénoms", 40),
+    "prenoms": ("Prénoms", 38),
     "sexe": ("Sexe", 10),
     "age": ("Âge", 10),
     "telephone": ("Téléphone", 24),
