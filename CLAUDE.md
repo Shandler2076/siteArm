@@ -33,7 +33,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Droits BNC : `apps/bureaux/backends.py::MandatBackend` traduit un mandat national de gestion en
   permissions `membres.gerer_membres` / `membres.voir_cip` (vérifier avec `has_perm`).
 - Notifications : `apps/notifications/services.py::notifier` / `notifier_unite`.
-- PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`).
+- PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.
+- Lots Excel (`apps/lots`) : AUCUNE création de membre avant `valider_lot` (tout ou rien) ; validation
+  des lignes par `apps/membres/forms.py::valider_futur_membre` (mêmes règles que l'individuel).
 
 ## Commandes
 - Tests : `DJANGO_DEBUG=True pytest -q`
