@@ -1,2 +1,2 @@
-web: gunicorn config.wsgi --log-file -
+web: gunicorn config.wsgi --timeout 120 --log-file -
 postdeploy: python manage.py migrate --noinput

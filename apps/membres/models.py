@@ -81,7 +81,9 @@ class Membre(models.Model):
     profession = models.CharField("profession", max_length=150, blank=True)
     urgence_nom = models.CharField("personne à contacter (nom)", max_length=150, blank=True)
     urgence_telephone = models.CharField(
-        "personne à contacter (téléphone)", max_length=20, blank=True,
+        "personne à contacter (téléphone)",
+        max_length=20,
+        blank=True,
         validators=[valider_telephone],
     )
     # Armée du Salut
@@ -96,20 +98,26 @@ class Membre(models.Model):
     categorie = models.CharField(
         "catégorie", max_length=20, choices=Categorie.choices, default=Categorie.ACTIF
     )
-    statut = models.CharField(
-        "statut", max_length=20, choices=Statut.choices, default=Statut.ACTIF
-    )
+    statut = models.CharField("statut", max_length=20, choices=Statut.choices, default=Statut.ACTIF)
     compte = models.OneToOneField(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.PROTECT,
-        related_name="membre", verbose_name="compte",
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="membre",
+        verbose_name="compte",
     )
     cle_identite = models.CharField(
         "clé de recherche des doublons", max_length=260, editable=False, db_index=True
     )
     date_enregistrement = models.DateTimeField("date d'enregistrement", auto_now_add=True)
     enregistre_par = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-        related_name="+", verbose_name="enregistré par",
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="enregistré par",
     )
 
     class Meta:
@@ -118,7 +126,9 @@ class Membre(models.Model):
         ordering = ["matricule"]
         constraints = [
             models.UniqueConstraint(
-                fields=["npi"], condition=~Q(npi=""), name="npi_unique",
+                fields=["npi"],
+                condition=~Q(npi=""),
+                name="npi_unique",
                 violation_error_message="Ce NPI est déjà utilisé par un autre membre.",
             )
         ]
@@ -132,9 +142,7 @@ class Membre(models.Model):
 
     def clean(self):
         annee_max = timezone.localdate().year
-        if self.annee_integration is not None and not (
-            1900 <= self.annee_integration <= annee_max
-        ):
+        if self.annee_integration is not None and not (1900 <= self.annee_integration <= annee_max):
             raise ValidationError(
                 {"annee_integration": f"L'année d'intégration doit être entre 1900 et {annee_max}."}
             )
@@ -174,9 +182,7 @@ class CompteurMatricule(models.Model):
     class Meta:
         verbose_name = "compteur de matricules"
         verbose_name_plural = "compteurs de matricules"
-        constraints = [
-            models.UniqueConstraint(fields=["annee", "region"], name="compteur_unique")
-        ]
+        constraints = [models.UniqueConstraint(fields=["annee", "region"], name="compteur_unique")]
 
     def __str__(self) -> str:
         return f"{self.annee} — région {self.region.code} : {self.dernier_numero}"
@@ -226,8 +232,12 @@ class PhotoIdentite(models.Model):
     date_depot = models.DateTimeField("date de dépôt", auto_now_add=True)
     date_decision = models.DateTimeField("date de la décision", null=True, blank=True)
     decide_par = models.ForeignKey(
-        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL,
-        related_name="+", verbose_name="décidé par",
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="décidé par",
     )
 
     class Meta:

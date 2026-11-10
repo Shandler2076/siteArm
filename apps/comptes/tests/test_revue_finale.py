@@ -27,8 +27,11 @@ def test_compte_cree_dans_admin_peut_se_connecter(client, tech):
     client.force_login(tech)
     r = client.post(
         "/gestion/comptes/compte/add/",
-        {"identifiant": "2015-01as-0999", "password1": "Provisoire!Salut26",
-         "password2": "Provisoire!Salut26"},
+        {
+            "identifiant": "2015-01as-0999",
+            "password1": "Provisoire!Salut26",
+            "password2": "Provisoire!Salut26",
+        },
     )
     assert r.status_code == 302, r.content.decode()[:2000]
     c = Compte.objects.get(identifiant="2015-01AS-0999")

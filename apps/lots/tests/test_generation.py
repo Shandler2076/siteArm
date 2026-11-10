@@ -85,10 +85,16 @@ def test_une_notification_par_bureau(
     assert messages == [f"2 nouveaux membres dans votre périmètre (lot n° {lot_pret.pk})."]
 
 
-def test_lot_non_validable_refuse(lot_pret, compte_technique):
-    lot_pret.lignes.filter(numero=2).update(etat=EtatLigne.ERREUR)
+def test_lot_non_validable_refuse(territoire, compte_technique, classeur):
+    ligne_fausse = _l("Agbo")
+    ligne_fausse[7] = "abc"  # téléphone invalide
+    lot = creer_lot(
+        region=territoire["HOULENOU"],
+        par=compte_technique,
+        fichier=classeur([ligne_fausse, _l("Bio")]),
+    )
     with pytest.raises(GenerationEchouee, match="ne peut pas être validé"):
-        valider_lot(lot_pret, compte_technique)
+        valider_lot(lot, compte_technique)
 
 
 def test_double_validation_refusee(lot_pret, compte_technique):

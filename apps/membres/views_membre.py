@@ -23,10 +23,16 @@ def ma_fiche(request):
     photo_en_attente = membre.photos.filter(etat="en_attente").first()
     derniere = membre.photos.first()
     photo_refusee = derniere if derniere and derniere.etat == EtatPhoto.REFUSEE else None
-    return render(request, "membres/ma_fiche.html", {
-        "membre": membre, "parcours": parcours, "photo_en_attente": photo_en_attente,
-        "photo_refusee": photo_refusee,
-    })
+    return render(
+        request,
+        "membres/ma_fiche.html",
+        {
+            "membre": membre,
+            "parcours": parcours,
+            "photo_en_attente": photo_en_attente,
+            "photo_refusee": photo_refusee,
+        },
+    )
 
 
 @login_required

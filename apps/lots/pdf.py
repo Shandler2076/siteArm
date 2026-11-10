@@ -22,22 +22,37 @@ def _membres(lot: Lot):
     ]
 
 
-def fiches_du_lot_pdf(lot: Lot, par) -> bytes:
-    """Une fiche par membre du lot, chacune avec un NOUVEAU mot de passe provisoire."""
-    membres = _membres(lot)
-    mots = {m.pk: generer_mot_de_passe_provisoire() for m in membres}
+TRANCHE = 100
+
+
+def fiches_du_lot_pdf(lot: Lot, par, debut: int = 1, fin: int | None = None) -> bytes:
+    """Fiches des membres n° debut à fin du lot (100 au plus par PDF).
+
+    Un NOUVEAU mot de passe provisoire n'est créé que pour les membres qui ne se sont jamais
+    connectés : ceux qui ont déjà choisi leur mot de passe le gardent (fiche sans identifiants).
+    """
+    tous = _membres(lot)
+    debut = max(1, debut)
+    fin = min(len(tous), fin or debut + TRANCHE - 1, debut + TRANCHE - 1)
+    membres = tous[debut - 1 : fin]
+    mots = {
+        m.pk: generer_mot_de_passe_provisoire()
+        for m in membres
+        if m.compte.last_login is None and m.compte.is_active
+    }
     tampon = io.BytesIO()
     c = canvas.Canvas(tampon, pagesize=A4)
     c.setTitle(f"Fiches d'identification — lot n° {lot.pk}")
     for m in membres:
-        dessiner_fiche(c, m, mots[m.pk])
+        dessiner_fiche(c, m, mots.get(m.pk))
     c.save()
     contenu = tampon.getvalue()  # construit avant de toucher aux comptes
     with transaction.atomic():
         for m in membres:
-            m.compte.set_password(mots[m.pk])
-            m.compte.doit_changer_mot_de_passe = True
-            m.compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
+            if m.pk in mots:
+                m.compte.set_password(mots[m.pk])
+                m.compte.doit_changer_mot_de_passe = True
+                m.compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
     return contenu
 
 

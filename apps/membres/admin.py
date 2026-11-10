@@ -28,8 +28,13 @@ class MembreAdmin(admin.ModelAdmin):
     list_filter = ("categorie", "statut", "region_integration")
     search_fields = ("matricule", "nom", "prenoms", "npi")
     readonly_fields = (
-        "matricule", "annee_integration", "paroisse_integration", "region_integration",
-        "compte", "date_enregistrement", "enregistre_par",
+        "matricule",
+        "annee_integration",
+        "paroisse_integration",
+        "region_integration",
+        "compte",
+        "date_enregistrement",
+        "enregistre_par",
     )
     exclude = ("photo_cip",)
     inlines = [AffectationEnLigne]

@@ -1,4 +1,3 @@
-
 from apps.comptes.models import Compte
 from apps.membres.models import Membre
 
@@ -7,9 +6,14 @@ URL = "/membres/bn/enregistrer/"
 
 def _post(client, paroisse, **extra):
     d = {
-        "nom": "Hounkpè", "prenoms": "Jean-Marc", "sexe": "M", "telephone": "0197000000",
-        "date_naissance": "1990-05-01", "annee_integration": "2015",
-        "paroisse_integration": paroisse.pk, "categorie": "actif",
+        "nom": "Hounkpè",
+        "prenoms": "Jean-Marc",
+        "sexe": "M",
+        "telephone": "0197000000",
+        "date_naissance": "1990-05-01",
+        "annee_integration": "2015",
+        "paroisse_integration": paroisse.pk,
+        "categorie": "actif",
     }
     d.update(extra)
     return client.post(URL, d)

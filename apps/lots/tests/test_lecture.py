@@ -139,5 +139,6 @@ def test_annee_texte_et_nombre(territoire):
 
 
 def test_telephone_nombre_excel(territoire):
-    d = normaliser_ligne(_brutes(**{"Téléphone*": 197000000}), territoire["HOULENOU"])[0]
-    assert d["telephone"] == "197000000"
+    # Un nombre a pu perdre son 0 initial dans Excel : on demande de l'écrire comme du texte.
+    erreurs = normaliser_ligne(_brutes(**{"Téléphone*": 197000000}), territoire["HOULENOU"])[1]
+    assert any("0 initial" in e for e in erreurs)

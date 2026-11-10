@@ -30,6 +30,7 @@ class Lot(models.Model):
     region = models.ForeignKey(Region, on_delete=models.PROTECT, verbose_name="région")
     fichier = models.FileField("fichier", storage=stockage_prive, upload_to="lots/", blank=True)
     nom_fichier = models.CharField("nom du fichier", max_length=200, blank=True)
+    fichiers = models.JSONField("fichiers déposés", default=list, blank=True)
     etat = models.CharField(
         "état", max_length=10, choices=EtatLot.choices, default=EtatLot.BROUILLON
     )

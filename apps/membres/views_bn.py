@@ -29,7 +29,9 @@ def enregistrer(request):
         cd = form.cleaned_data
         doublons = list(
             doublons_possibles(
-                nom=cd["nom"], prenoms=cd["prenoms"], date_naissance=cd.get("date_naissance"),
+                nom=cd["nom"],
+                prenoms=cd["prenoms"],
+                date_naissance=cd.get("date_naissance"),
                 npi=cd.get("npi", ""),
             ).select_related("paroisse_integration")
         )
@@ -55,9 +57,15 @@ def enregistrer(request):
             else:
                 messages.success(request, f"Membre enregistré : matricule {res.membre.matricule}")
                 return redirect("membres:bn_fiche", matricule=res.membre.matricule)
-    return render(request, "membres/bn_enregistrer.html", {
-        "form": form, "doublons": doublons, "cip_a_reselectionner": cip_a_reselectionner,
-    })
+    return render(
+        request,
+        "membres/bn_enregistrer.html",
+        {
+            "form": form,
+            "doublons": doublons,
+            "cip_a_reselectionner": cip_a_reselectionner,
+        },
+    )
 
 
 @login_required

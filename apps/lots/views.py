@@ -4,19 +4,23 @@ from functools import wraps
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
+from django.db import transaction
 from django.db.models import Count
-from django.http import HttpResponse, HttpResponseBadRequest
+from django.http import FileResponse, Http404, HttpResponse, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from apps.lots.controle import controler_lot, creer_lot, remplacer_fichier
-from apps.lots.forms import FormulaireDepot, FormulaireLigne, FormulaireRedepot
+from apps.lots.forms import FormulaireDepot, FormulaireLigne, FormulaireRedepot, _affichage
 from apps.lots.generation import GenerationEchouee, valider_lot
 from apps.lots.lecture import FichierInvalide
 from apps.lots.modele_excel import modele_pour_region
 from apps.lots.models import EtatLigne, EtatLot, LigneLot, Lot
+from apps.lots.pdf import TRANCHE
+from apps.membres.models import Categorie
+from apps.membres.stockage import stockage_prive
 from apps.organisation.models import Paroisse, Region
 
 TYPE_XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -45,7 +49,8 @@ def modele(request, code):
 
 
 def _lot_modifiable(pk) -> Lot:
-    lot = get_object_or_404(Lot, pk=pk)
+    """Lot verrouillé en brouillon. À appeler dans une transaction."""
+    lot = get_object_or_404(Lot.objects.select_for_update(), pk=pk)
     if lot.etat != EtatLot.BROUILLON:
         raise PermissionDenied("Ce lot est validé : il ne peut plus être modifié.")
     return lot
@@ -75,16 +80,44 @@ def deposer(request):
     return render(request, "lots/deposer.html", {"form": form})
 
 
+def _comprise(ligne: LigneLot, noms_paroisses: dict) -> dict:
+    """Valeurs telles que le site les a comprises (sinon telles que lues)."""
+    d, b = ligne.donnees or {}, ligne.brutes or {}
+    date = d.get("date_naissance")
+    if date:
+        date = f"{date[8:10]}/{date[5:7]}/{date[0:4]}"
+    else:
+        brut = b.get("Date de naissance")
+        date = "" if brut is None else _affichage(brut)
+    categories = dict(Categorie.choices)
+    return {
+        "nom": " ".join(
+            str(x or "")
+            for x in (d.get("nom") or b.get("Nom*"), d.get("prenoms") or b.get("Prénoms*"))
+        ),
+        "sexe": d.get("sexe") or b.get("Sexe*") or "",
+        "date": date,
+        "paroisse": noms_paroisses.get(d.get("paroisse_integration"))
+        or b.get("Paroisse d'intégration*")
+        or "",
+        "annee": d.get("annee_integration") or b.get("Année d'intégration*") or "",
+        "categorie": categories.get(d.get("categorie"), b.get("Catégorie") or ""),
+    }
+
+
 def _resume(lot: Lot) -> dict:
-    lignes = list(lot.lignes.all())
+    lignes = list(lot.lignes.select_related("membre"))
     retenues = [x for x in lignes if x.etat in (EtatLigne.CORRECTE, EtatLigne.GARDEE)]
     paroisses = dict(
         Paroisse.objects.filter(
             pk__in={x.donnees.get("paroisse_integration") for x in retenues}
         ).values_list("pk", "nom")
     )
+    tous_pk = {x.donnees.get("paroisse_integration") for x in lignes}
+    noms = dict(Paroisse.objects.filter(pk__in=tous_pk).values_list("pk", "nom"))
     return {
         "lignes": lignes,
+        "affichage": {x.pk: _comprise(x, noms) for x in lignes},
         "par_etat": [
             (lib, sum(1 for x in lignes if x.etat == val)) for val, lib in EtatLigne.choices
         ],
@@ -103,11 +136,12 @@ def controle(request, pk):
     lot = get_object_or_404(Lot.objects.select_related("region"), pk=pk)
     form = FormulaireRedepot(request.POST or None, request.FILES or None)
     if request.method == "POST":
-        lot = _lot_modifiable(pk)
+        with transaction.atomic():
+            _lot_modifiable(pk)
         if form.is_valid():
             try:
                 remplacer_fichier(lot, form.cleaned_data["fichier"], request.user)
-            except FichierInvalide as e:
+            except ValueError as e:  # FichierInvalide, ou lot validé entre-temps
                 form.add_error("fichier", str(e))
             else:
                 messages.success(request, "Nouveau fichier déposé et vérifié.")
@@ -119,40 +153,43 @@ def controle(request, pk):
 @bn_requis
 def ligne(request, pk, numero):
     lot = get_object_or_404(Lot, pk=pk)
-    if request.method == "POST":
-        lot = _lot_modifiable(pk)
     l_ = get_object_or_404(LigneLot, lot=lot, numero=numero)
     form = FormulaireLigne(request.POST or None, brutes=l_.brutes)
-    if request.method == "POST" and form.is_valid():
-        l_.brutes = form.brutes()
-        l_.corrigee_par = request.user
-        l_.date_correction = timezone.now()
-        if l_.etat == EtatLigne.ECARTEE:
-            l_.etat = EtatLigne.CORRECTE
-        l_.save()
-        controler_lot(lot)
-        messages.success(request, f"Ligne {numero} corrigée et vérifiée.")
-        return redirect("lots:controle", pk=lot.pk)
+    if request.method == "POST":
+        with transaction.atomic():
+            lot = _lot_modifiable(pk)
+            if form.is_valid():
+                l_ = LigneLot.objects.get(lot=lot, numero=numero)
+                l_.brutes = form.brutes()
+                l_.corrigee_par = request.user
+                l_.date_correction = timezone.now()
+                if l_.etat == EtatLigne.ECARTEE:
+                    l_.etat = EtatLigne.CORRECTE
+                l_.save(update_fields=["brutes", "corrigee_par", "date_correction", "etat"])
+        if form.is_valid():
+            controler_lot(lot)
+            messages.success(request, f"Ligne {numero} corrigée et vérifiée.")
+            return redirect("lots:controle", pk=lot.pk)
     return render(request, "lots/ligne.html", {"lot": lot, "ligne": l_, "form": form})
 
 
 @bn_requis
 @require_POST
 def action_ligne(request, pk, numero, action):
-    lot = _lot_modifiable(pk)
-    l_ = get_object_or_404(LigneLot, lot=lot, numero=numero)
-    if action == "ecarter":
-        l_.etat = EtatLigne.ECARTEE
+    with transaction.atomic():
+        lot = _lot_modifiable(pk)
+        l_ = get_object_or_404(LigneLot, lot=lot, numero=numero)
+        if action == "ecarter":
+            l_.etat = EtatLigne.ECARTEE
+        elif action == "reprendre" and l_.etat == EtatLigne.ECARTEE:
+            l_.etat = EtatLigne.CORRECTE
+        elif action == "garder" and l_.etat == EtatLigne.DOUBLON:
+            l_.etat = EtatLigne.GARDEE
+        else:
+            return HttpResponseBadRequest("Action impossible sur cette ligne.")
         l_.save(update_fields=["etat"])
-    elif action == "reprendre":
-        l_.etat = EtatLigne.CORRECTE
-        l_.save(update_fields=["etat"])
+    if action == "reprendre":
         controler_lot(lot)
-    elif action == "garder" and l_.etat == EtatLigne.DOUBLON:
-        l_.etat = EtatLigne.GARDEE
-        l_.save(update_fields=["etat"])
-    else:
-        return HttpResponseBadRequest("Action impossible sur cette ligne.")
     return redirect(f"{reverse('lots:controle', args=[lot.pk])}#ligne-{numero}")
 
 
@@ -161,7 +198,8 @@ def confirmer(request, pk):
     lot = get_object_or_404(Lot.objects.select_related("region"), pk=pk)
     erreur = None
     if request.method == "POST":
-        lot = _lot_modifiable(pk)
+        if lot.etat != EtatLot.BROUILLON:
+            raise PermissionDenied("Ce lot est déjà validé.")
         if request.POST.get("confirme") != "on":
             erreur = "Cochez la case pour confirmer."
         else:
@@ -178,10 +216,32 @@ def confirmer(request, pk):
 @bn_requis
 def resultat(request, pk):
     lot = get_object_or_404(Lot.objects.select_related("region"), pk=pk, etat=EtatLot.VALIDE)
-    lignes = lot.lignes.filter(membre__isnull=False).select_related(
-        "membre", "membre__paroisse_integration"
+    lignes = list(
+        lot.lignes.filter(membre__isnull=False).select_related(
+            "membre", "membre__paroisse_integration"
+        )
     )
-    return render(request, "lots/resultat.html", {"lot": lot, "lignes": lignes})
+    n = len(lignes)
+    tranches = [(d, min(d + TRANCHE - 1, n)) for d in range(1, n + 1, TRANCHE)]
+    return render(
+        request, "lots/resultat.html", {"lot": lot, "lignes": lignes, "tranches": tranches}
+    )
+
+
+@bn_requis
+def fichier_depose(request, pk, index):
+    lot = get_object_or_404(Lot, pk=pk)
+    if index >= len(lot.fichiers):
+        raise Http404
+    infos = lot.fichiers[index]
+    r = FileResponse(
+        stockage_prive.open(infos["chemin"], "rb"),
+        as_attachment=True,
+        filename=infos["nom"],
+        content_type=TYPE_XLSX,
+    )
+    r["Cache-Control"] = "private, no-store"
+    return r
 
 
 def _pdf(contenu: bytes, nom: str) -> HttpResponse:
@@ -197,7 +257,13 @@ def fiches(request, pk):
     from apps.lots.pdf import fiches_du_lot_pdf
 
     lot = get_object_or_404(Lot, pk=pk, etat=EtatLot.VALIDE)
-    return _pdf(fiches_du_lot_pdf(lot, request.user), f"fiches-lot-{lot.pk}.pdf")
+    debut = (
+        int(request.POST.get("debut") or 1) if (request.POST.get("debut") or "1").isdigit() else 1
+    )
+    fin = request.POST.get("fin")
+    fin = int(fin) if fin and fin.isdigit() else None
+    contenu = fiches_du_lot_pdf(lot, request.user, debut=debut, fin=fin)
+    return _pdf(contenu, f"fiches-lot-{lot.pk}-{debut}.pdf")
 
 
 @bn_requis

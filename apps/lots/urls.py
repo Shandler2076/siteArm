@@ -13,6 +13,7 @@ urlpatterns = [
     path("<int:pk>/resultat/", views.resultat, name="resultat"),
     path("<int:pk>/fiches.pdf", views.fiches, name="fiches"),
     path("<int:pk>/recapitulatif.pdf", views.recapitulatif, name="recapitulatif"),
+    path("<int:pk>/fichiers/<int:index>/", views.fichier_depose, name="fichier"),
     path("<int:pk>/lignes/<int:numero>/", views.ligne, name="ligne"),
     path("<int:pk>/lignes/<int:numero>/<str:action>/", views.action_ligne, name="action_ligne"),
 ]

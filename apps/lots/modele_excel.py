@@ -24,7 +24,8 @@ CONSIGNES = [
     "5. Sexe : M ou F. Situation, paroisse et catégorie : choisissez dans la liste proposée.",
     "6. Paroisse d'intégration : uniquement une paroisse de votre région.",
     "7. Catégorie laissée vide = membre actif.",
-    "8. NPI : 10 chiffres, facultatif. Téléphone : chiffres, espaces et + uniquement.",
+    "8. NPI : 10 chiffres, facultatif. Téléphone : chiffres, espaces et + uniquement. Ces "
+    "colonnes sont au format Texte pour garder le 0 initial (ex. 0197000000).",
     "9. Envoyez le fichier rempli au Secrétaire national, qui le déposera sur le site.",
 ]
 
@@ -59,8 +60,15 @@ def modele_pour_region(region: Region) -> bytes:
     ws.row_dimensions[1].height = 32
     ws.freeze_panes = "A2"
     date = get_column_letter(COLONNES.index(PAR_CHAMP["date_naissance"]) + 1)
+    # Téléphones et NPI en texte : Excel ne doit pas supprimer le 0 initial.
+    textes = [
+        get_column_letter(COLONNES.index(PAR_CHAMP[c]) + 1)
+        for c in ("telephone", "whatsapp", "urgence_telephone", "npi")
+    ]
     for ligne in range(2, NB_LIGNES + 2):
         ws[f"{date}{ligne}"].number_format = "DD/MM/YYYY"
+        for lettre in textes:
+            ws[f"{lettre}{ligne}"].number_format = "@"
 
     listes = wb.create_sheet("Listes")
     paroisses = list(

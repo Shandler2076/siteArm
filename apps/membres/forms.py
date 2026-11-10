@@ -7,7 +7,9 @@ from apps.membres.models import Categorie, Membre
 from apps.organisation.models import Paroisse
 
 
-def valider_futur_membre(donnees: dict, paroisse, exclure=()) -> dict[str, list[str]]:
+def valider_futur_membre(
+    donnees: dict, paroisse, exclure=(), verifier_contraintes: bool = True
+) -> dict[str, list[str]]:
     """Règles du modèle `Membre` appliquées à un membre pas encore enregistré.
 
     Utilisé par l'enregistrement individuel et par les lots : une seule source de vérité.
@@ -20,7 +22,7 @@ def valider_futur_membre(donnees: dict, paroisse, exclure=()) -> dict[str, list[
     if paroisse is None:
         ignores += ["paroisse_integration", "region_integration"]
     try:
-        membre.full_clean(exclude=ignores)
+        membre.full_clean(exclude=ignores, validate_constraints=verifier_contraintes)
     except ValidationError as e:
         return e.message_dict
     return {}
@@ -37,7 +39,9 @@ class FormulaireEnregistrement(forms.ModelForm):
         label="Paroisse d'intégration",
     )
     categorie = forms.ChoiceField(
-        label="Catégorie", choices=Categorie.choices, initial=Categorie.ACTIF,
+        label="Catégorie",
+        choices=Categorie.choices,
+        initial=Categorie.ACTIF,
         widget=forms.RadioSelect,
     )
     confirmer_malgre_doublon = forms.BooleanField(required=False, widget=forms.HiddenInput)
@@ -45,10 +49,25 @@ class FormulaireEnregistrement(forms.ModelForm):
     class Meta:
         model = Membre
         fields = [
-            "nom", "prenoms", "sexe", "date_naissance", "lieu_naissance",
-            "situation_matrimoniale", "npi", "photo_cip", "telephone", "whatsapp", "email",
-            "quartier", "ville", "profession", "urgence_nom", "urgence_telephone",
-            "annee_integration", "paroisse_integration", "categorie",
+            "nom",
+            "prenoms",
+            "sexe",
+            "date_naissance",
+            "lieu_naissance",
+            "situation_matrimoniale",
+            "npi",
+            "photo_cip",
+            "telephone",
+            "whatsapp",
+            "email",
+            "quartier",
+            "ville",
+            "profession",
+            "urgence_nom",
+            "urgence_telephone",
+            "annee_integration",
+            "paroisse_integration",
+            "categorie",
         ]
         widgets = {"date_naissance": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
@@ -90,8 +109,14 @@ class FormulaireCoordonnees(forms.ModelForm):
     class Meta:
         model = Membre
         fields = [
-            "telephone", "whatsapp", "email", "quartier", "ville", "profession",
-            "urgence_nom", "urgence_telephone",
+            "telephone",
+            "whatsapp",
+            "email",
+            "quartier",
+            "ville",
+            "profession",
+            "urgence_nom",
+            "urgence_telephone",
         ]
 
 

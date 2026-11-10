@@ -24,8 +24,13 @@ def test_bloque_apres_5_echecs_meme_avec_bon_mot_de_passe(client, compte):
 
 
 def test_variantes_d_ecriture_comptent_ensemble(client, compte):
-    for ident in ["2015-01as-0157", " 2015-01AS-0157", "2015-01AS-0157 ", "2015-01aS-0157",
-                  "2015-01As-0157"]:
+    for ident in [
+        "2015-01as-0157",
+        " 2015-01AS-0157",
+        "2015-01AS-0157 ",
+        "2015-01aS-0157",
+        "2015-01As-0157",
+    ]:
         _essai(client, "faux", ident)
     assert _essai(client, "MotDePasse!2026").status_code == 429
 

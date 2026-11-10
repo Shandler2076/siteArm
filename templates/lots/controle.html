@@ -6,6 +6,11 @@
   <p><a href="{% url 'lots:liste' %}">← Tous les lots</a></p>
   <h1>Lot n° {{ lot.pk }} — {{ lot.region.nom }}</h1>
   <p class="aide">{{ lignes|length }} ligne{{ lignes|length|pluralize }} · fichier « {{ lot.nom_fichier }} » · {{ lot.get_etat_display }}</p>
+  {% if lot.fichiers %}
+    <p class="aide">Fichiers déposés :
+      {% for f in lot.fichiers %}<a href="{% url 'lots:fichier' lot.pk forloop.counter0 %}">{{ f.nom }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}
+    </p>
+  {% endif %}
   <div class="resume">
     {% for libelle, nb in par_etat %}{% if nb %}<span class="pastille">{{ libelle }} : {{ nb }}</span>{% endif %}{% endfor %}
   </div>
@@ -30,12 +35,14 @@
               {% for e in l.erreurs %}<small class="erreur">{{ e }}</small>{% endfor %}
               {% if l.doublons %}<small>Ressemble à : {% for d in l.doublons %}{% if "ligne" in d %}{{ d }}{% else %}<a href="{% url 'membres:bn_fiche' d %}">{{ d }}</a>{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</small>{% endif %}
             </td>
-            <td>{{ l.brutes|get_item:"Nom*"|default:"" }} {{ l.brutes|get_item:"Prénoms*"|default:"" }}</td>
-            <td>{{ l.brutes|get_item:"Sexe*"|default:"" }}</td>
-            <td>{{ l.brutes|get_item:"Date de naissance"|default:"" }}</td>
-            <td>{{ l.brutes|get_item:"Paroisse d'intégration*"|default:"" }}</td>
-            <td>{{ l.brutes|get_item:"Année d'intégration*"|default:"" }}</td>
-            <td>{{ l.brutes|get_item:"Catégorie"|default:"Membre actif" }}</td>
+            {% with a=affichage|get_item:l.pk %}
+            <td>{{ a.nom }}</td>
+            <td>{{ a.sexe }}</td>
+            <td>{{ a.date }}</td>
+            <td>{{ a.paroisse }}</td>
+            <td>{{ a.annee }}</td>
+            <td>{{ a.categorie|default:"Membre actif" }}</td>
+            {% endwith %}
             <td class="actions-ligne">
               {% if lot.etat == "brouillon" %}
                 <a href="{% url 'lots:ligne' lot.pk l.numero %}">Corriger</a>
