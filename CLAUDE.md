@@ -19,6 +19,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Droits par mandat (fonction + unité + dates) ; un « gardien des périmètres » central (étape 3)
   filtre toutes les données. Un membre simple ne voit jamais un autre membre.
 - Photo du CIP : visible par le BN uniquement. Validation des photos : BN uniquement.
+- Sanctions : seul le BNC les inscrit sur le site (procédures locales hors site). Statuts : Actif,
+  Sanctionné, Exclu, Démissionnaire, Décédé. Catégorie (actif / d'honneur / sympathisant) sans
+  effet sur le matricule. Fonctions et durées de mandat : règlement intérieur (`docs/donnees/`).
 
 ## Commandes
 - Tests : `DJANGO_DEBUG=True pytest -q`
