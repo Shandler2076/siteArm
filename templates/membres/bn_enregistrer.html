@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block titre %}Enregistrer un membre — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Enregistrer un membre</h1>
+  <p class="aide">Les champs marqués d'un astérisque sont obligatoires. Le matricule est généré automatiquement.</p>
+  {% if form.non_field_errors %}
+    <div class="message message--error">{% for e in form.non_field_errors %}{{ e }}{% endfor %}</div>
+  {% endif %}
+  {% if doublons %}
+    <div class="alerte">
+      <h2>Doublons possibles</h2>
+      <p>Ces membres ressemblent à la personne saisie. Vérifiez avant de continuer.</p>
+      {% if cip_a_reselectionner %}<p><strong>Sélectionnez à nouveau la photo du CIP avant de confirmer.</strong></p>{% endif %}
+      <ul>
+        {% for d in doublons %}
+          <li><strong>{{ d.matricule }}</strong> — {{ d.nom_complet }}{% if d.date_naissance %}, né(e) le {{ d.date_naissance|date:"d/m/Y" }}{% endif %} — {{ d.paroisse_integration.nom }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {{ form.confirmer_malgre_doublon }}
+    <fieldset><legend>Identité</legend>
+      {% include "membres/_champ.html" with champ=form.nom %}
+      {% include "membres/_champ.html" with champ=form.prenoms %}
+      {% include "membres/_champ.html" with champ=form.sexe %}
+      {% include "membres/_champ.html" with champ=form.date_naissance %}
+      {% include "membres/_champ.html" with champ=form.lieu_naissance %}
+      {% include "membres/_champ.html" with champ=form.situation_matrimoniale %}
+      {% include "membres/_champ.html" with champ=form.npi %}
+      {% include "membres/_champ.html" with champ=form.photo_cip %}
+    </fieldset>
+    <fieldset><legend>Contact</legend>
+      {% include "membres/_champ.html" with champ=form.telephone %}
+      {% include "membres/_champ.html" with champ=form.whatsapp %}
+      {% include "membres/_champ.html" with champ=form.email %}
+      {% include "membres/_champ.html" with champ=form.quartier %}
+      {% include "membres/_champ.html" with champ=form.ville %}
+    </fieldset>
+    <fieldset><legend>Autres</legend>
+      {% include "membres/_champ.html" with champ=form.profession %}
+      {% include "membres/_champ.html" with champ=form.urgence_nom %}
+      {% include "membres/_champ.html" with champ=form.urgence_telephone %}
+    </fieldset>
+    <fieldset><legend>Armée du Salut</legend>
+      {% include "membres/_champ.html" with champ=form.annee_integration %}
+      {% include "membres/_champ.html" with champ=form.paroisse_integration %}
+      <div class="champ champ--requis"><span>{{ form.categorie.label }}</span>
+        <div class="choix">{{ form.categorie }}</div>
+        {% for e in form.categorie.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
+      </div>
+    </fieldset>
+    <button type="submit" class="bouton">{% if doublons %}Enregistrer quand même{% else %}Enregistrer le membre{% endif %}</button>
+  </form>
+</section>
+{% endblock %}

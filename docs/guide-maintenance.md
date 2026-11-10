@@ -91,3 +91,37 @@ Générer une clé secrète :
 L'hébergeur (choix à venir) installe automatiquement la nouvelle version envoyée sur la branche de
 production, puis applique les migrations (`Procfile` : `postdeploy`). Procédure détaillée ajoutée
 lors du choix de l'hébergeur.
+
+## 10. Donner les droits du Bureau national à un compte (en attendant l'étape 3)
+
+Jusqu'à l'arrivée des mandats (étape 3), les droits du BN passent par deux autorisations :
+
+1. Ouvrez la gestion : `/gestion/` → **Comptes** → choisissez le compte (ex. celui du Secrétaire national).
+2. Dans **Droits** → *Permissions de l'utilisateur*, ajoutez :
+   - **membres | membre | Gérer les membres (Bureau national)** : enregistrer des membres, imprimer
+     les fiches, valider les photos ;
+   - **membres | membre | Voir la photo du CIP** : consulter la photo du CIP.
+3. Enregistrez. La page d'accueil du compte affiche alors « Enregistrer un membre » et
+   « Photos à valider ».
+
+À l'étape 3, ces droits seront donnés automatiquement aux titulaires des fonctions concernées.
+
+## 11. Fichiers privés (photos, CIP)
+
+Les photos d'identité et les photos du CIP sont rangées dans le dossier `prive/` (réglage
+`PRIVATE_MEDIA_ROOT`). Ce dossier **n'est jamais envoyé sur GitHub** (il est dans `.gitignore`) et
+n'a aucune adresse publique : chaque fichier est servi par le site après vérification des droits.
+**Il doit être sauvegardé** avec la base de données. En production, il sera remplacé par un
+stockage objet privé chez l'hébergeur (étape de mise en ligne).
+
+## 12. Adresse du site imprimée sur les fiches
+
+La variable `DJANGO_SITE_URL` (ex. `https://armeedusalut.bj`) est imprimée dans l'encadré
+« Vos identifiants de connexion » des fiches d'identification.
+
+## 13. Matricules
+
+- Format `AAAA-RRAS-NNNN` (ex. `2015-01AS-0157`), un compteur par année d'intégration et par
+  région d'intégration (gestion → **Membres** → *Compteurs de matricules*, en lecture seule).
+- Un membre ne s'ajoute **que** par la page « Enregistrer un membre » : c'est elle qui garantit un
+  matricule unique, même si deux personnes enregistrent en même temps.

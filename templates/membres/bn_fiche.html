@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titre %}{{ membre.matricule }} — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="matricule">{{ membre.matricule }}</p>
+  <h1>{{ membre.nom_complet }}</h1>
+  <dl class="fiche">
+    <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
+    <dt>Statut</dt><dd>{{ membre.get_statut_display }}</dd>
+    <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
+    <dt>Date de naissance</dt><dd>{{ membre.date_naissance|date:"d/m/Y"|default:"—" }}</dd>
+    <dt>Téléphone</dt><dd>{{ membre.telephone }}</dd>
+    <dt>Intégration</dt><dd>{{ membre.annee_integration }} — {{ membre.paroisse_integration.nom }} ({{ membre.region_integration.nom }})</dd>
+    {% with a=membre.affectation_actuelle %}{% if a %}
+    <dt>Affectation actuelle</dt><dd>{{ a.paroisse.nom }} — {{ a.circuit_a_date }} — {{ a.region_a_date.nom }}</dd>
+    {% endif %}{% endwith %}
+  </dl>
+  {% if membre.photo_cip and perms.membres.voir_cip %}
+    <p><a href="{% url 'membres:cip' membre.matricule %}">Voir la photo du CIP</a></p>
+  {% endif %}
+  {% block actions %}
+  <div class="actions">
+    <form method="post" action="{% url 'membres:bn_fiche_identifiants' membre.matricule %}">
+      {% csrf_token %}
+      <button type="submit" class="bouton">Imprimer la fiche avec identifiants</button>
+    </form>
+    <p class="aide">Attention : un nouveau mot de passe provisoire remplace l'ancien.</p>
+    <a class="bouton bouton--secondaire" href="{% url 'membres:bn_fiche_pdf' membre.matricule %}">Fiche sans identifiants (PDF)</a>
+  </div>
+  {% endblock %}
+</section>
+{% endblock %}

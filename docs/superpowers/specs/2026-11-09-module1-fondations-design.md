@@ -77,9 +77,10 @@ National
 | Matricule | `AAAA-RRAS-NNNN` (ex. `2015-01AS-0157`) | Généré automatiquement, définitif |
 | Affectation actuelle | Paroisse (→ circuit → région) | Mise à jour uniquement par mutation validée |
 | Fonctions | Mandats en cours et passés | Voir section 5 |
-| Statut | Actif, Sanctionné, Exclu, Décédé | Termes définitifs selon le règlement intérieur |
-| Grade | Grade actuel et historique | **Module 2** |
-| Caractéristiques du règlement intérieur | À définir | Ajoutées quand le règlement sera fourni |
+| Statut | Actif, Sanctionné, Exclu, Démissionnaire, Décédé | Voir 3.3 |
+| Catégorie | Membre actif, membre d'honneur, membre sympathisant (RI art. 25-28) | **Sans effet sur le matricule** ; voir 3.6 |
+| Grade | Grade actuel et historique | **Module 2** (tout nouveau consacré commence Soldat de 3ᵉ classe, RI art. 80) |
+| Caractéristiques du règlement intérieur | Grade, tenue (module 2) | Règlement reçu : `docs/donnees/reglement-interieur.md` (projet) |
 
 Le **reçu** (présent, perdu, numéro) **n'est pas enregistré** sur la fiche. Les cas de reçu perdu sont réglés hors du site, lors de la centralisation.
 
@@ -103,8 +104,11 @@ Le **reçu** (présent, perdu, numéro) **n'est pas enregistré** sur la fiche. 
 |---|---|---|
 | Actif | Oui | Par défaut |
 | Sanctionné | **Oui** (espace personnel) | Automatique à l'enregistrement d'une sanction temporaire par le BN ; retour à « Actif » automatique à la date de fin |
-| Exclu | **Non** (compte désactivé) | Automatique à l'enregistrement d'une sanction d'exclusion par le BN |
+| Exclu | **Non** (compte désactivé) | Automatique à l'enregistrement d'une sanction d'exclusion (temporaire ou définitive) par le BN |
+| Démissionnaire | **Non** (compte désactivé) | Signalement par la paroisse, confirmation par le BN (voir 6.5) |
 | Décédé | **Non** (compte désactivé) | Signalement par la paroisse, confirmation par le BN |
+
+La qualité de membre se perd par démission, exclusion ou décès (RI art. 167). Un membre démissionnaire ou exclu peut être **réhabilité** (voir 6.5).
 
 ### 3.4 Photo d'identité
 
@@ -126,6 +130,14 @@ Le **reçu** (présent, perdu, numéro) **n'est pas enregistré** sur la fiche. 
 
 Toute modification est inscrite au journal (ancienne et nouvelle valeur).
 
+### 3.6 Catégorie de membre
+
+- Chaque membre a une **catégorie** : **membre actif**, **membre d'honneur** ou **membre sympathisant** (RI art. 25 à 28).
+- La catégorie **n'a aucun effet sur le matricule** : **tout le monde reçoit un matricule**, sans exception ni distinction, et le matricule ne change jamais quand la catégorie change.
+- À l'enregistrement, la **case catégorie est toujours présente** (enregistrement individuel et modèle Excel), pré-remplie sur **« Membre actif »** ; le BN peut en choisir une autre. Tout doit être en place avant l'entrée en vigueur du règlement intérieur, qui précède le déploiement du site.
+- **Changement de catégorie** : le bureau de la paroisse, du circuit ou de la région **signale** le changement sur le site ; le **BN valide** ; la fiche est mise à jour, le changement est inscrit dans l'historique et au journal, et le membre est notifié.
+- La catégorie est visible sur la fiche, utilisable comme **filtre** dans les listes et comme **critère** dans les statistiques.
+
 ---
 
 ## 4. Parcours (historique des affectations)
@@ -146,14 +158,25 @@ Après le départ d'un membre (mutation validée), l'ancienne paroisse, l'ancien
 
 ### 5.1 Fonctions
 
-- Une **fonction** a : un nom (Président, Vice-président, Secrétaire, Secrétaire adjoint…), un niveau (paroisse, circuit, région, national), et une case **« droit de gérer le site »**.
-- **Au démarrage**, seules les fonctions **Président** et **Secrétaire** ont le droit de gérer, à chaque niveau.
-- Le BN peut accorder ce droit à d'autres fonctions plus tard, **depuis le site, sans modifier le code**.
-- La liste des fonctions de chaque niveau est fournie par l'église.
+- Une **fonction** a : un nom, un niveau (paroisse, circuit, région, national), une **durée de mandat** et une case **« droit de gérer le site »**.
+- Les fonctions sont celles du **règlement intérieur** (art. 14 à 18) :
+
+| Niveau | Fonctions | Droit de gérer au démarrage | Durée du mandat |
+|---|---|---|---|
+| **Unité paroissiale** | Chef d'Unité paroissiale, Secrétaire paroissial, Trésorier paroissial | **Chef d'Unité paroissiale, Secrétaire paroissial** | 2 ans |
+| **Section de Circuit** | Chef de Section de Circuit, Secrétaire de Circuit, Trésorier de Circuit, Organisateur de Circuit, Formateur de Circuit | **Chef de Section de Circuit, Secrétaire de Circuit** | 2 ans |
+| **Bureau Régional de Coordination (BRC)** | Coordinateur régional, Coordinateur régional adjoint, Secrétaire régional, Rapporteur régional, Trésorier régional, Organisateur régional, Organisateur régional adjoint, Formateur régional, Conseiller régional | **Coordinateur régional, Secrétaire régional** | 2 ans |
+| **Bureau National de Commandement (BNC)** | Président, Vice-président, Secrétaire national, Secrétaire national adjoint, Trésorier national, Trésorier national adjoint, Responsable national à l'organisation (affaires sociales), Responsable national adjoint à l'organisation (information et propagande), Responsable national chargé de la formation, Responsable national adjoint chargé de la formation, Responsable national chargé des relations extérieures, Conseiller aux affaires spirituelles, Conseiller juridique et disciplinaire | **Président, Secrétaire national** | 4 ans |
+
+- Les **vérificateurs** (2 auprès de chaque Section de Circuit et de chaque BRC, RI art. 17) sont enregistrés comme fonction **sans droit de gérer** ; ils ne sont pas membres du bureau.
+- Le BN peut accorder le droit de gérer à d'autres fonctions plus tard, et ajuster la liste des fonctions, **depuis le site, sans modifier le code**.
+- Dans la suite du document, « Président et Secrétaire » d'un bureau désigne ces deux fonctions de gestion propres à chaque niveau.
 
 ### 5.2 Mandats
 
 - Un **mandat** relie : un membre, une fonction, une unité précise (telle paroisse, tel circuit, telle région, ou le national), une date de début, une date de fin.
+- La **date de fin prévue** est proposée automatiquement d'après la durée du mandat de la fonction (2 ans, ou 4 ans pour le BNC), et reste modifiable par le BN.
+- **Échéance des mandats** : le site **signale** au BN et au bureau concerné les mandats arrivant à échéance (**60 jours avant**) et les mandats **échus non renouvelés**. Un mandat échu **n'est pas coupé automatiquement** : c'est l'enregistrement du nouveau bureau par le BN (6.6) qui clôt les anciens mandats.
 - **Une même personne peut avoir plusieurs mandats en même temps, à tous les niveaux, jusqu'au Bureau national.**
 - Les droits d'une personne sont **la somme des droits de ses mandats en cours**.
 - Les mandats passés restent dans l'historique de la fiche.
@@ -170,7 +193,7 @@ Après le départ d'un membre (mutation validée), l'ancienne paroisse, l'ancien
 
 ### 6.1 Enregistrement individuel d'un membre (par le BN)
 
-1. Le Secrétaire national (ou toute personne du BN autorisée) saisit la fiche : identité, contact, année + paroisse + région d'intégration.
+1. Le Secrétaire national (ou toute personne du BN autorisée) saisit la fiche : identité, contact, année + paroisse + région d'intégration, **catégorie** (case obligatoire à trois choix : membre actif, membre d'honneur, membre sympathisant ; pré-cochée sur « membre actif »).
 2. Le site **détecte les doublons possibles** (même nom + même date de naissance, ou même NPI) et affiche un avertissement ; le secrétaire décide de poursuivre ou non.
 3. Le site génère le **matricule**, crée le **compte** avec un **mot de passe provisoire** et ouvre l'**affectation** dans la paroisse d'intégration.
 4. Le site génère la **fiche d'identification PDF** (nom, matricule, paroisse, circuit, région, identifiants de connexion), à imprimer ou envoyer par WhatsApp.
@@ -179,7 +202,7 @@ Après le départ d'un membre (mutation validée), l'ancienne paroisse, l'ancien
 
 ### 6.2 Enregistrement par lots (fichier Excel)
 
-1. Le site fournit un **modèle Excel officiel** à télécharger : colonnes fixes, listes déroulantes (sexe, situation matrimoniale, paroisses), consignes de saisie (format de date…).
+1. Le site fournit un **modèle Excel officiel** à télécharger : colonnes fixes, listes déroulantes (sexe, situation matrimoniale, paroisses, **catégorie**), consignes de saisie (format de date…). Une catégorie laissée vide vaut « membre actif ».
 2. Chaque **région** remplit le modèle avec ses nouveaux membres et **l'envoie au Secrétaire national** (hors site).
 3. Le **Secrétaire national dépose le fichier** sur le site, en indiquant la région concernée → création d'un **lot**.
 4. **Écran de contrôle du lot (aperçu avant génération).** Le site lit le fichier **sans rien créer** et affiche un tableau de toutes les lignes, **telles que le site les a comprises** (nom, prénoms, sexe, date de naissance, paroisse, année d'intégration…), avec pour chaque ligne un état :
@@ -213,19 +236,34 @@ Une seule demande de mutation en cours par membre. États : *En attente d'avis �
 
 ### 6.4 Sanction
 
-1. **Seul le BN** enregistre une sanction : type (selon le règlement), date de début, date de fin éventuelle, motif résumé, référence de la décision.
-2. Le statut change automatiquement (Sanctionné ou Exclu).
+1. **Seul le BNC** enregistre une sanction sur le site. Les procédures des autres niveaux (séances, commissions disciplinaires, décisions locales) se déroulent **hors site** et **n'ont aucun effet sur le site** ; une sanction n'apparaît sur la fiche d'un membre que si le BNC l'y inscrit.
+   La sanction comprend : **degré de la faute** (1ᵉʳ, 2ᵉ ou 3ᵉ degré, RI art. 152), **type de sanction**, date de début, date de fin éventuelle, motif résumé, référence de la décision.
+   Types de sanctions (RI art. 154, 156, 162) : avertissement verbal, avertissement écrit, amende, blâme écrit, suspension temporaire de service (15 jours au plus), retrait temporaire de responsabilités, exclusion temporaire, exclusion définitive, autre (préciser).
+2. Le statut change automatiquement : **Sanctionné** pour une suspension ou un retrait temporaire de responsabilités ; **Exclu** pour une exclusion ; les avertissements, l'amende et le blâme sont inscrits dans l'historique **sans changer le statut**.
 3. Les bureaux de la paroisse, du circuit et de la région sont notifiés.
 4. Sanction temporaire : retour automatique à « Actif » à la date de fin ; la sanction reste dans l'historique.
 5. **Visible par** : le membre concerné, les bureaux de sa paroisse, de son circuit, de sa région, et le BN.
 
-Les types exacts de sanctions seront repris du règlement intérieur.
 
 ### 6.5 Décès
 
 1. Le bureau de la paroisse **signale** le décès (avec la date).
 2. Le **BN confirme**.
 3. Statut « Décédé », compte désactivé, fiche conservée en archives, bureaux notifiés.
+
+### 6.5 bis Démission et réhabilitation
+
+**Démission**
+1. Le bureau de la paroisse **signale** la démission (date, référence de la lettre éventuelle).
+2. Le **BN confirme**.
+3. Statut « Démissionnaire », compte désactivé, fiche conservée, bureaux notifiés. Le matricule reste attribué à vie.
+
+**Réhabilitation** (RI art. 169 à 172)
+1. Possible pour un membre **démissionnaire ou exclu**, au plus tôt **6 mois** après la démission ou l'exclusion : le site bloque la demande avant ce délai.
+2. Le bureau de la paroisse transmet la demande ; les conditions (redevances, amendes, cotisations, souscriptions) sont vérifiées **hors site**.
+3. Le **BN valide** : statut « Actif », compte réactivé avec un **nouveau mot de passe provisoire**, **même matricule**. Pour un exclu, la référence de l'**engagement écrit de bonne conduite** est obligatoire.
+4. Un membre **déjà réhabilité après une exclusion** puis **exclu à nouveau** ne peut plus être réhabilité : le site le signale et bloque la demande.
+5. Toute l'opération est inscrite dans l'historique et au journal.
 
 ### 6.6 Changement de bureau
 
@@ -235,7 +273,7 @@ Les types exacts de sanctions seront repris du règlement intérieur.
 
 ### 6.7 Mot de passe oublié
 
-- Le membre s'adresse au **bureau de sa paroisse**. Le Président ou le Secrétaire génère un **nouveau mot de passe provisoire** (à changer à la connexion suivante). Le BN peut aussi le faire.
+- Le membre s'adresse au **bureau de sa paroisse**. Le Chef d'Unité paroissiale ou le Secrétaire paroissial génère un **nouveau mot de passe provisoire** (à changer à la connexion suivante). Le BN peut aussi le faire.
 - La réinitialisation d'un compte du **BN** n'est possible que par un autre membre du BN, ou par le mainteneur technique selon la procédure du guide de maintenance.
 - Chaque réinitialisation est inscrite au journal.
 
@@ -300,13 +338,17 @@ Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sél
 | Valider une mutation | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Signaler un décès | ❌ | ✅ | ❌ | ❌ | ✅ |
 | Confirmer un décès | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Signaler une démission, demander une réhabilitation | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Confirmer une démission, valider une réhabilitation | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Signaler un changement de catégorie | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Valider un changement de catégorie | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Valider une photo | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Enregistrer des membres (individuel, lot) | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Gérer bureaux, fonctions, territoire | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Réinitialiser un mot de passe | ❌ | Ses membres | ❌ | ❌ | ✅ |
 | Consulter le journal | ❌ | ❌ | ❌ | ❌ | ✅ |
 
-*« Bureau » = titulaire d'un mandat en cours dont la fonction a le droit de gérer (au démarrage : Président et Secrétaire).*
+*« Bureau » = titulaire d'un mandat en cours dont la fonction a le droit de gérer (au démarrage : Chef d'Unité paroissiale et Secrétaire paroissial ; Chef de Section de Circuit et Secrétaire de Circuit ; Coordinateur régional et Secrétaire régional ; Président et Secrétaire national). « BN » désigne le Bureau National de Commandement (BNC).*
 
 ### 9.2 Gardien des périmètres
 
@@ -404,15 +446,29 @@ Chaque étape est testable sur le site d'essai.
 | Élément | Nécessaire pour |
 |---|---|
 | Liste des régions, circuits et paroisses avec leurs rattachements | Étape 1 |
-| Liste des fonctions de chaque bureau, à chaque niveau | Étape 3 |
-| Logo et couleurs officielles | Interface |
+| ~~Liste des fonctions de chaque bureau~~ — **reçue** (règlement intérieur) | Étape 3 |
+| ~~Logos~~ — **reçus** (Armée du Salut ; Congrégation retravaillé, provisoire) — couleurs : bleu marine, jaune or, rouge | Interface |
 | Caractéristiques exigées pour la photo en tenue | Étape 2 |
-| Termes officiels des statuts et des types de sanctions | Étape 7 |
-| Règlement intérieur, liste des grades, conditions de passage | Module 2 |
+| ~~Termes des statuts et types de sanctions~~ — **reçus** (règlement intérieur) | Étape 7 |
+| ~~Règlement intérieur, grades, conditions de passage~~ — **reçus** (projet, à confirmer à son entrée en vigueur) | Module 2 |
 
 ---
 
-## 15. Hors du module 1
+## 15. Préparation du module 2 (grades) — repères du règlement intérieur
+
+Ces éléments seront détaillés dans le cahier des charges du module 2 ; ils sont notés ici pour que le module 1 les prépare.
+
+- **12 grades** (RI art. 77), dans l'ordre : Soldat de 3ᵉ classe, Soldat de 2ᵉ classe, Soldat de 1ʳᵉ classe, Sous-Capitaine, Capitaine, Senior Capitaine, Commandant, Sous-Supérieur, Supérieur Délégué, Supérieur Général Délégué, Supérieur Général, Supérieur Suprême Spirituel (avec épaulettes et couleur de corde).
+- **Premier grade** : tout nouveau consacré commence **Soldat de 3ᵉ classe**, quel que soit son titre dans l'Église (art. 80).
+- **Durées minimales** (art. 78) : 3ᵉ → 2ᵉ classe : 3 ans ; 2ᵉ → 1ʳᵉ classe : 3 ans ; 1ʳᵉ classe → Sous-Capitaine : 3 ans ; Sous-Capitaine → Capitaine : 4 ans ; Capitaine → Senior Capitaine : 5 ans. L'ancienneté seule ne donne pas droit au grade.
+- **Test obligatoire** jusqu'à Senior Capitaine, organisé par le BNC dans les régions (dérogation possible) ; **à partir de Commandant : nomination uniquement** (art. 74, 78, 79). Promotion exceptionnelle par le BNC (art. 84).
+- **Correspondance** des grades de l'Église (art. 81) : niveau de référence requis, jamais automatique.
+- **Changement de tenue** (art. 73) : après 3 ans d'activités pour la soutane blanche, 5 ans pour la première veste à col Mao ; avis préalable du BNC.
+- **Régularisation des grades existants** à l'entrée en vigueur du règlement (art. 83).
+
+---
+
+## 16. Hors du module 1
 
 - Grades et éligibilité (module 2)
 - Événements, invitations, présences (module 3)

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titre %}Photos à valider — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Photos à valider</h1>
+  {% for p in photos %}
+    <article class="photo-a-valider">
+      <div class="photos-comparees">
+        <figure><img class="photo" src="{% url 'membres:photo' p.pk %}" alt="Nouvelle photo"><figcaption>Nouvelle</figcaption></figure>
+        {% with ancienne=p.membre.photo_acceptee %}{% if ancienne %}
+        <figure><img class="photo" src="{% url 'membres:photo' ancienne.pk %}" alt="Photo actuelle"><figcaption>Actuelle</figcaption></figure>
+        {% endif %}{% endwith %}
+      </div>
+      <p><strong>{{ p.membre.matricule }}</strong> — {{ p.membre.nom_complet }}<br><small>Déposée le {{ p.date_depot|date:"d/m/Y à H:i" }}</small></p>
+      <form method="post" class="decision">
+        {% csrf_token %}
+        <input type="hidden" name="photo" value="{{ p.pk }}">
+        <button type="submit" name="decision" value="accepter" class="bouton">Accepter</button>
+        <label class="champ"><span>Motif du refus</span><input type="text" name="motif" maxlength="300"></label>
+        {% if erreur and erreur.0 == p.pk %}<small class="erreur">{{ erreur.1 }}</small>{% endif %}
+        <button type="submit" name="decision" value="refuser" class="bouton bouton--secondaire">Refuser</button>
+      </form>
+    </article>
+  {% empty %}
+    <p class="aide">Aucune photo en attente.</p>
+  {% endfor %}
+</section>
+{% endblock %}
