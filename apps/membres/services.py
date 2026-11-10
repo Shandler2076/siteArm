@@ -87,31 +87,39 @@ def enregistrer_membre(
     par: Compte,
     date_integration: datetime.date | None = None,
 ) -> ResultatEnregistrement:
-    """Crée en une seule transaction : matricule, compte, membre et première affectation."""
+    """Crée en une seule transaction : matricule, compte, membre et première affectation.
+
+    En cas d'échec, rien n'est créé, y compris le fichier de la photo du CIP éventuelle.
+    """
     region = paroisse_integration.region
-    with transaction.atomic():
-        matricule = attribuer_matricule(annee_integration, region)
-        membre = Membre(
-            **donnees,
-            annee_integration=annee_integration,
-            paroisse_integration=paroisse_integration,
-            region_integration=region,
-            matricule=matricule,
-            enregistre_par=par,
-        )
-        membre.full_clean(exclude=["compte"])
-        mot_de_passe = generer_mot_de_passe_provisoire()
-        membre.compte = Compte.objects.create_user(
-            matricule, mot_de_passe, nom_affiche=membre.nom_complet,
-            doit_changer_mot_de_passe=True,
-        )
-        membre.save()
-        Affectation.objects.create(
-            membre=membre,
-            paroisse=paroisse_integration,
-            circuit_a_date=paroisse_integration.circuit,
-            region_a_date=region,
-            date_debut=date_integration or datetime.date(annee_integration, 1, 1),
-            motif="Intégration",
-        )
+    membre = Membre(
+        **donnees,
+        annee_integration=annee_integration,
+        paroisse_integration=paroisse_integration,
+        region_integration=region,
+        enregistre_par=par,
+    )
+    try:
+        with transaction.atomic():
+            membre.matricule = attribuer_matricule(annee_integration, region)
+            membre.full_clean(exclude=["compte"])
+            mot_de_passe = generer_mot_de_passe_provisoire()
+            membre.compte = Compte.objects.create_user(
+                membre.matricule, mot_de_passe, nom_affiche=membre.nom_complet,
+                doit_changer_mot_de_passe=True,
+            )
+            membre.save()
+            Affectation.objects.create(
+                membre=membre,
+                paroisse=paroisse_integration,
+                circuit_a_date=paroisse_integration.circuit,
+                region_a_date=region,
+                date_debut=date_integration or datetime.date(annee_integration, 1, 1),
+                motif="Intégration",
+            )
+    except Exception:
+        cip = membre.photo_cip
+        if cip and getattr(cip, "_committed", False) and cip.name:
+            cip.storage.delete(cip.name)  # le fichier a été écrit avant l'annulation
+        raise
     return ResultatEnregistrement(membre=membre, mot_de_passe=mot_de_passe)

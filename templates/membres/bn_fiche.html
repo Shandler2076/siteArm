@@ -15,6 +15,9 @@
     <dt>Affectation actuelle</dt><dd>{{ a.paroisse.nom }} — {{ a.circuit_a_date }} — {{ a.region_a_date.nom }}</dd>
     {% endif %}{% endwith %}
   </dl>
+  {% if membre.photo_cip and perms.membres.voir_cip %}
+    <p><a href="{% url 'membres:cip' membre.matricule %}">Voir la photo du CIP</a></p>
+  {% endif %}
   {% block actions %}
   <div class="actions">
     <form method="post" action="{% url 'membres:bn_fiche_identifiants' membre.matricule %}">

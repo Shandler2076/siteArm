@@ -117,7 +117,10 @@ class Membre(models.Model):
         verbose_name_plural = "membres"
         ordering = ["matricule"]
         constraints = [
-            models.UniqueConstraint(fields=["npi"], condition=~Q(npi=""), name="npi_unique")
+            models.UniqueConstraint(
+                fields=["npi"], condition=~Q(npi=""), name="npi_unique",
+                violation_error_message="Ce NPI est déjà utilisé par un autre membre.",
+            )
         ]
         permissions = [
             ("gerer_membres", "Gérer les membres (Bureau national)"),

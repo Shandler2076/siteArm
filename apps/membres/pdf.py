@@ -37,6 +37,24 @@ def _polices():
         _polices_ok = True
 
 
+def taille_pour_largeur(texte: str, police: str, taille_max: float, largeur_max: float,
+                        taille_min: float = 9) -> float:
+    """Plus grande taille de police (≤ taille_max, ≥ taille_min) qui fait tenir le texte."""
+    taille = taille_max
+    while taille > taille_min and pdfmetrics.stringWidth(texte, police, taille) > largeur_max:
+        taille -= 0.5
+    return taille
+
+
+def _ajuste(texte: str, police: str, taille: float, largeur_max: float) -> str:
+    """Coupe avec « … » si le texte dépasse encore à la taille minimale."""
+    if pdfmetrics.stringWidth(texte, police, taille) <= largeur_max:
+        return texte
+    while texte and pdfmetrics.stringWidth(texte + "…", police, taille) > largeur_max:
+        texte = texte[:-1]
+    return texte.rstrip() + "…"
+
+
 def _image_photo(membre: Membre):
     photo = membre.photo_acceptee
     if not photo:
@@ -84,8 +102,10 @@ def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) ->
     c.setFont("Sans-Gras", 20)
     c.drawString(marge + 5 * mm, y, membre.matricule)
     c.setFillColor(MARINE)
-    c.setFont("Sans-Gras", 15)
-    c.drawString(marge, y - 14 * mm, membre.nom_complet)
+    largeur_nom = larg - 2 * marge - 44 * mm  # jusqu'au cadre photo
+    taille = taille_pour_largeur(membre.nom_complet, "Sans-Gras", 15, largeur_nom)
+    c.setFont("Sans-Gras", taille)
+    c.drawString(marge, y - 14 * mm, _ajuste(membre.nom_complet, "Sans-Gras", taille, largeur_nom))
 
     px, py, pl, ph = larg - marge - 38 * mm, haut - 106 * mm, 38 * mm, 48 * mm
     c.setStrokeColor(OR)

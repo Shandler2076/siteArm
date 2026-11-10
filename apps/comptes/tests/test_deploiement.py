@@ -23,6 +23,7 @@ def test_check_deploy_sans_avertissement():
     env = _env_production(
         DJANGO_SECRET_KEY="k7#Qp2!vZr9@Lm4$Wt8^Hy1&Bn6*Xc3(Df5)Gs0-Ja+Ue7%Ri2=Oa9",
         DJANGO_CSRF_TRUSTED_ORIGINS="https://exemple.bj",
+        DJANGO_SITE_URL="https://exemple.bj",
     )
     r = _manage("check", "--deploy", "--fail-level", "WARNING", env=env)
     assert r.returncode == 0, r.stdout + r.stderr

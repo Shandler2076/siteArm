@@ -11,6 +11,7 @@
     <div class="alerte">
       <h2>Doublons possibles</h2>
       <p>Ces membres ressemblent à la personne saisie. Vérifiez avant de continuer.</p>
+      {% if cip_a_reselectionner %}<p><strong>Sélectionnez à nouveau la photo du CIP avant de confirmer.</strong></p>{% endif %}
       <ul>
         {% for d in doublons %}
           <li><strong>{{ d.matricule }}</strong> — {{ d.nom_complet }}{% if d.date_naissance %}, né(e) le {{ d.date_naissance|date:"d/m/Y" }}{% endif %} — {{ d.paroisse_integration.nom }}</li>

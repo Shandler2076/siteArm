@@ -1,7 +1,8 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -24,6 +25,7 @@ gerer_membres = permission_required("membres.gerer_membres", raise_exception=Tru
 def enregistrer(request):
     form = FormulaireEnregistrement(request.POST or None, request.FILES or None)
     doublons = []
+    cip_a_reselectionner = False
     if request.method == "POST" and form.is_valid():
         cd = form.cleaned_data
         doublons = list(
@@ -35,6 +37,8 @@ def enregistrer(request):
         if doublons and not cd.get("confirmer_malgre_doublon"):
             form.data = form.data.copy()
             form.data["confirmer_malgre_doublon"] = "on"
+            # Le navigateur ne renvoie pas un fichier déjà choisi : il faut le resélectionner.
+            cip_a_reselectionner = bool(cd.get("photo_cip"))
         else:
             try:
                 res = enregistrer_membre(
@@ -46,10 +50,15 @@ def enregistrer(request):
             except CapaciteMatriculeAtteinte as e:
                 form.add_error(None, str(e))
                 doublons = []
+            except ValidationError as e:  # filet de sécurité : jamais d'erreur 500
+                form.add_error(None, e)
+                doublons = []
             else:
                 messages.success(request, f"Membre enregistré : matricule {res.membre.matricule}")
                 return redirect("membres:bn_fiche", matricule=res.membre.matricule)
-    return render(request, "membres/bn_enregistrer.html", {"form": form, "doublons": doublons})
+    return render(request, "membres/bn_enregistrer.html", {
+        "form": form, "doublons": doublons, "cip_a_reselectionner": cip_a_reselectionner,
+    })
 
 
 @login_required
@@ -75,12 +84,20 @@ def _reponse_pdf(contenu: bytes, matricule: str) -> HttpResponse:
 def fiche_identifiants_pdf(request, matricule):
     """Nouveau mot de passe provisoire et fiche avec identifiants (mot de passe jamais stocké)."""
     membre = get_object_or_404(Membre, matricule=matricule)
-    mot_de_passe = generer_mot_de_passe_provisoire()
     compte = membre.compte
+    if compte is None:
+        raise Http404("Ce membre n'a pas de compte.")
+    if not request.user.is_superuser and (
+        compte.is_superuser
+        or not compte.get_all_permissions() <= request.user.get_all_permissions()
+    ):
+        raise PermissionDenied("Ce compte a plus de droits que le vôtre.")
+    mot_de_passe = generer_mot_de_passe_provisoire()
+    contenu = fiche_identification_pdf(membre, mot_de_passe)  # avant toute modification du compte
     compte.set_password(mot_de_passe)
     compte.doit_changer_mot_de_passe = True
     compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
-    return _reponse_pdf(fiche_identification_pdf(membre, mot_de_passe), matricule)
+    return _reponse_pdf(contenu, matricule)
 
 
 @login_required

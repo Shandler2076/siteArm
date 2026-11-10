@@ -1,5 +1,8 @@
 """Service des fichiers privés : chaque accès vérifie les droits. Sinon : 404."""
 
+import mimetypes
+from pathlib import PurePath
+
 from django.contrib.auth.decorators import login_required
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404
@@ -10,7 +13,8 @@ from apps.membres.models import Membre, PhotoIdentite
 def _fichier(champ, nom):
     if not champ:
         raise Http404
-    r = FileResponse(champ.open("rb"), content_type="image/jpeg", filename=nom)
+    type_contenu = mimetypes.guess_type(champ.name)[0] or "application/octet-stream"
+    r = FileResponse(champ.open("rb"), content_type=type_contenu, filename=nom)
     r["Cache-Control"] = "private, no-store"
     return r
 
@@ -29,4 +33,4 @@ def cip(request, matricule):
     if not request.user.has_perm("membres.voir_cip"):
         raise Http404
     m = get_object_or_404(Membre, matricule=matricule)
-    return _fichier(m.photo_cip, f"cip-{m.matricule}")
+    return _fichier(m.photo_cip, f"cip-{m.matricule}{PurePath(m.photo_cip.name).suffix}")

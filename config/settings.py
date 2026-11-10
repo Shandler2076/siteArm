@@ -135,7 +135,12 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 PRIVATE_MEDIA_ROOT = BASE_DIR / "prive"
 
 # Adresse publique du site (imprimée sur les fiches d'identification).
-SITE_URL = os.environ.get("DJANGO_SITE_URL", "http://127.0.0.1:8000")
+SITE_URL = os.environ.get("DJANGO_SITE_URL", "")
+if not SITE_URL:
+    if DEBUG or EN_TEST:
+        SITE_URL = "http://127.0.0.1:8000"
+    else:
+        raise ImproperlyConfigured("La variable DJANGO_SITE_URL est obligatoire en production.")
 WHITENOISE_USE_FINDERS = DEBUG or EN_TEST
 WHITENOISE_AUTOREFRESH = DEBUG or EN_TEST
 STORAGES = {

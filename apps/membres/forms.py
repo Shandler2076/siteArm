@@ -1,4 +1,8 @@
+import uuid
+
 from django import forms
+from django.core.exceptions import ValidationError
+from django.forms.models import construct_instance
 
 from apps.membres.models import Categorie, Membre
 from apps.organisation.models import Paroisse
@@ -34,9 +38,37 @@ class FormulaireEnregistrement(forms.ModelForm):
         exclus = {"annee_integration", "paroisse_integration", "confirmer_malgre_doublon"}
         return {k: v for k, v in self.cleaned_data.items() if k not in exclus and k in self.fields}
 
+    def clean_photo_cip(self):
+        f = self.cleaned_data.get("photo_cip")
+        if not f:
+            return f
+        from apps.membres.images import PhotoInvalide, type_piece_cip
+
+        try:
+            extension = type_piece_cip(f)
+        except PhotoInvalide as e:
+            raise ValidationError(str(e)) from e
+        f.name = f"cip-{uuid.uuid4().hex}.{extension}"
+        return f
+
     def _post_clean(self):
-        # Le matricule et le compte sont créés par le service : on ne valide pas l'instance ici.
-        pass
+        """Valide le futur membre (téléphones, NPI, année, NPI unique) avant tout enregistrement.
+
+        Le matricule et le compte sont créés ensuite par le service : on les exclut ici.
+        """
+        membre = construct_instance(self, Membre(), fields=[
+            f for f in self._meta.fields if f not in ("photo_cip",)
+        ])
+        paroisse = self.cleaned_data.get("paroisse_integration")
+        if paroisse:
+            membre.region_integration = paroisse.region
+        try:
+            membre.full_clean(exclude=[
+                "matricule", "compte", "enregistre_par", "photo_cip",
+                *[n for n in self._meta.fields if n in self._errors],
+            ] + ([] if paroisse else ["paroisse_integration", "region_integration"]))
+        except ValidationError as e:
+            self._update_errors(e)
 
 
 class FormulaireCoordonnees(forms.ModelForm):
