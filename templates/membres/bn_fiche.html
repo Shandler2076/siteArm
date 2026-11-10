@@ -15,6 +15,15 @@
     <dt>Affectation actuelle</dt><dd>{{ a.paroisse.nom }} — {{ a.circuit_a_date }} — {{ a.region_a_date.nom }}</dd>
     {% endif %}{% endwith %}
   </dl>
-  {% block actions %}{% endblock %}
+  {% block actions %}
+  <div class="actions">
+    <form method="post" action="{% url 'membres:bn_fiche_identifiants' membre.matricule %}">
+      {% csrf_token %}
+      <button type="submit" class="bouton">Imprimer la fiche avec identifiants</button>
+    </form>
+    <p class="aide">Attention : un nouveau mot de passe provisoire remplace l'ancien.</p>
+    <a class="bouton bouton--secondaire" href="{% url 'membres:bn_fiche_pdf' membre.matricule %}">Fiche sans identifiants (PDF)</a>
+  </div>
+  {% endblock %}
 </section>
 {% endblock %}

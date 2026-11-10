@@ -53,3 +53,7 @@ legend { font-weight: 700; color: var(--marine); padding: 0 6px; }
   color: var(--marine); font-weight: 700; text-decoration: none; }
 .choix input[type="radio"] { width: 20px; height: 20px; margin: 0; }
 .choix label { justify-content: flex-start; }
+.actions { display: grid; gap: 8px; margin-top: 18px; }
+.bouton--secondaire { background: #fff; color: var(--marine); border: 2px solid var(--marine); text-align: center;
+  text-decoration: none; }
+.bouton--secondaire:hover { background: var(--fond); }

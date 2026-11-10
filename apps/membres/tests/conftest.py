@@ -39,3 +39,18 @@ def client_bn(client, compte_bn):
 def admin_client_tech(client, db):
     client.force_login(Compte.objects.create_superuser("tech", "MotDePasse!2026"))
     return client
+
+
+@pytest.fixture
+def membre_enregistre(paroisse, compte_bn):
+    import datetime
+
+    from apps.membres.services import enregistrer_membre
+
+    return enregistrer_membre(
+        donnees={
+            "nom": "Hounkpè", "prenoms": "Jean-Marc", "sexe": "M", "telephone": "0197000000",
+            "date_naissance": datetime.date(1990, 5, 1), "categorie": "actif",
+        },
+        paroisse_integration=paroisse, annee_integration=2015, par=compte_bn,
+    )

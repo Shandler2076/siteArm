@@ -1,13 +1,17 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
 
 from apps.membres.forms import FormulaireEnregistrement
 from apps.membres.models import Membre
+from apps.membres.pdf import fiche_identification_pdf
 from apps.membres.services import (
     CapaciteMatriculeAtteinte,
     doublons_possibles,
     enregistrer_membre,
+    generer_mot_de_passe_provisoire,
 )
 
 gerer_membres = permission_required("membres.gerer_membres", raise_exception=True)
@@ -54,3 +58,31 @@ def fiche(request, matricule):
         matricule=matricule,
     )
     return render(request, "membres/bn_fiche.html", {"membre": membre})
+
+
+def _reponse_pdf(contenu: bytes, matricule: str) -> HttpResponse:
+    r = HttpResponse(contenu, content_type="application/pdf")
+    r["Content-Disposition"] = f'attachment; filename="fiche-{matricule}.pdf"'
+    r["Cache-Control"] = "private, no-store"
+    return r
+
+
+@login_required
+@gerer_membres
+@require_POST
+def fiche_identifiants_pdf(request, matricule):
+    """Nouveau mot de passe provisoire et fiche avec identifiants (mot de passe jamais stocké)."""
+    membre = get_object_or_404(Membre, matricule=matricule)
+    mot_de_passe = generer_mot_de_passe_provisoire()
+    compte = membre.compte
+    compte.set_password(mot_de_passe)
+    compte.doit_changer_mot_de_passe = True
+    compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
+    return _reponse_pdf(fiche_identification_pdf(membre, mot_de_passe), matricule)
+
+
+@login_required
+@gerer_membres
+def fiche_pdf(request, matricule):
+    membre = get_object_or_404(Membre, matricule=matricule)
+    return _reponse_pdf(fiche_identification_pdf(membre), matricule)
