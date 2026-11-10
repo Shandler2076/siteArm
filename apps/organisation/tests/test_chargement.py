@@ -48,6 +48,6 @@ def test_conflit_de_code_refuse_sans_rien_ecrire(db, tmp_path):
         ),
         encoding="utf-8",
     )
-    with pytest.raises(CommandError):
+    with pytest.raises(CommandError, match="déjà utilisé"):
         call_command("charger_territoire", fichier=str(f))
     assert Circuit.objects.count() == 0
