@@ -241,14 +241,31 @@ Les types exacts de sanctions seront repris du règlement intérieur.
 
 ---
 
-## 7. Listes de membres en temps réel
+## 7. Listes et statistiques en temps réel
+
+### 7.1 Listes
 
 - Chaque bureau (paroisse, circuit, région, BN) peut, **à tout moment**, générer la liste des membres **de son périmètre**.
-- **Colonnes au choix :** matricule, nom, prénoms, sexe, téléphone, WhatsApp, paroisse, circuit, statut, fonction(s) (et grade au module 2).
-- **Filtres :** statut, sexe, paroisse, circuit, année d'intégration, fonction (et grade au module 2).
+- **Colonnes au choix :** matricule, nom, prénoms, sexe, **âge**, téléphone, WhatsApp, paroisse, circuit, statut, fonction(s) (et grade au module 2).
+- **Filtres :** statut, sexe, paroisse, circuit, année d'intégration, fonction, **âge** (« moins de X ans », « plus de Y ans », « entre X et Y ans », calculé à la date du jour depuis la date de naissance) et **grade** (module 2). Les filtres se combinent (ex. : Capitaines de plus de 40 ans du circuit de Davo).
 - **Formats :** **PDF** (en-tête officiel, date et heure de génération) et **Excel**.
 - La photo du CIP n'apparaît **jamais** dans une liste.
 - **Chaque génération de liste est inscrite au journal.**
+
+### 7.2 Page « Statistiques »
+
+- Chaque bureau (paroisse, circuit, région, BN) dispose d'une page **« Statistiques »**, limitée à **son périmètre**, toujours à jour.
+- **Chiffres affichés** (membres actifs par défaut, autres statuts sélectionnables) :
+  - total des membres ;
+  - par **sexe** ;
+  - par **tranche d'âge** : par défaut *moins de 18 ans*, *18 à 40 ans*, *plus de 40 ans* ; les tranches sont **modifiables par le BN** depuis le site ;
+  - par **statut** (actif, sanctionné, exclu, décédé) ;
+  - par **grade** (module 2) — par ex. nombre de Capitaines ;
+  - **répartition par unité inférieure** : par région (BN), par circuit (région), par paroisse (circuit).
+- **Chaque chiffre est cliquable** et ouvre la **liste correspondante** (section 7.1), avec les filtres déjà appliqués, exportable en PDF ou Excel.
+- Un membre sans date de naissance est compté dans une ligne **« Âge non renseigné »**.
+- Export de la page de statistiques en **PDF** (en-tête officiel, date et heure).
+- Chaque export est **inscrit au journal**.
 
 ---
 
@@ -277,7 +294,7 @@ Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sél
 | Voir les sanctions | La sienne | ✅ | ✅ | ✅ | ✅ |
 | Enregistrer une sanction | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Voir la photo du CIP | La sienne | ❌ | ❌ | ❌ | ✅ |
-| Générer des listes | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Générer des listes, consulter les statistiques | ❌ | ✅ | ✅ | ✅ | ✅ |
 | Demander une mutation | ❌ | ✅ (arrivée) | ❌ | ❌ | ✅ |
 | Donner un avis de mutation | ❌ | ❌ | ✅ (départ) | ✅ (départ) | — |
 | Valider une mutation | ❌ | ❌ | ❌ | ❌ | ✅ |
@@ -349,7 +366,7 @@ Une personne avec plusieurs mandats peut **passer d'un espace à l'autre** (sél
 - sanctions (changement de statut, exclu ne peut plus se connecter, expiration automatique) ;
 - import par lots (aperçu sans aucune création, détection des erreurs et doublons, corrections et lignes écartées, validation bloquée tant qu'il reste des erreurs, tout ou rien) ;
 - validation des photos réservée au BN ;
-- listes (périmètre respecté, inscription au journal).
+- listes et statistiques (périmètre respecté, calcul de l'âge au jour près, tranches d'âge aux bornes exactes, chiffres égaux au nombre de lignes de la liste ouverte, inscription au journal).
 
 ### 12.2 Parcours d'une modification
 
@@ -373,7 +390,7 @@ Alerte email si le site est inaccessible ; rapport détaillé des erreurs.
 2. Fiche membre + matricule + fiche PDF + dépôt et validation de la photo
 3. Fonctions, mandats, bureaux + gardien des périmètres + espaces
 4. Enregistrement par lots (Excel)
-5. Listes en temps réel (PDF / Excel)
+5. Listes et statistiques en temps réel (PDF / Excel) — le volet « grade » s'active avec le module 2
 6. Mutations + décès
 7. Sanctions + journal + double vérification BN
 8. Mise en ligne réelle (après comparatif d'hébergement et déclaration APDP)
