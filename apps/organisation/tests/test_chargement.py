@@ -18,9 +18,7 @@ def test_chargement_complet(db):
 def test_caracteres_speciaux_conserves(db):
     call_command("charger_territoire")
     assert Circuit.objects.filter(nom="Sô-Tchanhoué").exists()
-    assert Paroisse.objects.filter(
-        nom="Paroisse Itè Anu « Vie Neuve » de IKPINLE SEKANME"
-    ).exists()
+    assert Paroisse.objects.filter(nom="Paroisse Itè Anu « Vie Neuve » de IKPINLE SEKANME").exists()
     assert Paroisse.objects.filter(nom__contains="d’AKPADJLAME").exists()
 
 
@@ -41,8 +39,11 @@ def test_conflit_de_code_refuse_sans_rien_ecrire(db, tmp_path):
         json.dumps(
             {
                 "regions": [
-                    {"code": "01", "nom": "PORTO-NOVO",
-                     "circuits": [{"nom": "Davo", "paroisses": ["P1"]}]}
+                    {
+                        "code": "01",
+                        "nom": "PORTO-NOVO",
+                        "circuits": [{"nom": "Davo", "paroisses": ["P1"]}],
+                    }
                 ]
             }
         ),

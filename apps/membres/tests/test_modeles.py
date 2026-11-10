@@ -12,16 +12,19 @@ def paroisse(db):
     from apps.organisation.models import Circuit, Paroisse, Region
 
     r = Region.objects.create(code="01", nom="PORTO-NOVO")
-    return Paroisse.objects.create(
-        circuit=Circuit.objects.create(region=r, nom="Davo"), nom="P1"
-    )
+    return Paroisse.objects.create(circuit=Circuit.objects.create(region=r, nom="Davo"), nom="P1")
 
 
 def _membre(paroisse, **kw):
     d = dict(
-        nom="Hounkpè", prenoms="Jean-Marc", sexe="M", telephone="0197000000",
-        annee_integration=2015, paroisse_integration=paroisse,
-        region_integration=paroisse.region, matricule="2015-01AS-0001",
+        nom="Hounkpè",
+        prenoms="Jean-Marc",
+        sexe="M",
+        telephone="0197000000",
+        annee_integration=2015,
+        paroisse_integration=paroisse,
+        region_integration=paroisse.region,
+        matricule="2015-01AS-0001",
     )
     d.update(kw)
     return Membre.objects.create(**d)
@@ -52,8 +55,14 @@ def test_npi_unique_si_renseigne(paroisse):
 @pytest.mark.parametrize("annee", [1899, datetime.date.today().year + 1])
 def test_annee_integration_invalide(paroisse, annee):
     m = Membre(
-        nom="A", prenoms="B", sexe="F", telephone="0197000000", annee_integration=annee,
-        paroisse_integration=paroisse, region_integration=paroisse.region, matricule="X",
+        nom="A",
+        prenoms="B",
+        sexe="F",
+        telephone="0197000000",
+        annee_integration=annee,
+        paroisse_integration=paroisse,
+        region_integration=paroisse.region,
+        matricule="X",
     )
     with pytest.raises(ValidationError):
         m.full_clean()
@@ -62,8 +71,12 @@ def test_annee_integration_invalide(paroisse, annee):
 def test_une_seule_affectation_ouverte(paroisse):
     m = _membre(paroisse)
     kw = dict(
-        membre=m, paroisse=paroisse, circuit_a_date=paroisse.circuit,
-        region_a_date=paroisse.region, date_debut=datetime.date(2015, 1, 1), motif="Intégration",
+        membre=m,
+        paroisse=paroisse,
+        circuit_a_date=paroisse.circuit,
+        region_a_date=paroisse.region,
+        date_debut=datetime.date(2015, 1, 1),
+        motif="Intégration",
     )
     Affectation.objects.create(**kw)
     with pytest.raises(IntegrityError):

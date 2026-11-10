@@ -12,8 +12,13 @@ from apps.membres.models import Affectation, CompteurMatricule, Membre, cle_nom
 from apps.organisation.models import Paroisse, Region
 
 __all__ = [
-    "CapaciteMatriculeAtteinte", "ResultatEnregistrement", "attribuer_matricule", "cle_nom",
-    "doublons_possibles", "enregistrer_membre", "generer_mot_de_passe_provisoire",
+    "CapaciteMatriculeAtteinte",
+    "ResultatEnregistrement",
+    "attribuer_matricule",
+    "cle_nom",
+    "doublons_possibles",
+    "enregistrer_membre",
+    "generer_mot_de_passe_provisoire",
 ]
 
 NUMERO_MAX = 9999
@@ -86,6 +91,8 @@ def enregistrer_membre(
     annee_integration: int,
     par: Compte,
     date_integration: datetime.date | None = None,
+    notifier: bool = True,
+    avec_mot_de_passe: bool = True,
 ) -> ResultatEnregistrement:
     """Crée en une seule transaction : matricule, compte, membre et première affectation.
 
@@ -103,9 +110,12 @@ def enregistrer_membre(
         with transaction.atomic():
             membre.matricule = attribuer_matricule(annee_integration, region)
             membre.full_clean(exclude=["compte"])
-            mot_de_passe = generer_mot_de_passe_provisoire()
+            # Lots : pas de hachage inutile, le mot de passe est créé à l'impression des fiches.
+            mot_de_passe = generer_mot_de_passe_provisoire() if avec_mot_de_passe else None
             membre.compte = Compte.objects.create_user(
-                membre.matricule, mot_de_passe, nom_affiche=membre.nom_complet,
+                membre.matricule,
+                mot_de_passe,
+                nom_affiche=membre.nom_complet,
                 doit_changer_mot_de_passe=True,
             )
             membre.save()
@@ -117,7 +127,8 @@ def enregistrer_membre(
                 date_debut=date_integration or datetime.date(annee_integration, 1, 1),
                 motif="Intégration",
             )
-        transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
+        if notifier:  # les lots envoient une notification groupée à la place
+            transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
     except Exception:
         cip = membre.photo_cip
         if cip and getattr(cip, "_committed", False) and cip.name:

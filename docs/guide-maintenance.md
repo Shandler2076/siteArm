@@ -154,3 +154,21 @@ renseignez le serveur d'envoi (fournisseur d'emails) avec les variables `DJANGO_
 (ex. `Armée du Salut <noreply@armeedusalut.bj>`). En développement, les emails s'affichent dans le
 terminal. Un email qui échoue n'interrompt jamais le site : l'erreur est inscrite dans les
 journaux de l'hébergeur.
+
+## 16. Enregistrement par lots (Excel)
+
+Circuit : **région → Secrétaire national → site**.
+
+1. Gestion BNC → « Enregistrer par lots (Excel) » → télécharger le **modèle** de la région et
+   l'envoyer à la région avec la fiche `docs/guide-lots-regions.md`.
+2. À réception : « Nouveau lot » → choisir la région → déposer le fichier.
+3. **Écran de contrôle** : rien n'est encore créé. Corriger une ligne, l'écarter, garder ou
+   écarter un doublon possible, ou redéposer un fichier corrigé. Le lot reste en brouillon : on peut
+   y revenir plus tard.
+4. « Valider et générer » (actif quand il n'y a plus d'erreur ni de doublon à trancher) →
+   cocher « Je confirme ». Tout est créé en une fois ; si une ligne échoue, **rien** n'est créé et
+   le message indique la ligne.
+5. Page de résultat : « Imprimer les fiches avec identifiants » (de nouveaux mots de passe sont
+   créés à chaque impression) et « Liste récapitulative » à renvoyer à la région.
+
+Les fichiers déposés sont archivés dans `prive/lots/` (à sauvegarder avec la base).

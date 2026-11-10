@@ -37,8 +37,9 @@ def _polices():
         _polices_ok = True
 
 
-def taille_pour_largeur(texte: str, police: str, taille_max: float, largeur_max: float,
-                        taille_min: float = 9) -> float:
+def taille_pour_largeur(
+    texte: str, police: str, taille_max: float, largeur_max: float, taille_min: float = 9
+) -> float:
     """Plus grande taille de police (≤ taille_max, ≥ taille_min) qui fait tenir le texte."""
     taille = taille_max
     while taille > taille_min and pdfmetrics.stringWidth(texte, police, taille) > largeur_max:
@@ -69,6 +70,14 @@ def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) ->
     c = canvas.Canvas(tampon, pagesize=A4)
     c.setTitle(f"Fiche d'identification — {membre.matricule}")
     c.setAuthor("Armée du Salut du Bénin")
+    dessiner_fiche(c, membre, mot_de_passe)
+    c.save()
+    return tampon.getvalue()
+
+
+def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -> None:
+    """Dessine une fiche d'identification sur une page (pour un PDF d'une ou plusieurs fiches)."""
+    _polices()
     larg, haut = A4
     marge = 18 * mm
 
@@ -81,8 +90,15 @@ def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) ->
     c.roundRect(marge - 2 * mm, haut - 44 * mm, 40 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
     c.drawImage(ImageReader(str(LOGO_AS)), marge, haut - 42 * mm, 36 * mm, 36 * mm, mask="auto")
     c.roundRect(larg - marge - 46 * mm, haut - 44 * mm, 48 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
-    c.drawImage(ImageReader(str(LOGO_CONGREGATION)), larg - marge - 45 * mm, haut - 41 * mm,
-                46 * mm, 34.5 * mm, mask="auto", preserveAspectRatio=True)
+    c.drawImage(
+        ImageReader(str(LOGO_CONGREGATION)),
+        larg - marge - 45 * mm,
+        haut - 41 * mm,
+        46 * mm,
+        34.5 * mm,
+        mask="auto",
+        preserveAspectRatio=True,
+    )
     centre = (marge + 38 * mm + larg - marge - 46 * mm) / 2  # milieu entre les deux logos
     c.setFillColor(colors.white)
     c.setFont("Sans-Gras", 13.5)
@@ -173,9 +189,9 @@ def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) ->
         c.setFillColor(GRIS)
         c.setFont("Sans", 8.5)
         c.drawString(
-            marge + 5 * mm, y - 32 * mm,
-            "Ce mot de passe est à changer à la première connexion. "
-            "Ne le communiquez à personne.",
+            marge + 5 * mm,
+            y - 32 * mm,
+            "Ce mot de passe est à changer à la première connexion. Ne le communiquez à personne.",
         )
 
     # Pied de page
@@ -186,8 +202,9 @@ def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) ->
     c.setFont("Sans", 8)
     maintenant = timezone.localtime()
     c.drawString(marge, 14 * mm, f"Généré le {maintenant:%d/%m/%Y} à {maintenant:%H:%M}")
-    c.drawRightString(larg - marge, 14 * mm,
-                      "Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins")
+    c.drawRightString(
+        larg - marge,
+        14 * mm,
+        "Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins",
+    )
     c.showPage()
-    c.save()
-    return tampon.getvalue()

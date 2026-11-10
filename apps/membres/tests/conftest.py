@@ -9,17 +9,13 @@ def paroisse(db):
     from apps.organisation.models import Circuit, Paroisse, Region
 
     r = Region.objects.create(code="03", nom="HOULENOU")
-    return Paroisse.objects.create(
-        circuit=Circuit.objects.create(region=r, nom="Ekpe A"), nom="P1"
-    )
+    return Paroisse.objects.create(circuit=Circuit.objects.create(region=r, nom="Ekpe A"), nom="P1")
 
 
 @pytest.fixture
 def compte_bn(db):
     c = Compte.objects.create_user("BN1", "MotDePasse!2026", doit_changer_mot_de_passe=False)
-    c.user_permissions.add(
-        *Permission.objects.filter(codename__in=["gerer_membres", "voir_cip"])
-    )
+    c.user_permissions.add(*Permission.objects.filter(codename__in=["gerer_membres", "voir_cip"]))
     return c
 
 
@@ -53,10 +49,16 @@ def membre_enregistre(paroisse, compte_bn):
 
     return enregistrer_membre(
         donnees={
-            "nom": "Hounkpè", "prenoms": "Jean-Marc", "sexe": "M", "telephone": "0197000000",
-            "date_naissance": datetime.date(1990, 5, 1), "categorie": "actif",
+            "nom": "Hounkpè",
+            "prenoms": "Jean-Marc",
+            "sexe": "M",
+            "telephone": "0197000000",
+            "date_naissance": datetime.date(1990, 5, 1),
+            "categorie": "actif",
         },
-        paroisse_integration=paroisse, annee_integration=2015, par=compte_bn,
+        paroisse_integration=paroisse,
+        annee_integration=2015,
+        par=compte_bn,
     )
 
 

@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "apps.membres",
     "apps.bureaux",
     "apps.notifications",
+    "apps.lots",
     "axes",
 ]
 

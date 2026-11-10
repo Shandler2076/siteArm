@@ -25,8 +25,12 @@ def contexte(db):
 
 
 DONNEES = dict(
-    nom="Hounkpè", prenoms="Jean-Marc", sexe="M", telephone="0197000000",
-    date_naissance=datetime.date(1990, 5, 1), categorie="honneur",
+    nom="Hounkpè",
+    prenoms="Jean-Marc",
+    sexe="M",
+    telephone="0197000000",
+    date_naissance=datetime.date(1990, 5, 1),
+    categorie="honneur",
 )
 
 
@@ -74,12 +78,18 @@ def test_cle_nom():
 def test_doublon_ecrit_autrement(contexte):
     p, bn = contexte
     _enregistrer(p, bn)
-    assert doublons_possibles(
-        nom="HOUNKPE", prenoms="jean  marc", date_naissance=datetime.date(1990, 5, 1)
-    ).count() == 1
-    assert doublons_possibles(
-        nom="HOUNKPE", prenoms="Paul", date_naissance=datetime.date(1990, 5, 1)
-    ).count() == 0
+    assert (
+        doublons_possibles(
+            nom="HOUNKPE", prenoms="jean  marc", date_naissance=datetime.date(1990, 5, 1)
+        ).count()
+        == 1
+    )
+    assert (
+        doublons_possibles(
+            nom="HOUNKPE", prenoms="Paul", date_naissance=datetime.date(1990, 5, 1)
+        ).count()
+        == 0
+    )
 
 
 def test_doublon_sans_date_de_naissance(contexte):
@@ -91,9 +101,12 @@ def test_doublon_sans_date_de_naissance(contexte):
 def test_doublon_par_npi(contexte):
     p, bn = contexte
     _enregistrer(p, bn, npi="1234567890")
-    assert doublons_possibles(
-        nom="Autre", prenoms="Nom", date_naissance=None, npi="1234567890"
-    ).count() == 1
+    assert (
+        doublons_possibles(
+            nom="Autre", prenoms="Nom", date_naissance=None, npi="1234567890"
+        ).count()
+        == 1
+    )
 
 
 def test_mot_de_passe_provisoire_valide():

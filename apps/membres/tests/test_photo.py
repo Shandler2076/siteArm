@@ -73,11 +73,14 @@ def test_file_bn_reservee(client_membre):
     assert client_membre.get(FILE_BN).status_code == 403
 
 
-@pytest.mark.parametrize("contenu,message", [
-    (b"ceci n'est pas une image", "JPEG ou PNG"),
-    (_image(200, 200), "trop petite"),
-    (_image(fmt="GIF"), "JPEG ou PNG"),
-])
+@pytest.mark.parametrize(
+    "contenu,message",
+    [
+        (b"ceci n'est pas une image", "JPEG ou PNG"),
+        (_image(200, 200), "trop petite"),
+        (_image(fmt="GIF"), "JPEG ou PNG"),
+    ],
+)
 def test_photo_refusee(client_membre, contenu, message):
     r = _envoyer(client_membre, contenu)
     assert message in r.content.decode() and PhotoIdentite.objects.count() == 0
@@ -96,9 +99,16 @@ def test_photo_d_un_autre_membre_404(client, client_membre, membre_enregistre, p
     pk = PhotoIdentite.objects.get().pk
     assert client_membre.get(f"/membres/photos/{pk}/").status_code == 200
     autre = enregistrer_membre(
-        donnees={"nom": "Autre", "prenoms": "Personne", "sexe": "F", "telephone": "0197111111",
-                 "categorie": "actif"},
-        paroisse_integration=paroisse, annee_integration=2016, par=compte_bn,
+        donnees={
+            "nom": "Autre",
+            "prenoms": "Personne",
+            "sexe": "F",
+            "telephone": "0197111111",
+            "categorie": "actif",
+        },
+        paroisse_integration=paroisse,
+        annee_integration=2016,
+        par=compte_bn,
     ).membre
     autre.compte.doit_changer_mot_de_passe = False
     autre.compte.save()

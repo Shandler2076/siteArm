@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titre %}Valider le lot n° {{ lot.pk }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'lots:controle' lot.pk %}">← Retour au contrôle</a></p>
+  <h1>Valider le lot n° {{ lot.pk }}</h1>
+  <div class="alerte">
+    <p><strong>{{ nb_retenues }} membre{{ nb_retenues|pluralize }} {{ nb_retenues|pluralize:"va,vont" }} être créé{{ nb_retenues|pluralize }} pour la région {{ lot.region.code }}</strong> — {{ lot.region.nom }}.</p>
+    <p>Par année d'intégration : {% for annee, nb in par_annee %}{{ annee }} : {{ nb }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>
+    <p>Les matricules, les comptes et les affectations seront créés en une seule fois. Si une seule ligne échoue, rien ne sera créé.</p>
+  </div>
+  {% if lot.validable %}
+    <form method="post">
+      {% csrf_token %}
+      {% if erreur %}<p class="message message--error">{{ erreur }}</p>{% endif %}
+      <label class="case"><input type="checkbox" name="confirme"> Je confirme la création de ces membres.</label>
+      <button type="submit" class="bouton">Valider et générer</button>
+    </form>
+  {% else %}
+    <p class="message message--error">Ce lot ne peut pas encore être validé.</p>
+  {% endif %}
+</section>
+{% endblock %}

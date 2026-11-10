@@ -9,11 +9,18 @@ def test_accueil_propose_ma_fiche(client_membre):
 
 
 def test_modifier_coordonnees_ignore_les_champs_proteges(client_membre, membre_enregistre):
-    r = client_membre.post("/membres/ma-fiche/coordonnees/", {
-        "telephone": "0161000000", "ville": "Porto-Novo",
-        "nom": "PIRATE", "matricule": "2099-99AS-9999", "annee_integration": "2000",
-        "categorie": "honneur", "statut": "decede",
-    })
+    r = client_membre.post(
+        "/membres/ma-fiche/coordonnees/",
+        {
+            "telephone": "0161000000",
+            "ville": "Porto-Novo",
+            "nom": "PIRATE",
+            "matricule": "2099-99AS-9999",
+            "annee_integration": "2000",
+            "categorie": "honneur",
+            "statut": "decede",
+        },
+    )
     assert r.status_code == 302
     m = membre_enregistre.membre
     m.refresh_from_db()
