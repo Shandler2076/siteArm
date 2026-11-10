@@ -92,19 +92,25 @@ L'hébergeur (choix à venir) installe automatiquement la nouvelle version envoy
 production, puis applique les migrations (`Procfile` : `postdeploy`). Procédure détaillée ajoutée
 lors du choix de l'hébergeur.
 
-## 10. Donner les droits du Bureau national à un compte (en attendant l'étape 3)
+## 10. Installer le Bureau National de Commandement (première fois)
 
-Jusqu'à l'arrivée des mandats (étape 3), les droits du BN passent par deux autorisations :
+Depuis l'étape 3, les droits viennent des **mandats** (fonction + unité + dates) :
 
-1. Ouvrez la gestion : `/gestion/` → **Comptes** → choisissez le compte (ex. celui du Secrétaire national).
-2. Dans **Droits** → *Permissions de l'utilisateur*, ajoutez :
-   - **membres | membre | Gérer les membres (Bureau national)** : enregistrer des membres, imprimer
-     les fiches, valider les photos ;
-   - **membres | membre | Voir la photo du CIP** : consulter la photo du CIP.
-3. Enregistrez. La page d'accueil du compte affiche alors « Enregistrer un membre » et
-   « Photos à valider ».
+1. Connectez-vous avec le **compte technique** (`createsuperuser`, §3).
+2. Enregistrez d'abord, comme membres, le Président et le Secrétaire national
+   (« Enregistrer un membre »).
+3. Ouvrez **Installer un bureau** → niveau « Bureau National de Commandement » → saisissez le
+   matricule de chaque titulaire et la date de début → « Installer le bureau ».
+4. Le Président et le Secrétaire national ont alors toutes les pages du BNC. Ils installent ensuite
+   les bureaux des régions, circuits et paroisses de la même façon.
 
-À l'étape 3, ces droits seront donnés automatiquement aux titulaires des fonctions concernées.
+Ce que font les fonctions est réglable dans **Fonctions et droits** (case « droit de gérer »).
+Un titulaire qui n'est plus « Actif » (sanctionné, exclu, démissionnaire, décédé) perd
+immédiatement ses droits de bureau. Les comptes de bureau sont déconnectés après 30 minutes
+d'inactivité.
+
+*Transition :* l'autorisation manuelle « Gérer les membres » (gestion → Comptes → Permissions)
+donne encore les pages du BNC. À réserver au démarrage ; préférez les mandats.
 
 ## 11. Fichiers privés (photos, CIP)
 
@@ -125,3 +131,22 @@ La variable `DJANGO_SITE_URL` (ex. `https://armeedusalut.bj`) est imprimée dans
   région d'intégration (gestion → **Membres** → *Compteurs de matricules*, en lecture seule).
 - Un membre ne s'ajoute **que** par la page « Enregistrer un membre » : c'est elle qui garantit un
   matricule unique, même si deux personnes enregistrent en même temps.
+
+## 14. Tâche quotidienne : échéances des mandats
+
+Programmez chez l'hébergeur une tâche quotidienne (le matin) :
+
+```bash
+python manage.py verifier_echeances_mandats
+```
+
+Elle prévient les titulaires, leur bureau et le BNC 60 jours avant la fin d'un mandat, puis quand
+un mandat est échu sans renouvellement. Elle ne coupe jamais un mandat : c'est l'installation du
+nouveau bureau qui le fait.
+
+## 15. Emails des notifications
+
+Les notifications sont aussi envoyées par email aux membres qui ont une adresse. En production,
+réglez l'envoi d'emails de l'hébergeur et la variable `DJANGO_DEFAULT_FROM_EMAIL`
+(ex. `Armée du Salut <noreply@armeedusalut.bj>`). En développement, les emails s'affichent dans le
+terminal.

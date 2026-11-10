@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
 from apps.bureaux.models import Fonction, Niveau
-from apps.bureaux.perimetre import MODELES, Unite, est_bn
+from apps.bureaux.perimetre import MODELES, Unite
 from apps.bureaux.services import InstallationRefusee, _mandats_de_l_unite, installer_bureau
 from apps.comptes.models import normaliser_identifiant
 from apps.membres.models import Membre
@@ -18,7 +18,8 @@ def bn_requis(vue):
     @wraps(vue)
     @login_required
     def enveloppe(request, *args, **kwargs):
-        if not est_bn(request.user):
+        # Mandat national de gestion (via MandatBackend) ou autorisation de transition.
+        if not request.user.has_perm("membres.gerer_membres"):
             raise PermissionDenied
         return vue(request, *args, **kwargs)
 
