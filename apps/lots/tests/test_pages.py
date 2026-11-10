@@ -1,5 +1,6 @@
 import pytest
 
+from apps.lots.colonnes import COLONNES
 from apps.lots.controle import creer_lot
 from apps.lots.models import EtatLigne, EtatLot
 
@@ -91,7 +92,11 @@ def test_corriger_une_ligne(client_technique, lot, compte_technique):
     assert ligne.etat == EtatLigne.ERREUR
     data = dict(ligne.brutes)
     data["Téléphone*"] = "0161000000"
-    envoi = {f"c{i}": "" if v is None else v for i, v in enumerate(data.values())}
+    # Ordre des colonnes du modèle (jsonb ne garde pas l'ordre des clés sous PostgreSQL)
+    envoi = {
+        f"c{i}": "" if data.get(c.entete) is None else data[c.entete]
+        for i, c in enumerate(COLONNES)
+    }
     r = client_technique.post(f"/lots/{lot.pk}/lignes/3/", envoi)
     assert r.status_code == 302
     ligne.refresh_from_db()
