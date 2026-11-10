@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load lots_extras %}
+{% block titre %}Lot n° {{ lot.pk }} — contrôle{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'lots:liste' %}">← Tous les lots</a></p>
+  <h1>Lot n° {{ lot.pk }} — {{ lot.region.nom }}</h1>
+  <p class="aide">{{ lignes|length }} ligne{{ lignes|length|pluralize }} · fichier « {{ lot.nom_fichier }} » · {{ lot.get_etat_display }}</p>
+  <div class="resume">
+    {% for libelle, nb in par_etat %}{% if nb %}<span class="pastille">{{ libelle }} : {{ nb }}</span>{% endif %}{% endfor %}
+  </div>
+  {% if par_annee %}<p class="aide">Par année d'intégration : {% for annee, nb in par_annee %}{{ annee }} : {{ nb }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+  {% if par_paroisse %}<p class="aide">Par paroisse : {% for p, nb in par_paroisse %}{{ p }} : {{ nb }}{% if not forloop.last %} · {% endif %}{% endfor %}</p>{% endif %}
+
+  {% if lot.etat == "brouillon" %}
+    <form method="get" action="{% url 'lots:confirmer' lot.pk %}">
+      <button type="submit" class="bouton" id="valider"{% if not lot.validable %} disabled{% endif %}>Valider et générer ({{ nb_retenues }} membre{{ nb_retenues|pluralize }})</button>
+    </form>
+    {% if not lot.validable %}<p class="aide">Corrigez ou écartez les lignes en erreur et décidez pour chaque doublon possible avant de valider.</p>{% endif %}
+  {% endif %}
+
+  <div class="tableau-defilant">
+    <table class="tableau">
+      <thead><tr><th>Ligne</th><th>État</th><th>Nom et prénoms</th><th>Sexe</th><th>Naissance</th><th>Paroisse</th><th>Année</th><th>Catégorie</th><th></th></tr></thead>
+      <tbody>
+        {% for l in lignes %}
+          <tr id="ligne-{{ l.numero }}" class="etat-{{ l.etat }}">
+            <td>{{ l.numero }}</td>
+            <td><strong>{{ l.get_etat_display }}</strong>
+              {% for e in l.erreurs %}<small class="erreur">{{ e }}</small>{% endfor %}
+              {% if l.doublons %}<small>Ressemble à : {% for d in l.doublons %}{% if "ligne" in d %}{{ d }}{% else %}<a href="{% url 'membres:bn_fiche' d %}">{{ d }}</a>{% endif %}{% if not forloop.last %}, {% endif %}{% endfor %}</small>{% endif %}
+            </td>
+            <td>{{ l.brutes|get_item:"Nom*"|default:"" }} {{ l.brutes|get_item:"Prénoms*"|default:"" }}</td>
+            <td>{{ l.brutes|get_item:"Sexe*"|default:"" }}</td>
+            <td>{{ l.brutes|get_item:"Date de naissance"|default:"" }}</td>
+            <td>{{ l.brutes|get_item:"Paroisse d'intégration*"|default:"" }}</td>
+            <td>{{ l.brutes|get_item:"Année d'intégration*"|default:"" }}</td>
+            <td>{{ l.brutes|get_item:"Catégorie"|default:"Membre actif" }}</td>
+            <td class="actions-ligne">
+              {% if lot.etat == "brouillon" %}
+                <a href="{% url 'lots:ligne' lot.pk l.numero %}">Corriger</a>
+                {% if l.etat == "doublon" %}<form method="post" action="{% url 'lots:action_ligne' lot.pk l.numero 'garder' %}">{% csrf_token %}<button type="submit">Garder</button></form>{% endif %}
+                {% if l.etat == "ecartee" %}<form method="post" action="{% url 'lots:action_ligne' lot.pk l.numero 'reprendre' %}">{% csrf_token %}<button type="submit">Reprendre</button></form>
+                {% else %}<form method="post" action="{% url 'lots:action_ligne' lot.pk l.numero 'ecarter' %}">{% csrf_token %}<button type="submit">Écarter</button></form>{% endif %}
+              {% elif l.membre %}<a href="{% url 'membres:bn_fiche' l.membre.matricule %}">{{ l.membre.matricule }}</a>{% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if lot.etat == "brouillon" %}
+    <h2>Redéposer un fichier corrigé</h2>
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      {% for champ in form %}{% include "membres/_champ.html" %}{% endfor %}
+      <button type="submit" class="bouton bouton--secondaire">Remplacer le fichier</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

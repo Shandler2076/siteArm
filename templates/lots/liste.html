@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block titre %}Enregistrement par lots — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Enregistrement par lots</h1>
+  <p><a class="bouton" href="{% url 'lots:deposer' %}">Nouveau lot</a></p>
+  <h2>Modèles Excel à envoyer aux régions</h2>
+  <ul class="liens liens--compacts">
+    {% for r in regions %}<li><a href="{% url 'lots:modele' r.code %}">Modèle — {{ r.code }} {{ r.nom }}</a></li>{% endfor %}
+  </ul>
+  <h2>Lots déposés</h2>
+  <ul class="liste-membres">
+    {% for lot in lots %}
+      <li><a href="{% url 'lots:controle' lot.pk %}"><strong>Lot n° {{ lot.pk }} — {{ lot.region.nom }}</strong>
+        <span>{{ lot.nb }} ligne{{ lot.nb|pluralize }} · {{ lot.get_etat_display }} · déposé le {{ lot.date_creation|date:"d/m/Y" }}</span></a></li>
+    {% empty %}
+      <li class="aide">Aucun lot pour l'instant.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

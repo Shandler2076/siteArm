@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titre %}Nouveau lot — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Nouveau lot</h1>
+  <p class="aide">Déposez le modèle Excel rempli par la région. Rien n'est créé tant que vous n'avez pas validé le lot.</p>
+  <form method="post" enctype="multipart/form-data" novalidate>
+    {% csrf_token %}
+    {% for champ in form %}{% include "membres/_champ.html" %}{% endfor %}
+    <button type="submit" class="bouton">Déposer et vérifier</button>
+  </form>
+</section>
+{% endblock %}
