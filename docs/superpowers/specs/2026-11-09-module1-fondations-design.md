@@ -134,7 +134,7 @@ Toute modification est inscrite au journal (ancienne et nouvelle valeur).
 
 - Chaque membre a une **catégorie** : **membre actif**, **membre d'honneur** ou **membre sympathisant** (RI art. 25 à 28).
 - La catégorie **n'a aucun effet sur le matricule** : **tout le monde reçoit un matricule**, sans exception ni distinction, et le matricule ne change jamais quand la catégorie change.
-- À l'enregistrement, la catégorie est **« Membre actif » par défaut** ; le BN peut en choisir une autre.
+- À l'enregistrement, la **case catégorie est toujours présente** (enregistrement individuel et modèle Excel), pré-remplie sur **« Membre actif »** ; le BN peut en choisir une autre. Tout doit être en place avant l'entrée en vigueur du règlement intérieur, qui précède le déploiement du site.
 - **Changement de catégorie** : le bureau de la paroisse, du circuit ou de la région **signale** le changement sur le site ; le **BN valide** ; la fiche est mise à jour, le changement est inscrit dans l'historique et au journal, et le membre est notifié.
 - La catégorie est visible sur la fiche, utilisable comme **filtre** dans les listes et comme **critère** dans les statistiques.
 
@@ -193,7 +193,7 @@ Après le départ d'un membre (mutation validée), l'ancienne paroisse, l'ancien
 
 ### 6.1 Enregistrement individuel d'un membre (par le BN)
 
-1. Le Secrétaire national (ou toute personne du BN autorisée) saisit la fiche : identité, contact, année + paroisse + région d'intégration.
+1. Le Secrétaire national (ou toute personne du BN autorisée) saisit la fiche : identité, contact, année + paroisse + région d'intégration, **catégorie** (case obligatoire à trois choix : membre actif, membre d'honneur, membre sympathisant ; pré-cochée sur « membre actif »).
 2. Le site **détecte les doublons possibles** (même nom + même date de naissance, ou même NPI) et affiche un avertissement ; le secrétaire décide de poursuivre ou non.
 3. Le site génère le **matricule**, crée le **compte** avec un **mot de passe provisoire** et ouvre l'**affectation** dans la paroisse d'intégration.
 4. Le site génère la **fiche d'identification PDF** (nom, matricule, paroisse, circuit, région, identifiants de connexion), à imprimer ou envoyer par WhatsApp.
@@ -202,7 +202,7 @@ Après le départ d'un membre (mutation validée), l'ancienne paroisse, l'ancien
 
 ### 6.2 Enregistrement par lots (fichier Excel)
 
-1. Le site fournit un **modèle Excel officiel** à télécharger : colonnes fixes, listes déroulantes (sexe, situation matrimoniale, paroisses), consignes de saisie (format de date…).
+1. Le site fournit un **modèle Excel officiel** à télécharger : colonnes fixes, listes déroulantes (sexe, situation matrimoniale, paroisses, **catégorie**), consignes de saisie (format de date…). Une catégorie laissée vide vaut « membre actif ».
 2. Chaque **région** remplit le modèle avec ses nouveaux membres et **l'envoie au Secrétaire national** (hors site).
 3. Le **Secrétaire national dépose le fichier** sur le site, en indiquant la région concernée → création d'un **lot**.
 4. **Écran de contrôle du lot (aperçu avant génération).** Le site lit le fichier **sans rien créer** et affiche un tableau de toutes les lignes, **telles que le site les a comprises** (nom, prénoms, sexe, date de naissance, paroisse, année d'intégration…), avec pour chaque ligne un état :
