@@ -84,7 +84,7 @@ AUTH_USER_MODEL = "comptes.Compte"
 
 AUTHENTICATION_BACKENDS = [
     "axes.backends.AxesStandaloneBackend",
-    "django.contrib.auth.backends.ModelBackend",
+    "apps.comptes.backends.IdentifiantNormaliseBackend",
 ]
 
 # Blocage après 5 échecs, pendant 15 minutes, par identifiant.

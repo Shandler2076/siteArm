@@ -37,7 +37,10 @@ python manage.py createsuperuser
 ```
 
 Choisissez un identifiant (ex. `tech`) et un mot de passe solide. Ce compte donne accès à la
-gestion : `http://127.0.0.1:8000/gestion/`.
+gestion : `http://127.0.0.1:8000/gestion/`. Les identifiants sont enregistrés en majuscules
+(`TECH`), mais la connexion accepte aussi les minuscules et les espaces autour.
+
+Mot de passe du compte technique oublié : `python manage.py changepassword TECH`.
 
 ## 4. Lancer le site
 

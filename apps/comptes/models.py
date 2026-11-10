@@ -30,3 +30,7 @@ class Compte(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self) -> str:
         return self.nom_affiche or self.identifiant
+
+    def save(self, *args, **kwargs):
+        self.identifiant = normaliser_identifiant(self.identifiant or "")
+        super().save(*args, **kwargs)

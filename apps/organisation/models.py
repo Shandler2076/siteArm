@@ -22,6 +22,8 @@ class Fermable(models.Model):
         abstract = True
 
     def fermer(self, date: datetime.date | None = None) -> None:
+        if not self.active:
+            return  # déjà fermé : on garde la date de fermeture d'origine
         self.active = False
         self.date_fermeture = date or timezone.localdate()
         self.save(update_fields=["active", "date_fermeture"])
