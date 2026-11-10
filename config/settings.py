@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "apps.comptes",
     "apps.organisation",
     "apps.membres",
+    "apps.bureaux",
     "axes",
 ]
 
