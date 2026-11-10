@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titre %}Lot n° {{ lot.pk }} validé{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Lot n° {{ lot.pk }} validé</h1>
+  <p class="aide">{{ lignes|length }} membre{{ lignes|length|pluralize }} créé{{ lignes|length|pluralize }} — {{ lot.region.nom }} — le {{ lot.date_validation|date:"d/m/Y à H:i" }}</p>
+  {% block impressions %}{% endblock %}
+  <ul class="liste-membres">
+    {% for l in lignes %}
+      <li><a href="{% url 'membres:bn_fiche' l.membre.matricule %}"><strong>{{ l.membre.matricule }} — {{ l.membre.nom_complet }}</strong>
+        <span>{{ l.membre.paroisse_integration.nom }} · {{ l.membre.get_categorie_display }}</span></a></li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

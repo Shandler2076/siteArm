@@ -13,6 +13,7 @@ from django.views.decorators.http import require_POST
 
 from apps.lots.controle import controler_lot, creer_lot, remplacer_fichier
 from apps.lots.forms import FormulaireDepot, FormulaireLigne, FormulaireRedepot
+from apps.lots.generation import GenerationEchouee, valider_lot
 from apps.lots.lecture import FichierInvalide
 from apps.lots.modele_excel import modele_pour_region
 from apps.lots.models import EtatLigne, EtatLot, LigneLot, Lot
@@ -157,5 +158,27 @@ def action_ligne(request, pk, numero, action):
 
 @bn_requis
 def confirmer(request, pk):
-    lot = get_object_or_404(Lot, pk=pk)
-    return render(request, "lots/confirmer.html", {"lot": lot, **_resume(lot)})
+    lot = get_object_or_404(Lot.objects.select_related("region"), pk=pk)
+    erreur = None
+    if request.method == "POST":
+        lot = _lot_modifiable(pk)
+        if request.POST.get("confirme") != "on":
+            erreur = "Cochez la case pour confirmer."
+        else:
+            try:
+                valider_lot(lot, request.user)
+            except GenerationEchouee as e:
+                messages.error(request, str(e))
+                return redirect("lots:controle", pk=lot.pk)
+            messages.success(request, f"Lot n° {lot.pk} validé : les membres sont créés.")
+            return redirect("lots:resultat", pk=lot.pk)
+    return render(request, "lots/confirmer.html", {"lot": lot, "erreur": erreur, **_resume(lot)})
+
+
+@bn_requis
+def resultat(request, pk):
+    lot = get_object_or_404(Lot.objects.select_related("region"), pk=pk, etat=EtatLot.VALIDE)
+    lignes = lot.lignes.filter(membre__isnull=False).select_related(
+        "membre", "membre__paroisse_integration"
+    )
+    return render(request, "lots/resultat.html", {"lot": lot, "lignes": lignes})

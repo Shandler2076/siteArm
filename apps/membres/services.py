@@ -86,6 +86,7 @@ def enregistrer_membre(
     annee_integration: int,
     par: Compte,
     date_integration: datetime.date | None = None,
+    notifier: bool = True,
 ) -> ResultatEnregistrement:
     """Crée en une seule transaction : matricule, compte, membre et première affectation.
 
@@ -117,7 +118,8 @@ def enregistrer_membre(
                 date_debut=date_integration or datetime.date(annee_integration, 1, 1),
                 motif="Intégration",
             )
-        transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
+        if notifier:  # les lots envoient une notification groupée à la place
+            transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
     except Exception:
         cip = membre.photo_cip
         if cip and getattr(cip, "_committed", False) and cip.name:
