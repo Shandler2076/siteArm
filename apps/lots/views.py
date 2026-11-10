@@ -182,3 +182,27 @@ def resultat(request, pk):
         "membre", "membre__paroisse_integration"
     )
     return render(request, "lots/resultat.html", {"lot": lot, "lignes": lignes})
+
+
+def _pdf(contenu: bytes, nom: str) -> HttpResponse:
+    r = HttpResponse(contenu, content_type="application/pdf")
+    r["Content-Disposition"] = f'attachment; filename="{nom}"'
+    r["Cache-Control"] = "private, no-store"
+    return r
+
+
+@bn_requis
+@require_POST
+def fiches(request, pk):
+    from apps.lots.pdf import fiches_du_lot_pdf
+
+    lot = get_object_or_404(Lot, pk=pk, etat=EtatLot.VALIDE)
+    return _pdf(fiches_du_lot_pdf(lot, request.user), f"fiches-lot-{lot.pk}.pdf")
+
+
+@bn_requis
+def recapitulatif(request, pk):
+    from apps.lots.pdf import recapitulatif_pdf
+
+    lot = get_object_or_404(Lot.objects.select_related("region"), pk=pk, etat=EtatLot.VALIDE)
+    return _pdf(recapitulatif_pdf(lot), f"recapitulatif-lot-{lot.pk}.pdf")
