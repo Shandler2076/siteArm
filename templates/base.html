@@ -8,8 +8,10 @@
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body>
+  <div class="filigrane" aria-hidden="true" style="background-image: url('{% static 'img/logo-armee-du-salut.png' %}')"></div>
   {% if site_demo %}<div class="bandeau-essai">Site d'essai — données fictives uniquement. N'enregistrez aucun vrai membre.</div>{% endif %}
   <header class="entete">
+    {% if afficher_menu %}<button type="button" class="bouton-menu" aria-controls="menu" aria-expanded="false" onclick="var o=document.body.classList.toggle('menu-ouvert');this.setAttribute('aria-expanded',o)">☰ <span>Menu</span></button>{% endif %}
     <div class="entete__marque">
       <span class="entete__filet"></span>
       <span>Armée du Salut <small>Bénin</small></span>
@@ -22,13 +24,21 @@
           <button type="submit" class="bouton bouton--discret">Déconnexion</button>
         </form>
       </div>
+    {% elif request.path != "/connexion/" %}
+      <a class="bouton bouton--connexion" href="{% url 'connexion' %}">Se connecter</a>
     {% endif %}
   </header>
-  <main class="page">
-    {% if messages %}
-      {% for message in messages %}<p class="message message--{{ message.tags }}">{{ message }}</p>{% endfor %}
-    {% endif %}
-    {% block contenu %}{% endblock %}
-  </main>
+  <div class="disposition{% if afficher_menu %} disposition--menu{% endif %}">
+    {% if afficher_menu %}{% include "_menu.html" %}<div class="voile" onclick="document.body.classList.remove('menu-ouvert')"></div>{% endif %}
+    <main class="page">
+      {% if afficher_menu and not page_accueil %}
+        <p class="retour-ligne"><a class="retour" href="{% url 'accueil' %}" onclick="if (document.referrer.indexOf(location.host) !== -1 && history.length > 1) { history.back(); return false; }">← Retour</a></p>
+      {% endif %}
+      {% if messages %}
+        {% for message in messages %}<p class="message message--{{ message.tags }}">{{ message }}</p>{% endfor %}
+      {% endif %}
+      {% block contenu %}{% endblock %}
+    </main>
+  </div>
 </body>
 </html>

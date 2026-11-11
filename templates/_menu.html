@@ -1,0 +1,46 @@
+<nav class="menu" id="menu" aria-label="Menu principal">
+  <div class="menu__qui">
+    <strong>{{ user.nom_affiche|default:user.identifiant }}</strong>
+    {% for f in mes_fonctions %}<span>{{ f }}</span>{% empty %}<span>{% if user.membre %}Membre simple{% else %}Compte technique{% endif %}</span>{% endfor %}
+  </div>
+  <p class="menu__titre">Mon espace</p>
+  <ul>
+    <li><a href="{% url 'accueil' %}" {% if request.path == '/' %}class="actif"{% endif %}>Accueil</a></li>
+    {% if user.membre %}
+    {% url 'membres:ma_fiche' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Ma fiche et mon parcours</a></li>
+    {% url 'membres:ma_photo' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Ma photo</a></li>
+    {% url 'membres:mes_coordonnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes coordonnées</a></li>
+    {% endif %}
+    {% url 'notifications:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Notifications{% if notifications_non_lues %} ({{ notifications_non_lues }}){% endif %}</a></li>
+  </ul>
+  {% for unite in mes_unites %}
+    <p class="menu__titre">{{ unite.libelle }}</p>
+    <ul>
+      {% url 'bureaux:membres' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Membres</a></li>
+      {% if unite.niveau != "national" %}{% url 'bureaux:anciens' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Anciens membres</a></li>{% endif %}
+      {% url 'mouvements:demandes' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Demandes</a></li>
+      {% url 'listes:liste' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Listes</a></li>
+      {% url 'listes:statistiques' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Statistiques</a></li>
+    </ul>
+  {% endfor %}
+  {% if est_bn %}
+    <p class="menu__titre">Bureau national</p>
+    <ul>
+      {% url 'mouvements:bn_decisions' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Décisions à prendre{% if nb_decisions %} ({{ nb_decisions }}){% endif %}</a></li>
+      {% url 'membres:bn_enregistrer' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Enregistrer un membre</a></li>
+      {% url 'lots:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Enregistrer par lots</a></li>
+      {% url 'membres:bn_photos' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Photos à valider</a></li>
+      {% if espace_national %}
+      {% url 'bureaux:membres' 'national' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Tous les membres</a></li>
+      {% url 'listes:liste' 'national' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Listes nationales</a></li>
+      {% url 'listes:statistiques' 'national' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Statistiques nationales</a></li>
+      {% endif %}
+      {% url 'bureaux:bn_installer' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Installer un bureau</a></li>
+      {% url 'bureaux:bn_fonctions' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Fonctions et droits</a></li>
+      {% url 'bureaux:bn_echeances' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mandats à échéance</a></li>
+      {% url 'listes:tranches' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Tranches d'âge</a></li>
+      {% url 'journal:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Journal</a></li>
+      {% if user.is_superuser %}<li><a href="/gestion/">Administration technique</a></li>{% endif %}
+    </ul>
+  {% endif %}
+</nav>

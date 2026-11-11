@@ -15,7 +15,7 @@ from apps.bureaux.perimetre import Unite
 from apps.listes.colonnes import COLONNES_LISTE, lignes, preparer
 from apps.listes.filtres import membres_filtres, resume_filtres
 from apps.membres.models import Statut
-from apps.membres.pdf import GRIS, LOGO_AS, MARINE, OR, _ajuste, _polices
+from apps.membres.pdf import GRIS, LOGO_AS, LOGO_CONGREGATION, MARINE, OR, _ajuste, _polices
 
 MARGE = 16 * mm
 LARGEUR_PORTRAIT = A4[0] - 2 * MARGE  # 178 mm
@@ -32,14 +32,32 @@ def _texte(v) -> str:
 
 
 def entete_officiel(c: canvas.Canvas, titre: str, sous_titres: list[str], larg, haut) -> float:
+    # Logo de l'Église à gauche, logo de l'Armée du Salut à droite.
+    if LOGO_CONGREGATION.exists():
+        c.drawImage(
+            ImageReader(str(LOGO_CONGREGATION)),
+            MARGE,
+            haut - 26 * mm,
+            16 * mm,
+            14 * mm,
+            mask="auto",
+            preserveAspectRatio=True,
+        )
     if LOGO_AS.exists():
-        c.drawImage(ImageReader(str(LOGO_AS)), MARGE, haut - 26 * mm, 14 * mm, 14 * mm, mask="auto")
+        c.drawImage(
+            ImageReader(str(LOGO_AS)),
+            larg - MARGE - 14 * mm,
+            haut - 26 * mm,
+            14 * mm,
+            14 * mm,
+            mask="auto",
+        )
     x = MARGE + 18 * mm
     c.setFillColor(MARINE)
     c.setFont("Sans-Gras", 13)
     c.drawString(x, haut - 17 * mm, "ARMÉE DU SALUT DU BÉNIN")
     c.setFont("Sans-Gras", 11)
-    c.drawString(x, haut - 23 * mm, _ajuste(titre, "Sans-Gras", 11, larg - x - MARGE))
+    c.drawString(x, haut - 23 * mm, _ajuste(titre, "Sans-Gras", 11, larg - x - MARGE - 18 * mm))
     y = haut - 31 * mm
     c.setFont("Sans", 9)
     for ligne in sous_titres:

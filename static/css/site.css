@@ -133,3 +133,51 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .qr { text-align: center; margin: 12px 0; } .qr svg { max-width: 220px; height: auto; }
 .cle { word-spacing: .3em; overflow-wrap: anywhere; }
 .bandeau-essai { background: var(--or); color: var(--marine); text-align: center; font-weight: 700; padding: 6px 12px; font-size: .9rem; }
+/* Navigation : menu de gauche, bouton retour, fonctions */
+.bouton-menu { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 6px 10px; font-size: 1rem; cursor: pointer; margin-right: 8px; }
+.disposition--menu { display: block; }
+.menu { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; background: #fff; box-shadow: 2px 0 16px rgba(20,40,75,.15); overflow-y: auto; padding: 16px 14px 40px; transform: translateX(-105%); transition: transform .2s ease; z-index: 30; }
+.menu-ouvert .menu { transform: none; }
+.voile { display: none; }
+.menu-ouvert .voile { display: block; position: fixed; inset: 0; background: rgba(20,40,75,.35); z-index: 20; }
+.menu ul { list-style: none; padding: 0; margin: 0 0 6px; }
+.menu li a { display: block; padding: 8px 10px; border-radius: 8px; color: var(--marine); text-decoration: none; font-size: .95rem; }
+.menu li a:hover { background: var(--fond); }
+.menu li a.actif { background: var(--marine); color: #fff; font-weight: 700; }
+.menu__titre { margin: 14px 0 4px; padding: 0 10px; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--rouge); }
+.menu__qui { border-bottom: 2px solid var(--or); padding: 0 10px 10px; margin-bottom: 4px; }
+.menu__qui strong { display: block; color: var(--marine); }
+.menu__qui span { display: block; font-size: .82rem; color: var(--gris); line-height: 1.35; margin-top: 3px; }
+.retour-ligne { margin: 0 0 10px; }
+.retour { display: inline-block; color: var(--marine); font-weight: 700; text-decoration: none; padding: 4px 10px 4px 0; }
+.fonctions-actuelles ul { list-style: none; padding: 0; margin: 6px 0 14px; }
+.fonctions-actuelles li { background: var(--fond); border-left: 4px solid var(--or); border-radius: 6px; padding: 6px 10px; margin: 4px 0; font-weight: 600; color: var(--marine); }
+@media (min-width: 960px) {
+  .bouton-menu { display: none; }
+  .disposition--menu { display: grid; grid-template-columns: 270px 1fr; gap: 0; align-items: start; }
+  .disposition--menu .menu { position: sticky; top: 0; transform: none; height: 100vh; box-shadow: none; border-right: 1px solid #DDE3EE; max-width: none; width: auto; z-index: 1; }
+  .disposition--menu .voile { display: none !important; }
+  .disposition--menu .page { margin: 0; max-width: 900px; }
+}
+/* Filigrane (logo de l'Armée du Salut) sur toutes les pages */
+.filigrane { position: fixed; inset: 0; background-repeat: no-repeat; background-position: center 55%; background-size: min(70vw, 460px); opacity: .05; pointer-events: none; z-index: 15; }
+/* Bouton de connexion dans l'en-tête */
+.bouton--connexion { width: auto; padding: 8px 16px; background: var(--or); color: var(--marine); border: 0; font-size: .95rem; text-decoration: none; }
+/* Page d'accueil publique */
+.vitrine-hero { text-align: center; color: #fff; background: linear-gradient(160deg, var(--marine) 0%, #22396A 60%, #6B1730 100%); border-radius: 16px; padding: 28px 18px 30px; margin-bottom: 18px; box-shadow: 0 6px 24px rgba(20,40,75,.25); position: relative; z-index: 16; }
+.vitrine-logos { display: flex; justify-content: center; gap: 22px; margin-bottom: 14px; }
+.vitrine-logos img { width: 96px; height: 96px; object-fit: contain; background: #fff; border-radius: 50%; padding: 6px; box-shadow: 0 2px 10px rgba(0,0,0,.25); }
+.vitrine-surtitre { font-size: .82rem; color: #DCE5F3; margin: 0 auto 6px; max-width: 520px; line-height: 1.4; }
+.vitrine-hero h1 { color: #fff; font-size: 2rem; margin: 6px 0 2px; border: 0; }
+.vitrine-nom { color: var(--or); font-style: italic; margin: 0 0 10px; }
+.vitrine-devise { display: inline-block; letter-spacing: .12em; font-weight: 800; color: var(--marine); background: var(--or); padding: 6px 14px; border-radius: 20px; margin: 4px 0 18px; }
+.vitrine-cta { display: block; max-width: 340px; margin: 0 auto; background: #fff; color: var(--marine); }
+.vitrine-bloc { position: relative; z-index: 16; }
+.vitrine-points { padding-left: 18px; }
+.vitrine-points li { margin: 6px 0; }
+.vitrine-chiffres { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; text-align: center; margin-top: 10px; }
+.vitrine-chiffres div { background: var(--fond); border-radius: 10px; padding: 12px 6px; border-top: 3px solid var(--or); }
+.vitrine-chiffres strong { display: block; font-size: 1.6rem; color: var(--marine); }
+.vitrine-chiffres span { color: var(--gris); font-size: .9rem; }
+.vitrine-pied { text-align: center; color: var(--gris); font-size: .85rem; margin: 24px 0 10px; }
+.vitrine-pied span { color: var(--marine); font-weight: 700; }

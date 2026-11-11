@@ -202,3 +202,19 @@ def alertes_echeances(jour: datetime.date | None = None) -> tuple[int, int]:
             m.save(update_fields=["alerte_echu_le"])
             echus += 1
     return echeances, echus
+
+
+def libelles_fonctions(compte, jour: datetime.date | None = None) -> list[str]:
+    """Fonctions en cours d'une personne, de la paroisse au national, une par ligne :
+    « Secrétaire paroissial — Paroisse X », « Trésorier régional — Région Y »…"""
+    from apps.bureaux.perimetre import ORDRE, Unite
+
+    if not getattr(compte, "is_authenticated", False):
+        return []
+    mandats = (
+        Mandat.objects.en_cours(jour)
+        .filter(membre__compte=compte)
+        .select_related("fonction", "paroisse", "circuit", "region")
+    )
+    tries = sorted(mandats, key=lambda m: (-ORDRE[m.fonction.niveau], m.fonction.ordre))
+    return [f"{m.fonction.nom} — {Unite(m.fonction.niveau, m.unite).libelle}" for m in tries]

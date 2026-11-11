@@ -29,7 +29,7 @@ def test_page_de_changement_accessible(client, nouveau):
 
 
 def test_deconnexion_reste_possible(client, nouveau):
-    assert client.post("/deconnexion/").url == "/connexion/"
+    assert client.post("/deconnexion/").url == "/"
 
 
 def test_refuse_identifiant_comme_mot_de_passe(client, nouveau):

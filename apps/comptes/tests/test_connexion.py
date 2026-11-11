@@ -11,9 +11,18 @@ def compte(db):
     return c
 
 
-def test_accueil_exige_connexion(client, db):
+def test_page_d_accueil_publique(client, db):
+    from html import unescape
+
     r = client.get("/")
-    assert r.status_code == 302 and r.url.startswith("/connexion/")
+    html = unescape(r.content.decode())
+    assert r.status_code == 200
+    assert 'href="/connexion/"' in html and "Se connecter" in html
+    assert "FOI – AMOUR – JUSTICE" in html and "Armée du Salut du Bénin" in html
+    assert "logo-congregation" in html and "logo-armee-du-salut" in html
+    logos = html[html.index('class="vitrine-logos"') :]
+    assert logos.index("logo-congregation") < logos.index("logo-armee-du-salut")  # Église à gauche
+    assert 'class="menu"' not in html and "Bienvenue," not in html
 
 
 def test_connexion_avec_espaces_et_minuscules(client, compte):
@@ -39,5 +48,15 @@ def test_accueil_salue_le_membre(client, compte):
 def test_deconnexion_post(client, compte):
     client.force_login(compte)
     r = client.post("/deconnexion/")
-    assert r.status_code == 302 and r.url == "/connexion/"
-    assert client.get("/").status_code == 302
+    assert r.status_code == 302 and r.url == "/"
+    assert "Se connecter" in client.get("/").content.decode()
+
+
+def test_filigrane_sur_toutes_les_pages(client, compte):
+    assert 'class="filigrane"' in client.get("/connexion/").content.decode()
+    client.force_login(compte)
+    assert 'class="filigrane"' in client.get("/").content.decode()
+
+
+def test_connexion_propose_le_retour_a_l_accueil(client, db):
+    assert 'href="/"' in client.get("/connexion/").content.decode()

@@ -173,7 +173,7 @@ STORAGES = {
 
 LOGIN_URL = "connexion"
 LOGIN_REDIRECT_URL = "accueil"
-LOGOUT_REDIRECT_URL = "connexion"
+LOGOUT_REDIRECT_URL = "accueil"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Sécurité HTTPS en production (l'hébergeur termine le HTTPS devant le site).

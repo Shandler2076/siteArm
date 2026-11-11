@@ -13,6 +13,7 @@ def bureaux(request):
         # Espace national du gardien des périmètres (mandat national ou superutilisateur).
         "espace_national": SimpleLazyObject(lambda: est_bn(user)),
         "nb_decisions": SimpleLazyObject(lambda: _nb_decisions(user)),
+        "mes_fonctions": SimpleLazyObject(lambda: _fonctions(user)),
     }
 
 
@@ -25,3 +26,9 @@ def _nb_decisions(user) -> int:
         Mutation.objects.filter(etat__in=EN_COURS).count()
         + Signalement.objects.filter(etat=EtatDemande.BN).count()
     )
+
+
+def _fonctions(user) -> list[str]:
+    from apps.bureaux.services import libelles_fonctions
+
+    return libelles_fonctions(user)

@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse_lazy
 
@@ -13,8 +12,17 @@ class Connexion(auth_views.LoginView):
     redirect_authenticated_user = True
 
 
-@login_required
 def accueil(request):
+    """Page d'accueil publique (présentation du mouvement) ; tableau de bord une fois connecté."""
+    if not request.user.is_authenticated:
+        from apps.organisation.models import Circuit, Paroisse, Region
+
+        chiffres = {
+            "regions": Region.objects.filter(active=True).count(),
+            "circuits": Circuit.objects.filter(active=True).count(),
+            "paroisses": Paroisse.objects.filter(active=True).count(),
+        }
+        return render(request, "vitrine.html", {"chiffres": chiffres})
     return render(request, "accueil.html")
 
 
