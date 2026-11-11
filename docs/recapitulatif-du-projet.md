@@ -47,7 +47,7 @@ et ce qui reste à faire. Il complète le cahier des charges (le *quoi*) et le g
 - **Double vérification avec un seul téléphone** (bouton qui ouvre l'application, ou « Copier la
   clé »).
 - **Page « Protection de vos données »** et **dossier de demande d'autorisation APDP**.
-- **Cahier des charges complet** (version 2.0, puis 2.1 avec les grades et les cotisations).
+- **Cahier des charges complet** (version 2.0, puis 2.1 et 2.2 avec les grades et les cotisations).
 - **Wireframe** des principaux écrans.
 - **Sauvegarde chiffrée** sur clé USB, avec procédure de restauration essayée.
 
@@ -164,8 +164,8 @@ et la phrase de passe des sauvegardes.
 
 | Sujet | Qui | État |
 |---|---|---|
-| **Grades** (12 grades, historique, filtres et statistiques croisés, membres fictifs avec grades) | Mainteneur | Cahier des charges 2.1 rédigé ; **à valider**, puis réalisation |
-| **Cotisations mensuelles (CM)** (100 F par mois, suivi mois par mois, à jour / en retard, fiche PDF) | Mainteneur | Cahier des charges 2.1 rédigé ; **à valider**, puis réalisation |
+| **Grades** (12 grades, nom affiché « Capitaine Marc Aurel KOUDAKPO », historique, filtres et statistiques croisés, membres fictifs avec grades) | Mainteneur | Décisions reçues le 11 novembre (cahier des charges 2.2) ; réalisation en premier |
+| **Cotisations mensuelles (CM)** (100 F par mois pour tous les membres ; saisie paroisse, validation circuit, parts circuit / région / national ; état des cotisations et reçu PDF à part) | Mainteneur | Décisions reçues le 11 novembre (cahier des charges 2.2) ; **pourcentages à fournir** ; réalisation après les grades |
 | Option « Faire confiance à cet appareil 30 jours » pour la double vérification | BNC | **À décider** |
 | Rubriques [à compléter] du dossier APDP, signature, dépôt | BNC | À faire |
 | Durées de conservation, puis effacement automatique | BNC, puis mainteneur | À valider |

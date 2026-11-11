@@ -136,7 +136,7 @@ Chaque circuit est rattaché à une région, chaque paroisse à un circuit.
 | Historique | Changements de statut, de catégorie et de matricule, avec date, motif et référence |
 | Sanctions | Sanctions inscrites par le BNC, en cours, terminées ou levées (§ 9.7) |
 | Grade | Grade actuel et historique — **module 2** (§ 15) |
-| Cotisations mensuelles | Mois payés, total versé, à jour ou en retard — **module 2** (§ 16) |
+| Cotisations mensuelles | Suivies à part, hors de la fiche : état des cotisations et reçus — **module 2** (§ 16) |
 
 Le reçu de consécration n'est pas enregistré sur la fiche : les cas de reçu perdu sont réglés hors du
 site, lors de la centralisation des inscriptions.
@@ -467,9 +467,11 @@ Une personne qui a plusieurs mandats passe d'un espace à l'autre depuis l'accue
 | Réinitialiser un mot de passe | ❌ | Ses membres | ❌ | ❌ | ✅ |
 | Consulter le journal | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Voir le grade et les cotisations | Les siens | Sa paroisse | Son circuit | Sa région | Tous |
-| Enregistrer un versement de cotisation | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Enregistrer un versement de cotisation | ❌ | ✅ | ❌ | ❌ | ❌ |
+| Valider ou refuser un versement de cotisation | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Marquer sa part de cotisations comme reçue | ❌ | ❌ | ❌ | ✅ | ✅ |
 | Attribuer ou corriger un grade | ❌ | ❌ | ❌ | ❌ | ✅ |
-| Fixer le montant et le mois de départ des cotisations | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Fixer le montant, le mois de départ et les pourcentages des cotisations | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ### 12.2 Le gardien des périmètres
 
@@ -545,7 +547,7 @@ Le BNC le consulte depuis son espace, avec des filtres par action, auteur, texte
   - réinitialisation de mot de passe ;
   - changement de matricule.
   - attribution, promotion ou correction d'un grade (module 2) ;
-  - versement de cotisation enregistré ou annulé (module 2).
+  - versement de cotisation enregistré, validé, refusé ou annulé ; part marquée comme reçue (module 2).
 - SMS et WhatsApp : étudiés au module 4, selon leur coût.
 
 ## 14. Interface
@@ -594,6 +596,11 @@ d'honneur n'est pas un grade (art. 87).
 ### 15.2 Sur la fiche du membre
 
 - **Grade actuel**, affiché sur la fiche, dans l'espace du membre et sur la **fiche PDF**.
+- **Le grade précède toujours le nom**, dans l'ordre **grade, prénoms, NOM** : par exemple
+  « **Capitaine Marc Aurel KOUDAKPO** ». C'est ainsi que le membre est nommé partout sur le site : fiche,
+  fiche PDF, accueil (« Bienvenue, Capitaine Marc Aurel KOUDAKPO »), menu, listes, notifications,
+  décisions. Les **fonctions** suivent, à leur place habituelle, une par ligne (par exemple
+  « Secrétaire national — Bureau national »).
 - **Historique des grades** : grade, date d'effet, mode d'accès (première consécration, test,
   nomination, promotion exceptionnelle, régularisation), référence de la décision du BNC.
 - Le membre voit son propre grade et son historique ; un bureau voit ceux des membres de son
@@ -653,14 +660,15 @@ façon vraisemblable selon l'âge et l'ancienneté (beaucoup de Soldats, moins d
 Commandants et Supérieurs), avec leur historique de grades, afin d'essayer listes et statistiques
 croisées.
 
-### 15.8 Points à confirmer par le BNC
+### 15.8 Décisions (11 novembre 2026)
 
-1. Les membres déjà gradés seront-ils régularisés à l'enregistrement (grade et date connus), ou tous
-   saisis Soldat de 3ᵉ classe puis corrigés ?
-2. Faut-il enregistrer aussi la **tenue** (soutane blanche, première veste, deuxième veste) et ses
-   changements (art. 73) ?
-3. Une sanction peut-elle entraîner une rétrogradation ? (Le règlement ne le prévoit pas : par défaut,
-   non.)
+1. **Les membres déjà gradés sont enregistrés directement avec leur grade** (régularisation,
+   art. 83), sur le formulaire individuel comme dans le fichier Excel des lots.
+2. **La tenue n'est pas suivie** sur le site.
+3. **Sanction et grade : on applique le règlement intérieur.** Les sanctions qu'il prévoit
+   (art. 154 à 157 : avertissements, amende, blâme, suspension, retrait de responsabilités,
+   exclusion) **ne comportent pas de rétrogradation** : une sanction ne change donc pas le grade. Si
+   le règlement intérieur venait à prévoir une rétrogradation, le site serait adapté.
 
 ## 16. Module 2 — Les cotisations mensuelles (CM)
 
@@ -685,7 +693,11 @@ compter du mois de mise en service du site**. Il n'enregistre pas l'argent lui-m
 
 - Un membre doit la cotisation de chaque mois **à partir du mois de départ**, ou de son mois
   d'enregistrement s'il est arrivé plus tard, **jusqu'au mois en cours**.
-- Rien n'est dû pour les mois pendant lesquels le membre est **exclu, démissionnaire ou décédé**.
+- La cotisation concerne **tous les membres** : membres actifs, d'honneur et sympathisants, membres
+  sanctionnés pendant leur sanction, et mineurs. Toute exception future sera décidée par le BNC et
+  ajoutée au site.
+- Rien n'est dû pour les mois pendant lesquels la personne n'est plus membre (**exclue,
+  démissionnaire ou décédée**).
 - Un membre est **à jour** quand tous les mois dus jusqu'au mois en cours sont payés. Sinon, il est
   **en retard** de N mois, soit N × 100 F CFA.
 - Un membre peut **payer d'avance** les mois suivants de l'année.
@@ -693,61 +705,89 @@ compter du mois de mise en service du site**. Il n'enregistre pas l'argent lui-m
 ### 16.4 Enregistrer un versement
 
 - C'est le **bureau de la paroisse** du membre qui enregistre les versements (titulaire d'une fonction
-  avec droit de gérer, en principe le Trésorier paroissial) ; le BNC peut aussi le faire.
+  avec droit de gérer, en principe le Trésorier paroissial).
+- Chaque versement saisi par la paroisse est ensuite **validé par le bureau du circuit**. Tant qu'il
+  n'est pas validé, il apparaît « **en attente de validation** » et le mois n'est pas encore compté
+  comme payé. Le circuit peut aussi **refuser** un versement, avec un motif ; la paroisse est alors
+  notifiée.
 - Le bureau saisit : le membre, le **montant versé** et la **date** ; le site range automatiquement le
   montant sur les **mois non payés les plus anciens** (200 F = deux mois). Il peut aussi cocher
   directement les mois payés.
 - **Saisie rapide pour toute la paroisse** : une grille des membres et des mois de l'année, où l'on
   coche les mois payés lors de la collecte.
 - Un versement ne se supprime pas : une erreur s'**annule** (avec motif), et l'annulation reste visible.
-  Versements et annulations sont inscrits au journal.
+  Versements, validations, refus et annulations sont inscrits au journal.
+
+### 16.4 bis Répartition entre le circuit, la région et le national
+
+- À la validation par le circuit, le site calcule la **part de chaque niveau** : la part du **circuit**,
+  celle de la **région** et celle du **national**, selon des **pourcentages fixés par le BNC** (avec
+  date d'effet).
+- Chaque bureau voit, pour son périmètre et pour chaque mois, le **montant validé** et **sa part**.
+- La **région** puis le **national** marquent la part qui leur revient comme **reçue** lorsqu'ils la
+  perçoivent ; le site affiche ainsi, à chaque niveau, les parts **reçues** et **en attente**.
 
 ### 16.5 Ce que chacun voit
 
 | Qui | Ce qu'il voit |
 |---|---|
 | **Membre** | **Ses seules** cotisations : mois payés de l'année, total versé, à jour ou non. Jamais celles d'un autre membre. |
-| **Bureau de paroisse** | Les cotisations de chaque membre de sa paroisse, mois par mois ; la grille de saisie. |
-| **Bureau de circuit / de région** | Les cotisations des membres de son circuit / de sa région, en lecture ; listes et statistiques. |
-| **BNC** | Tout le pays ; réglages ; corrections. |
+| **Bureau de paroisse** | Les cotisations de chaque membre de sa paroisse, mois par mois ; la grille de saisie ; les versements en attente de validation. |
+| **Bureau de circuit** | Les cotisations des membres de son circuit ; la **validation** des versements de ses paroisses ; sa part ; listes et statistiques. |
+| **Bureau de région** | Les cotisations des membres de sa région, en lecture ; sa part (reçue ou en attente) ; listes et statistiques. |
+| **BNC** | Tout le pays ; sa part ; réglages (montant, mois de départ, pourcentages) ; corrections. |
 
 ### 16.6 Tableau de bord, listes et statistiques
 
 - **Tableau de bord** de chaque bureau : pour l'année et le mois en cours, nombre de membres **à jour**
-  et **en retard**, montant total enregistré, montant restant dû.
-- **Fiche de cotisations** d'un membre : grille des 12 mois de l'année (payé / non payé / non dû),
-  total de l'année et depuis le début, en F CFA.
+  et **en retard**, montant validé, montant **en attente de validation**, montant restant dû, et
+  **part du niveau** (reçue ou en attente) ; pour le circuit, les versements **à valider**.
+- **Cotisations d'un membre** (écran à part, hors de la fiche) : grille des 12 mois de l'année (payé /
+  en attente / non payé / non dû), total de l'année et depuis le début, en F CFA.
 - **Listes** : nouveaux filtres « à jour », « en retard », « en retard d'au moins N mois », combinables
   avec tous les autres (grade, âge, unité…) ; colonnes « mois payés », « total versé », « reste dû ».
 - **Statistiques** : membres à jour / en retard, montants versés et restant dus, par unité inférieure,
   par grade, par tranche d'âge ; chaque chiffre ouvre la liste correspondante.
 - Exports PDF et Excel, inscrits au journal.
 
-### 16.7 Sur la fiche PDF du membre
+### 16.7 Documents PDF : état des cotisations et reçu
 
-La fiche PDF comporte une rubrique **« Cotisations mensuelles »** :
+Les cotisations **ne figurent pas sur la fiche du membre** : elles font l'objet de documents à part.
 
-- **total des cotisations versées**, en F CFA (année en cours, et depuis le mois de départ) ;
-- la mention **« À jour au [mois en cours] »** ou **« En retard de N mois (X F CFA) »**.
+- **« État des cotisations mensuelles »** d'un membre, avec l'en-tête officiel : grade, prénoms, NOM et
+  matricule ; grille des 12 mois de l'année (payé, en attente de validation, non payé, non dû) ;
+  **total versé en F CFA** (année en cours et depuis le mois de départ) ; mention **« À jour au [mois
+  en cours] »** ou **« En retard de N mois (X F CFA) »**. Il peut être produit par le bureau de la
+  paroisse, du circuit, de la région ou par le BNC, et par le membre pour lui-même.
+- **Reçu de versement** : un petit document PDF par versement, produit une fois le versement validé
+  par le circuit : numéro de reçu, date, membre (grade, prénoms, NOM, matricule), montant, mois
+  couverts, paroisse qui a encaissé, validation du circuit.
+- **État des cotisations d'une unité** (paroisse, circuit, région, pays) : liste des membres avec mois
+  payés, total versé et reste dû, en PDF et en Excel.
 
 ### 16.8 Site d'essai
 
 Les membres fictifs reçoivent des **cotisations fictives** variées (à jour, en retard d'un mois, de
 plusieurs mois, payées d'avance) pour essayer le tableau de bord, les listes et les statistiques.
 
-### 16.9 Points à confirmer par le BNC
+### 16.9 Décisions (11 novembre 2026) et points restant à confirmer
 
-1. Les **membres d'honneur** et les **membres sympathisants** paient-ils la cotisation ? (Par défaut :
-   oui, comme les membres actifs.)
-2. Un membre **sanctionné** (suspendu) doit-il ses cotisations pendant la sanction ? (Par défaut :
-   oui.)
-3. Le mineur paie-t-il la même cotisation ? (Par défaut : oui.)
-4. Le bureau de circuit ou de région peut-il aussi enregistrer des versements, ou seulement la
-   paroisse ?
-5. Le site doit-il produire un **reçu** (PDF) pour chaque versement ?
-6. Les reversements des paroisses au BNC, au circuit et à la région (art. 127 et 128 : 500, 300 ou
-   200 F selon la catégorie de la paroisse) sont un autre sujet ; faut-il aussi les suivre sur le site
-   (plus tard) ?
+Décisions :
+
+1. La cotisation concerne **tous les membres** (actifs, d'honneur, sympathisants, sanctionnés,
+   mineurs) ; toute modification sera ajoutée plus tard.
+2. La **paroisse** saisit les versements ; le **circuit** les valide ; le circuit, la région et le
+   national perçoivent chacun leur **pourcentage**.
+3. Un **reçu PDF** est produit pour chaque versement, et un document **« État des cotisations
+   mensuelles »** à part ; rien sur la fiche du membre.
+
+Restent à confirmer par le BNC :
+
+1. Les **pourcentages** du circuit, de la région et du national sur les 100 F, et ce que garde la
+   paroisse (le cas échéant).
+2. Le reçu est-il remis **dès la saisie** par la paroisse, ou **seulement après la validation** du
+   circuit ? (Proposé : après la validation.)
+3. Un **délai** de validation par le circuit (par exemple 30 jours), avec rappel automatique ?
 
 Ces données nouvelles (grade, versements) seront ajoutées à la page « Protection de vos données » et
 au dossier APDP.
@@ -881,7 +921,7 @@ mis en ligne en même temps que le module 1.
 | Choix de l'hébergeur et du nom de domaine `.bj` | Mise en ligne | **À décider** après les essais |
 | Informations pour la déclaration APDP (responsable du traitement, contact) | Mise en ligne | **À fournir** |
 | Retours des essais sur le site d'essai | Mise en ligne | En cours |
-| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | **À fournir** |
+| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | Reçues le 11 novembre 2026 ; restent les **pourcentages** de répartition (§ 16.9) |
 
 ---
 
