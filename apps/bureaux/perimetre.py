@@ -129,3 +129,15 @@ def titulaires_gestion(unite: Unite, jour: datetime.date | None = None) -> Query
     if unite.objet is not None:
         mandats = mandats.filter(**{unite.niveau: unite.objet})
     return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
+
+
+def membre_pour_mutation(matricule: str) -> Membre | None:
+    """Seule exception au périmètre : la paroisse d'arrivée retrouve un membre par matricule.
+
+    La vue n'en affiche que le nom, les prénoms et la paroisse actuelle (confirmation).
+    """
+    return (
+        Membre.objects.filter(matricule=(matricule or "").strip().upper())
+        .prefetch_related("affectations__paroisse")
+        .first()
+    )

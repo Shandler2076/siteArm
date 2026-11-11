@@ -1,0 +1,15 @@
+<p class="matricule">{{ mutation.membre.matricule }}</p>
+<h2>{{ mutation.membre.nom_complet }}</h2>
+<dl class="fiche">
+  <dt>État</dt><dd><span class="pastille">{{ mutation.get_etat_display }}</span></dd>
+  <dt>Départ</dt><dd>{{ mutation.paroisse_depart.nom }}</dd>
+  <dt>Arrivée</dt><dd>{{ mutation.paroisse_arrivee.nom }}</dd>
+  <dt>Demandée le</dt><dd>{{ mutation.date_demande|date:"d/m/Y" }}</dd>
+  <dt>Motif</dt><dd>{{ mutation.motif|default:"—" }}</dd>
+  {% for a in avis %}
+    <dt>{{ a.get_niveau_display }}</dt><dd>{% if a.favorable %}Favorable{% else %}Défavorable{% endif %}{% if a.commentaire %} — {{ a.commentaire }}{% endif %}</dd>
+  {% endfor %}
+  {% if mutation.date_decision %}
+    <dt>Décision</dt><dd>{{ mutation.get_etat_display }} le {{ mutation.date_decision|date:"d/m/Y" }}{% if mutation.commentaire_decision %} — {{ mutation.commentaire_decision }}{% endif %}</dd>
+  {% endif %}
+</dl>

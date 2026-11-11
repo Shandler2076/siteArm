@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titre %}Demander une mutation — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "bureaux/_entete_unite.html" %}
+  <h2>Demander une mutation</h2>
+  {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
+  <form method="post">
+    {% csrf_token %}
+    {% if apercu %}
+      <div class="alerte">
+        <h2>Confirmez le membre</h2>
+        <p><strong>{{ apercu.nom }}</strong> — actuellement : {{ apercu.paroisse }}<br>
+        Paroisse d'arrivée : <strong>{{ apercu.arrivee.nom }}</strong></p>
+      </div>
+      <input type="hidden" name="matricule" value="{{ form.matricule.value }}">
+      {% if form.paroisse_arrivee %}<input type="hidden" name="paroisse_arrivee" value="{{ form.paroisse_arrivee.value }}">{% endif %}
+      <label class="champ"><span>{{ form.motif.label }}</span>{{ form.motif }}</label>
+      <input type="hidden" name="confirmer" value="1">
+      <button type="submit" class="bouton">Confirmer la demande</button>
+    {% else %}
+      {% for champ in form %}
+        <label class="champ"><span>{{ champ.label }}</span>{{ champ }}
+          {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
+      {% endfor %}
+      <button type="submit" class="bouton">Continuer</button>
+    {% endif %}
+  </form>
+</section>
+{% endblock %}
