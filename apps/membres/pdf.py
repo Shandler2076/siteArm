@@ -86,20 +86,28 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
     c.rect(0, haut - 48 * mm, larg, 48 * mm, stroke=0, fill=1)
     c.setFillColor(ROUGE)
     c.rect(0, haut - 50 * mm, larg, 2 * mm, stroke=0, fill=1)
+    # Logo de l'Église à gauche, logo de l'Armée du Salut à droite.
     c.setFillColor(colors.white)
-    c.roundRect(marge - 2 * mm, haut - 44 * mm, 40 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
-    c.drawImage(ImageReader(str(LOGO_AS)), marge, haut - 42 * mm, 36 * mm, 36 * mm, mask="auto")
-    c.roundRect(larg - marge - 46 * mm, haut - 44 * mm, 48 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
+    c.roundRect(marge - 2 * mm, haut - 44 * mm, 48 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
     c.drawImage(
         ImageReader(str(LOGO_CONGREGATION)),
-        larg - marge - 45 * mm,
+        marge - 1 * mm,
         haut - 41 * mm,
         46 * mm,
         34.5 * mm,
         mask="auto",
         preserveAspectRatio=True,
     )
-    centre = (marge + 38 * mm + larg - marge - 46 * mm) / 2  # milieu entre les deux logos
+    c.roundRect(larg - marge - 38 * mm, haut - 44 * mm, 40 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
+    c.drawImage(
+        ImageReader(str(LOGO_AS)),
+        larg - marge - 36 * mm,
+        haut - 42 * mm,
+        36 * mm,
+        36 * mm,
+        mask="auto",
+    )
+    centre = (marge + 46 * mm + larg - marge - 38 * mm) / 2  # milieu entre les deux logos
     c.setFillColor(colors.white)
     c.setFont("Sans-Gras", 13.5)
     c.drawCentredString(centre, haut - 20 * mm, "ARMÉE DU SALUT DU BÉNIN")

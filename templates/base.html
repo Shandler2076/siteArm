@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body>
+  <div class="filigrane" aria-hidden="true" style="background-image: url('{% static 'img/logo-armee-du-salut.png' %}')"></div>
   {% if site_demo %}<div class="bandeau-essai">Site d'essai — données fictives uniquement. N'enregistrez aucun vrai membre.</div>{% endif %}
   <header class="entete">
     {% if afficher_menu %}<button type="button" class="bouton-menu" aria-controls="menu" aria-expanded="false" onclick="var o=document.body.classList.toggle('menu-ouvert');this.setAttribute('aria-expanded',o)">☰ <span>Menu</span></button>{% endif %}
@@ -23,6 +24,8 @@
           <button type="submit" class="bouton bouton--discret">Déconnexion</button>
         </form>
       </div>
+    {% elif request.path != "/connexion/" %}
+      <a class="bouton bouton--connexion" href="{% url 'connexion' %}">Se connecter</a>
     {% endif %}
   </header>
   <div class="disposition{% if afficher_menu %} disposition--menu{% endif %}">

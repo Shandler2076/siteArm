@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}Armée du Salut du Bénin — Ọmọ Ogun Igbala{% endblock %}
+{% block contenu %}
+<section class="vitrine-hero">
+  <div class="vitrine-logos">
+    <img src="{% static 'img/logo-congregation.png' %}" alt="Logo de la Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins « Mont Sion » du Bénin">
+    <img src="{% static 'img/logo-armee-du-salut.png' %}" alt="Logo de l'Armée du Salut">
+  </div>
+  <p class="vitrine-surtitre">Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins « Mont Sion » du Bénin</p>
+  <h1>Armée du Salut du Bénin</h1>
+  <p class="vitrine-nom">Ọmọ Ogun Igbala</p>
+  <p class="vitrine-devise">FOI – AMOUR – JUSTICE</p>
+  <a class="bouton vitrine-cta" href="{% url 'connexion' %}">Se connecter à l'espace des membres</a>
+</section>
+
+<section class="carte vitrine-bloc">
+  <h2>Notre mission</h2>
+  <p>Instituée par le Fondateur de l'Ordre Sacré Éternel des Chérubins et Séraphins, le Révérend
+    Prophète Suprême Moses Orimolade Tunolase, le 26 novembre 1926 au Nigéria, l'Armée du Salut
+    contribue au maintien de l'ordre, de la discipline, de la paix et de la sécurité au sein de
+    l'Église, à l'image de la Milice Céleste.</p>
+  <ul class="vitrine-points">
+    <li>Œuvrer à la réconciliation, à l'unité et à la fraternité entre ses membres.</li>
+    <li>Assurer l'ordre, l'harmonie et la sécurité lors des cultes et des manifestations de la Congrégation.</li>
+    <li>Promouvoir la lecture, l'étude et l'enseignement des Saintes Écritures.</li>
+    <li>Inculquer la discipline, le respect mutuel, la prière et la crainte de Dieu.</li>
+    <li>Contribuer au bien-être moral, spirituel et social des membres.</li>
+  </ul>
+</section>
+
+<section class="carte vitrine-bloc">
+  <h2>Notre organisation</h2>
+  <p>Sous l'autorité du <strong>Bureau National de Commandement</strong>, le mouvement est organisé en
+    régions, sections de circuit et unités paroissiales.</p>
+  <div class="vitrine-chiffres">
+    <div><strong>{{ chiffres.regions }}</strong><span>régions</span></div>
+    <div><strong>{{ chiffres.circuits }}</strong><span>circuits</span></div>
+    <div><strong>{{ chiffres.paroisses }}</strong><span>paroisses</span></div>
+  </div>
+</section>
+
+<section class="carte vitrine-bloc">
+  <h2>L'espace des membres</h2>
+  <p>Chaque membre enregistré par le Bureau National reçoit un <strong>matricule</strong> et un accès
+    personnel. Il y retrouve sa fiche, son parcours et ses fonctions ; les bureaux y suivent les
+    membres de leur paroisse, de leur circuit ou de leur région.</p>
+  <p class="aide">Il n'y a pas d'inscription en ligne : l'enregistrement se fait auprès de votre paroisse,
+    qui transmet au Bureau National. Mot de passe oublié ? Adressez-vous au bureau de votre paroisse.</p>
+  <a class="bouton" href="{% url 'connexion' %}">Se connecter</a>
+</section>
+
+<footer class="vitrine-pied">
+  Armée du Salut du Bénin — Bureau National de Commandement<br>
+  <span>« Foi – Amour – Justice »</span>
+</footer>
+{% endblock %}
