@@ -40,7 +40,16 @@ def mes_coordonnees(request):
     membre = membre_de(request)
     form = FormulaireCoordonnees(request.POST or None, instance=membre)
     if request.method == "POST" and form.is_valid():
+        changements = {
+            champ: [str(form.initial.get(champ) or ""), str(form.cleaned_data.get(champ) or "")]
+            for champ in form.changed_data
+        }
         form.save()
+        if changements:
+            from apps.journal.models import COORDONNEES
+            from apps.journal.services import journaliser
+
+            journaliser(request.user, COORDONNEES, membre=membre.matricule, changements=changements)
         messages.success(request, "Vos coordonnées ont été mises à jour.")
         return redirect("membres:ma_fiche")
     return render(request, "membres/mes_coordonnees.html", {"form": form})

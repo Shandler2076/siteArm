@@ -33,8 +33,8 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Droits BNC : `apps/bureaux/backends.py::MandatBackend` traduit un mandat national de gestion en
   permissions `membres.gerer_membres` / `membres.voir_cip` (vérifier avec `has_perm`).
 - Notifications : `apps/notifications/services.py::notifier` / `notifier_unite`.
-- Journal : `apps/journal/services.py::journaliser(par, action, unite="", **details)` (minimal ;
-  page de consultation BN à l'étape 7). Chaque export de liste/statistiques y est inscrit.
+- Journal : `apps/journal/services.py::journaliser(par, action, unite="", **details)` ; toute
+  action sensible y est inscrite (constantes dans `apps/journal/models.py`).
 - Listes et statistiques (`apps/listes`) : filtres en base (`membres_filtres`), âge au jour près
   (`ages.py` : « plus de 40 » = 41 ans et plus), chaque chiffre de statistique = nombre de lignes de
   la liste qu'il ouvre (mêmes filtres). Jamais de NPI ni de photo du CIP dans une liste.
@@ -42,6 +42,12 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   départ → décision BN), signalements (décès, démission, réhabilitation, catégorie → décision BN).
   `statuts.py::changer_statut` / `changer_categorie` sont les SEULS points d'entrée des statuts et
   catégories (historique + compte + mandats). Décisions atomiques avec revérification.
+- Sanctions (`apps/mouvements/sanctions.py`) : BNC seulement ; statut via `changer_statut` ;
+  fin automatique par la commande quotidienne `fin_des_sanctions` ; une sanction se lève, ne se
+  supprime pas. Correction exceptionnelle : `apps/membres/services.py::corriger_integration`.
+- Journal immuable (`JournalImmuable`) ; page BN `/journal/`.
+- Double vérification BN (`apps/securite`) : TOTP, intergiciel `DoubleVerificationObligatoire` ;
+  désactivée dans les tests par `conftest.py` racine (sauf `apps/securite/tests`).
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.
 - Lots Excel (`apps/lots`) : AUCUNE création de membre avant `valider_lot` (tout ou rien) ; validation
   des lignes par `apps/membres/forms.py::valider_futur_membre` (mêmes règles que l'individuel).

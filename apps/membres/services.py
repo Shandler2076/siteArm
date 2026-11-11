@@ -6,6 +6,7 @@ from dataclasses import dataclass
 
 from django.db import IntegrityError, transaction
 from django.db.models import Q, QuerySet
+from django.utils import timezone
 
 from apps.comptes.models import Compte
 from apps.membres.models import Affectation, CompteurMatricule, Membre, cle_nom
@@ -127,6 +128,10 @@ def enregistrer_membre(
                 date_debut=date_integration or datetime.date(annee_integration, 1, 1),
                 motif="Intégration",
             )
+        from apps.journal.models import ENREGISTREMENT
+        from apps.journal.services import journaliser
+
+        journaliser(par, ENREGISTREMENT, membre=membre.matricule)
         if notifier:  # les lots envoient une notification groupée à la place
             transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
     except Exception:
@@ -149,3 +154,92 @@ def _notifier_nouveau_membre(membre: Membre) -> None:
         Unite("region", paroisse.circuit.region),
     ):
         notifier_unite(unite, message)
+
+
+class CorrectionRefusee(Exception):
+    """Correction exceptionnelle impossible ; le message s'affiche tel quel."""
+
+
+def corriger_integration(*, membre: Membre, annee: int, paroisse: Paroisse, motif: str, par):
+    """Correction exceptionnelle par le BN (§3.5) de l'année, de la paroisse et de la région
+    d'intégration. Nouveau matricule si l'année ou la région change (l'ancien reste dans
+    l'historique). L'affectation d'intégration est corrigée si le membre n'a jamais été muté.
+    """
+    from apps.journal.models import CORRECTION_INTEGRATION
+    from apps.journal.services import journaliser
+    from apps.mouvements.models import HistoriqueMembre, TypeHistorique
+    from apps.notifications.services import notifier
+
+    motif = (motif or "").strip()
+    if not motif:
+        raise CorrectionRefusee("Le motif est obligatoire.")
+    annee_max = timezone.localdate().year
+    if not 1900 <= annee <= annee_max:
+        raise CorrectionRefusee(f"L'année d'intégration doit être entre 1900 et {annee_max}.")
+    region = paroisse.region
+    if annee == membre.annee_integration and paroisse.pk == membre.paroisse_integration_id:
+        raise CorrectionRefusee("Aucune modification à enregistrer.")
+    avant = {
+        "annee": membre.annee_integration,
+        "paroisse": membre.paroisse_integration.nom,
+        "region": membre.region_integration.code,
+        "matricule": membre.matricule,
+    }
+    with transaction.atomic():
+        membre = Membre.objects.select_for_update().get(pk=membre.pk)
+        nouveau_matricule = None
+        if annee != membre.annee_integration or region.pk != membre.region_integration_id:
+            nouveau_matricule = attribuer_matricule(annee, region)
+        ancienne_annee = membre.annee_integration
+        membre.annee_integration = annee
+        membre.paroisse_integration = paroisse
+        membre.region_integration = region
+        if nouveau_matricule:
+            membre.matricule = nouveau_matricule
+            if membre.compte_id:
+                membre.compte.identifiant = nouveau_matricule
+                membre.compte.save(update_fields=["identifiant"])
+            HistoriqueMembre.objects.create(
+                membre=membre,
+                type=TypeHistorique.MATRICULE,
+                ancien=avant["matricule"],
+                nouveau=nouveau_matricule,
+                date_effet=timezone.localdate(),
+                motif=f"Correction exceptionnelle : {motif}"[:200],
+                par=par,
+            )
+        membre.save(
+            update_fields=[
+                "annee_integration",
+                "paroisse_integration",
+                "region_integration",
+                "matricule",
+            ]
+        )
+        affectations = list(membre.affectations.all())
+        if len(affectations) == 1 and affectations[0].motif == "Intégration":
+            a = affectations[0]
+            a.paroisse, a.circuit_a_date, a.region_a_date = paroisse, paroisse.circuit, region
+            if a.date_debut == datetime.date(ancienne_annee, 1, 1):
+                a.date_debut = datetime.date(annee, 1, 1)
+            a.save()
+    journaliser(
+        par,
+        CORRECTION_INTEGRATION,
+        membre=membre.matricule,
+        motif=motif,
+        avant=avant,
+        apres={
+            "annee": annee,
+            "paroisse": paroisse.nom,
+            "region": region.code,
+            "matricule": membre.matricule,
+        },
+    )
+    if nouveau_matricule:
+        notifier(
+            [membre.compte],
+            f"Votre matricule a été corrigé : {avant['matricule']} → {nouveau_matricule}. "
+            "Utilisez le nouveau matricule pour vous connecter.",
+        )
+    return membre

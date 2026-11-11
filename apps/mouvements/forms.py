@@ -1,5 +1,6 @@
 from django import forms
 
+from apps.mouvements.models import Sanction, TypeSanction
 from apps.organisation.models import Paroisse
 
 
@@ -57,3 +58,19 @@ class SignalementForm(forms.Form):
                 c for c in Categorie.choices if c[0] != membre.categorie
             ]
             del f["date_effet"], f["reference"]
+
+
+class SanctionForm(forms.Form):
+    degre = forms.TypedChoiceField(label="Degré de la faute", choices=Sanction.DEGRES, coerce=int)
+    type = forms.ChoiceField(label="Type de sanction", choices=TypeSanction.choices)
+    precision = forms.CharField(label="Précision (type « Autre »)", max_length=200, required=False)
+    date_debut = forms.DateField(
+        label="Date de début", widget=forms.DateInput(attrs={"type": "date"})
+    )
+    date_fin = forms.DateField(
+        label="Date de fin (sanctions temporaires)",
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}),
+    )
+    motif = forms.CharField(label="Motif résumé", max_length=300)
+    reference = forms.CharField(label="Référence de la décision", max_length=120)

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block titre %}Journal — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="aide">Bureau national</p>
+  <h1>Journal</h1>
+  <p class="aide">Le journal ne peut être ni modifié ni effacé.</p>
+  <form method="get" class="filtres">
+    <div class="grille-filtres">
+      <label class="champ"><span>Action</span>
+        <select name="action"><option value="">Toutes</option>
+          {% for valeur, libelle in actions %}<option value="{{ valeur }}"{% if valeur == filtres.action %} selected{% endif %}>{{ libelle }}</option>{% endfor %}
+        </select></label>
+      <label class="champ"><span>Auteur (identifiant)</span><input name="auteur" value="{{ filtres.auteur }}"></label>
+      <label class="champ"><span>Recherche (matricule, unité…)</span><input name="q" value="{{ filtres.q }}"></label>
+      <label class="champ"><span>Du</span><input type="date" name="du" value="{{ filtres.du }}"></label>
+      <label class="champ"><span>Au</span><input type="date" name="au" value="{{ filtres.au }}"></label>
+    </div>
+    <button type="submit" class="bouton">Filtrer</button>
+  </form>
+  <p><strong>{{ page.paginator.count }} entrée{{ page.paginator.count|pluralize }}</strong></p>
+  <div class="tableau-defilant">
+    <table class="tableau">
+      <thead><tr><th>Date</th><th>Auteur</th><th>Action</th><th>Unité</th><th>Détails</th></tr></thead>
+      <tbody>
+        {% for e in page %}
+          <tr><td class="insecable">{{ e.date|date:"d/m/Y H:i" }}</td><td>{{ e.auteur|default:"—" }}</td>
+            <td>{{ e.libelle }}</td><td>{{ e.unite|default:"—" }}</td>
+            <td><small>{% for k, v in e.details.items %}{{ k }} : {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</small></td></tr>
+        {% empty %}
+          <tr><td colspan="5" class="aide">Aucune entrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+    <nav class="pagination">
+      {% if page.has_previous %}<a href="?{{ requete }}&amp;page={{ page.previous_page_number }}">← Plus récentes</a>{% endif %}
+      <span>Page {{ page.number }} / {{ page.paginator.num_pages }}</span>
+      {% if page.has_next %}<a href="?{{ requete }}&amp;page={{ page.next_page_number }}">Plus anciennes →</a>{% endif %}
+    </nav>
+  {% endif %}
+</section>
+{% endblock %}

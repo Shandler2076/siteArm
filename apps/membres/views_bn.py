@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.exceptions import ValidationError
@@ -7,6 +8,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.journal import models as journal
+from apps.journal.services import journaliser
 from apps.membres.forms import FormulaireEnregistrement
 from apps.membres.models import EtatPhoto, Membre, PhotoIdentite
 from apps.membres.pdf import fiche_identification_pdf
@@ -15,6 +18,7 @@ from apps.membres.services import (
     doublons_possibles,
     enregistrer_membre,
 )
+from apps.organisation.models import Paroisse
 
 gerer_membres = permission_required("membres.gerer_membres", raise_exception=True)
 
@@ -75,6 +79,7 @@ def fiche(request, matricule):
         Membre.objects.select_related("paroisse_integration", "region_integration"),
         matricule=matricule,
     )
+    journaliser(request.user, journal.CONSULTATION_FICHE, unite="national", membre=matricule)
     return render(request, "membres/bn_fiche.html", {"membre": membre})
 
 
@@ -125,7 +130,43 @@ def photos(request):
                     p.etat, p.motif_refus = EtatPhoto.REFUSEE, motif
                 p.date_decision, p.decide_par = timezone.now(), request.user
                 p.save()
+                journaliser(
+                    request.user,
+                    journal.PHOTO_DECISION,
+                    membre=p.membre.matricule,
+                    decision=decision,
+                    motif=motif,
+                )
             messages.success(request, f"Photo de {p.membre.matricule} : {p.get_etat_display()}.")
             return redirect("membres:bn_photos")
     en_attente = PhotoIdentite.objects.filter(etat=EtatPhoto.EN_ATTENTE).select_related("membre")
     return render(request, "membres/bn_photos.html", {"photos": en_attente, "erreur": erreur})
+
+
+class FormulaireCorrection(forms.Form):
+    annee = forms.IntegerField(label="Année d'intégration", min_value=1900)
+    paroisse = forms.ModelChoiceField(
+        label="Paroisse d'intégration", queryset=Paroisse.objects.order_by("nom")
+    )
+    motif = forms.CharField(label="Motif de la correction", max_length=200)
+
+
+@login_required
+@gerer_membres
+def corriger(request, matricule):
+    from apps.membres.services import CorrectionRefusee, corriger_integration
+
+    membre = get_object_or_404(Membre, matricule=matricule)
+    form = FormulaireCorrection(
+        request.POST or None,
+        initial={"annee": membre.annee_integration, "paroisse": membre.paroisse_integration},
+    )
+    if request.method == "POST" and form.is_valid():
+        try:
+            membre = corriger_integration(membre=membre, par=request.user, **form.cleaned_data)
+        except CorrectionRefusee as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, "Correction enregistrée.")
+            return redirect("membres:bn_fiche", matricule=membre.matricule)
+    return render(request, "membres/bn_corriger.html", {"membre": membre, "form": form})

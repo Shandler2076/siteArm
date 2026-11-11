@@ -19,6 +19,7 @@
   {% if membre.photo_cip and perms.membres.voir_cip %}
     <p><a href="{% url 'membres:cip' membre.matricule %}">Voir la photo du CIP</a></p>
   {% endif %}
+  {% include "mouvements/_sanctions.html" with bn=True %}
   {% include "mouvements/_historique.html" %}
   {% block actions %}
   <div class="actions">
@@ -28,6 +29,7 @@
     </form>
     <p class="aide">Attention : un nouveau mot de passe provisoire remplace l'ancien.</p>
     <a class="bouton bouton--secondaire" href="{% url 'membres:bn_fiche_pdf' membre.matricule %}">Fiche sans identifiants (PDF)</a>
+    <a class="bouton bouton--secondaire" href="{% url 'membres:bn_corriger' membre.matricule %}">Correction exceptionnelle (intégration)</a>
   </div>
   {% endblock %}
 </section>

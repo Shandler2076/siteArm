@@ -75,7 +75,9 @@ def test_excel_pas_de_formule(client_sec, monde):
 def test_journal(client_sec, monde):
     client_sec.get(_base(monde) + "pdf/?envoye=1&sexe=M")
     client_sec.get(_base(monde) + "excel/")
-    e1, e2 = EntreeJournal.objects.order_by("date", "pk")
+    e1, e2 = EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    ).order_by("date", "pk")
     assert (e1.action, e2.action) == ("liste_pdf", "liste_excel")
     assert e1.auteur == monde["sec_p1"].compte and e1.unite == f"paroisse-{monde['P1'].pk}"
     assert e1.details["lignes"] == 3 and "sexe=M" in e1.details["filtres"]
@@ -84,15 +86,21 @@ def test_journal(client_sec, monde):
 def test_export_hors_perimetre_404(client_sec, monde):
     assert client_sec.get(_base(monde, "P2") + "pdf/").status_code == 404
     assert client_sec.get(_base(monde, "P2") + "excel/").status_code == 404
-    assert not EntreeJournal.objects.exists()
+    assert not EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    ).exists()
 
 
 def test_export_formulaire_invalide_redirige(client_sec, monde):
     r = client_sec.get(_base(monde) + "pdf/?envoye=1&age=plus")
     assert r.status_code == 302 and r.url.startswith(_base(monde))
-    assert not EntreeJournal.objects.exists()
+    assert not EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    ).exists()
 
 
 def test_affichage_non_journalise(client_sec, monde):
     client_sec.get(_base(monde))
-    assert not EntreeJournal.objects.exists()
+    assert not EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    ).exists()

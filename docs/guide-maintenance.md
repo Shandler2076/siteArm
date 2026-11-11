@@ -139,7 +139,11 @@ Programmez chez l'hébergeur une tâche quotidienne (le matin) :
 
 ```bash
 python manage.py verifier_echeances_mandats
+python manage.py fin_des_sanctions
 ```
+
+La seconde commande applique les sanctions datées dans le futur le jour de leur début et remet
+« Actif » les membres dont la sanction temporaire est arrivée à sa date de fin.
 
 Elle prévient les titulaires, leur bureau et le BNC 60 jours avant la fin d'un mandat, puis quand
 un mandat est échu sans renouvellement. Elle ne coupe jamais un mandat : c'est l'installation du
@@ -221,3 +225,44 @@ Les fichiers déposés sont archivés dans `prive/lots/` (à sauvegarder avec la
 - **Changement de catégorie** : signalé par la paroisse, le circuit ou la région, validé par le BN.
 - Tout est inscrit au journal (`mutation_demandee`, `mutation_avis`, `mutation_decidee`,
   `signalement`, `signalement_decide`).
+
+## 19. Sanctions, journal, double vérification, correction exceptionnelle
+
+### Sanctions
+- Seul le BNC inscrit une sanction : fiche BN du membre → « Inscrire une sanction » (degré, type,
+  dates, motif résumé, référence de la décision). Code : `apps/mouvements/sanctions.py`.
+- Effets : suspension (15 jours au plus) ou retrait temporaire de responsabilités → « Sanctionné » ;
+  exclusion temporaire ou définitive → « Exclu », compte désactivé, mandats clos, mutation en cours
+  annulée ; avertissements, amende, blâme, « autre » → inscrits sans changer le statut.
+- Retour automatique à « Actif » à la date de fin (commande quotidienne `fin_des_sanctions`, §14),
+  sauf si une autre sanction en cours justifie encore le statut.
+- Une sanction ne se supprime jamais : en cas d'erreur, le BN la **lève** (bouton « Lever » sur la
+  fiche BN, motif obligatoire) ; c'est inscrit dans l'historique et au journal.
+- La fin d'une exclusion temporaire n'est pas une réhabilitation (art. 172 : seul un membre
+  réhabilité par décision du BN puis exclu à nouveau ne peut plus être réhabilité).
+
+### Journal
+- Page « Journal » de l'accueil du BN (`/journal/`) : filtres par action, auteur, texte, dates.
+- Le journal ne peut être ni modifié ni effacé, même depuis l'administration ou le code
+  (`JournalImmuable`). Sont inscrits : connexions (réussies et échouées), consultations de fiches,
+  coordonnées modifiées (ancienne et nouvelle valeur), réinitialisations, décisions sur les photos,
+  enregistrements, lots, installations de bureau, listes et statistiques téléchargées, mutations,
+  signalements, sanctions, corrections exceptionnelles, double vérification.
+
+### Double vérification (comptes du BN)
+- Obligatoire pour tout compte ayant un mandat national (et le compte technique) : à la première
+  connexion, la personne enregistre le site dans une application d'authentification (Google
+  Authenticator, Microsoft Authenticator…) en scannant un QR code ; ensuite un code à 6 chiffres est
+  demandé à chaque connexion. Un code ne sert qu'une fois ; 5 codes faux ferment la session.
+- **Téléphone perdu** : après vérification de l'identité de la personne, le mainteneur lance
+  `python manage.py reinitialiser_double_verification <matricule>` ; la personne refait l'activation
+  à sa prochaine connexion. Inscrit au journal.
+- Réglage `DJANGO_DOUBLE_VERIFICATION_BN` (laisser `True` en production ; les tests le désactivent
+  sauf ceux de `apps/securite`).
+
+### Correction exceptionnelle des données d'intégration
+- Fiche BN → « Correction exceptionnelle (intégration) » : année, paroisse d'intégration, motif
+  obligatoire.
+- Si l'année ou la région change : nouveau matricule (compteur de la nouvelle année/région), le
+  membre se connecte désormais avec ce nouveau matricule (il est notifié) ; l'ancien reste dans
+  l'historique. Si le membre n'a jamais été muté, son affectation d'intégration est corrigée aussi.

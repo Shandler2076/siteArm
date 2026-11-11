@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from apps.mouvements.models import AvisMutation, HistoriqueMembre, Mutation, Signalement
+from apps.mouvements.models import AvisMutation, HistoriqueMembre, Mutation, Sanction, Signalement
 
 
 class LectureSeule(admin.ModelAdmin):
@@ -36,3 +36,9 @@ class AvisAdmin(LectureSeule):
 class SignalementAdmin(LectureSeule):
     list_display = ("membre", "type", "etat", "date_effet", "unite", "date_demande")
     list_filter = ("type", "etat")
+
+
+@admin.register(Sanction)
+class SanctionAdmin(LectureSeule):
+    list_display = ("membre", "type", "degre", "date_debut", "date_fin", "levee_le")
+    list_filter = ("type", "degre")

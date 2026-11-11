@@ -18,6 +18,7 @@ from apps.journal.services import journaliser
 from apps.membres.models import Affectation, Categorie, Membre, Statut
 from apps.mouvements.models import (
     EN_COURS,
+    TYPES_EXCLUSION,
     AvisMutation,
     EtatDemande,
     Mutation,
@@ -419,6 +420,13 @@ def decider_signalement(
                 compte.doit_changer_mot_de_passe = True
                 compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
                 pdf = fiche_identification_pdf(membre, mot_de_passe)
+                # Les exclusions encore « en cours » sont levées : sinon la tâche quotidienne
+                # des sanctions exclurait de nouveau le membre réhabilité.
+                membre.sanctions.filter(
+                    type__in=list(TYPES_EXCLUSION), levee_le__isnull=True
+                ).update(
+                    levee_le=jour, levee_par=par, motif_levee="Réhabilitation validée par le BN"
+                )
             else:
                 changer_categorie(
                     membre, sig.nouvelle_categorie, par=par, date_effet=jour, motif=motif

@@ -103,3 +103,40 @@ def signalement(request, pk):
                 return redirect("mouvements:bn_signalement", pk=pk)
         sig.refresh_from_db()
     return render(request, "mouvements/bn_signalement.html", {"signalement": sig, "erreur": erreur})
+
+
+@bn_requis
+def nouvelle_sanction(request, matricule):
+    from apps.membres.models import Membre
+    from apps.mouvements.forms import SanctionForm
+    from apps.mouvements.sanctions import enregistrer_sanction
+
+    membre = get_object_or_404(Membre, matricule=matricule)
+    form = SanctionForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            enregistrer_sanction(membre=membre, par=request.user, **form.cleaned_data)
+        except MouvementRefuse as exc:
+            form.add_error(None, str(exc))
+        else:
+            messages.success(request, "Sanction inscrite.")
+            return redirect("membres:bn_fiche", matricule=matricule)
+    return render(request, "mouvements/bn_sanction.html", {"membre": membre, "form": form})
+
+
+@bn_requis
+def lever(request, pk):
+    from apps.mouvements.models import Sanction
+    from apps.mouvements.sanctions import lever_sanction
+
+    sanction = get_object_or_404(Sanction.objects.select_related("membre"), pk=pk)
+    if request.method != "POST":
+        return redirect("membres:bn_fiche", matricule=sanction.membre.matricule)
+    try:
+        lever_sanction(
+            sanction=sanction, motif=request.POST.get("motif_levee", "")[:300], par=request.user
+        )
+        messages.success(request, "Sanction levée.")
+    except MouvementRefuse as exc:
+        messages.error(request, str(exc))
+    return redirect("membres:bn_fiche", matricule=sanction.membre.matricule)

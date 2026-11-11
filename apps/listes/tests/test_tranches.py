@@ -19,7 +19,9 @@ def test_modifier(client_technique, compte_technique, monde):
     assert ReglageStatistiques.courant().bornes == "18,40,60"
     html = client_technique.get("/bureau/national/statistiques/").content.decode()
     assert "41 à 60 ans" in html and "Plus de 60 ans" in html
-    (e,) = EntreeJournal.objects.all()
+    (e,) = EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    )
     assert e.action == "tranches_age" and e.auteur == compte_technique
     assert e.details == {"avant": "18,40", "apres": "18,40,60"}
 
@@ -29,7 +31,9 @@ def test_refus(client_technique, saisie):
     r = client_technique.post(URL, {"bornes": saisie})
     assert r.status_code == 200 and "erreur" in r.content.decode()
     assert ReglageStatistiques.courant().bornes == "18,40"
-    assert not EntreeJournal.objects.exists()
+    assert not EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    ).exists()
 
 
 def test_lien_accueil(client_technique):
