@@ -165,3 +165,69 @@ class Signalement(models.Model):
 
     def __str__(self) -> str:
         return f"{self.get_type_display()} — {self.membre.matricule}"
+
+
+class TypeSanction(models.TextChoices):
+    AVERTISSEMENT_VERBAL = "avertissement_verbal", "Avertissement verbal"
+    AVERTISSEMENT_ECRIT = "avertissement_ecrit", "Avertissement écrit"
+    AMENDE = "amende", "Amende"
+    BLAME = "blame", "Blâme écrit"
+    SUSPENSION = "suspension", "Suspension temporaire de service"
+    RETRAIT = "retrait", "Retrait temporaire de responsabilités"
+    EXCLUSION_TEMPORAIRE = "exclusion_temporaire", "Exclusion temporaire"
+    EXCLUSION_DEFINITIVE = "exclusion_definitive", "Exclusion définitive"
+    AUTRE = "autre", "Autre"
+
+
+EFFETS_SANCTION = {
+    TypeSanction.SUSPENSION: Statut.SANCTIONNE,
+    TypeSanction.RETRAIT: Statut.SANCTIONNE,
+    TypeSanction.EXCLUSION_TEMPORAIRE: Statut.EXCLU,
+    TypeSanction.EXCLUSION_DEFINITIVE: Statut.EXCLU,
+}
+SANCTIONS_TEMPORAIRES = (
+    TypeSanction.SUSPENSION,
+    TypeSanction.RETRAIT,
+    TypeSanction.EXCLUSION_TEMPORAIRE,
+)
+
+
+class Sanction(models.Model):
+    DEGRES = [(1, "1ᵉʳ degré"), (2, "2ᵉ degré"), (3, "3ᵉ degré")]
+
+    membre = models.ForeignKey(Membre, on_delete=models.PROTECT, related_name="sanctions")
+    degre = models.PositiveSmallIntegerField("degré de la faute", choices=DEGRES)
+    type = models.CharField("type de sanction", max_length=30, choices=TypeSanction.choices)
+    precision = models.CharField("précision", max_length=200, blank=True)
+    date_debut = models.DateField("date de début")
+    date_fin = models.DateField("date de fin", null=True, blank=True)
+    motif = models.CharField("motif résumé", max_length=300)
+    reference = models.CharField("référence de la décision", max_length=120)
+    par = _compte(verbose_name="inscrite par")
+    date = models.DateTimeField("inscrite le", auto_now_add=True)
+    levee_le = models.DateField("levée le", null=True, blank=True)
+    levee_par = _compte(verbose_name="levée par")
+    motif_levee = models.CharField("motif de la levée", max_length=300, blank=True)
+
+    class Meta:
+        verbose_name = "sanction"
+        verbose_name_plural = "sanctions"
+        ordering = ["-date_debut", "-pk"]
+
+    def __str__(self) -> str:
+        return f"{self.get_type_display()} — {self.membre.matricule}"
+
+    @property
+    def effet(self) -> str | None:
+        return EFFETS_SANCTION.get(self.type)
+
+    @property
+    def libelle(self) -> str:
+        if self.type == TypeSanction.AUTRE and self.precision:
+            return f"Autre : {self.precision}"
+        return self.get_type_display()
+
+    def en_cours(self, jour) -> bool:
+        if self.levee_le is not None or self.date_debut > jour:
+            return False
+        return self.date_fin is None or jour < self.date_fin
