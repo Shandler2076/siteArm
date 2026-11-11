@@ -117,3 +117,28 @@ def test_commande_reinitialisation(client, compte_technique):
     client.logout()
     client.force_login(compte_technique)
     assert client.get("/").url.startswith("/securite/activer/")
+
+
+def test_permission_bn_manuelle_concernee(client, monde):
+    from django.contrib.auth.models import Permission
+
+    compte = monde["m1"].compte
+    compte.user_permissions.add(Permission.objects.get(codename="gerer_membres"))
+    client.force_login(compte)
+    assert client.get("/journal/").url.startswith("/securite/activer/")
+
+
+def test_blocage_persiste_apres_reconnexion(client, compte_technique):
+    client.force_login(compte_technique)
+    secret, _ = _activer(client)
+    client.logout()
+    client.force_login(compte_technique)
+    for _ in range(5):
+        client.post("/securite/code/", {"code": "000000"})
+    client.force_login(compte_technique)  # nouvelle connexion avec le bon mot de passe
+    dv = DoubleVerification.objects.get()
+    dv.dernier_pas = None
+    dv.save()
+    r = client.post("/securite/code/", {"code": code_totp(secret, time.time())})
+    assert r.status_code == 200 and "Trop d" in r.content.decode()
+    assert client.get("/").status_code == 302

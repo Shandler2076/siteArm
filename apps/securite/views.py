@@ -1,9 +1,11 @@
+import datetime
 import time
 
 import segno
 from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -20,6 +22,8 @@ from apps.securite.services import (
     double_verification_active,
 )
 from apps.securite.totp import nouveau_secret, uri_provisioning, verifier
+
+DUREE_BLOCAGE = datetime.timedelta(minutes=15)
 
 
 def _suivant(request) -> str:
@@ -94,13 +98,30 @@ def code(request):
         return redirect("securite:activer")
     erreur = None
     if request.method == "POST":
-        pas = verifier(dv.secret, request.POST.get("code", ""), time.time(), dv.dernier_pas)
-        if pas is None:
-            erreur = "Code incorrect ou déjà utilisé."
-            if _echec(request):
-                return redirect("connexion")
-        else:
-            _ouvrir(request, dv, pas)
+        with transaction.atomic():
+            # Verrou : un même code envoyé deux fois en même temps n'est accepté qu'une fois ;
+            # le compteur d'échecs est sur le compte (une reconnexion ne le remet pas à zéro).
+            dv = DoubleVerification.objects.select_for_update().get(pk=dv.pk)
+            maintenant = timezone.now()
+            if dv.bloque_jusqu_a and dv.bloque_jusqu_a > maintenant:
+                fin = timezone.localtime(dv.bloque_jusqu_a)
+                erreur = f"Trop d'essais erronés : réessayez après {fin:%H:%M}."
+                pas = None
+            else:
+                pas = verifier(dv.secret, request.POST.get("code", ""), time.time(), dv.dernier_pas)
+                if pas is None:
+                    dv.echecs += 1
+                    if dv.echecs >= ECHECS_MAX:
+                        dv.echecs, dv.bloque_jusqu_a = 0, maintenant + DUREE_BLOCAGE
+                    dv.save(update_fields=["echecs", "bloque_jusqu_a"])
+                    erreur = "Code incorrect ou déjà utilisé."
+                else:
+                    dv.echecs, dv.bloque_jusqu_a = 0, None
+                    dv.save(update_fields=["echecs", "bloque_jusqu_a"])
+                    _ouvrir(request, dv, pas)
+        if pas is not None:
             journaliser(request.user, DOUBLE_VERIFICATION, evenement="code_correct")
             return redirect(_suivant(request))
+        if erreur.startswith("Code") and _echec(request):
+            return redirect("connexion")
     return render(request, "securite/code.html", {"erreur": erreur, "suivant": _suivant(request)})

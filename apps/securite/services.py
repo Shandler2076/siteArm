@@ -7,12 +7,15 @@ ECHECS_MAX = 5
 
 
 def doit_verifier(user) -> bool:
-    """Obligatoire pour les comptes ayant un mandat national (et le compte technique)."""
+    """Obligatoire pour les comptes ayant les pouvoirs du BN."""
     from apps.bureaux.perimetre import est_bn
 
     if not getattr(settings, "DOUBLE_VERIFICATION_BN", True):
         return False
-    return bool(getattr(user, "is_authenticated", False)) and est_bn(user)
+    if not getattr(user, "is_authenticated", False):
+        return False
+    # Mandat national, compte technique, ou autorisation BN de transition (mêmes pouvoirs).
+    return est_bn(user) or user.has_perm("membres.gerer_membres")
 
 
 def est_verifie(request) -> bool:

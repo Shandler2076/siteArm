@@ -10,6 +10,8 @@ class DoubleVerification(models.Model):
     active = models.BooleanField("activée", default=False)
     date_activation = models.DateTimeField("activée le", null=True, blank=True)
     dernier_pas = models.BigIntegerField("dernier code utilisé", null=True, blank=True)
+    echecs = models.PositiveSmallIntegerField("codes faux consécutifs", default=0)
+    bloque_jusqu_a = models.DateTimeField("bloqué jusqu'à", null=True, blank=True)
 
     class Meta:
         verbose_name = "double vérification"

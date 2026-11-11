@@ -72,10 +72,11 @@ class EntreeJournal(models.Model):
         settings.AUTH_USER_MODEL,
         null=True,
         blank=True,
-        on_delete=models.SET_NULL,
+        on_delete=models.PROTECT,  # un compte cité au journal ne se supprime pas
         related_name="+",
         verbose_name="auteur",
     )
+    auteur_identifiant = models.CharField("identifiant de l'auteur", max_length=150, blank=True)
     action = models.CharField("action", max_length=60, db_index=True)
     unite = models.CharField("unité", max_length=40, blank=True)
     details = models.JSONField("détails", default=dict, blank=True)
@@ -86,6 +87,7 @@ class EntreeJournal(models.Model):
         verbose_name = "entrée du journal"
         verbose_name_plural = "journal"
         ordering = ["-date"]
+        base_manager_name = "objects"
 
     def save(self, *args, **kwargs):
         if not self._state.adding:
