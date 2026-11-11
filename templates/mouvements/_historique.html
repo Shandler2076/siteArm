@@ -1,0 +1,9 @@
+<h2>Historique</h2>
+<ul class="fonctions">
+  {% for h in membre.historique.all %}
+    <li><strong>{{ h.date_effet|date:"d/m/Y" }}</strong> — {{ h.libelle }}<br>
+      <small class="aide">{{ h.motif }}{% if h.reference %} · Réf. {{ h.reference }}{% endif %}</small></li>
+  {% empty %}
+    <li class="aide">Aucun événement.</li>
+  {% endfor %}
+</ul>

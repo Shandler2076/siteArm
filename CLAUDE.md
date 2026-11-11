@@ -38,6 +38,10 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Listes et statistiques (`apps/listes`) : filtres en base (`membres_filtres`), âge au jour près
   (`ages.py` : « plus de 40 » = 41 ans et plus), chaque chiffre de statistique = nombre de lignes de
   la liste qu'il ouvre (mêmes filtres). Jamais de NPI ni de photo du CIP dans une liste.
+- Mouvements (`apps/mouvements`) : mutations (demande paroisse d'arrivée → avis circuit/région de
+  départ → décision BN), signalements (décès, démission, réhabilitation, catégorie → décision BN).
+  `statuts.py::changer_statut` / `changer_categorie` sont les SEULS points d'entrée des statuts et
+  catégories (historique + compte + mandats). Décisions atomiques avec revérification.
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.
 - Lots Excel (`apps/lots`) : AUCUNE création de membre avant `valider_lot` (tout ou rien) ; validation
   des lignes par `apps/membres/forms.py::valider_futur_membre` (mêmes règles que l'individuel).

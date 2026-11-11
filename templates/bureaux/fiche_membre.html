@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load mouvements %}
 {% block titre %}{{ membre.matricule }} — {{ unite.libelle }}{% endblock %}
 {% block contenu %}
 <section class="carte">
@@ -7,7 +8,7 @@
   <h1>{{ membre.nom_complet }}</h1>
   <dl class="fiche">
     <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
-    <dt>Statut</dt><dd>{{ membre.get_statut_display }}</dd>
+    <dt>Statut</dt><dd>{{ membre.get_statut_display }}{% with d=membre|date_deces %}{% if d %}<br><small>Décédé le {{ d|date:"d/m/Y" }}</small>{% endif %}{% endwith %}</dd>
     <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
     <dt>Date de naissance</dt><dd>{{ membre.date_naissance|date:"d/m/Y"|default:"—" }}</dd>
     <dt>Téléphone</dt><dd>{{ membre.telephone }}</dd>
@@ -36,6 +37,7 @@
       <li class="aide">Aucune fonction.</li>
     {% endfor %}
   </ul>
+  {% include "mouvements/_historique.html" %}
   <h2>Signalements au Bureau national</h2>
   <ul class="liens liens--compacts">
     {% for type, libelle in actions_signalement %}
