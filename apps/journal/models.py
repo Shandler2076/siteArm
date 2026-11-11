@@ -7,6 +7,11 @@ LISTE_PDF = "liste_pdf"
 LISTE_EXCEL = "liste_excel"
 STATISTIQUES_PDF = "statistiques_pdf"
 TRANCHES_AGE = "tranches_age"
+MUTATION_DEMANDEE = "mutation_demandee"
+MUTATION_AVIS = "mutation_avis"
+MUTATION_DECIDEE = "mutation_decidee"
+SIGNALEMENT = "signalement"
+SIGNALEMENT_DECIDE = "signalement_decide"
 
 
 class EntreeJournal(models.Model):
