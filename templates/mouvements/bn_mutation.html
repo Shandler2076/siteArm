@@ -15,10 +15,13 @@
         <ul>{% for m in mandats %}<li>{{ m.fonction.nom }} — {{ m.unite.nom }}</li>{% endfor %}</ul>
       </div>
     {% endif %}
+    <form method="post" class="decision" onsubmit="return confirm('Valider cette mutation ? Le parcours du membre sera mis à jour immédiatement.');">
+      {% csrf_token %}
+      <button type="submit" name="decision" value="valider" class="bouton">Valider la mutation</button>
+    </form>
     <form method="post" class="decision">
       {% csrf_token %}
-      <label class="champ"><span>Commentaire (facultatif)</span><input type="text" name="commentaire" maxlength="300"></label>
-      <button type="submit" name="decision" value="valider" class="bouton">Valider la mutation</button>
+      <label class="champ"><span>Commentaire du refus (facultatif)</span><input type="text" name="commentaire" maxlength="300"></label>
       <button type="submit" name="decision" value="refuser" class="bouton bouton--secondaire">Refuser</button>
     </form>
   {% endif %}

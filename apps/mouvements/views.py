@@ -43,9 +43,12 @@ def _mutation_visible(unite: Unite, pk: int) -> Mutation:
     return mutation
 
 
-def niveau_avis(unite: Unite, mutation: Mutation) -> str | None:
-    """« circuit » ou « region » si cette unité est celle de départ et que son avis manque."""
-    if mutation.etat != EtatDemande.AVIS:
+def niveau_avis(unite: Unite, mutation: Mutation, compte) -> str | None:
+    """« circuit » ou « region » si cette unité est celle de départ et que son avis manque.
+
+    Seuls les titulaires d'un mandat de cette unité donnent l'avis (pas le BN, matrice 9.1).
+    """
+    if mutation.etat != EtatDemande.AVIS or unite not in unites_gerees(compte):
         return None
     depart = mutation.paroisse_depart
     if unite.niveau == Niveau.CIRCUIT and unite.objet == depart.circuit:
@@ -114,7 +117,7 @@ def nouvelle_mutation(request, cle):
 def mutation(request, cle, pk):
     unite = unite_depuis_cle(request.user, cle)
     mut = _mutation_visible(unite, pk)
-    niveau = niveau_avis(unite, mut)
+    niveau = niveau_avis(unite, mut, request.user)
     return render(
         request,
         "mouvements/mutation.html",
@@ -132,8 +135,9 @@ def mutation(request, cle, pk):
 def avis(request, cle, pk):
     unite = unite_depuis_cle(request.user, cle)
     mut = _mutation_visible(unite, pk)
-    niveau = niveau_avis(unite, mut)
-    if niveau is None and unite.niveau in (Niveau.CIRCUIT, Niveau.REGION):
+    niveau = niveau_avis(unite, mut, request.user)
+    gere = unite in unites_gerees(request.user)
+    if niveau is None and gere and unite.niveau in (Niveau.CIRCUIT, Niveau.REGION):
         depart = mut.paroisse_depart
         if unite.objet in (depart.circuit, depart.circuit.region):
             messages.error(request, "L'avis a déjà été donné ou n'est plus attendu.")
@@ -161,12 +165,14 @@ def avis(request, cle, pk):
 @login_required
 def mutation_aiguillage(request, pk):
     """Lien commun des notifications : renvoie vers la page de la mutation pour ce compte."""
-    get_object_or_404(Mutation, pk=pk)
+    mut = get_object_or_404(Mutation.objects.select_related("membre"), pk=pk)
     if request.user.has_perm("membres.gerer_membres"):
         return redirect("mouvements:bn_mutation", pk=pk)
     for unite in unites_gerees(request.user):
         if mutations_pour_unite(unite).filter(pk=pk).exists():
             return redirect(reverse("mouvements:mutation", args=[unite.cle, pk]))
+    if mut.membre.compte_id == request.user.pk:  # le membre muté : son parcours est sur sa fiche
+        return redirect("membres:ma_fiche")
     raise Http404
 
 

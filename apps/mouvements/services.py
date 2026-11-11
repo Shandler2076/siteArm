@@ -15,7 +15,7 @@ from apps.bureaux.models import Niveau
 from apps.bureaux.perimetre import MODELES, Unite, titulaires_gestion
 from apps.journal import models as journal
 from apps.journal.services import journaliser
-from apps.membres.models import Affectation, Categorie, Statut
+from apps.membres.models import Affectation, Categorie, Membre, Statut
 from apps.mouvements.models import (
     EN_COURS,
     AvisMutation,
@@ -64,6 +64,11 @@ def notifier_unites(unites: Iterable[Unite], message: str, lien: str = "", compt
 def _decrire(mutation: Mutation) -> str:
     m, depart, arrivee = mutation.membre, mutation.paroisse_depart, mutation.paroisse_arrivee
     return f"{m.matricule} — {m.nom_complet} ({depart.nom} → {arrivee.nom})"
+
+
+def _verrouiller_membre(pk: int):
+    """Verrouille la ligne du membre : deux décisions sur lui passent l'une après l'autre."""
+    return Membre.objects.select_for_update().get(pk=pk)
 
 
 # --- Mutations ---------------------------------------------------------------------------
@@ -148,14 +153,12 @@ def decider_mutation(
 ) -> Mutation:
     jour = jour or timezone.localdate()
     with transaction.atomic():
-        mutation = Mutation.objects.select_for_update().select_related("membre").get(pk=mutation.pk)
+        membre = _verrouiller_membre(mutation.membre_id)
+        mutation = Mutation.objects.select_for_update().get(pk=mutation.pk)
         if mutation.etat not in EN_COURS:
             raise MouvementRefuse("Cette demande a déjà été traitée.")
-        membre, depart, arrivee = (
-            mutation.membre,
-            mutation.paroisse_depart,
-            mutation.paroisse_arrivee,
-        )
+        mutation.membre = membre
+        depart, arrivee = mutation.paroisse_depart, mutation.paroisse_arrivee
         if valider:
             obstacle = _obstacle_mutation(membre, arrivee, depart)
             if obstacle:
@@ -276,7 +279,12 @@ def blocage_rehabilitation(membre, jour: datetime.date) -> str | None:
     if membre.statut not in (Statut.DEMISSIONNAIRE, Statut.EXCLU):
         return "Seul un membre démissionnaire ou exclu peut être réhabilité."
     statuts = membre.historique.filter(type=TypeHistorique.STATUT)
-    if membre.statut == Statut.EXCLU and statuts.filter(ancien=Statut.EXCLU, nouveau=Statut.ACTIF):
+    rehabilitations = statuts.filter(
+        ancien=Statut.EXCLU,
+        nouveau=Statut.ACTIF,
+        motif=CONFIRMATIONS[TypeSignalement.REHABILITATION],
+    )  # la fin d'une exclusion temporaire (sanction échue) n'est pas une réhabilitation
+    if membre.statut == Statut.EXCLU and rehabilitations.exists():
         return (
             "Ce membre, déjà réhabilité après une exclusion puis exclu à nouveau, ne peut plus "
             "être réhabilité (règlement intérieur, art. 172)."
@@ -375,12 +383,11 @@ def decider_signalement(
     jour = jour or timezone.localdate()
     pdf = None
     with transaction.atomic():
-        sig = (
-            Signalement.objects.select_for_update().select_related("membre").get(pk=signalement.pk)
-        )
+        membre = _verrouiller_membre(signalement.membre_id)
+        sig = Signalement.objects.select_for_update().get(pk=signalement.pk)
         if sig.etat != EtatDemande.BN:
             raise MouvementRefuse("Cette demande a déjà été traitée.")
-        membre = sig.membre
+        sig.membre = membre
         if confirmer:
             _verifier(sig.type, membre, sig.date_effet, sig.reference, sig.nouvelle_categorie, jour)
             motif = CONFIRMATIONS[sig.type]
@@ -448,7 +455,7 @@ def decider_signalement(
 
 
 def _annuler_mutations(membre, commentaire: str) -> None:
-    for mutation in membre.mutations.filter(etat__in=EN_COURS):
+    for mutation in Mutation.objects.select_for_update().filter(membre=membre, etat__in=EN_COURS):
         mutation.etat = EtatDemande.ANNULEE
         mutation.commentaire_decision = commentaire
         mutation.date_decision = timezone.now()

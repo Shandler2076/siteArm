@@ -47,9 +47,7 @@ def test_liste_decisions(client_technique, monde, mutation, deces):
 def test_valider_mutation_page(client_technique, monde, mutation):
     page = unescape(client_technique.get(f"/bureau/bn/mutations/{mutation.pk}/").content.decode())
     assert "Avis du circuit de départ : pas encore donné" in page
-    r = client_technique.post(
-        f"/bureau/bn/mutations/{mutation.pk}/", {"decision": "valider", "commentaire": "OK"}
-    )
+    r = client_technique.post(f"/bureau/bn/mutations/{mutation.pk}/", {"decision": "valider"})
     assert r.status_code == 302
     assert monde["m1"].affectation_actuelle.paroisse == monde["P4"]
     assert "Mutation validée." in client_technique.get(r.url).content.decode()

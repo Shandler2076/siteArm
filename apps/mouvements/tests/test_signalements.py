@@ -133,7 +133,9 @@ def test_rehabilitation_exclu_exige_engagement(monde):
 def test_exclu_deux_fois_bloque(monde):
     m1 = monde["m1"]
     changer_statut(m1, "exclu", par=None, date_effet=date(2024, 1, 1), motif="Exclusion")
-    changer_statut(m1, "actif", par=None, date_effet=date(2024, 9, 1), motif="Réhabilitation")
+    changer_statut(
+        m1, "actif", par=None, date_effet=date(2024, 9, 1), motif="Réhabilitation validée"
+    )
     changer_statut(m1, "exclu", par=None, date_effet=date(2025, 1, 1), motif="Exclusion")
     assert "art. 172" in blocage_rehabilitation(m1, J)
     with pytest.raises(MouvementRefuse, match="art. 172"):
