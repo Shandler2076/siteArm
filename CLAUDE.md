@@ -52,6 +52,12 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Lots Excel (`apps/lots`) : AUCUNE création de membre avant `valider_lot` (tout ou rien) ; validation
   des lignes par `apps/membres/forms.py::valider_futur_membre` (mêmes règles que l'individuel).
 
+## Hébergement
+- Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre
+  gratuite) : `docs/guide-alwaysdata.md` + scripts `deploiement/alwaysdata/` (installer, mettre à
+  jour, tâches quotidiennes). Réglages lus aussi depuis `.env` (`config/env.py`, l'environnement a
+  priorité). Site d'essai : `DJANGO_SITE_DEMO=True` (bandeau + `peupler_demo`, données FICTIVES).
+
 ## Commandes
 - Tests : `DJANGO_DEBUG=True pytest -q`
 - Style : `ruff check .`

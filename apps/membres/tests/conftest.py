@@ -69,3 +69,6 @@ def client_membre(client, membre_enregistre):
     c.save()
     client.force_login(c)
     return client
+
+
+from apps.bureaux.tests.conftest import territoire  # noqa: E402,F401
