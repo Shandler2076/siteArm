@@ -11,6 +11,7 @@ from apps.organisation.models import Paroisse
 class TypeHistorique(models.TextChoices):
     STATUT = "statut", "Statut"
     CATEGORIE = "categorie", "Catégorie"
+    MATRICULE = "matricule", "Matricule"
 
 
 class TypeSignalement(models.TextChoices):
@@ -63,6 +64,8 @@ class HistoriqueMembre(models.Model):
 
     @property
     def libelle(self) -> str:
+        if self.type == TypeHistorique.MATRICULE:
+            return f"Matricule : {self.ancien} → {self.nouveau}"
         choix = Statut if self.type == TypeHistorique.STATUT else Categorie
         libelles = dict(choix.choices)
         ancien = libelles.get(self.ancien, self.ancien)

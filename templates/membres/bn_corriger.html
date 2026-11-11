@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titre %}Correction exceptionnelle — {{ membre.matricule }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'membres:bn_fiche' membre.matricule %}">← {{ membre.nom_complet }}</a></p>
+  <h1>Correction exceptionnelle</h1>
+  <p><span class="matricule">{{ membre.matricule }}</span> {{ membre.nom_complet }}</p>
+  <div class="alerte">
+    <h2>À utiliser seulement en cas d'erreur</h2>
+    <p>Si l'année ou la région d'intégration change, un <strong>nouveau matricule</strong> est attribué : le membre se connectera avec ce nouveau matricule (il est notifié). L'ancien reste noté dans l'historique de la fiche. La correction est inscrite au journal.</p>
+  </div>
+  {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
+  <form method="post" onsubmit="return confirm('Enregistrer cette correction ?');">
+    {% csrf_token %}
+    {% for champ in form %}
+      <label class="champ champ--requis"><span>{{ champ.label }}</span>{{ champ }}
+        {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
+    {% endfor %}
+    <button type="submit" class="bouton">Enregistrer la correction</button>
+  </form>
+</section>
+{% endblock %}

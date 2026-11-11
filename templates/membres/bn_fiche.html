@@ -29,6 +29,7 @@
     </form>
     <p class="aide">Attention : un nouveau mot de passe provisoire remplace l'ancien.</p>
     <a class="bouton bouton--secondaire" href="{% url 'membres:bn_fiche_pdf' membre.matricule %}">Fiche sans identifiants (PDF)</a>
+    <a class="bouton bouton--secondaire" href="{% url 'membres:bn_corriger' membre.matricule %}">Correction exceptionnelle (intégration)</a>
   </div>
   {% endblock %}
 </section>

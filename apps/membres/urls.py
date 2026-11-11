@@ -15,6 +15,7 @@ urlpatterns = [
     path("bn/photos/", views_bn.photos, name="bn_photos"),
     path("bn/<str:matricule>/", views_bn.fiche, name="bn_fiche"),
     path("bn/<str:matricule>/fiche.pdf", views_bn.fiche_pdf, name="bn_fiche_pdf"),
+    path("bn/<str:matricule>/corriger/", views_bn.corriger, name="bn_corriger"),
     path(
         "bn/<str:matricule>/fiche-identifiants.pdf",
         views_bn.fiche_identifiants_pdf,
