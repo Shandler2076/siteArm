@@ -181,3 +181,5 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .vitrine-chiffres span { color: var(--gris); font-size: .9rem; }
 .vitrine-pied { text-align: center; color: var(--gris); font-size: .85rem; margin: 24px 0 10px; }
 .vitrine-pied span { color: var(--marine); font-weight: 700; }
+.etape-2fa { border: 1px solid #DDE3EE; border-radius: 10px; padding: 12px 14px; margin: 12px 0; } .etape-2fa .bouton { margin: 6px 0; }
+.etape-2fa a.bouton { text-decoration: none; text-align: center; }

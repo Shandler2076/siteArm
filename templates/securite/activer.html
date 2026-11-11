@@ -3,20 +3,30 @@
 {% block contenu %}
 <section class="carte carte--etroite">
   <h1>Double vérification</h1>
-  <p>Votre compte a un mandat national : un code à 6 chiffres vous sera demandé à chaque connexion.</p>
-  <ol>
-    <li>Installez une application d'authentification sur votre téléphone (Google Authenticator, Microsoft Authenticator…).</li>
-    <li>Dans l'application, ajoutez un compte en scannant ce code :</li>
-  </ol>
-  <div class="qr">{{ qr|safe }}</div>
-  <p class="aide">Ou saisissez la clé à la main : <br><strong class="cle">Clé : {{ cle }}</strong></p>
-  <ol start="3"><li>Saisissez le code à 6 chiffres affiché par l'application.</li></ol>
+  <p>Votre compte a des responsabilités au Bureau national : un code à 6 chiffres vous sera demandé à chaque connexion.</p>
+  <p><strong>1.</strong> Installez sur votre téléphone une application d'authentification gratuite : <strong>Google Authenticator</strong> ou <strong>Microsoft Authenticator</strong>.</p>
+
+  <div class="etape-2fa">
+    <p><strong>2. Vous êtes sur le téléphone qui a l'application ?</strong> Touchez ce bouton : l'application s'ouvre et ajoute le compte toute seule.</p>
+    <a class="bouton" href="{{ uri }}">Ajouter à mon application d'authentification</a>
+    <p class="aide">Si rien ne s'ouvre : copiez la clé, puis dans l'application touchez <strong>+</strong> → <strong>« Saisir une clé de configuration »</strong> (ou « Saisir le code manuellement »), collez la clé et choisissez « Basé sur l'heure ».</p>
+    <button type="button" class="bouton bouton--secondaire" data-cle="{{ secret }}"
+      onclick="var b=this;navigator.clipboard.writeText(b.dataset.cle).then(function(){b.textContent='Clé copiée ✓'},function(){b.textContent='Copie impossible : recopiez la clé ci-dessous'})">Copier la clé</button>
+    <p class="aide"><strong class="cle">Clé : {{ cle }}</strong></p>
+  </div>
+
+  <div class="etape-2fa">
+    <p><strong>Vous êtes sur un ordinateur ?</strong> Dans l'application du téléphone, touchez <strong>+</strong> → <strong>« Scanner un code QR »</strong> et visez ce code :</p>
+    <div class="qr">{{ qr|safe }}</div>
+  </div>
+
+  <p><strong>3.</strong> L'application affiche maintenant un code à 6 chiffres (« Armée du Salut Bénin »). Revenez ici et saisissez-le :</p>
   {% if erreur %}<p class="message message--error">{{ erreur }}</p>{% endif %}
   <form method="post">
     {% csrf_token %}
     <input type="hidden" name="suivant" value="{{ suivant }}">
     <label class="champ"><span>Code à 6 chiffres</span>
-      <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required autofocus></label>
+      <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required></label>
     <button type="submit" class="bouton">Activer</button>
   </form>
   <form method="post" action="{% url 'deconnexion' %}">{% csrf_token %}<button type="submit" class="bouton bouton--discret">Se déconnecter</button></form>

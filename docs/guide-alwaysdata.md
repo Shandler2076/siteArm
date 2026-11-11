@@ -128,7 +128,9 @@ cd ~/siteArm
 
 > Les comptes du Bureau national (et le compte technique) doivent installer une application
 > d'authentification sur leur téléphone (Google Authenticator ou Microsoft Authenticator) : le site
-> la demande à la première connexion (QR code).
+> la demande à la première connexion. **Un seul téléphone suffit** : sur le téléphone, touchez
+> « Ajouter à mon application d'authentification » (ou « Copier la clé ») ; depuis un ordinateur,
+> scannez le QR code avec le téléphone.
 
 ## 9. Programmer la tâche quotidienne
 
