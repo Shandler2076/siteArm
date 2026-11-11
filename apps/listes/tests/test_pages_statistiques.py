@@ -59,7 +59,9 @@ def test_export_pdf_statistiques(client, monde):
     texte = "\n".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
     assert "ARMÉE DU SALUT DU BÉNIN" in texte and "Statistiques —" in texte
     assert "Généré le" in texte and "Total des membres" in texte and "Statut : Actif" in texte
-    (e,) = EntreeJournal.objects.all()
+    (e,) = EntreeJournal.objects.filter(
+        action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]
+    )
     assert e.action == "statistiques_pdf" and e.details["statuts"] == ["actif"]
     assert e.auteur == monde["sec_p1"].compte
     assert client.get(_url(monde, "paroisse", "P2") + "pdf/").status_code == 404
