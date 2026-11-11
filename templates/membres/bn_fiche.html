@@ -19,6 +19,7 @@
   {% if membre.photo_cip and perms.membres.voir_cip %}
     <p><a href="{% url 'membres:cip' membre.matricule %}">Voir la photo du CIP</a></p>
   {% endif %}
+  {% include "mouvements/_sanctions.html" with bn=True %}
   {% include "mouvements/_historique.html" %}
   {% block actions %}
   <div class="actions">

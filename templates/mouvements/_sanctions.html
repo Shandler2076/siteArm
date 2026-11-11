@@ -1,0 +1,19 @@
+{% load mouvements %}
+<h2>Sanctions</h2>
+{% if bn %}<p><a class="bouton bouton--secondaire" href="{% url 'mouvements:bn_nouvelle_sanction' membre.matricule %}">Inscrire une sanction</a></p>{% endif %}
+<ul class="fonctions">
+  {% for s in membre.sanctions.all %}
+    <li><strong>{{ s.libelle }}</strong> — {{ s.get_degre_display }} · <span class="pastille">{{ s|etat_sanction }}</span><br>
+      <small class="aide">Du {{ s.date_debut|date:"d/m/Y" }}{% if s.date_fin %} au {{ s.date_fin|date:"d/m/Y" }}{% endif %} · {{ s.motif }} · Réf. {{ s.reference }}{% if s.motif_levee %} · Levée : {{ s.motif_levee }}{% endif %}</small>
+      {% if bn and s|en_cours_ou_a_venir %}
+        <form method="post" action="{% url 'mouvements:bn_lever_sanction' s.pk %}" class="recherche" onsubmit="return confirm('Lever cette sanction ?');">
+          {% csrf_token %}
+          <input type="text" name="motif_levee" maxlength="300" placeholder="Motif de la levée" required>
+          <button type="submit" class="bouton bouton--discret">Lever</button>
+        </form>
+      {% endif %}
+    </li>
+  {% empty %}
+    <li class="aide">Aucune sanction.</li>
+  {% endfor %}
+</ul>

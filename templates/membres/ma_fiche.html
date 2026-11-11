@@ -40,6 +40,7 @@
       </li>
     {% endfor %}
   </ol>
+  {% include "mouvements/_sanctions.html" %}
   {% include "mouvements/_historique.html" %}
   <p><a class="bouton" href="{% url 'membres:ma_fiche_pdf' %}">Télécharger ma fiche (PDF)</a></p>
 </section>
