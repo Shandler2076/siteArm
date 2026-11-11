@@ -62,6 +62,12 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   jour, tâches quotidiennes). Réglages lus aussi depuis `.env` (`config/env.py`, l'environnement a
   priorité). Site d'essai : `DJANGO_SITE_DEMO=True` (bandeau + `peupler_demo`, données FICTIVES).
 
+## Protection des données (APDP)
+- Dossier de demande d'autorisation (traitement + transfert hors Bénin, art. 391) :
+  `docs/apdp/dossier-apdp.md` (+ PDF). Page publique `/protection-des-donnees/`
+  (`templates/protection_donnees.html`, contact `DJANGO_CONTACT_DONNEES`). Toute nouvelle donnée
+  ou finalité doit y être reportée.
+
 ## Commandes
 - Tests : `DJANGO_DEBUG=True pytest -q`
 - Style : `ruff check .`

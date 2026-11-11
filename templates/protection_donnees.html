@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block titre %}Protection de vos données — Armée du Salut du Bénin{% endblock %}
+{% block contenu %}
+<section class="carte texte-long">
+  <h1>Protection de vos données</h1>
+  <p>L'Armée du Salut du Bénin enregistre sur ce site des informations sur ses membres. Cette page
+    explique, simplement, quelles informations sont enregistrées, pourquoi, qui peut les voir et
+    quels sont vos droits, conformément au Code du numérique (loi n° 2017-20 du 20 avril 2018,
+    modifiée) et sous le contrôle de l'Autorité de Protection des Données Personnelles (APDP).</p>
+
+  <h2>Qui est responsable de vos données ?</h2>
+  <p>Le <strong>Bureau National de Commandement (BNC)</strong> de l'Armée du Salut du Bénin, mouvement
+    de la Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins « Mont Sion » du
+    Bénin. Le site est entretenu, pour le BNC, par son mainteneur.</p>
+  {% if contact %}<p>Contact pour toute question sur vos données : <strong>{{ contact }}</strong>.</p>{% endif %}
+
+  <h2>Quelles données sont enregistrées ?</h2>
+  <ul>
+    <li><strong>Identité</strong> : nom, prénoms, sexe, date et lieu de naissance, situation matrimoniale ;</li>
+    <li><strong>Pièce d'identité</strong> : NPI et/ou photo du CIP ;</li>
+    <li><strong>Photo d'identité</strong> en tenue, que vous déposez vous-même ;</li>
+    <li><strong>Coordonnées</strong> : téléphone, WhatsApp, e-mail (facultatif), quartier, ville, profession,
+      personne à contacter en cas d'urgence ;</li>
+    <li><strong>Vie dans le mouvement</strong> : matricule, année et paroisse d'intégration, paroisses
+      successives, fonctions occupées, catégorie, statut, sanctions éventuelles inscrites par le BNC ;</li>
+    <li><strong>Sécurité</strong> : vos connexions et les opérations importantes, inscrites au journal du site.</li>
+  </ul>
+  <p>Votre appartenance à l'Armée du Salut révèle une appartenance religieuse : ces données sont
+    traitées avec un soin particulier et ne sont jamais utilisées à d'autres fins que celles décrites
+    ici.</p>
+
+  <h2>Pourquoi ?</h2>
+  <ul>
+    <li>Vous identifier de façon sûre et définitive grâce à votre <strong>matricule</strong> ;</li>
+    <li>suivre votre <strong>parcours</strong> dans le mouvement (paroisses, fonctions, grades à venir) ;</li>
+    <li>permettre aux bureaux d'<strong>organiser la vie du mouvement</strong> : listes, statistiques,
+      mutations, convocations ;</li>
+    <li>appliquer les décisions prévues par le <strong>règlement intérieur</strong> ;</li>
+    <li>vous <strong>informer</strong> des décisions qui vous concernent (notifications).</li>
+  </ul>
+  <p>Vos données ne sont <strong>jamais vendues ni cédées</strong>, et ne servent à aucune publicité.</p>
+
+  <h2>Qui y a accès ?</h2>
+  <ul>
+    <li><strong>Vous</strong> : toute votre fiche, depuis votre espace personnel ;</li>
+    <li>les <strong>bureaux de votre paroisse, de votre circuit et de votre région</strong>, uniquement
+      pour les membres de leur périmètre, et uniquement les titulaires d'une fonction de gestion ;</li>
+    <li>le <strong>Bureau national</strong> (BNC), pour tout le pays ;</li>
+    <li>la <strong>photo du CIP</strong> n'est visible que par vous et le Bureau national ;</li>
+    <li>un <strong>membre simple ne voit jamais</strong> les données d'un autre membre ;</li>
+    <li>le mainteneur du site et l'hébergeur, uniquement pour le bon fonctionnement technique, sans
+      utiliser vos données à d'autres fins.</li>
+  </ul>
+
+  <h2>Combien de temps sont-elles conservées ?</h2>
+  <ul>
+    <li>Votre fiche est conservée <strong>tant que vous êtes membre</strong>.</li>
+    <li>Après la perte de la qualité de membre (démission, exclusion, décès), la fiche est conservée
+      <strong>en archives</strong> par le Bureau national, pour garder l'historique du mouvement et
+      permettre une éventuelle réhabilitation ; votre matricule ne sera jamais attribué à quelqu'un d'autre.</li>
+    <li>Le <strong>journal</strong> des opérations est conservé pour la sécurité du site et ne peut être
+      ni modifié ni effacé.</li>
+  </ul>
+
+  <h2>Où sont-elles hébergées ?</h2>
+  <p>Chez un hébergeur professionnel, avec des sauvegardes quotidiennes. Si l'hébergement se trouve
+    hors du Bénin, ce transfert fait l'objet d'une <strong>autorisation de l'APDP</strong> avant la mise en
+    service du site.</p>
+
+  <h2>Comment sont-elles protégées ?</h2>
+  <ul>
+    <li>Connexion chiffrée (HTTPS) et mots de passe personnels, conservés sous forme chiffrée ;</li>
+    <li>blocage après plusieurs essais de connexion erronés, déconnexion automatique ;</li>
+    <li>code de vérification supplémentaire pour les comptes du Bureau national ;</li>
+    <li>accès limité au périmètre de chaque bureau ;</li>
+    <li>journal des opérations sensibles, qui ne peut être ni modifié ni effacé ;</li>
+    <li>photos stockées dans un espace privé, jamais accessibles par un simple lien.</li>
+  </ul>
+
+  <h2>Vos droits</h2>
+  <p>Vous pouvez à tout moment :</p>
+  <ul>
+    <li><strong>consulter</strong> toutes vos données, dans « Ma fiche » ;</li>
+    <li><strong>faire corriger</strong> une donnée inexacte : vos coordonnées directement dans
+      « Mes coordonnées », les autres informations en vous adressant au bureau de votre paroisse ou au
+      Bureau national ;</li>
+    <li><strong>demander des explications</strong> sur l'utilisation de vos données, ou vous opposer à un
+      usage qui ne serait pas prévu ici ;</li>
+    <li>adresser une <strong>réclamation à l'APDP</strong> (Autorité de Protection des Données
+      Personnelles du Bénin) si vous estimez que vos droits ne sont pas respectés.</li>
+  </ul>
+  <p>Les demandes sont à adresser au bureau de votre paroisse, qui les transmet au Bureau national,
+    ou directement au Bureau national{% if contact %} ({{ contact }}){% endif %}.</p>
+
+  <h2>Les mineurs</h2>
+  <p>L'adhésion est possible dès 10 ans (règlement intérieur, art. 10). Pour un membre mineur,
+    l'enregistrement se fait avec l'accord de ses parents ou de son tuteur, qui peuvent exercer ses
+    droits en son nom.</p>
+
+  <h2>Cookies</h2>
+  <p>Le site n'utilise que les cookies indispensables à la connexion et à la sécurité. Il n'y a
+    <strong>aucun cookie publicitaire ni de mesure d'audience</strong>.</p>
+
+  <p class="aide">Dernière mise à jour : 11 novembre 2026.</p>
+</section>
+{% endblock %}
