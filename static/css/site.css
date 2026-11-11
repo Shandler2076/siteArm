@@ -129,3 +129,4 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .stat li { display: flex; justify-content: space-between; gap: 10px; padding: 5px 0; border-bottom: 1px dashed #DDE3EE; }
 .stat li:last-child { border-bottom: 0; }
 .stat .nombre { font-weight: 800; color: var(--marine); min-width: 2.5em; text-align: right; }
+.liste-membres span.pastille { display: inline-block; color: var(--texte); }

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block titre %}Demandes — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "bureaux/_entete_unite.html" %}
+  {% if unite.niveau == "paroisse" or unite.niveau == "national" %}
+    <p><a class="bouton" href="{% url 'mouvements:nouvelle_mutation' unite.cle %}">Demander une mutation</a></p>
+  {% endif %}
+  <h2>Mutations</h2>
+  <ul class="liste-membres">
+    {% for m in mutations %}
+      <li><a href="{% url 'mouvements:mutation' unite.cle m.pk %}">
+        <strong>{{ m.membre.nom_complet }} — {{ m.membre.matricule }}</strong>
+        <span>{{ m.paroisse_depart.nom }} → {{ m.paroisse_arrivee.nom }}</span>
+        <span><span class="pastille">{{ m.get_etat_display }}</span> demandée le {{ m.date_demande|date:"d/m/Y" }}</span>
+      </a></li>
+    {% empty %}
+      <li class="aide">Aucune mutation.</li>
+    {% endfor %}
+  </ul>
+  <h2>Signalements transmis</h2>
+  <ul class="liste-membres">
+    {% for s in signalements %}
+      <li><strong>{{ s.get_type_display }} — {{ s.membre.nom_complet }} ({{ s.membre.matricule }})</strong>
+        <span><span class="pastille">{{ s.get_etat_display }}</span> le {{ s.date_demande|date:"d/m/Y" }}{% if s.motif_refus %} — {{ s.motif_refus }}{% endif %}</span></li>
+    {% empty %}
+      <li class="aide">Aucun signalement.</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endblock %}

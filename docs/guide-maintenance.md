@@ -195,3 +195,29 @@ Les fichiers déposés sont archivés dans `prive/lots/` (à sauvegarder avec la
   La page de consultation du BN viendra à l'étape 7. Le simple affichage à l'écran n'est pas inscrit.
 - **Grade** : filtre, colonne et statistique arriveront avec le module 2 (ajouter une entrée dans
   `COLONNES_LISTE`, un champ dans `FiltreListeForm` et une section dans `calculer_statistiques`).
+
+## 18. Mouvements : mutations, décès, démission, réhabilitation, catégorie
+
+- Code : `apps/mouvements`. Toute la logique est dans `services.py` ; les pages ne font que
+  vérifier les droits puis appeler ces fonctions.
+- **Seul point d'entrée des statuts et catégories** : `apps/mouvements/statuts.py`
+  (`changer_statut`, `changer_categorie`). Chaque changement est inscrit dans l'historique du membre
+  (bloc « Historique » des fiches) ; le compte est désactivé pour Décédé, Démissionnaire et Exclu,
+  réactivé pour Actif. Ne jamais changer `membre.statut` directement (sauf correction technique).
+- **Mutation** : demandée par la paroisse d'arrivée (onglet « Demandes » → « Demander une
+  mutation »), avis du circuit puis de la région de départ (une fois chacun), décision du BN
+  (« Décisions à prendre » sur l'accueil), même si un avis manque. À la validation : parcours mis à
+  jour, mandats clos dans les unités quittées, notifications. Une seule mutation en cours par membre.
+- **Décès / démission** : signalés depuis la fiche du membre (bureau de paroisse ou BN), confirmés
+  par le BN. Une mutation en cours est annulée ; les mandats en cours sont clos.
+- **Réhabilitation** : démissionnaire ou exclu, au plus tôt 6 mois (mois calendaires) après la date
+  inscrite dans l'historique ; engagement de bonne conduite obligatoire pour un exclu ; jamais pour un
+  membre exclu à nouveau après une réhabilitation (RI art. 172). La validation par le BN télécharge
+  la fiche avec un nouveau mot de passe provisoire.
+- **Date de démission ou d'exclusion inconnue** (statut posé avant l'étape 6) : la réhabilitation est
+  bloquée. Pour régulariser, le mainteneur crée l'événement manquant dans un shell Django :
+  `changer_statut(membre, membre.statut, par=None, date_effet=<date réelle>, motif="Régularisation")`
+  (le statut ne change pas, seule la date est inscrite).
+- **Changement de catégorie** : signalé par la paroisse, le circuit ou la région, validé par le BN.
+- Tout est inscrit au journal (`mutation_demandee`, `mutation_avis`, `mutation_decidee`,
+  `signalement`, `signalement_decide`).

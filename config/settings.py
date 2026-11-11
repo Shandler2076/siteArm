@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "apps.lots",
     "apps.journal",
     "apps.listes",
+    "apps.mouvements",
     "axes",
 ]
 

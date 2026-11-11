@@ -46,6 +46,8 @@ def fiche_membre(request, cle, matricule):
         raise Http404
     parcours = membre.affectations.select_related("paroisse", "circuit_a_date", "region_a_date")
     mandats = membre.mandats.select_related("fonction", "paroisse", "circuit", "region")
+    from apps.mouvements.views import contexte_fiche
+
     return render(
         request,
         "bureaux/fiche_membre.html",
@@ -54,6 +56,7 @@ def fiche_membre(request, cle, matricule):
             "membre": membre,
             "parcours": parcours,
             "mandats": mandats,
+            **contexte_fiche(unite, membre),
         },
     )
 
