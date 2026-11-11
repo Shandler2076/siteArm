@@ -18,6 +18,9 @@
     <dt>Personne à contacter</dt><dd>{{ membre.urgence_nom|default:"—" }} {{ membre.urgence_telephone }}</dd>
     <dt>Intégration</dt><dd>{{ membre.annee_integration }} — {{ membre.paroisse_integration.nom }} ({{ membre.region_integration.nom }})</dd>
   </dl>
+  {% for s in signalements_en_attente %}
+    <p class="alerte">En attente du BN : {{ s.get_type_display|lower }} signalé le {{ s.date_demande|date:"d/m/Y" }}.</p>
+  {% endfor %}
   <h2>Parcours</h2>
   <ol class="parcours">
     {% for a in parcours %}
@@ -33,6 +36,13 @@
       <li class="aide">Aucune fonction.</li>
     {% endfor %}
   </ul>
+  <h2>Signalements au Bureau national</h2>
+  <ul class="liens liens--compacts">
+    {% for type, libelle in actions_signalement %}
+      <li><a href="{% url 'mouvements:signaler' unite.cle membre.matricule type %}">{{ libelle }}</a></li>
+    {% endfor %}
+  </ul>
+  {% if blocage_rehabilitation %}<p class="aide">{{ blocage_rehabilitation }}</p>{% endif %}
   {% if unite.niveau == "paroisse" %}
   <div class="actions">
     <form method="post" action="{% url 'bureaux:reinitialiser' unite.cle membre.matricule %}">

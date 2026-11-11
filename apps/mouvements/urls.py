@@ -10,4 +10,9 @@ urlpatterns = [
     path("<str:cle>/mutations/nouvelle/", views.nouvelle_mutation, name="nouvelle_mutation"),
     path("<str:cle>/mutations/<int:pk>/", views.mutation, name="mutation"),
     path("<str:cle>/mutations/<int:pk>/avis/", views.avis, name="avis"),
+    path(
+        "<str:cle>/membres/<str:matricule>/signaler/<str:type_signalement>/",
+        views.signaler_vue,
+        name="signaler",
+    ),
 ]

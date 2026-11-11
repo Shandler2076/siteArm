@@ -28,3 +28,32 @@ class AvisForm(forms.Form):
         widget=forms.RadioSelect,
     )
     commentaire = forms.CharField(label="Commentaire", max_length=300, required=False)
+
+
+class SignalementForm(forms.Form):
+    date_effet = forms.DateField(widget=forms.DateInput(attrs={"type": "date"}))
+    reference = forms.CharField(max_length=120, required=False)
+    nouvelle_categorie = forms.ChoiceField(label="Nouvelle catégorie")
+    commentaire = forms.CharField(label="Commentaire (facultatif)", max_length=300, required=False)
+
+    def __init__(self, *args, type_signalement: str, membre, **kwargs):
+        from apps.membres.models import Categorie, Statut
+
+        super().__init__(*args, **kwargs)
+        f = self.fields
+        if type_signalement == "deces":
+            f["date_effet"].label = "Date du décès"
+            del f["reference"], f["nouvelle_categorie"]
+        elif type_signalement == "demission":
+            f["date_effet"].label = "Date de la démission"
+            f["reference"].label = "Référence de la lettre (facultatif)"
+            del f["nouvelle_categorie"]
+        elif type_signalement == "rehabilitation":
+            f["reference"].label = "Référence de l'engagement écrit de bonne conduite"
+            f["reference"].required = membre.statut == Statut.EXCLU
+            del f["date_effet"], f["nouvelle_categorie"]
+        else:
+            f["nouvelle_categorie"].choices = [
+                c for c in Categorie.choices if c[0] != membre.categorie
+            ]
+            del f["date_effet"], f["reference"]
