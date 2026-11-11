@@ -8,6 +8,8 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
+- Cahier des charges général (v2.1, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+  détaillé § 15-16, points à confirmer § 15.8 / 16.9) : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
 - Plans de réalisation : `docs/superpowers/plans/`
@@ -61,6 +63,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   gratuite) : `docs/guide-alwaysdata.md` + scripts `deploiement/alwaysdata/` (installer, mettre à
   jour, tâches quotidiennes). Réglages lus aussi depuis `.env` (`config/env.py`, l'environnement a
   priorité). Site d'essai : `DJANGO_SITE_DEMO=True` (bandeau + `peupler_demo`, données FICTIVES).
+- Sauvegarde complète chiffrée (code en git bundle, dumpdata + pg_dump, fichiers privés, .env ; gpg
+  AES-256) : `deploiement/alwaysdata/sauvegarder.sh` ; restauration : `docs/guide-maintenance.md` § 20.
+- Récapitulatif de tout le projet : `docs/recapitulatif-du-projet.md` (+ PDF), à tenir à jour.
 
 ## Protection des données (APDP)
 - Dossier de demande d'autorisation (traitement + transfert hors Bénin, art. 391) :

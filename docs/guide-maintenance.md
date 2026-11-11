@@ -266,3 +266,57 @@ Les fichiers déposés sont archivés dans `prive/lots/` (à sauvegarder avec la
 - Si l'année ou la région change : nouveau matricule (compteur de la nouvelle année/région), le
   membre se connecte désormais avec ce nouveau matricule (il est notifié) ; l'ancien reste dans
   l'historique. Si le membre n'a jamais été muté, son affectation d'intégration est corrigée aussi.
+
+## 20. Sauvegarde sur clé USB et restauration
+
+### Faire une sauvegarde (chez alwaysdata)
+
+Dans la console SSH :
+
+```bash
+bash ~/siteArm/deploiement/alwaysdata/sauvegarder.sh
+```
+
+Le script demande deux fois une **phrase de passe** (12 caractères au moins ; par exemple quatre mots
+sans rapport entre eux). Il crée dans `~/sauvegardes/` un fichier unique et **chiffré** (AES-256)
+`siteArm-sauvegarde-AAAA-MM-JJ_HHhMM.tar.gz.gpg`, qui contient :
+
+| Dossier | Contenu |
+|---|---|
+| `code/` | tout le code et tout son historique (`siteArm.bundle`) et la version sauvegardée |
+| `base/` | toutes les données : `donnees.json` (lisible par toute base) et, si le site utilise PostgreSQL, `postgresql.dump` (copie exacte) |
+| `fichiers/prive/` | photos d'identité, photos du CIP, fichiers des lots |
+| `reglages/.env` | réglages secrets du site |
+
+> **La phrase de passe ne peut pas être retrouvée.** Écrivez-la sur papier et rangez-la **à part**
+> de la clé USB (par exemple sous enveloppe au BNC). Sans elle, la sauvegarde est illisible — c'est ce
+> qui la protège si la clé est perdue ou volée.
+
+### Copier la sauvegarde sur l'ordinateur, puis sur la clé USB
+
+Sur l'ordinateur, ouvrez PowerShell (Windows) ou Terminal (Mac, Linux) et collez la commande `scp`
+affichée à la fin du script (le mot de passe SSH est demandé). Le fichier arrive dans le dossier
+courant ; copiez-le sur la clé USB ou le disque dur. Gardez **deux copies** à deux endroits
+différents, et refaites une sauvegarde au moins **une fois par mois** et avant toute grosse mise à
+jour. Vous pouvez ensuite effacer les anciennes sauvegardes du serveur : `rm ~/sauvegardes/*.gpg`.
+
+### Ouvrir une sauvegarde
+
+- **Windows** : installez **Gpg4win** (gratuit, gpg4win.org), double-cliquez sur le fichier `.gpg`,
+  saisissez la phrase de passe ; ouvrez ensuite le `.tar.gz` obtenu avec 7-Zip.
+- **Mac / Linux** : `gpg -d siteArm-sauvegarde-….tar.gz.gpg | tar -xzf -`
+
+### Restaurer sur un nouvel ordinateur ou un nouvel hébergement
+
+1. Récupérer le code : `git clone code/siteArm.bundle siteArm` (ou depuis GitHub).
+2. Installer le projet (§ 1), puis copier `reglages/.env` dans le dossier `siteArm/` et l'adapter
+   (adresse du site, `DATABASE_URL`, `DJANGO_PRIVATE_MEDIA_ROOT`).
+3. Créer les tables dans une base **vide** : `python manage.py migrate`.
+4. Remettre les données :
+   - PostgreSQL, copie exacte : `pg_restore --no-owner --clean --if-exists -d "$DATABASE_URL" base/postgresql.dump`
+   - ou n'importe quelle base : `python manage.py loaddata base/donnees.json`
+5. Recopier `fichiers/prive/` dans le dossier indiqué par `DJANGO_PRIVATE_MEDIA_ROOT`.
+6. Vérifier : se connecter, ouvrir une fiche, une photo, la liste nationale et le journal.
+
+Cette procédure a été essayée le 11 novembre 2026 (sauvegarde, déchiffrement, restauration dans une
+base neuve : mêmes nombres de membres et d'entrées du journal).

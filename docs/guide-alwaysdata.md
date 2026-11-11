@@ -164,7 +164,18 @@ bash ~/siteArm/deploiement/alwaysdata/mettre_a_jour.sh
 
 puis Administration → **Web** → **Sites** → bouton **Redémarrer** du site.
 
-## 12. En cas de problème
+## 12. Sauvegarder le site sur une clé USB
+
+```bash
+bash ~/siteArm/deploiement/alwaysdata/sauvegarder.sh
+```
+
+Le script crée une sauvegarde complète et **chiffrée** : code, données, photos et réglages. Il demande
+une phrase de passe, à noter sur papier et à ranger à part de la clé. Copiez ensuite le fichier sur
+votre ordinateur avec la commande `scp` affichée à la fin, puis sur la clé USB. Le détail, avec la
+restauration, se trouve dans le guide de maintenance (§ 20).
+
+## 13. En cas de problème
 
 | Symptôme | Solution |
 |---|---|
@@ -174,7 +185,7 @@ puis Administration → **Web** → **Sites** → bouton **Redémarrer** du site
 | Le site est lent ou s'arrête | L'offre gratuite a peu de mémoire (256 Mo) : normal pour un essai ; le pack payant en a davantage. |
 | Mot de passe d'un compte de démonstration oublié | Connectez-vous avec le compte technique et réimprimez une fiche avec identifiants depuis la fiche du membre. |
 
-## 13. Après l'essai
+## 14. Après l'essai
 
 - **Si alwaysdata convient** : Administration → **Abonnement** → passer au pack payant (≈ 7 € HT par
   mois). Le site reste où il est.

@@ -23,7 +23,8 @@ Le document est organisé en quatre parties :
 
 1. **Le projet** : objectifs, principes, découpage en modules, acteurs.
 2. **Le module 1 — Fondations** : la gestion des membres, décrite en détail.
-3. **Les modules suivants** : grades, événements, communication, médias.
+3. **Les modules suivants** : grades et cotisations mensuelles (module 2, décrit en détail),
+   puis événements, communication, médias.
 4. **Réalisation et exploitation** : choix techniques, hébergement, qualité, maintenance, calendrier.
 
 Un lexique figure en annexe.
@@ -40,13 +41,14 @@ Le site doit permettre de :
 
 - **connaître chaque membre** grâce à une fiche unique, identifiée par un **matricule définitif** ;
 - **suivre son parcours** dans le mouvement : paroisses successives, fonctions occupées, catégorie,
-  statut, sanctions éventuelles, puis grades (module 2) et participation aux activités (module 3) ;
+  statut, sanctions éventuelles, grades et cotisations mensuelles (module 2) et participation aux activités (module 3) ;
 - **donner à chaque bureau** (paroisse, circuit, région, national) une vue **à jour et limitée à son
   périmètre**, avec des listes et des statistiques en temps réel ;
 - **faire circuler les décisions** selon les circuits prévus par le règlement : mutations,
   signalements, validations par le BNC, avec des notifications à chaque étape ;
 - **garder la trace** de toutes les opérations sensibles dans un journal qui ne peut être ni modifié
   ni effacé ;
+- **suivre les cotisations mensuelles** de chaque membre, mois par mois, à chaque niveau ;
 - **protéger les données personnelles** des membres, conformément à la loi béninoise.
 
 ## 2. Principes directeurs
@@ -71,7 +73,7 @@ d'essai, puis mise en ligne.
 | Ordre | Module | Contenu | État |
 |---|---|---|---|
 | **1** | **Fondations** | Comptes, organisation territoriale, fiche membre, matricule, parcours, fonctions et bureaux, enregistrement par lots, listes et statistiques, mutations, décès, démissions, réhabilitations, sanctions, journal, sécurité | **Réalisé** ; mise en ligne en préparation |
-| 2 | Grades et éligibilité | Historique des grades, conditions de passage, listes d'éligibles | À concevoir |
+| **2** | **Grades et cotisations** | Grade actuel et historique, listes et statistiques par grade, éligibilité ; cotisations mensuelles (CM) mois par mois, membres à jour ou en retard | **Cahier des charges rédigé (§ 15 et 16)** ; réalisation après validation |
 | 3 | Événements et présences | Activités, invitations, convocations ciblées, présences | À concevoir |
 | 4 | Communication | Messages officiels, espace documents, règlement intérieur en ligne, SMS / WhatsApp | À concevoir |
 | 5 | Médias | Photos et vidéos des activités | À concevoir |
@@ -133,7 +135,8 @@ Chaque circuit est rattaché à une région, chaque paroisse à un circuit.
 | Statut | Actif, Sanctionné, Exclu, Démissionnaire, Décédé (§ 6.3) |
 | Historique | Changements de statut, de catégorie et de matricule, avec date, motif et référence |
 | Sanctions | Sanctions inscrites par le BNC, en cours, terminées ou levées (§ 9.7) |
-| Grade | Grade actuel et historique — **module 2** |
+| Grade | Grade actuel et historique — **module 2** (§ 15) |
+| Cotisations mensuelles | Mois payés, total versé, à jour ou en retard — **module 2** (§ 16) |
 
 Le reçu de consécration n'est pas enregistré sur la fiche : les cas de reçu perdu sont réglés hors du
 site, lors de la centralisation des inscriptions.
@@ -404,12 +407,12 @@ date de début, la date de fin éventuelle, un motif résumé et la **référenc
 Chaque bureau peut, **à tout moment**, établir la liste des membres de son périmètre :
 
 - **Filtres combinables** : statut (Actif par défaut), sexe, catégorie, paroisse, circuit, région
-  (BNC), année d'intégration, fonction en cours, âge, et grade (module 2).
+  (BNC), année d'intégration, fonction en cours, âge, grade et situation des cotisations (module 2).
 - **Âge**, calculé au jour près à partir de la date de naissance : « moins de X ans », « plus de Y
   ans », « entre X et Y ans » (bornes incluses), ou « âge non renseigné ». « Plus de 40 ans » commence
   à 41 ans : les tranches ne se chevauchent pas.
 - **Colonnes au choix** : matricule, nom, prénoms, sexe, âge, téléphone, WhatsApp, paroisse, circuit,
-  catégorie, statut, fonctions.
+  catégorie, statut, fonctions, grade, cotisations (module 2).
 - **Formats** : affichage à l'écran, **PDF** avec en-tête officiel, filtres utilisés, date et heure ;
   **Excel**.
 - Le NPI et la photo du CIP n'apparaissent **jamais** dans une liste.
@@ -420,7 +423,7 @@ Chaque bureau peut, **à tout moment**, établir la liste des membres de son pé
 Chaque bureau dispose d'une page « Statistiques » limitée à son périmètre, toujours à jour :
 
 - total ; répartition par sexe, par tranche d'âge (avec « âge non renseigné »), par catégorie, par
-  statut, et par grade (module 2) ;
+  statut, par grade et par situation des cotisations (module 2) ;
 - répartition par unité inférieure : par région pour le BNC, par circuit pour une région, par
   paroisse pour un circuit ;
 - les membres actifs sont comptés par défaut ; les autres statuts peuvent être ajoutés ;
@@ -463,6 +466,10 @@ Une personne qui a plusieurs mandats passe d'un espace à l'autre depuis l'accue
 | Gérer bureaux, fonctions, territoire | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Réinitialiser un mot de passe | ❌ | Ses membres | ❌ | ❌ | ✅ |
 | Consulter le journal | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Voir le grade et les cotisations | Les siens | Sa paroisse | Son circuit | Sa région | Tous |
+| Enregistrer un versement de cotisation | ❌ | ✅ | ❌ | ❌ | ✅ |
+| Attribuer ou corriger un grade | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Fixer le montant et le mois de départ des cotisations | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ### 12.2 Le gardien des périmètres
 
@@ -507,8 +514,9 @@ Le BNC le consulte depuis son espace, avec des filtres par action, auteur, texte
 
 - La photo du CIP et les photos d'identité sont stockées dans un **espace privé** et ne sont
   transmises qu'après contrôle des droits.
-- **Sauvegardes** : quotidienne automatique chez l'hébergeur, copie hebdomadaire chiffrée chez un
-  autre fournisseur, test de restauration chaque trimestre.
+- **Sauvegardes** : quotidienne automatique chez l'hébergeur ; **sauvegarde complète chiffrée** par le
+  mainteneur, au moins une fois par mois et avant toute grosse mise à jour, copiée sur deux supports
+  (clé USB, disque dur) rangés à deux endroits différents ; test de restauration chaque trimestre.
 - Alertes de sécurité automatiques sur les composants utilisés.
 
 ### 12.6 Protection des données personnelles (APDP)
@@ -536,6 +544,8 @@ Le BNC le consulte depuis son espace, avec des filtres par action, auteur, texte
   - lot validé ;
   - réinitialisation de mot de passe ;
   - changement de matricule.
+  - attribution, promotion ou correction d'un grade (module 2) ;
+  - versement de cotisation enregistré ou annulé (module 2).
 - SMS et WhatsApp : étudiés au module 4, selon leur coût.
 
 ## 14. Interface
@@ -551,54 +561,198 @@ Le BNC le consulte depuis son espace, avec des filtres par action, auteur, texte
 
 # Partie III — Les modules suivants
 
-Les modules 2 à 5 feront chacun l'objet d'un cahier des charges détaillé avant leur réalisation. Les
-éléments ci-dessous en fixent dès maintenant le contenu attendu.
+Le **module 2** (grades et cotisations mensuelles) est décrit ci-dessous en détail : il sera réalisé
+dès sa validation. Les modules 3 à 5 feront chacun l'objet d'un cahier des charges détaillé avant leur
+réalisation ; les éléments ci-dessous en fixent dès maintenant le contenu attendu.
 
-## 15. Module 2 — Grades et éligibilité
+## 15. Module 2 — Les grades
 
-D'après le règlement intérieur (chapitre X) :
+### 15.1 Les douze grades
 
-- **12 grades** (art. 77), dans l'ordre :
-  1. Soldat de 3ᵉ classe
-  2. Soldat de 2ᵉ classe
-  3. Soldat de 1ʳᵉ classe
-  4. Sous-Capitaine
-  5. Capitaine
-  6. Senior Capitaine
-  7. Commandant
-  8. Sous-Supérieur
-  9. Supérieur Délégué
-  10. Supérieur Général Délégué
-  11. Supérieur Général
-  12. Supérieur Suprême Spirituel
-  
-  Chaque grade a ses épaulettes et sa couleur de corde.
-- **Premier grade** : tout nouveau consacré commence **Soldat de 3ᵉ classe** (art. 80).
-- **Durées minimales** avant le passage au grade suivant (art. 78) :
+D'après le règlement intérieur (chapitre X, art. 77 et 86), du moins élevé au plus élevé :
 
-  | Passage | Durée minimale |
-  |---|---|
-  | 3ᵉ classe → 2ᵉ classe | 3 ans |
-  | 2ᵉ classe → 1ʳᵉ classe | 3 ans |
-  | 1ʳᵉ classe → Sous-Capitaine | 3 ans |
-  | Sous-Capitaine → Capitaine | 4 ans |
-  | Capitaine → Senior Capitaine | 5 ans |
+| N° | Grade | Épaulettes / attributs | Corde | Accès |
+|---:|---|---|---|---|
+| 1 | Soldat de 3ᵉ classe | 2 barrettes | Blanche | Première consécration (art. 80) |
+| 2 | Soldat de 2ᵉ classe | 3 barrettes | Verte | Test, après 3 ans |
+| 3 | Soldat de 1ʳᵉ classe | 1 étoile | Chocolat | Test, après 3 ans |
+| 4 | Sous-Capitaine | 2 étoiles | Bleue | Test, après 3 ans |
+| 5 | Capitaine | 3 étoiles | Jaune | Test, après 4 ans |
+| 6 | Senior Capitaine | 3 étoiles, 3 croix, 1 épée | Bleue et jaune | Test, après 5 ans |
+| 7 | Commandant | 4 étoiles, 1 croix, 1 épée | Jaune | Nomination |
+| 8 | Sous-Supérieur | 4 étoiles, 3 croix, 1 épée | Multicolore | Nomination |
+| 9 | Supérieur Délégué | 4 étoiles, Saint-Michel | Multicolore | Nomination |
+| 10 | Supérieur Général Délégué | Moïse, 1 épée | Multicolore | Nomination |
+| 11 | Supérieur Général | Jésus, Moïse, 1 épée | Multicolore | Nomination |
+| 12 | Supérieur Suprême Spirituel | Jésus, Moïse, couronne | Multicolore | Nomination |
 
-  L'ancienneté seule ne donne pas droit au grade.
-- **Test obligatoire** jusqu'à Senior Capitaine, organisé par le BNC dans les régions ; **à partir de
-  Commandant, nomination uniquement** (art. 74, 78, 79). Promotion exceptionnelle par le BNC
-  (art. 84).
-- **Correspondance** avec les grades de l'Église (art. 81) : niveau de référence requis, jamais
-  automatique.
-- **Changement de tenue** (art. 73) : après 3 ans d'activités pour la soutane blanche, 5 ans pour la
-  première veste à col Mao, avec avis préalable du BNC.
-- **Régularisation** des grades existants à l'entrée en vigueur du règlement (art. 83).
+Les durées sont des **minimums** (art. 78) : l'ancienneté seule ne donne pas droit au grade. Le BNC
+peut accorder une **promotion exceptionnelle** (art. 84). La correspondance avec les grades de l'Église
+(art. 81) est un niveau de référence, **jamais une attribution automatique**. La qualité de membre
+d'honneur n'est pas un grade (art. 87).
 
-Le site tiendra l'historique des grades de chaque membre, produira automatiquement les **listes
-d'éligibles** par grade et par unité, et ajoutera le grade aux filtres des listes et aux statistiques
-(par exemple : nombre de Capitaines de plus de 40 ans d'une région).
+### 15.2 Sur la fiche du membre
 
-## 16. Module 3 — Événements et présences
+- **Grade actuel**, affiché sur la fiche, dans l'espace du membre et sur la **fiche PDF**.
+- **Historique des grades** : grade, date d'effet, mode d'accès (première consécration, test,
+  nomination, promotion exceptionnelle, régularisation), référence de la décision du BNC.
+- Le membre voit son propre grade et son historique ; un bureau voit ceux des membres de son
+  périmètre ; un membre simple ne voit jamais le grade d'un autre membre.
+
+### 15.3 Qui enregistre les grades
+
+- **Le BNC seul** attribue un grade (art. 76 : le BNC arrête et publie les décisions d'avancement).
+- **À l'enregistrement** d'un nouveau membre : Soldat de 3ᵉ classe par défaut. Pour les membres déjà
+  gradés (**régularisation**, art. 83), le BNC choisit le grade et sa date, sur le formulaire individuel
+  ou dans une **colonne « Grade »** du fichier Excel des lots.
+- **Promotion** : sur la fiche d'un membre, ou **en série** après la proclamation des résultats d'un
+  test (cocher les promus dans une liste, indiquer la date et la référence de la décision).
+- Le site **refuse** une promotion qui ne respecte pas la durée minimale de l'article 78, sauf si le
+  BNC la déclare **promotion exceptionnelle** (art. 84), avec un motif.
+- Un grade ne s'efface pas : une erreur se corrige par une **correction** du BNC, avec motif, qui reste
+  dans l'historique.
+- Chaque attribution, promotion ou correction est **inscrite au journal** et **notifiée** au membre et
+  au bureau de sa paroisse.
+
+### 15.4 Listes
+
+- Nouvelle colonne **Grade** et nouveau filtre **Grade** : un ou plusieurs grades, ou « à partir de »
+  un grade (par exemple : à partir de Capitaine).
+- Le filtre grade se **combine** avec tous les autres : âge, sexe, statut, catégorie, région, circuit,
+  paroisse, fonction, année d'intégration. Exemples :
+  - les Capitaines de plus de 40 ans de la région de Cotonou ;
+  - les Senior Capitaines de moins de 50 ans du circuit de Davo ;
+  - les Soldats de 3ᵉ classe intégrés en 2024 dans une paroisse donnée.
+- Exports PDF et Excel, comme les autres listes.
+
+### 15.5 Statistiques
+
+- **Répartition par grade** (les douze grades, avec « grade non renseigné »), dans le périmètre du
+  bureau : par exemple le nombre de Capitaines, de Senior Capitaines, de Soldats de 3ᵉ classe.
+- **Tableau croisé grade × tranche d'âge** et **grade × sexe**.
+- **Tableau croisé grade × unité inférieure** : par région pour le BNC, par circuit pour une région, par
+  paroisse pour un circuit.
+- Ces tableaux suivent les filtres de la page : on peut, par exemple, n'afficher que les membres d'une
+  région ou d'une tranche d'âge.
+- Comme partout, **chaque chiffre ouvre la liste correspondante** (mêmes filtres) : le chiffre et le
+  nombre de lignes de la liste sont toujours égaux.
+
+### 15.6 Éligibilité
+
+- Liste des **membres éligibles** au grade suivant : grade actuel, ancienneté dans ce grade, durée
+  minimale atteinte (art. 78), statut Actif.
+- Filtrable et exportable comme les autres listes ; sert à préparer les tests organisés par le BNC dans
+  les régions (art. 75).
+- Les autres conditions (tenue, assiduité, cotisations, conduite, art. 73) restent appréciées par les
+  bureaux ; la **situation des cotisations** (§ 16) est affichée à côté de chaque nom pour aider.
+
+### 15.7 Site d'essai
+
+Les membres fictifs du site d'essai sont **recréés avec des grades de toutes sortes**, répartis de
+façon vraisemblable selon l'âge et l'ancienneté (beaucoup de Soldats, moins de Capitaines, quelques
+Commandants et Supérieurs), avec leur historique de grades, afin d'essayer listes et statistiques
+croisées.
+
+### 15.8 Points à confirmer par le BNC
+
+1. Les membres déjà gradés seront-ils régularisés à l'enregistrement (grade et date connus), ou tous
+   saisis Soldat de 3ᵉ classe puis corrigés ?
+2. Faut-il enregistrer aussi la **tenue** (soutane blanche, première veste, deuxième veste) et ses
+   changements (art. 73) ?
+3. Une sanction peut-elle entraîner une rétrogradation ? (Le règlement ne le prévoit pas : par défaut,
+   non.)
+
+## 16. Module 2 — Les cotisations mensuelles (CM)
+
+### 16.1 Le principe
+
+Le règlement intérieur oblige tout membre à s'acquitter régulièrement de ses cotisations mensuelles
+(art. 10 f). À ce jour, la cotisation est de **100 F CFA par mois**, soit **1 200 F CFA par an**.
+
+Le site retrace, **pour chaque membre et pour chaque mois**, si la cotisation est payée ou non, **à
+compter du mois de mise en service du site**. Il n'enregistre pas l'argent lui-même : il enregistre les
+**versements déclarés** par le bureau qui les reçoit.
+
+### 16.2 Réglages (BNC)
+
+- **Montant mensuel** : 100 F CFA, modifiable par le BNC avec une **date d'effet** ; les mois déjà
+  passés gardent leur ancien montant.
+- **Mois de départ** : le premier mois suivi par le site (mois de la mise en service réelle). Avant ce
+  mois, rien n'est dû sur le site.
+- Toute modification est inscrite au journal.
+
+### 16.3 Ce qui est dû
+
+- Un membre doit la cotisation de chaque mois **à partir du mois de départ**, ou de son mois
+  d'enregistrement s'il est arrivé plus tard, **jusqu'au mois en cours**.
+- Rien n'est dû pour les mois pendant lesquels le membre est **exclu, démissionnaire ou décédé**.
+- Un membre est **à jour** quand tous les mois dus jusqu'au mois en cours sont payés. Sinon, il est
+  **en retard** de N mois, soit N × 100 F CFA.
+- Un membre peut **payer d'avance** les mois suivants de l'année.
+
+### 16.4 Enregistrer un versement
+
+- C'est le **bureau de la paroisse** du membre qui enregistre les versements (titulaire d'une fonction
+  avec droit de gérer, en principe le Trésorier paroissial) ; le BNC peut aussi le faire.
+- Le bureau saisit : le membre, le **montant versé** et la **date** ; le site range automatiquement le
+  montant sur les **mois non payés les plus anciens** (200 F = deux mois). Il peut aussi cocher
+  directement les mois payés.
+- **Saisie rapide pour toute la paroisse** : une grille des membres et des mois de l'année, où l'on
+  coche les mois payés lors de la collecte.
+- Un versement ne se supprime pas : une erreur s'**annule** (avec motif), et l'annulation reste visible.
+  Versements et annulations sont inscrits au journal.
+
+### 16.5 Ce que chacun voit
+
+| Qui | Ce qu'il voit |
+|---|---|
+| **Membre** | **Ses seules** cotisations : mois payés de l'année, total versé, à jour ou non. Jamais celles d'un autre membre. |
+| **Bureau de paroisse** | Les cotisations de chaque membre de sa paroisse, mois par mois ; la grille de saisie. |
+| **Bureau de circuit / de région** | Les cotisations des membres de son circuit / de sa région, en lecture ; listes et statistiques. |
+| **BNC** | Tout le pays ; réglages ; corrections. |
+
+### 16.6 Tableau de bord, listes et statistiques
+
+- **Tableau de bord** de chaque bureau : pour l'année et le mois en cours, nombre de membres **à jour**
+  et **en retard**, montant total enregistré, montant restant dû.
+- **Fiche de cotisations** d'un membre : grille des 12 mois de l'année (payé / non payé / non dû),
+  total de l'année et depuis le début, en F CFA.
+- **Listes** : nouveaux filtres « à jour », « en retard », « en retard d'au moins N mois », combinables
+  avec tous les autres (grade, âge, unité…) ; colonnes « mois payés », « total versé », « reste dû ».
+- **Statistiques** : membres à jour / en retard, montants versés et restant dus, par unité inférieure,
+  par grade, par tranche d'âge ; chaque chiffre ouvre la liste correspondante.
+- Exports PDF et Excel, inscrits au journal.
+
+### 16.7 Sur la fiche PDF du membre
+
+La fiche PDF comporte une rubrique **« Cotisations mensuelles »** :
+
+- **total des cotisations versées**, en F CFA (année en cours, et depuis le mois de départ) ;
+- la mention **« À jour au [mois en cours] »** ou **« En retard de N mois (X F CFA) »**.
+
+### 16.8 Site d'essai
+
+Les membres fictifs reçoivent des **cotisations fictives** variées (à jour, en retard d'un mois, de
+plusieurs mois, payées d'avance) pour essayer le tableau de bord, les listes et les statistiques.
+
+### 16.9 Points à confirmer par le BNC
+
+1. Les **membres d'honneur** et les **membres sympathisants** paient-ils la cotisation ? (Par défaut :
+   oui, comme les membres actifs.)
+2. Un membre **sanctionné** (suspendu) doit-il ses cotisations pendant la sanction ? (Par défaut :
+   oui.)
+3. Le mineur paie-t-il la même cotisation ? (Par défaut : oui.)
+4. Le bureau de circuit ou de région peut-il aussi enregistrer des versements, ou seulement la
+   paroisse ?
+5. Le site doit-il produire un **reçu** (PDF) pour chaque versement ?
+6. Les reversements des paroisses au BNC, au circuit et à la région (art. 127 et 128 : 500, 300 ou
+   200 F selon la catégorie de la paroisse) sont un autre sujet ; faut-il aussi les suivre sur le site
+   (plus tard) ?
+
+Ces données nouvelles (grade, versements) seront ajoutées à la page « Protection de vos données » et
+au dossier APDP.
+
+## 17. Module 3 — Événements et présences
 
 - Création des activités (cultes, rassemblements, formations, tests de grade, pèlerinages) par les
   bureaux, selon leur périmètre.
@@ -607,15 +761,16 @@ d'éligibles** par grade et par unité, et ajoutera le grade aux filtres des lis
 - Enregistrement des **présences** et historique de participation de chaque membre, consultable sur
   sa fiche.
 - Statistiques de participation par unité.
+- **Tests de grade** : inscription des candidats éligibles (§ 15.6) et saisie des résultats.
 
-## 17. Module 4 — Communication
+## 18. Module 4 — Communication
 
 - **Messages officiels** du BNC aux membres, par périmètre.
 - **Espace documents commun** : circulaires, modèles, comptes rendus.
 - **Règlement intérieur en ligne**, consultable par tous les membres.
 - Étude de l'envoi de **SMS et de messages WhatsApp**, selon les coûts.
 
-## 18. Module 5 — Médias
+## 19. Module 5 — Médias
 
 - Photos et vidéos des activités, rattachées aux événements du module 3.
 - Vidéos publiées sur la chaîne YouTube de l'Église et intégrées au site, pour des raisons de coût et
@@ -625,7 +780,7 @@ d'éligibles** par grade et par unité, et ajoutera le grade aux filtres des lis
 
 # Partie IV — Réalisation et exploitation
 
-## 19. Choix techniques
+## 20. Choix techniques
 
 | Élément | Choix | Raison |
 |---|---|---|
@@ -637,7 +792,7 @@ d'éligibles** par grade et par unité, et ajoutera le grade aux filtres des lis
 | Code source | Dépôt GitHub `siteArm` | Historique complet, tests automatiques, retour en arrière possible. |
 | Nom de domaine | **.bj** | Choix de l'Église. |
 
-## 20. Hébergement
+## 21. Hébergement
 
 Un comparatif chiffré a été établi le 11 novembre 2026 (document séparé). Il porte sur trois
 hébergeurs gérés français (Scalingo, Clever Cloud, alwaysdata) et sur un serveur à administrer
@@ -653,9 +808,9 @@ soi-même.
   Bénin, moyen de paiement, nom de domaine `.bj` et son titulaire (l'Église), déclaration du transfert
   des données à l'APDP.
 
-## 21. Qualité
+## 22. Qualité
 
-### 21.1 Tests automatiques
+### 22.1 Tests automatiques
 
 Chaque fonctionnalité est accompagnée de **tests automatiques écrits avant le code**. Ils vérifient en
 particulier :
@@ -671,7 +826,7 @@ particulier :
 À ce jour, près de 500 tests sont exécutés automatiquement à chaque modification, sur la même base
 de données que le site réel.
 
-### 21.2 Parcours d'une modification
+### 22.2 Parcours d'une modification
 
 Toute modification passe par les mêmes étapes :
 
@@ -681,21 +836,24 @@ Toute modification passe par les mêmes étapes :
 4. La modification est essayée sur le **site d'essai**.
 5. Elle est mise en ligne sur le **site réel**.
 
-### 21.3 Surveillance
+### 22.3 Surveillance
 
 Alerte par e-mail si le site est inaccessible ; rapport détaillé des erreurs.
 
-## 22. Documentation et maintenance
+## 23. Documentation et maintenance
 
 - **Guide de maintenance** : installation, mise à jour, sauvegarde et restauration, ajout d'une
   région, réinitialisation d'un compte ou d'une double vérification, tâches quotidiennes.
 - **Guide d'installation du site d'essai** chez alwaysdata, pas à pas.
 - **Guides pour les bureaux**, avec captures d'écran (enregistrement par lots, listes, mutations).
 - **Fichier de contexte** permettant à tout assistant technique de reprendre le projet.
+- **Récapitulatif du projet** : tout ce qui est fait, où se trouve chaque chose, ce qui reste à faire.
+- **Sauvegarde complète et chiffrée** (code, données, photos, réglages) à copier sur une clé USB ou un
+  disque dur, avec procédure de restauration sur un autre ordinateur ou un autre hébergement.
 - Tâche quotidienne automatique : avertissement des échéances de mandats, début et fin des
   sanctions.
 
-## 23. Calendrier du module 1
+## 24. Calendrier du module 1
 
 | Étape | Contenu | État |
 |---|---|---|
@@ -708,7 +866,11 @@ Alerte par e-mail si le site est inaccessible ; rapport détaillé des erreurs.
 | 7 | Sanctions, journal, double vérification, correction exceptionnelle | Réalisée |
 | 8 | Mise en ligne : hébergement, site d'essai, déclaration APDP, site réel | **En cours** (site d'essai en ligne) |
 
-## 24. Éléments attendus de l'Église
+Le **module 2** (grades, puis cotisations mensuelles) est réalisé ensuite, en deux étapes, et essayé
+sur le site d'essai avec de nouveaux membres fictifs dotés de grades et de cotisations ; il peut être
+mis en ligne en même temps que le module 1.
+
+## 25. Éléments attendus de l'Église
 
 | Élément | Pour | État |
 |---|---|---|
@@ -719,6 +881,7 @@ Alerte par e-mail si le site est inaccessible ; rapport détaillé des erreurs.
 | Choix de l'hébergeur et du nom de domaine `.bj` | Mise en ligne | **À décider** après les essais |
 | Informations pour la déclaration APDP (responsable du traitement, contact) | Mise en ligne | **À fournir** |
 | Retours des essais sur le site d'essai | Mise en ligne | En cours |
+| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | **À fournir** |
 
 ---
 
@@ -740,6 +903,9 @@ Alerte par e-mail si le site est inaccessible ; rapport détaillé des erreurs.
 | **Signalement** | Demande transmise au BNC : décès, démission, réhabilitation ou changement de catégorie. |
 | **Double vérification** | Code à 6 chiffres demandé à la connexion, en plus du mot de passe, pour les comptes du BNC. |
 | **Journal** | Registre non modifiable des opérations sensibles. |
+| **Grade** | Rang du membre dans l'Armée du Salut, de Soldat de 3ᵉ classe à Supérieur Suprême Spirituel (RI art. 77). |
+| **CM** | Cotisation mensuelle due par chaque membre (100 F CFA par mois à ce jour). |
+| **À jour** | Se dit d'un membre qui a payé toutes les cotisations dues jusqu'au mois en cours. |
 | **APDP** | Autorité de Protection des Données Personnelles du Bénin. |
 | **Site d'essai** | Copie du site, avec des données fictives, où chaque nouveauté est essayée avant la mise en ligne. |
 
