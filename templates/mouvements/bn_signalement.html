@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titre %}{{ signalement.get_type_display }} — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'mouvements:bn_decisions' %}">← Décisions à prendre</a></p>
+  {% if erreur %}<p class="message message--error">{{ erreur }}</p>{% endif %}
+  <h1>{{ signalement.get_type_display }}</h1>
+  {% with m=signalement.membre %}
+  <p><span class="matricule">{{ m.matricule }}</span></p>
+  <dl class="fiche">
+    <dt>Membre</dt><dd><a href="{% url 'membres:bn_fiche' m.matricule %}">{{ m.nom_complet }}</a></dd>
+    <dt>Statut actuel</dt><dd>{{ m.get_statut_display }}</dd>
+    <dt>Catégorie actuelle</dt><dd>{{ m.get_categorie_display }}</dd>
+    <dt>État</dt><dd><span class="pastille">{{ signalement.get_etat_display }}</span></dd>
+    {% if signalement.date_effet %}<dt>Date</dt><dd>{{ signalement.date_effet|date:"d/m/Y" }}</dd>{% endif %}
+    {% if signalement.reference %}<dt>Référence</dt><dd>{{ signalement.reference }}</dd>{% endif %}
+    {% if signalement.nouvelle_categorie %}<dt>Nouvelle catégorie</dt><dd>{{ signalement.get_nouvelle_categorie_display }}</dd>{% endif %}
+    <dt>Commentaire</dt><dd>{{ signalement.commentaire|default:"—" }}</dd>
+    <dt>Signalé le</dt><dd>{{ signalement.date_demande|date:"d/m/Y" }} ({{ signalement.unite }})</dd>
+    {% if signalement.motif_refus %}<dt>Motif du refus</dt><dd>{{ signalement.motif_refus }}</dd>{% endif %}
+  </dl>
+  {% endwith %}
+  {% if signalement.etat == "bn" %}
+    {% if signalement.type == "rehabilitation" %}
+      <p class="aide">La confirmation réactive le compte et télécharge une fiche avec un nouveau mot de passe provisoire.</p>
+    {% endif %}
+    <form method="post" class="decision">
+      {% csrf_token %}
+      <button type="submit" name="decision" value="valider" class="bouton">Confirmer</button>
+      <label class="champ"><span>Motif du refus</span><input type="text" name="motif_refus" maxlength="300"></label>
+      <button type="submit" name="decision" value="refuser" class="bouton bouton--secondaire">Refuser</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

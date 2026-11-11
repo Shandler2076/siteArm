@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titre %}Mutation n° {{ mutation.pk }} — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'mouvements:bn_decisions' %}">← Décisions à prendre</a></p>
+  {% if erreur %}<p class="message message--error">{{ erreur }}</p>{% endif %}
+  {% include "mouvements/_mutation_detail.html" %}
+  {% if mutation.en_cours %}
+    {% if not avis_circuit %}<p class="aide">Avis du circuit de départ : pas encore donné.</p>{% endif %}
+    {% if not avis_region %}<p class="aide">Avis de la région de départ : pas encore donné.</p>{% endif %}
+    {% if mandats %}
+      <div class="alerte">
+        <h2>Fonctions en cours</h2>
+        <p>Si la mutation est validée, ces mandats seront clos :</p>
+        <ul>{% for m in mandats %}<li>{{ m.fonction.nom }} — {{ m.unite.nom }}</li>{% endfor %}</ul>
+      </div>
+    {% endif %}
+    <form method="post" class="decision">
+      {% csrf_token %}
+      <label class="champ"><span>Commentaire (facultatif)</span><input type="text" name="commentaire" maxlength="300"></label>
+      <button type="submit" name="decision" value="valider" class="bouton">Valider la mutation</button>
+      <button type="submit" name="decision" value="refuser" class="bouton bouton--secondaire">Refuser</button>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

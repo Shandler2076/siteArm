@@ -163,7 +163,7 @@ def mutation_aiguillage(request, pk):
     """Lien commun des notifications : renvoie vers la page de la mutation pour ce compte."""
     get_object_or_404(Mutation, pk=pk)
     if request.user.has_perm("membres.gerer_membres"):
-        return redirect(f"/bureau/bn/mutations/{pk}/")
+        return redirect("mouvements:bn_mutation", pk=pk)
     for unite in unites_gerees(request.user):
         if mutations_pour_unite(unite).filter(pk=pk).exists():
             return redirect(reverse("mouvements:mutation", args=[unite.cle, pk]))

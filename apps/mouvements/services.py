@@ -174,14 +174,7 @@ def decider_mutation(
                 date_debut=jour,
                 motif=f"Mutation n° {mutation.pk}",
             )
-            quittees = set()
-            if depart != arrivee:
-                quittees.add(depart)
-            if depart.circuit != arrivee.circuit:
-                quittees.add(depart.circuit)
-            if depart.circuit.region != arrivee.circuit.region:
-                quittees.add(depart.circuit.region)
-            clore_mandats(membre, jour, quittees)
+            clore_mandats(membre, jour, unites_quittees(depart, arrivee))
         mutation.etat = EtatDemande.VALIDEE if valider else EtatDemande.REFUSEE
         mutation.decidee_par = par
         mutation.date_decision = timezone.now()
@@ -202,6 +195,27 @@ def decider_mutation(
     unites = {*unites_de_paroisse(depart), *unites_de_paroisse(arrivee), NATIONAL}
     notifier_unites(unites, texte, lien_mutation(mutation), comptes=[membre.compte])
     return mutation
+
+
+def unites_quittees(depart, arrivee) -> set:
+    """Paroisse, circuit et région que le membre quitte (ceux qui changent)."""
+    quittees = set()
+    if depart != arrivee:
+        quittees.add(depart)
+    if depart.circuit != arrivee.circuit:
+        quittees.add(depart.circuit)
+    if depart.circuit.region != arrivee.circuit.region:
+        quittees.add(depart.circuit.region)
+    return quittees
+
+
+def mandats_a_clore(mutation: Mutation) -> list:
+    """Mandats en cours qui seront clos si la mutation est validée (pour prévenir le BN)."""
+    quittees = unites_quittees(mutation.paroisse_depart, mutation.paroisse_arrivee)
+    mandats = mutation.membre.mandats.en_cours().select_related(
+        "fonction", "paroisse", "circuit", "region"
+    )
+    return [m for m in mandats if m.unite in quittees]
 
 
 def mutations_pour_unite(unite: Unite) -> QuerySet[Mutation]:

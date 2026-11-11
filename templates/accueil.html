@@ -20,6 +20,7 @@
   {% if est_bn %}
   <h2>Bureau national</h2>
   <ul class="liens">
+    <li><a href="{% url 'mouvements:bn_decisions' %}">Décisions à prendre ({{ nb_decisions }})</a></li>
     <li><a href="{% url 'membres:bn_enregistrer' %}">Enregistrer un membre</a></li>
     <li><a href="{% url 'lots:liste' %}">Enregistrer par lots (Excel)</a></li>
     <li><a href="{% url 'membres:bn_photos' %}">Photos à valider</a></li>

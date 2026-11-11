@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titre %}Décisions à prendre — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="aide">Bureau national</p>
+  <h1>Décisions à prendre</h1>
+  <h2>Mutations</h2>
+  <ul class="liste-membres">
+    {% for m in mutations %}
+      <li><a href="{% url 'mouvements:bn_mutation' m.pk %}">
+        <strong>{{ m.membre.nom_complet }} — {{ m.membre.matricule }}</strong>
+        <span>{{ m.paroisse_depart.nom }} → {{ m.paroisse_arrivee.nom }}</span>
+        <span><span class="pastille">{{ m.get_etat_display }}</span> demandée le {{ m.date_demande|date:"d/m/Y" }}</span>
+      </a></li>
+    {% empty %}<li class="aide">Aucune mutation en attente.</li>{% endfor %}
+  </ul>
+  <h2>Signalements</h2>
+  <ul class="liste-membres">
+    {% for s in signalements %}
+      <li><a href="{% url 'mouvements:bn_signalement' s.pk %}">
+        <strong>{{ s.get_type_display }} — {{ s.membre.nom_complet }} ({{ s.membre.matricule }})</strong>
+        <span>Signalé le {{ s.date_demande|date:"d/m/Y" }}</span>
+      </a></li>
+    {% empty %}<li class="aide">Aucun signalement en attente.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}
