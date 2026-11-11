@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "apps.journal",
     "apps.listes",
     "apps.mouvements",
+    "apps.securite",
     "axes",
 ]
 
@@ -57,6 +58,7 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "apps.comptes.middleware.ChangementMotDePasseObligatoire",
+    "apps.securite.middleware.DoubleVerificationObligatoire",
     "apps.bureaux.middleware.DureeSessionBureau",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -192,3 +194,6 @@ EMAIL_USE_SSL = _bool("DJANGO_EMAIL_USE_SSL", False)
 EMAIL_TIMEOUT = 10  # secondes : un serveur lent ne bloque pas les pages
 if DEBUG and not os.environ.get("DJANGO_EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+
+# Double vérification (code à 6 chiffres) obligatoire pour les comptes ayant un mandat national.
+DOUBLE_VERIFICATION_BN = os.environ.get("DJANGO_DOUBLE_VERIFICATION_BN", "True") == "True"
