@@ -7,7 +7,11 @@ from pathlib import Path
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 
+from config.env import charger_env
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+# Fichier .env facultatif (hébergeur) ; les variables d'environnement ont la priorité.
+charger_env(os.environ.get("DJANGO_ENV_FILE") or BASE_DIR / ".env")
 
 
 def _bool(nom: str, defaut: bool = False) -> bool:
@@ -79,6 +83,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "apps.notifications.context_processors.notifications",
                 "apps.bureaux.context_processors.bureaux",
+                "apps.comptes.context_processors.site",
             ],
         },
     },
@@ -144,7 +149,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 # Fichiers privés (photos, CIP) : jamais servis directement, seulement via des vues contrôlées.
-PRIVATE_MEDIA_ROOT = BASE_DIR / "prive"
+PRIVATE_MEDIA_ROOT = Path(os.environ.get("DJANGO_PRIVATE_MEDIA_ROOT") or BASE_DIR / "prive")
 
 # Adresse publique du site (imprimée sur les fiches d'identification).
 SITE_URL = os.environ.get("DJANGO_SITE_URL", "")
@@ -176,7 +181,8 @@ CSRF_TRUSTED_ORIGINS = _liste("DJANGO_CSRF_TRUSTED_ORIGINS")
 X_FRAME_OPTIONS = "DENY"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 if not DEBUG:
-    SECURE_SSL_REDIRECT = not EN_TEST
+    # À désactiver seulement si l'hébergeur redirige déjà vers HTTPS (boucle de redirections).
+    SECURE_SSL_REDIRECT = not EN_TEST and _bool("DJANGO_SECURE_SSL_REDIRECT", True)
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -197,3 +203,6 @@ if DEBUG and not os.environ.get("DJANGO_EMAIL_HOST"):
 
 # Double vérification (code à 6 chiffres) obligatoire pour les comptes ayant un mandat national.
 DOUBLE_VERIFICATION_BN = os.environ.get("DJANGO_DOUBLE_VERIFICATION_BN", "True") == "True"
+
+# Site d'essai : bandeau « données fictives » et commande peupler_demo autorisée.
+SITE_DEMO = _bool("DJANGO_SITE_DEMO", False)

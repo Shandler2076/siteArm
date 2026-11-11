@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/site.css' %}">
 </head>
 <body>
+  {% if site_demo %}<div class="bandeau-essai">Site d'essai — données fictives uniquement. N'enregistrez aucun vrai membre.</div>{% endif %}
   <header class="entete">
     <div class="entete__marque">
       <span class="entete__filet"></span>
