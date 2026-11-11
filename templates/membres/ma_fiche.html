@@ -20,6 +20,7 @@
     <dt>NPI</dt><dd>{{ membre.npi|default:"—" }}</dd>
     <dt>Intégration</dt><dd>{{ membre.annee_integration }} — {{ membre.paroisse_integration.nom }} ({{ membre.region_integration.nom }})</dd>
   </dl>
+  {% include "_mes_fonctions.html" with titre="Mes fonctions" %}
   <h2>Mes coordonnées</h2>
   <dl class="fiche">
     <dt>Téléphone</dt><dd>{{ membre.telephone }}</dd>

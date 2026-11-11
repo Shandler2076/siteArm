@@ -1,0 +1,6 @@
+<div class="fonctions-actuelles">
+  {% if titre %}<h2>{{ titre }}</h2>{% endif %}
+  <ul>
+    {% for f in mes_fonctions %}<li>{{ f }}</li>{% empty %}<li>{% if user.membre %}Membre simple{% else %}Compte technique{% endif %}</li>{% endfor %}
+  </ul>
+</div>

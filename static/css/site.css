@@ -133,3 +133,29 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .qr { text-align: center; margin: 12px 0; } .qr svg { max-width: 220px; height: auto; }
 .cle { word-spacing: .3em; overflow-wrap: anywhere; }
 .bandeau-essai { background: var(--or); color: var(--marine); text-align: center; font-weight: 700; padding: 6px 12px; font-size: .9rem; }
+/* Navigation : menu de gauche, bouton retour, fonctions */
+.bouton-menu { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 8px; padding: 6px 10px; font-size: 1rem; cursor: pointer; margin-right: 8px; }
+.disposition--menu { display: block; }
+.menu { position: fixed; top: 0; left: 0; bottom: 0; width: 280px; max-width: 85vw; background: #fff; box-shadow: 2px 0 16px rgba(20,40,75,.15); overflow-y: auto; padding: 16px 14px 40px; transform: translateX(-105%); transition: transform .2s ease; z-index: 30; }
+.menu-ouvert .menu { transform: none; }
+.voile { display: none; }
+.menu-ouvert .voile { display: block; position: fixed; inset: 0; background: rgba(20,40,75,.35); z-index: 20; }
+.menu ul { list-style: none; padding: 0; margin: 0 0 6px; }
+.menu li a { display: block; padding: 8px 10px; border-radius: 8px; color: var(--marine); text-decoration: none; font-size: .95rem; }
+.menu li a:hover { background: var(--fond); }
+.menu li a.actif { background: var(--marine); color: #fff; font-weight: 700; }
+.menu__titre { margin: 14px 0 4px; padding: 0 10px; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--rouge); }
+.menu__qui { border-bottom: 2px solid var(--or); padding: 0 10px 10px; margin-bottom: 4px; }
+.menu__qui strong { display: block; color: var(--marine); }
+.menu__qui span { display: block; font-size: .82rem; color: var(--gris); line-height: 1.35; margin-top: 3px; }
+.retour-ligne { margin: 0 0 10px; }
+.retour { display: inline-block; color: var(--marine); font-weight: 700; text-decoration: none; padding: 4px 10px 4px 0; }
+.fonctions-actuelles ul { list-style: none; padding: 0; margin: 6px 0 14px; }
+.fonctions-actuelles li { background: var(--fond); border-left: 4px solid var(--or); border-radius: 6px; padding: 6px 10px; margin: 4px 0; font-weight: 600; color: var(--marine); }
+@media (min-width: 960px) {
+  .bouton-menu { display: none; }
+  .disposition--menu { display: grid; grid-template-columns: 270px 1fr; gap: 0; align-items: start; }
+  .disposition--menu .menu { position: sticky; top: 0; transform: none; height: 100vh; box-shadow: none; border-right: 1px solid #DDE3EE; max-width: none; width: auto; z-index: 1; }
+  .disposition--menu .voile { display: none !important; }
+  .disposition--menu .page { margin: 0; max-width: 900px; }
+}
