@@ -91,6 +91,16 @@ def installer_bureau(
                 )
 
         transaction.on_commit(prevenir)
+    from apps.journal.models import INSTALLATION_BUREAU
+    from apps.journal.services import journaliser
+
+    journaliser(
+        par,
+        INSTALLATION_BUREAU,
+        unite=unite.cle,
+        titulaires={f.nom: m.matricule for f, m in titulaires.items()},
+        date_debut=date_debut.isoformat(),
+    )
     return nouveaux
 
 
@@ -128,8 +138,12 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
         )
         if not dans_ma_paroisse or droits_particuliers:
             raise PermissionDenied("Vous ne pouvez pas réinitialiser ce compte.")
+    from apps.journal.models import REINITIALISATION
+    from apps.journal.services import journaliser
+
     mot_de_passe = generer_mot_de_passe_provisoire()
     contenu = fiche_identification_pdf(cible, mot_de_passe)  # avant de toucher au compte
+    journaliser(par, REINITIALISATION, membre=cible.matricule)
     with transaction.atomic():
         compte.set_password(mot_de_passe)
         compte.doit_changer_mot_de_passe = True

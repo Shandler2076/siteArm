@@ -7,6 +7,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from apps.journal import models as journal
+from apps.journal.services import journaliser
 from apps.membres.forms import FormulaireEnregistrement
 from apps.membres.models import EtatPhoto, Membre, PhotoIdentite
 from apps.membres.pdf import fiche_identification_pdf
@@ -75,6 +77,7 @@ def fiche(request, matricule):
         Membre.objects.select_related("paroisse_integration", "region_integration"),
         matricule=matricule,
     )
+    journaliser(request.user, journal.CONSULTATION_FICHE, unite="national", membre=matricule)
     return render(request, "membres/bn_fiche.html", {"membre": membre})
 
 
@@ -125,6 +128,13 @@ def photos(request):
                     p.etat, p.motif_refus = EtatPhoto.REFUSEE, motif
                 p.date_decision, p.decide_par = timezone.now(), request.user
                 p.save()
+                journaliser(
+                    request.user,
+                    journal.PHOTO_DECISION,
+                    membre=p.membre.matricule,
+                    decision=decision,
+                    motif=motif,
+                )
             messages.success(request, f"Photo de {p.membre.matricule} : {p.get_etat_display()}.")
             return redirect("membres:bn_photos")
     en_attente = PhotoIdentite.objects.filter(etat=EtatPhoto.EN_ATTENTE).select_related("membre")

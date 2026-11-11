@@ -68,6 +68,10 @@ def valider_lot(lot: Lot, par) -> list[Membre]:
         lot.save(update_fields=["etat", "valide_par", "date_validation"])
         numero = lot.pk
         transaction.on_commit(lambda: _notifier_bureaux(crees, numero))
+    from apps.journal.models import LOT_VALIDE
+    from apps.journal.services import journaliser
+
+    journaliser(par, LOT_VALIDE, lot=lot.pk, membres=len(crees))
     return crees
 
 

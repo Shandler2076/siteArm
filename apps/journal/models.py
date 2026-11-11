@@ -12,6 +12,58 @@ MUTATION_AVIS = "mutation_avis"
 MUTATION_DECIDEE = "mutation_decidee"
 SIGNALEMENT = "signalement"
 SIGNALEMENT_DECIDE = "signalement_decide"
+CONNEXION = "connexion"
+CONNEXION_ECHOUEE = "connexion_echouee"
+CONSULTATION_FICHE = "consultation_fiche"
+REINITIALISATION = "reinitialisation"
+PHOTO_DECISION = "photo_decision"
+ENREGISTREMENT = "enregistrement"
+LOT_VALIDE = "lot_valide"
+INSTALLATION_BUREAU = "installation_bureau"
+COORDONNEES = "coordonnees"
+SANCTION = "sanction"
+SANCTION_LEVEE = "sanction_levee"
+FIN_SANCTION = "fin_sanction"
+CORRECTION_INTEGRATION = "correction_integration"
+DOUBLE_VERIFICATION = "double_verification"
+
+LIBELLES = {
+    LISTE_PDF: "Liste téléchargée (PDF)",
+    LISTE_EXCEL: "Liste téléchargée (Excel)",
+    STATISTIQUES_PDF: "Statistiques téléchargées (PDF)",
+    TRANCHES_AGE: "Tranches d'âge modifiées",
+    MUTATION_DEMANDEE: "Mutation demandée",
+    MUTATION_AVIS: "Avis de mutation",
+    MUTATION_DECIDEE: "Mutation décidée",
+    SIGNALEMENT: "Signalement",
+    SIGNALEMENT_DECIDE: "Signalement décidé",
+    CONNEXION: "Connexion",
+    CONNEXION_ECHOUEE: "Connexion échouée",
+    CONSULTATION_FICHE: "Consultation d'une fiche",
+    REINITIALISATION: "Mot de passe réinitialisé",
+    PHOTO_DECISION: "Décision sur une photo",
+    ENREGISTREMENT: "Membre enregistré",
+    LOT_VALIDE: "Lot validé",
+    INSTALLATION_BUREAU: "Bureau installé",
+    COORDONNEES: "Coordonnées modifiées",
+    SANCTION: "Sanction inscrite",
+    SANCTION_LEVEE: "Sanction levée",
+    FIN_SANCTION: "Fin de sanction",
+    CORRECTION_INTEGRATION: "Correction exceptionnelle",
+    DOUBLE_VERIFICATION: "Double vérification",
+}
+
+
+class JournalImmuable(Exception):
+    """Le journal ne se modifie pas et ne s'efface pas."""
+
+
+class JournalQuerySet(models.QuerySet):
+    def update(self, **kwargs):
+        raise JournalImmuable("Le journal ne peut pas être modifié.")
+
+    def delete(self):
+        raise JournalImmuable("Le journal ne peut pas être effacé.")
 
 
 class EntreeJournal(models.Model):
@@ -28,10 +80,24 @@ class EntreeJournal(models.Model):
     unite = models.CharField("unité", max_length=40, blank=True)
     details = models.JSONField("détails", default=dict, blank=True)
 
+    objects = JournalQuerySet.as_manager()
+
     class Meta:
         verbose_name = "entrée du journal"
         verbose_name_plural = "journal"
         ordering = ["-date"]
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding:
+            raise JournalImmuable("Le journal ne peut pas être modifié.")
+        super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise JournalImmuable("Le journal ne peut pas être effacé.")
+
+    @property
+    def libelle(self) -> str:
+        return LIBELLES.get(self.action, self.action)
 
     def __str__(self) -> str:
         return f"{self.date:%d/%m/%Y %H:%M} — {self.action}"

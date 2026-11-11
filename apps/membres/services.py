@@ -127,6 +127,10 @@ def enregistrer_membre(
                 date_debut=date_integration or datetime.date(annee_integration, 1, 1),
                 motif="Intégration",
             )
+        from apps.journal.models import ENREGISTREMENT
+        from apps.journal.services import journaliser
+
+        journaliser(par, ENREGISTREMENT, membre=membre.matricule)
         if notifier:  # les lots envoient une notification groupée à la place
             transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
     except Exception:

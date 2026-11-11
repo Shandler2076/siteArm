@@ -46,7 +46,11 @@ def fiche_membre(request, cle, matricule):
         raise Http404
     parcours = membre.affectations.select_related("paroisse", "circuit_a_date", "region_a_date")
     mandats = membre.mandats.select_related("fonction", "paroisse", "circuit", "region")
+    from apps.journal.models import CONSULTATION_FICHE
+    from apps.journal.services import journaliser
     from apps.mouvements.views import contexte_fiche
+
+    journaliser(request.user, CONSULTATION_FICHE, unite=unite.cle, membre=membre.matricule)
 
     return render(
         request,
