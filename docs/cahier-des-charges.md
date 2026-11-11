@@ -28,7 +28,7 @@ Le document est organisé en quatre parties :
 
 Un lexique figure en annexe.
 
-*Koudakbo, mainteneur du site, pour le Bureau National de Commandement.*
+*KOUDAKPO Thoovi Marc Aurel, mainteneur du site, pour le Bureau National de Commandement.*
 
 ---
 

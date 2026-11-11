@@ -3,6 +3,10 @@
 Site Django en français pour gérer les membres : matricules, parcours, bureaux, mutations,
 sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 
+## Mainteneur
+- **KOUDAKPO Thoovi Marc Aurel** — mainteneur du site, pour le Bureau National de Commandement
+  (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
+
 ## Documents de référence
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
