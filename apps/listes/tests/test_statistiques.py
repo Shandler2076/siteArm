@@ -42,6 +42,7 @@ def test_totaux(varies):
         "Par catégorie",
         "Par grade",
         "Par statut",
+        "Cotisations",
     ]
     assert _chiffres(s["Total"]) == {"Total des membres": 3}
     assert _chiffres(s["Par sexe"]) == {"Hommes": 2, "Femmes": 1}
