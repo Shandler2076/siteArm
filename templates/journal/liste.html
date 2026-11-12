@@ -4,7 +4,7 @@
 <section class="carte">
   <p class="aide">Bureau national</p>
   <h1>Journal</h1>
-  <p class="aide">Le journal ne peut être ni modifié ni effacé.</p>
+  <p class="aide">Le journal ne peut être ni modifié ni effacé. Chaque ligne se lit : <strong>qui</strong> a fait <strong>quoi</strong>, et à quel niveau (paroisse, circuit, région ou Bureau national).</p>
   <form method="get" class="filtres">
     <div class="grille-filtres">
       <label class="champ"><span>Action</span>
@@ -21,14 +21,13 @@
   <p><strong>{{ page.paginator.count }} entrée{{ page.paginator.count|pluralize }}</strong></p>
   <div class="tableau-defilant">
     <table class="tableau">
-      <thead><tr><th>Date</th><th>Auteur</th><th>Action</th><th>Unité</th><th>Détails</th></tr></thead>
+      <thead><tr><th>Date</th><th>Qui</th><th>Ce qui a été fait</th><th>Au niveau de</th></tr></thead>
       <tbody>
-        {% for e in page %}
-          <tr><td class="insecable">{{ e.date|date:"d/m/Y H:i" }}</td><td>{{ e.auteur|default:"—" }}</td>
-            <td>{{ e.libelle }}</td><td>{{ e.unite|default:"—" }}</td>
-            <td><small>{% for k, v in e.details.items %}{{ k }} : {{ v }}{% if not forloop.last %} · {% endif %}{% endfor %}</small></td></tr>
+        {% for l in lignes %}
+          <tr><td class="insecable">{{ l.date|date:"d/m/Y H:i" }}</td><td>{{ l.auteur }}</td>
+            <td>{{ l.texte }}</td><td>{{ l.unite }}</td></tr>
         {% empty %}
-          <tr><td colspan="5" class="aide">Aucune entrée.</td></tr>
+          <tr><td colspan="4" class="aide">Aucune entrée.</td></tr>
         {% endfor %}
       </tbody>
     </table>

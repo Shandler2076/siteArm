@@ -469,7 +469,7 @@ Une personne qui a plusieurs mandats passe d'un espace à l'autre depuis l'accue
 | Voir le grade et les cotisations | Les siens | Sa paroisse | Son circuit | Sa région | Tous |
 | Enregistrer un versement de cotisation | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Valider ou refuser un versement de cotisation | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Marquer sa part de cotisations comme reçue | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Marquer sa part de cotisations comme reçue | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Attribuer ou corriger un grade | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Fixer le montant, le mois de départ et les pourcentages des cotisations | ❌ | ❌ | ❌ | ❌ | ✅ |
 
@@ -724,14 +724,24 @@ compter du mois de mise en service du site**. Il n'enregistre pas l'argent lui-m
 - Un versement ne se supprime pas : une erreur s'**annule** (avec motif), et l'annulation reste visible.
   Versements, validations, refus et annulations sont inscrits au journal.
 
-### 16.4 bis Répartition entre le circuit, la région et le national
+### 16.4 bis Répartition entre la paroisse, le circuit, la région et le national
 
-- À la validation par le circuit, le site calcule la **part de chaque niveau** : la part du **circuit**,
-  celle de la **région** et celle du **national**, selon des **pourcentages fixés par le BNC** (avec
-  date d'effet).
+- À la validation par le circuit, le site calcule la **part de chaque niveau**, selon la répartition
+  décidée par le BNC (12 novembre 2026) :
+
+  | Niveau | Part | Sur une cotisation de 100 F |
+  |---|---|---|
+  | Paroisse | 30 % | 30 F |
+  | Circuit | 20 % | 20 F |
+  | Région | 20 % | 20 F |
+  | Bureau national | 30 % | 30 F |
+  | **Total** | **100 %** | **100 F** |
+
+- Ces pourcentages sont un **réglage du BNC**, modifiable avec une date d'effet (les mois passés gardent
+  l'ancienne répartition) ; leur total doit toujours faire 100 %.
 - Chaque bureau voit, pour son périmètre et pour chaque mois, le **montant validé** et **sa part**.
-- La **région** puis le **national** marquent la part qui leur revient comme **reçue** lorsqu'ils la
-  perçoivent ; le site affiche ainsi, à chaque niveau, les parts **reçues** et **en attente**.
+- La paroisse garde sa part. Le **circuit**, la **région** et le **national** marquent la part qui
+  leur revient comme **reçue** lorsqu'ils la perçoivent ; le site affiche ainsi, à chaque niveau, les parts **reçues** et **en attente**.
 
 ### 16.5 Ce que chacun voit
 
@@ -787,13 +797,15 @@ Décisions :
 3. Un **reçu PDF** est produit pour chaque versement, et un document **« État des cotisations
    mensuelles »** à part ; rien sur la fiche du membre.
 
-Restent à confirmer par le BNC :
+4. **Répartition** (12 novembre 2026) : paroisse 30 %, circuit 20 %, région 20 %, Bureau national
+   30 %.
 
-1. Les **pourcentages** du circuit, de la région et du national sur les 100 F, et ce que garde la
-   paroisse (le cas échéant).
-2. Le reçu est-il remis **dès la saisie** par la paroisse, ou **seulement après la validation** du
-   circuit ? (Proposé : après la validation.)
-3. Un **délai** de validation par le circuit (par exemple 30 jours), avec rappel automatique ?
+Choix retenus par défaut, sauf avis contraire du BNC :
+
+1. Le **reçu** est produit **après la validation** du circuit (un versement refusé ne doit pas avoir
+   de reçu).
+2. Les versements non validés depuis **30 jours** font l'objet d'un **rappel automatique** au bureau du
+   circuit (tâche quotidienne).
 
 Ces données nouvelles (grade, versements) seront ajoutées à la page « Protection de vos données » et
 au dossier APDP.
@@ -927,7 +939,7 @@ mis en ligne en même temps que le module 1.
 | Choix de l'hébergeur et du nom de domaine `.bj` | Mise en ligne | **À décider** après les essais |
 | Informations pour la déclaration APDP (responsable du traitement, contact) | Mise en ligne | **À fournir** |
 | Retours des essais sur le site d'essai | Mise en ligne | En cours |
-| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | Reçues le 11 novembre 2026 ; restent les **pourcentages** de répartition (§ 16.9) |
+| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | Reçues (11 et 12 novembre 2026) |
 
 ---
 
