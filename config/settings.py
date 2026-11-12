@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "apps.securite",
     "apps.grades",
     "apps.cotisations",
+    "apps.evenements",
     "axes",
 ]
 

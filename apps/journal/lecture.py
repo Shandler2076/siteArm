@@ -212,6 +212,25 @@ def lire(entrees) -> list[Ligne]:
                 )
             texte = " ; ".join(morceaux) or "a modifié les réglages"
             return f"Cotisations mensuelles : {texte}."
+        if a == j.EVENEMENT_CREE:
+            return f"A créé l'événement « {d.get('nom')} »."
+        if a == j.EVENEMENT_MODIFIE:
+            return f"A modifié l'événement « {d.get('nom')} »."
+        if a == j.EVENEMENT_ANNULE:
+            return f"A annulé l'événement « {d.get('nom')} » (motif : {d.get('motif', '')})."
+        if a == j.CONVOCATION:
+            session = f", {d['session']}" if d.get("session") else ""
+            return f"A convoqué {m} à « {d.get('nom')} »{session}."
+        if a == j.CONVOCATION_RETIREE:
+            return (
+                f"A retiré la convocation de {m} à « {d.get('nom')} » "
+                f"(motif : {d.get('motif', '')})."
+            )
+        if a == j.PRESENCE:
+            etat = {"present": "présent", "absent": "absent", "excuse": "excusé"}.get(
+                d.get("presence"), d.get("presence")
+            )
+            return f"A pointé {m} : {etat} à « {d.get('nom')} »."
         if a == j.CONNEXION:
             return "S'est connecté au site."
         if a == j.CONNEXION_ECHOUEE:
