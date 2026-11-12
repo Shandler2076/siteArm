@@ -9,6 +9,7 @@
     <p class="matricule">{{ c.membre.matricule }}</p>
     <p><strong>{{ c.evenement.nom }}</strong><br>{{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %} — {{ c.evenement.lieu }}{% endif %}</p>
     <p>Est autorisé(e) à travailler{% if c.session %} — <strong>{{ c.session.nom }}</strong>{% endif %}.</p>
+    {% if peut_pointer %}<p><a class="bouton" href="{% url 'evenements:pointage' c.evenement_id %}?q={{ c.membre.matricule|urlencode }}#c{{ c.pk }}">Pointer la présence</a></p>{% endif %}
   {% else %}
     <p class="verification__etat verification__etat--non">Non valable</p>
     {% if c %}<h1>{{ c.membre.nom_complet }}</h1><p>{{ c.evenement.nom }}</p>{% endif %}

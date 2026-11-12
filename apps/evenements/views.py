@@ -28,6 +28,15 @@ NATIONAL = Unite(Niveau.NATIONAL, None)
 MAX_PROPOSES = 500
 
 
+def _pk(valeur) -> int:
+    """Identifiant envoyé par un formulaire ; une valeur non numérique donne une page 404."""
+    from django.http import Http404
+
+    if not (valeur or "").isdigit():
+        raise Http404
+    return int(valeur)
+
+
 @login_required
 @bn
 def liste(request):
@@ -125,7 +134,7 @@ def detail(request, pk):
         action = request.POST.get("action")
         try:
             if action == "retirer":
-                c = get_object_or_404(ev.convocations, pk=request.POST.get("convocation") or 0)
+                c = get_object_or_404(ev.convocations, pk=_pk(request.POST.get("convocation")))
                 retirer(c, motif=request.POST.get("motif", ""), par=request.user)
                 messages.success(request, f"Convocation de {c.membre.nom_complet} retirée.")
             elif action == "annuler":
@@ -147,6 +156,7 @@ def detail(request, pk):
             "total": total,
             "presents": presents,
             "pointes": pointes,
+            "taux": round(100 * presents / pointes) if pointes else None,
             "retires": retires,
         },
     )
@@ -167,7 +177,9 @@ def convoquer_vue(request, pk):
         try:
             if not membres:
                 raise EvenementRefuse("Cochez au moins un membre.")
-            faites = convoquer(ev, membres, session=session, par=request.user)
+            faites = convoquer(
+                ev, membres, session=session, sans_session=session is None, par=request.user
+            )
         except EvenementRefuse as e:
             messages.error(request, str(e))
             return redirect(request.get_full_path())
@@ -193,12 +205,12 @@ def convoquer_vue(request, pk):
 def pointage(request, pk):
     ev = get_object_or_404(Evenement, pk=pk)
     if request.method == "POST":
-        c = get_object_or_404(ev.convocations, pk=request.POST.get("convocation") or 0)
+        c = get_object_or_404(ev.convocations, pk=_pk(request.POST.get("convocation")))
         try:
             pointer(c, request.POST.get("presence", ""), par=request.user)
         except EvenementRefuse as e:
             messages.error(request, str(e))
-        return redirect(request.get_full_path())
+        return redirect(f"{request.get_full_path()}#c{c.pk}")
     q = request.GET.get("q", "").strip()
     convocations = ev.convocations.filter(active=True).select_related("membre", "session")
     if q:
@@ -242,6 +254,7 @@ def export_excel(request, pk):
     ws = wb.active
     ws.title = "Convoqués"
     ws.append([ev.nom])
+    ws["A1"].data_type = "s"  # jamais de formule
     ws.append(ENTETES)
     for ligne in _lignes(ev):
         ws.append(ligne)
@@ -366,8 +379,11 @@ def verifier(request, jeton):
     valable = c is not None and autorisation_valable(c)
     photo = None
     if valable and c.membre.photo_acceptee:
-        with c.membre.photo_acceptee.fichier.open("rb") as f:
-            photo = base64.b64encode(f.read()).decode()
+        try:
+            with c.membre.photo_acceptee.fichier.open("rb") as f:
+                photo = base64.b64encode(f.read()).decode()
+        except OSError:
+            photo = None  # fichier introuvable (restauration incomplète…) : pas de photo
     raison = ""
     if c is None:
         raison = "Code inconnu."
@@ -375,10 +391,20 @@ def verifier(request, jeton):
         raison = "Cette convocation a été retirée."
     elif c.evenement.annule:
         raison = "Cet événement est annulé."
+    elif not c.evenement.avec_autorisation:
+        raison = "Cet événement ne donne pas lieu à une autorisation."
+    elif c.membre.statut in {"exclu", "demissionnaire", "decede"}:
+        raison = "Cette personne n'est plus membre du mouvement."
     reponse = render(
         request,
         "evenements/verifier.html",
-        {"c": c, "valable": valable, "photo": photo, "raison": raison},
+        {
+            "c": c,
+            "valable": valable,
+            "photo": photo,
+            "raison": raison,
+            "peut_pointer": valable and request.user.has_perm("membres.gerer_membres"),
+        },
     )
     reponse["Cache-Control"] = "no-store"
     reponse["X-Robots-Tag"] = "noindex"

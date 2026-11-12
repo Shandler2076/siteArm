@@ -4,6 +4,7 @@ Les invitations partent directement du Bureau national vers la personne convoqu�
 """
 
 import datetime
+import re
 
 from django.db import IntegrityError, transaction
 from django.utils import timezone
@@ -24,6 +25,10 @@ ACTIONS = {
     "retrait": "convocation_retiree",
     "presence": "presence",
 }
+
+
+JETON = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+SORTIS = {"exclu", "demissionnaire", "decede"}  # plus membres : ni convocation ni carte valable
 
 
 class EvenementRefuse(Exception):
@@ -152,21 +157,51 @@ def _texte_convocation(ev, c) -> str:
     )
 
 
-def convoquer(ev: Evenement, membres, *, par, session: Session | None = None) -> list[Convocation]:
-    """Convoque (ou change de session) ; un membre déjà convoqué n'est pas convoqué deux fois."""
+def convoquer(
+    ev: Evenement,
+    membres,
+    *,
+    par,
+    session: Session | None = None,
+    sans_session: bool = False,
+) -> list[Convocation]:
+    """Convoque (ou change de session) ; un membre déjà convoqué n'est pas convoqué deux fois.
+
+    Tout ou rien : un membre qui n'est plus dans le mouvement fait refuser l'ensemble.
+    `sans_session=True` remet « sans session » les membres déjà convoqués.
+    """
     if ev.annule:
         raise EvenementRefuse("Cet événement est annulé.")
     if session is not None and session.evenement_id != ev.pk:
         raise EvenementRefuse("Cette session n'appartient pas à l'événement.")
+    membres = list(membres)
+    sortis = [m.nom_complet for m in membres if m.statut in SORTIS]
+    if sortis:
+        raise EvenementRefuse(
+            "Aucune convocation enregistrée : ne sont plus membres du mouvement — "
+            + ", ".join(sortis)
+            + "."
+        )
     resultat, a_notifier = [], []
     with transaction.atomic():
         for membre in membres:
             existante = ev.convocations.filter(membre=membre, active=True).first()
             if existante:
-                if session is not None and existante.session_id != session.pk:
+                nouvelle = session.pk if session is not None else None
+                if (session is not None or sans_session) and existante.session_id != nouvelle:
+                    ancienne = existante.session.nom if existante.session else ""
                     existante.session = session
                     existante.save(update_fields=["session"])
                     a_notifier.append(existante)
+                    _journal(
+                        par,
+                        "convocation",
+                        evenement=ev.pk,
+                        nom=ev.nom,
+                        membre=membre.matricule,
+                        session=session.nom if session else "",
+                        ancienne_session=ancienne,
+                    )
                 resultat.append(existante)
                 continue
             try:
@@ -175,7 +210,9 @@ def convoquer(ev: Evenement, membres, *, par, session: Session | None = None) ->
                         evenement=ev, membre=membre, session=session, convoque_par=par
                     )
             except IntegrityError:
-                c = ev.convocations.get(membre=membre, active=True)
+                # Convoqué au même instant par une autre requête : déjà notifié et journalisé.
+                resultat.append(ev.convocations.get(membre=membre, active=True))
+                continue
             resultat.append(c)
             a_notifier.append(c)
             _journal(
@@ -239,7 +276,7 @@ def pointer(convocation: Convocation, presence: str, *, par) -> Convocation:
 
 
 def convocation_par_jeton(jeton: str) -> Convocation | None:
-    if not jeton or len(jeton) > 64:
+    if not jeton or not JETON.match(jeton):
         return None
     return (
         Convocation.objects.select_related("evenement", "membre", "session")
@@ -249,4 +286,9 @@ def convocation_par_jeton(jeton: str) -> Convocation | None:
 
 
 def autorisation_valable(c: Convocation) -> bool:
-    return bool(c.active and not c.evenement.annule and c.evenement.avec_autorisation)
+    return bool(
+        c.active
+        and not c.evenement.annule
+        and c.evenement.avec_autorisation
+        and c.membre.statut not in SORTIS
+    )
