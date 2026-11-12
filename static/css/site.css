@@ -184,3 +184,6 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .etape-2fa { border: 1px solid #DDE3EE; border-radius: 10px; padding: 12px 14px; margin: 12px 0; } .etape-2fa .bouton { margin: 6px 0; }
 .etape-2fa a.bouton { text-decoration: none; text-align: center; }
 .texte-long h2 { font-size: 1.1rem; margin-top: 22px; } .texte-long li { margin: 5px 0; } .vitrine-pied a { color: var(--marine); }
+.croise td, .croise th { text-align: right; }
+.croise th[scope="row"], .croise thead th:first-child { text-align: left; white-space: nowrap; }
+.croise .nombre { font-weight: 700; color: var(--marine); }
