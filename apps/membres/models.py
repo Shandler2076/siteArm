@@ -161,7 +161,7 @@ class Membre(models.Model):
 
     @property
     def nom_complet(self) -> str:
-        """« Grade Prénoms NOM » (ex. « Capitaine Marc Aurel KOUDAKPO ») ; sans grade : « Prénoms NOM »."""
+        """« Grade Prénoms NOM » (ex. « Capitaine Marc Aurel KOUDAKPO ») ; sinon « Prénoms NOM »."""
         nom = f"{self.prenoms} {self.nom.upper()}".strip()
         if self.grade is None:
             return nom
