@@ -7,6 +7,7 @@
   <p class="matricule">{{ membre.matricule }}</p>
   <h1>{{ membre.nom_complet }}</h1>
   <dl class="fiche">
+    <dt>Grade</dt><dd>{{ membre.get_grade_display|default:"Non renseigné" }}{% if membre.date_grade %} <small class="aide">depuis le {{ membre.date_grade|date:"d/m/Y" }}</small>{% endif %}</dd>
     <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
     <dt>Statut</dt><dd>{{ membre.get_statut_display }}{% with d=membre|date_deces %}{% if d %}<br><small>Décédé le {{ d|date:"d/m/Y" }}</small>{% endif %}{% endwith %}</dd>
     <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
@@ -38,6 +39,7 @@
     {% endfor %}
   </ul>
   {% include "mouvements/_sanctions.html" %}
+  {% include "grades/_historique.html" %}
   {% include "mouvements/_historique.html" %}
   <h2>Signalements au Bureau national</h2>
   <ul class="liens liens--compacts">

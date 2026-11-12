@@ -14,8 +14,22 @@
       </div>
       <small class="aide">Aucune case cochée : tous les statuts.</small>
     </div>
+    <details{% if resume or form.errors %} open{% endif %}>
+      <summary>Filtrer les statistiques (grade, âge, région, circuit…)</summary>
+      {{ form.non_field_errors }}
+      <div class="grille-filtres">
+        {% for champ in form %}{% if champ.name != "envoye" and champ.name != "colonnes" and champ.name != "statut" %}
+          <div class="champ{% if champ.name == 'grade' %} choix choix--grille{% endif %}">
+            <span>{{ champ.label }}</span>
+            {{ champ }}
+            {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
+          </div>
+        {% endif %}{% endfor %}
+      </div>
+    </details>
     <button type="submit" class="bouton">Mettre à jour</button>
   </form>
+  {% if resume %}<div class="resume">{% for r in resume %}<span class="pastille">{{ r }}</span>{% endfor %}</div>{% endif %}
   <p class="aide">Touchez un chiffre pour ouvrir la liste correspondante (exportable en PDF ou Excel).</p>
   <div class="grille-stats">
     {% for section in sections %}
@@ -29,6 +43,21 @@
       </div>
     {% endfor %}
   </div>
+  {% for t in tableaux %}
+    <h2>{{ t.titre }}</h2>
+    {% if t.lignes %}
+    <div class="tableau-defilant">
+      <table class="croise">
+        <thead><tr><th>Grade</th>{% for col in t.colonnes %}<th>{{ col }}</th>{% endfor %}</tr></thead>
+        <tbody>
+        {% for libelle, cellules in t.lignes %}
+          <tr><th scope="row">{{ libelle }}</th>{% for c in cellules %}<td><a href="{{ c.lien }}" class="nombre">{{ c.nombre }}</a></td>{% endfor %}</tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}<p class="aide">Aucun membre.</p>{% endif %}
+  {% endfor %}
   <div class="actions">
     <a class="bouton bouton--secondaire" href="{% url 'listes:statistiques_pdf' unite.cle %}?{{ requete }}">Télécharger en PDF</a>
   </div>

@@ -18,7 +18,11 @@ from apps.listes.exports import liste_excel, liste_pdf, statistiques_pdf
 from apps.listes.filtres import FiltreListeForm, membres_filtres, resume_filtres
 from apps.listes.forms import BornesForm
 from apps.listes.models import ReglageStatistiques
-from apps.listes.statistiques import calculer_statistiques
+from apps.listes.statistiques import (
+    base_depuis_requete,
+    calculer_statistiques,
+    calculer_tableaux,
+)
 from apps.membres.models import Statut
 
 PAR_PAGE = 100
@@ -58,25 +62,39 @@ def _statuts(request) -> list[str]:
 
 
 def _sections(request, unite):
+    """Statuts, sections, tableaux croisés et formulaire des filtres de page."""
     statuts = _statuts(request)
-    sections = calculer_statistiques(unite, statuts, timezone.localdate())
-    base = reverse("listes:liste", args=[unite.cle])
+    form = FiltreListeForm(unite, request.GET)
+    valide = form.is_valid()
+    base = base_depuis_requete(request.GET) if valide else {}
+    jour = timezone.localdate()
+    sections = calculer_statistiques(unite, statuts, jour, base)
+    tableaux = calculer_tableaux(unite, statuts, jour, base)
+    lien = reverse("listes:liste", args=[unite.cle]) + "?"
     for section in sections:
         for c in section.cellules:
-            c.lien = base + "?" + urlencode(c.filtres, doseq=True)
-    return statuts, sections
+            c.lien = lien + urlencode(c.filtres, doseq=True)
+    for t in tableaux:
+        for _libelle, cellules in t.lignes:
+            for c in cellules:
+                c.lien = lien + urlencode(c.filtres, doseq=True)
+    resume = [r for r in resume_filtres(form) if r != "Aucun filtre"] if valide and base else []
+    return statuts, sections, tableaux, form, resume
 
 
 @login_required
 def statistiques(request, cle):
     unite = unite_depuis_cle(request.user, cle)
-    statuts, sections = _sections(request, unite)
+    statuts, sections, tableaux, form, resume = _sections(request, unite)
     return render(
         request,
         "listes/statistiques.html",
         {
             "unite": unite,
             "sections": sections,
+            "tableaux": tableaux,
+            "form": form,
+            "resume": resume,
             "statuts": statuts,
             "choix_statuts": Statut.choices,
             "requete": request.GET.urlencode(),
@@ -87,8 +105,8 @@ def statistiques(request, cle):
 @login_required
 def statistiques_pdf_vue(request, cle):
     unite = unite_depuis_cle(request.user, cle)
-    statuts, sections = _sections(request, unite)
-    contenu = statistiques_pdf(unite, sections, statuts)
+    statuts, sections, tableaux, _form, resume = _sections(request, unite)
+    contenu = statistiques_pdf(unite, sections, statuts, tableaux, resume)
     journaliser(request.user, STATISTIQUES_PDF, unite=unite.cle, statuts=statuts)
     horodatage = timezone.localtime().strftime("%Y%m%d-%H%M")
     return telechargement(contenu, "application/pdf", f"statistiques-{cle}-{horodatage}.pdf")

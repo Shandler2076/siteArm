@@ -51,6 +51,7 @@ def enregistrer(request):
                     paroisse_integration=cd["paroisse_integration"],
                     annee_integration=cd["annee_integration"],
                     par=request.user,
+                    **form.parametres_grade(),
                 )
             except CapaciteMatriculeAtteinte as e:
                 form.add_error(None, str(e))

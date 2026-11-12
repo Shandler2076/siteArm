@@ -38,7 +38,7 @@ def test_valeurs_par_defaut(paroisse):
 
 def test_nom_complet_et_age(paroisse):
     m = _membre(paroisse, date_naissance=datetime.date(2000, 11, 11))
-    assert m.nom_complet == "HOUNKPÈ Jean-Marc"
+    assert m.nom_complet == "Jean-Marc HOUNKPÈ"
     assert m.age(datetime.date(2026, 11, 10)) == 25
     assert m.age(datetime.date(2026, 11, 11)) == 26
     assert _membre(paroisse, matricule="2015-01AS-0002").age() is None

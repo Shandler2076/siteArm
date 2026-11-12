@@ -8,6 +8,7 @@ from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
 from apps.lots.colonnes import COLONNES, PAR_CHAMP
+from apps.membres.grades import Grade
 from apps.membres.models import Categorie, SituationMatrimoniale
 from apps.organisation.models import Paroisse, Region
 
@@ -26,7 +27,9 @@ CONSIGNES = [
     "7. Catégorie laissée vide = membre actif.",
     "8. NPI : 10 chiffres, facultatif. Téléphone : chiffres, espaces et + uniquement. Ces "
     "colonnes sont au format Texte pour garder le 0 initial (ex. 0197000000).",
-    "9. Envoyez le fichier rempli au Secrétaire national, qui le déposera sur le site.",
+    "9. Grade : laissé vide = Camarade (nouveau membre). Pour un membre déjà gradé, choisissez son "
+    "grade dans la liste et indiquez la date à laquelle il l'a reçu (Date du grade).",
+    "10. Envoyez le fichier rempli au Secrétaire national, qui le déposera sur le site.",
 ]
 
 
@@ -59,14 +62,18 @@ def modele_pour_region(region: Region) -> bytes:
         ws.column_dimensions[get_column_letter(i)].width = max(14, len(c.entete) + 4)
     ws.row_dimensions[1].height = 32
     ws.freeze_panes = "A2"
-    date = get_column_letter(COLONNES.index(PAR_CHAMP["date_naissance"]) + 1)
+    dates = [
+        get_column_letter(COLONNES.index(PAR_CHAMP[c]) + 1)
+        for c in ("date_naissance", "date_grade")
+    ]
     # Téléphones et NPI en texte : Excel ne doit pas supprimer le 0 initial.
     textes = [
         get_column_letter(COLONNES.index(PAR_CHAMP[c]) + 1)
         for c in ("telephone", "whatsapp", "urgence_telephone", "npi")
     ]
     for ligne in range(2, NB_LIGNES + 2):
-        ws[f"{date}{ligne}"].number_format = "DD/MM/YYYY"
+        for date in dates:
+            ws[f"{date}{ligne}"].number_format = "DD/MM/YYYY"
         for lettre in textes:
             ws[f"{lettre}{ligne}"].number_format = "@"
 
@@ -81,6 +88,7 @@ def modele_pour_region(region: Region) -> bytes:
     situations = [lib for _, lib in SituationMatrimoniale.choices]
     _validation(ws, "situation_matrimoniale", _liste(listes, 3, situations))
     _validation(ws, "sexe", '"M,F"')
+    _validation(ws, "grade", _liste(listes, 4, [lib for _, lib in Grade.choices]))
     listes.sheet_state = "hidden"
 
     consignes = wb.create_sheet("Consignes")

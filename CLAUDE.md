@@ -3,7 +3,13 @@
 Site Django en français pour gérer les membres : matricules, parcours, bureaux, mutations,
 sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 
+## Mainteneur
+- **KOUDAKPO Thoovi Marc Aurel** — mainteneur du site, pour le Bureau National de Commandement
+  (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
+
 ## Documents de référence
+- Cahier des charges général (v2.3, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+  détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
 - Plans de réalisation : `docs/superpowers/plans/`
@@ -46,6 +52,10 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   fin automatique par la commande quotidienne `fin_des_sanctions` ; une sanction se lève, ne se
   supprime pas. Correction exceptionnelle : `apps/membres/services.py::corriger_integration`.
 - Journal immuable (`JournalImmuable`) ; page BN `/journal/`.
+- Grades (`apps/membres/grades.py` : Camarade = 0, puis 12 grades RI ; `apps/grades`) : `services.py`
+  est le SEUL point d'entrée (promouvoir, promouvoir_en_serie, corriger_grade, attribuer_grade_initial ;
+  durées art. 78, nomination ≥ Commandant, exceptionnelle art. 84). Nom affiché `nom_complet` =
+  « Grade Prénoms NOM ». Démo : `reinitialiser_demo --oui` (PostgreSQL).
 - Double vérification BN (`apps/securite`) : TOTP, intergiciel `DoubleVerificationObligatoire` ;
   désactivée dans les tests par `conftest.py` racine (sauf `apps/securite/tests`).
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.
@@ -57,6 +67,15 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   gratuite) : `docs/guide-alwaysdata.md` + scripts `deploiement/alwaysdata/` (installer, mettre à
   jour, tâches quotidiennes). Réglages lus aussi depuis `.env` (`config/env.py`, l'environnement a
   priorité). Site d'essai : `DJANGO_SITE_DEMO=True` (bandeau + `peupler_demo`, données FICTIVES).
+- Sauvegarde complète chiffrée (code en git bundle, dumpdata + pg_dump, fichiers privés, .env ; gpg
+  AES-256) : `deploiement/alwaysdata/sauvegarder.sh` ; restauration : `docs/guide-maintenance.md` § 20.
+- Récapitulatif de tout le projet : `docs/recapitulatif-du-projet.md` (+ PDF), à tenir à jour.
+
+## Protection des données (APDP)
+- Dossier de demande d'autorisation (traitement + transfert hors Bénin, art. 391) :
+  `docs/apdp/dossier-apdp.md` (+ PDF). Page publique `/protection-des-donnees/`
+  (`templates/protection_donnees.html`, contact `DJANGO_CONTACT_DONNEES`). Toute nouvelle donnée
+  ou finalité doit y être reportée.
 
 ## Commandes
 - Tests : `DJANGO_DEBUG=True pytest -q`

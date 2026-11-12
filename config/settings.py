@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.listes",
     "apps.mouvements",
     "apps.securite",
+    "apps.grades",
     "axes",
 ]
 
@@ -206,3 +207,6 @@ DOUBLE_VERIFICATION_BN = os.environ.get("DJANGO_DOUBLE_VERIFICATION_BN", "True")
 
 # Site d'essai : bandeau « données fictives » et commande peupler_demo autorisée.
 SITE_DEMO = _bool("DJANGO_SITE_DEMO", False)
+
+# Contact pour les questions sur les données personnelles (page « Protection de vos données »).
+CONTACT_DONNEES = os.environ.get("DJANGO_CONTACT_DONNEES", "")

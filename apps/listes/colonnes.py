@@ -19,6 +19,8 @@ COLONNES_LISTE: dict[str, tuple[str, float]] = {
     "whatsapp": ("WhatsApp", 24),
     "paroisse": ("Paroisse", 36),
     "circuit": ("Circuit", 30),
+    "grade": ("Grade", 34),
+    "date_grade": ("Grade depuis", 22),
     "categorie": ("Catégorie", 28),
     "statut": ("Statut", 22),
     "fonctions": ("Fonction(s)", 45),
@@ -48,6 +50,10 @@ def _valeur(m, cle: str, aujourdhui: datetime.date):
         return m.paroisse_actuelle
     if cle == "circuit":
         return m.circuit_actuel
+    if cle == "date_grade":
+        return m.date_grade.strftime("%d/%m/%Y") if m.date_grade else None
+    if cle == "grade":
+        return m.get_grade_display() if m.grade is not None else None
     if cle == "categorie":
         return m.get_categorie_display()
     if cle == "statut":

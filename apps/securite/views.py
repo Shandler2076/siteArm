@@ -82,6 +82,8 @@ def activer(request):
         "securite/activer.html",
         {
             "qr": segno.make(uri, error="m").svg_inline(scale=5, dark="#14284B"),
+            "uri": uri,
+            "secret": secret,
             "cle": " ".join(secret[i : i + 4] for i in range(0, len(secret), 4)),
             "erreur": erreur,
             "suivant": _suivant(request),

@@ -3,6 +3,7 @@ import uuid
 from django import forms
 from django.core.exceptions import ValidationError
 
+from apps.membres.grades import Grade
 from apps.membres.models import Categorie, Membre
 from apps.organisation.models import Paroisse
 
@@ -44,6 +45,21 @@ class FormulaireEnregistrement(forms.ModelForm):
         initial=Categorie.ACTIF,
         widget=forms.RadioSelect,
     )
+    grade = forms.TypedChoiceField(
+        label="Grade",
+        choices=Grade.choices,
+        coerce=int,
+        required=False,
+        empty_value=Grade.CAMARADE,
+        initial=Grade.CAMARADE,
+        help_text="Camarade pour un nouveau membre ; le grade actuel pour un membre déjà gradé.",
+    )
+    date_grade = forms.DateField(
+        label="Grade obtenu le",
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+        help_text="Pour un membre déjà gradé. Vide : date d'intégration.",
+    )
     confirmer_malgre_doublon = forms.BooleanField(required=False, widget=forms.HiddenInput)
 
     class Meta:
@@ -72,8 +88,33 @@ class FormulaireEnregistrement(forms.ModelForm):
         widgets = {"date_naissance": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")}
 
     def donnees_membre(self) -> dict:
-        exclus = {"annee_integration", "paroisse_integration", "confirmer_malgre_doublon"}
+        exclus = {
+            "annee_integration",
+            "paroisse_integration",
+            "confirmer_malgre_doublon",
+            "grade",
+            "date_grade",
+        }
         return {k: v for k, v in self.cleaned_data.items() if k not in exclus and k in self.fields}
+
+    def parametres_grade(self) -> dict:
+        """Paramètres de grade pour `enregistrer_membre`."""
+        grade = self.cleaned_data["grade"]
+        return {
+            "grade": grade,
+            "date_grade": self.cleaned_data.get("date_grade"),
+            "regularisation": grade != Grade.CAMARADE,
+        }
+
+    def clean(self):
+        from apps.grades.services import erreurs_grade_initial
+
+        donnees = super().clean()
+        date_grade, annee = donnees.get("date_grade"), donnees.get("annee_integration")
+        if date_grade and annee:
+            for message in erreurs_grade_initial(date_grade, annee, donnees.get("date_naissance")):
+                self.add_error("date_grade", message[0].upper() + message[1:])
+        return donnees
 
     def clean_photo_cip(self):
         f = self.cleaned_data.get("photo_cip")

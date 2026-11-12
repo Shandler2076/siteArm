@@ -9,6 +9,7 @@ from django.db.models import Q, QuerySet
 from django.utils import timezone
 
 from apps.comptes.models import Compte
+from apps.membres.grades import Grade
 from apps.membres.models import Affectation, CompteurMatricule, Membre, cle_nom
 from apps.organisation.models import Paroisse, Region
 
@@ -94,11 +95,18 @@ def enregistrer_membre(
     date_integration: datetime.date | None = None,
     notifier: bool = True,
     avec_mot_de_passe: bool = True,
+    grade: int = Grade.CAMARADE,
+    date_grade: datetime.date | None = None,
+    regularisation: bool = False,
 ) -> ResultatEnregistrement:
     """Crée en une seule transaction : matricule, compte, membre et première affectation.
 
     En cas d'échec, rien n'est créé, y compris le fichier de la photo du CIP éventuelle.
+    Grade : Camarade par défaut ; un grade donné (`regularisation`) est daté de `date_grade`,
+    sinon de la date d'intégration.
     """
+    from apps.grades.services import attribuer_grade_initial
+
     region = paroisse_integration.region
     membre = Membre(
         **donnees,
@@ -120,13 +128,21 @@ def enregistrer_membre(
                 doit_changer_mot_de_passe=True,
             )
             membre.save()
+            debut = date_integration or datetime.date(annee_integration, 1, 1)
             Affectation.objects.create(
                 membre=membre,
                 paroisse=paroisse_integration,
                 circuit_a_date=paroisse_integration.circuit,
                 region_a_date=region,
-                date_debut=date_integration or datetime.date(annee_integration, 1, 1),
+                date_debut=debut,
                 motif="Intégration",
+            )
+            attribuer_grade_initial(
+                membre,
+                grade=grade,
+                date_effet=date_grade or debut,
+                par=par,
+                regularisation=regularisation,
             )
         from apps.journal.models import ENREGISTREMENT
         from apps.journal.services import journaliser

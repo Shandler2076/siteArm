@@ -15,6 +15,7 @@ from apps.bureaux.perimetre import Unite
 from apps.listes.ages import tranches_depuis_bornes
 from apps.listes.filtres import FiltreListeForm, membres_filtres
 from apps.listes.models import ReglageStatistiques
+from apps.membres.grades import Grade
 from apps.membres.models import Categorie, Sexe, Statut
 from apps.organisation.models import Circuit, Paroisse, Region
 
@@ -30,6 +31,63 @@ class Cellule:
 class Section:
     titre: str
     cellules: list[Cellule]
+
+
+@dataclass
+class Tableau:
+    """Tableau croisé : une ligne par grade, une colonne par tranche d'âge, sexe ou unité."""
+
+    titre: str
+    colonnes: list[str]
+    lignes: list[tuple[str, list[Cellule]]]
+
+
+# Valeurs d'URL du filtre « grade », dans l'ordre : Camarade, les 12 grades, non renseigné.
+GRADES_STAT = [(str(v), str(lib)) for v, lib in Grade.choices] + [("aucun", "Grade non renseigné")]
+# Filtres de page acceptés sur la page Statistiques (mêmes clés que la liste).
+CLES_BASE = (
+    "sexe",
+    "categorie",
+    "grade",
+    "grade_min",
+    "eligible",
+    "region",
+    "circuit",
+    "paroisse",
+    "sans_affectation",
+    "annee",
+    "fonction",
+    "age",
+    "age_x",
+    "age_y",
+)
+
+
+def base_depuis_requete(donnees) -> dict:
+    """Filtres de page (clés d'URL) d'une requête GET, sans statut ni colonnes."""
+    base = {}
+    for cle in CLES_BASE:
+        valeurs = [v for v in donnees.getlist(cle) if v != ""]
+        if valeurs:
+            base[cle] = valeurs if cle == "grade" else valeurs[0]
+    return base
+
+
+def _grades(base: dict | None) -> list[tuple[str, str]]:
+    """Grades à détailler : ceux du filtre de page « grade » s'il y en a un, sinon tous."""
+    choisis = (base or {}).get("grade")
+    return [(v, lib) for v, lib in GRADES_STAT if not choisis or v in choisis]
+
+
+def _fabrique(unite: Unite, statuts: list[str], aujourdhui: datetime.date, base: dict | None):
+    def cellule(libelle: str, **filtres) -> Cellule:
+        complets = {"envoye": "1", "statut": list(statuts)}
+        complets.update(base or {})
+        complets.update(filtres)
+        donnees = _nettoyer(unite, complets)
+        return Cellule(libelle, membres_filtres(unite, donnees, aujourdhui).count(), complets)
+
+    return cellule
 
 
 def _nom(objet) -> str:
@@ -50,39 +108,50 @@ def _inferieures(unite: Unite):
     return None
 
 
-def calculer_statistiques(
-    unite: Unite, statuts: list[str], aujourdhui: datetime.date
-) -> list[Section]:
-    def cellule(libelle: str, **filtres) -> Cellule:
-        complets = {"envoye": "1", "statut": list(statuts)}
-        complets.update(filtres)
-        donnees = _nettoyer(unite, complets)
-        return Cellule(libelle, membres_filtres(unite, donnees, aujourdhui).count(), complets)
-
-    sections = [
-        Section("Total", [cellule("Total des membres")]),
-        Section(
-            "Par sexe",
-            [cellule("Hommes", sexe=Sexe.MASCULIN), cellule("Femmes", sexe=Sexe.FEMININ)],
-        ),
-    ]
-    tranches = tranches_depuis_bornes(ReglageStatistiques.courant().liste_bornes)
-    ages = []
-    for t in tranches:
+def _tranches_age() -> list:
+    """[(libellé, filtres)] des tranches d'âge, « âge non renseigné » compris."""
+    resultat = []
+    for t in tranches_depuis_bornes(ReglageStatistiques.courant().liste_bornes):
         filtres = {"age": t.condition, "age_x": str(t.x)}
         if t.y is not None:
             filtres["age_y"] = str(t.y)
-        ages.append(cellule(t.libelle, **filtres))
-    ages.append(cellule("Âge non renseigné", age="inconnu"))
-    sections.append(Section("Par tranche d'âge", ages))
-    sections.append(
-        Section("Par catégorie", [cellule(str(lib), categorie=v) for v, lib in Categorie.choices])
-    )
+        resultat.append((t.libelle, filtres))
+    resultat.append(("Âge non renseigné", {"age": "inconnu"}))
+    return resultat
+
+
+def calculer_statistiques(
+    unite: Unite, statuts: list[str], aujourdhui: datetime.date, base: dict | None = None
+) -> list[Section]:
+    """`base` : filtres de page (clés d'URL de la liste) appliqués à tous les chiffres."""
+    cellule = _fabrique(unite, statuts, aujourdhui, base)
+    # Une dimension déjà fixée par un filtre de page n'est pas redétaillée : sa répartition
+    # remplacerait le filtre de page au lieu de s'y ajouter.
+    fixe = set(base or {})
+
+    sections = [Section("Total", [cellule("Total des membres")])]
+    if "sexe" not in fixe:
+        sections.append(
+            Section(
+                "Par sexe",
+                [cellule("Hommes", sexe=Sexe.MASCULIN), cellule("Femmes", sexe=Sexe.FEMININ)],
+            )
+        )
+    if "age" not in fixe:
+        ages = [cellule(libelle, **filtres) for libelle, filtres in _tranches_age()]
+        sections.append(Section("Par tranche d'âge", ages))
+    if "categorie" not in fixe:
+        sections.append(
+            Section(
+                "Par catégorie", [cellule(str(lib), categorie=v) for v, lib in Categorie.choices]
+            )
+        )
+    sections.append(Section("Par grade", [cellule(lib, grade=[v]) for v, lib in _grades(base)]))
     sections.append(
         Section("Par statut", [cellule(str(lib), statut=[v]) for v, lib in Statut.choices])
     )
     inferieures = _inferieures(unite)
-    if inferieures:
+    if inferieures and inferieures[1] not in fixe:
         titre, champ, objets = inferieures
         cellules = []
         for libelle, objet in objets:
@@ -95,6 +164,54 @@ def calculer_statistiques(
                 cellules.append(c)
         sections.append(Section(titre, cellules))
     return sections
+
+
+def calculer_tableaux(
+    unite: Unite, statuts: list[str], aujourdhui: datetime.date, base: dict | None = None
+) -> list[Tableau]:
+    """Grade × tranche d'âge, grade × sexe, grade × unité inférieure ; lignes non vides seules.
+
+    Chaque cellule porte ses filtres : son nombre est celui de la liste qu'elle ouvre.
+    """
+    cellule = _fabrique(unite, statuts, aujourdhui, base)
+    grades = []
+    for valeur, libelle in _grades(base):
+        total = cellule("Total", grade=[valeur])
+        if total.nombre:
+            grades.append((valeur, libelle, total))
+    fixe = set(base or {})  # dimensions fixées par la page : pas de tableau (voir plus haut)
+    colonnes_par_tableau = []
+    if "age" not in fixe:
+        colonnes_par_tableau.append(("Grade × tranche d'âge", _tranches_age()))
+    if "sexe" not in fixe:
+        colonnes_par_tableau.append(
+            (
+                "Grade × sexe",
+                [("Hommes", {"sexe": Sexe.MASCULIN}), ("Femmes", {"sexe": Sexe.FEMININ})],
+            )
+        )
+    inferieures = _inferieures(unite)
+    if inferieures and inferieures[1] not in fixe:
+        titre, champ, objets = inferieures
+        nom = {"region": "région", "circuit": "circuit", "paroisse": "paroisse"}[champ]
+        colonnes_par_tableau.append(
+            (f"Grade × {nom}", [(libelle, {champ: str(o.pk)}) for libelle, o in objets])
+        )
+    tableaux = []
+    for titre, colonnes in colonnes_par_tableau:
+        lignes = []
+        for valeur, libelle, total in grades:
+            cellules = [cellule(lib, grade=[valeur], **filtres) for lib, filtres in colonnes]
+            lignes.append((libelle, [*cellules, total]))
+        # Unités inférieures fermées et vides : colonne retirée.
+        garder = [
+            i
+            for i, (lib, _f) in enumerate(colonnes)
+            if "(fermée)" not in lib or any(cs[i].nombre for _l, cs in lignes)
+        ]
+        lignes = [(lib, [cs[i] for i in garder] + [cs[-1]]) for lib, cs in lignes]
+        tableaux.append(Tableau(titre, [colonnes[i][0] for i in garder] + ["Total"], lignes))
+    return tableaux
 
 
 def _nettoyer(unite: Unite, filtres: dict) -> dict:

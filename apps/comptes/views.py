@@ -36,3 +36,14 @@ class ChangerMotDePasse(auth_views.PasswordChangeView):
         self.request.user.save(update_fields=["doit_changer_mot_de_passe"])
         messages.success(self.request, "Votre mot de passe a été changé.")
         return reponse
+
+
+def protection_donnees(request):
+    """Page publique « Protection de vos données » (Code du numérique, APDP)."""
+    from django.conf import settings
+
+    return render(
+        request,
+        "protection_donnees.html",
+        {"contact": getattr(settings, "CONTACT_DONNEES", "")},
+    )

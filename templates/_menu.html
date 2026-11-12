@@ -11,6 +11,7 @@
     {% url 'membres:ma_photo' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Ma photo</a></li>
     {% url 'membres:mes_coordonnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes coordonnées</a></li>
     {% endif %}
+    {% url 'protection_donnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Protection de vos données</a></li>
     {% url 'notifications:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Notifications{% if notifications_non_lues %} ({{ notifications_non_lues }}){% endif %}</a></li>
   </ul>
   {% for unite in mes_unites %}
@@ -20,6 +21,7 @@
       {% if unite.niveau != "national" %}{% url 'bureaux:anciens' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Anciens membres</a></li>{% endif %}
       {% url 'mouvements:demandes' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Demandes</a></li>
       {% url 'listes:liste' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Listes</a></li>
+      <li><a href="{% url 'listes:liste' unite.cle %}?envoye=1&amp;statut=actif&amp;eligible=on&amp;colonnes=matricule&amp;colonnes=nom&amp;colonnes=prenoms&amp;colonnes=grade&amp;colonnes=date_grade&amp;colonnes=paroisse">Éligibles au grade suivant</a></li>
       {% url 'listes:statistiques' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Statistiques</a></li>
     </ul>
   {% endfor %}
@@ -35,6 +37,7 @@
       {% url 'listes:liste' 'national' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Listes nationales</a></li>
       {% url 'listes:statistiques' 'national' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Statistiques nationales</a></li>
       {% endif %}
+      {% url 'grades:bn_serie' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Promotions en série</a></li>
       {% url 'bureaux:bn_installer' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Installer un bureau</a></li>
       {% url 'bureaux:bn_fonctions' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Fonctions et droits</a></li>
       {% url 'bureaux:bn_echeances' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mandats à échéance</a></li>

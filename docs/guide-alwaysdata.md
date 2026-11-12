@@ -128,7 +128,9 @@ cd ~/siteArm
 
 > Les comptes du Bureau national (et le compte technique) doivent installer une application
 > d'authentification sur leur téléphone (Google Authenticator ou Microsoft Authenticator) : le site
-> la demande à la première connexion (QR code).
+> la demande à la première connexion. **Un seul téléphone suffit** : sur le téléphone, touchez
+> « Ajouter à mon application d'authentification » (ou « Copier la clé ») ; depuis un ordinateur,
+> scannez le QR code avec le téléphone.
 
 ## 9. Programmer la tâche quotidienne
 
@@ -162,7 +164,40 @@ bash ~/siteArm/deploiement/alwaysdata/mettre_a_jour.sh
 
 puis Administration → **Web** → **Sites** → bouton **Redémarrer** du site.
 
-## 12. En cas de problème
+## 12. Sauvegarder le site sur une clé USB
+
+```bash
+bash ~/siteArm/deploiement/alwaysdata/sauvegarder.sh
+```
+
+Le script crée une sauvegarde complète et **chiffrée** : code, données, photos et réglages. Il demande
+une phrase de passe, à noter sur papier et à ranger à part de la clé. Copiez ensuite le fichier sur
+votre ordinateur avec la commande `scp` affichée à la fin, puis sur la clé USB. Le détail, avec la
+restauration, se trouve dans le guide de maintenance (§ 20).
+
+## 12 bis. Recréer les données fictives (après une nouvelle version)
+
+Quand une nouvelle version ajoute des informations aux membres (par exemple les **grades**), on
+recrée les membres fictifs pour les essayer. Dans la console, après `mettre_a_jour.sh` :
+
+```bash
+cd ~/siteArm
+~/venv-siteArm/bin/python manage.py reinitialiser_demo --oui --base COMPTE_site
+~/venv-siteArm/bin/python manage.py createsuperuser
+```
+
+- La première commande **efface toutes les données du site d'essai** (membres, comptes, journal) et
+  recrée environ 150 membres fictifs, avec des grades de toutes sortes. Elle affiche les nouveaux
+  **comptes de démonstration** : notez-les tout de suite.
+- La seconde recrée votre **compte technique** (il a été effacé) ; réactivez ensuite sa double
+  vérification à la première connexion.
+- Puis ⟳ **Redémarrer** le site.
+
+Par sécurité, il faut donner le **nom exact de la base** (`--base COMPTE_site`, celui de l'étape 3 ;
+en cas d'erreur, la commande affiche le bon nom sans rien effacer). Elle refuse aussi de fonctionner
+sur le vrai site (`DJANGO_SITE_DEMO=False`).
+
+## 13. En cas de problème
 
 | Symptôme | Solution |
 |---|---|
@@ -172,7 +207,7 @@ puis Administration → **Web** → **Sites** → bouton **Redémarrer** du site
 | Le site est lent ou s'arrête | L'offre gratuite a peu de mémoire (256 Mo) : normal pour un essai ; le pack payant en a davantage. |
 | Mot de passe d'un compte de démonstration oublié | Connectez-vous avec le compte technique et réimprimez une fiche avec identifiants depuis la fiche du membre. |
 
-## 13. Après l'essai
+## 14. Après l'essai
 
 - **Si alwaysdata convient** : Administration → **Abonnement** → passer au pack payant (≈ 7 € HT par
   mois). Le site reste où il est.

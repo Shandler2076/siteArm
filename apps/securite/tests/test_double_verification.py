@@ -142,3 +142,12 @@ def test_blocage_persiste_apres_reconnexion(client, compte_technique):
     r = client.post("/securite/code/", {"code": code_totp(secret, time.time())})
     assert r.status_code == 200 and "Trop d" in r.content.decode()
     assert client.get("/").status_code == 302
+
+
+def test_activation_possible_avec_un_seul_telephone(bn):
+    html = bn.get("/securite/activer/").content.decode()
+    secret = bn.session["double_verification_secret"]
+    assert 'href="otpauth://totp/' in html and f"secret={secret}" in html
+    assert "Ajouter à mon application d" in html
+    assert "Copier la clé" in html and f'data-cle="{secret}"' in html
+    assert html.index("otpauth://") < html.index("<svg")  # le bouton passe avant le QR code

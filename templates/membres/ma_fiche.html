@@ -12,6 +12,7 @@
   {% if photo_refusee %}<p class="message message--error">Votre dernière photo a été refusée : {{ photo_refusee.motif_refus }}</p>{% endif %}
   <p><a href="{% url 'membres:ma_photo' %}">Déposer ma photo en tenue</a></p>
   <dl class="fiche">
+    <dt>Grade</dt><dd>{{ membre.get_grade_display|default:"Non renseigné" }}{% if membre.date_grade %} <small class="aide">depuis le {{ membre.date_grade|date:"d/m/Y" }}</small>{% endif %}</dd>
     <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
     <dt>Statut</dt><dd>{{ membre.get_statut_display }}{% with d=membre|date_deces %}{% if d %}<br><small>Décédé le {{ d|date:"d/m/Y" }}</small>{% endif %}{% endwith %}</dd>
     <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
@@ -42,6 +43,7 @@
     {% endfor %}
   </ol>
   {% include "mouvements/_sanctions.html" %}
+  {% include "grades/_historique.html" %}
   {% include "mouvements/_historique.html" %}
   <p><a class="bouton" href="{% url 'membres:ma_fiche_pdf' %}">Télécharger ma fiche (PDF)</a></p>
 </section>

@@ -1,0 +1,9 @@
+<h2>Grades</h2>
+<ul class="fonctions">
+  {% for h in membre.grades.all %}
+    <li><strong>{{ h.get_grade_display }}</strong> — depuis le {{ h.date_effet|date:"d/m/Y" }}<br>
+      <small class="aide">{{ h.get_mode_display }}{% if h.reference %} · Réf. {{ h.reference }}{% endif %}{% if h.motif %} · {{ h.motif }}{% endif %}</small></li>
+  {% empty %}
+    <li class="aide">Grade non renseigné.</li>
+  {% endfor %}
+</ul>

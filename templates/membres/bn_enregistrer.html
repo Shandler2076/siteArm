@@ -51,6 +51,8 @@
         <div class="choix">{{ form.categorie }}</div>
         {% for e in form.categorie.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
       </div>
+      {% include "membres/_champ.html" with champ=form.grade %}
+      {% include "membres/_champ.html" with champ=form.date_grade %}
     </fieldset>
     <button type="submit" class="bouton">{% if doublons %}Enregistrer quand même{% else %}Enregistrer le membre{% endif %}</button>
   </form>

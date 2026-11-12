@@ -40,6 +40,7 @@ def test_totaux(varies):
         "Par sexe",
         "Par tranche d'âge",
         "Par catégorie",
+        "Par grade",
         "Par statut",
     ]
     assert _chiffres(s["Total"]) == {"Total des membres": 3}

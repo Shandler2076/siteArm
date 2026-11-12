@@ -159,7 +159,9 @@ def liste_excel(unite: Unite, form, aujourdhui: datetime.date) -> tuple[bytes, i
     return tampon.getvalue(), total
 
 
-def statistiques_pdf(unite: Unite, sections, statuts: list[str]) -> bytes:
+def statistiques_pdf(
+    unite: Unite, sections, statuts: list[str], tableaux=(), filtres: list[str] = ()
+) -> bytes:
     _polices()
     larg, haut = A4
     tampon = io.BytesIO()
@@ -167,6 +169,8 @@ def statistiques_pdf(unite: Unite, sections, statuts: list[str]) -> bytes:
     titre = f"Statistiques — {unite.libelle}"
     libelles = dict(Statut.choices)
     sous = ["Statut : " + (", ".join(str(libelles[s]) for s in statuts) or "tous")]
+    if filtres:
+        sous.append("Filtres : " + " ; ".join(filtres))
     c.setTitle(titre)
     numero = 1
     y = entete_officiel(c, titre, sous, larg, haut)
@@ -196,5 +200,51 @@ def statistiques_pdf(unite: Unite, sections, statuts: list[str]) -> bytes:
         y -= 4 * mm
     pied_de_page(c, numero, larg)
     c.showPage()
+    for tableau in tableaux:
+        numero += 1
+        _dessiner_tableau(c, tableau, titre, sous, numero)
     c.save()
     return tampon.getvalue()
+
+
+def _dessiner_tableau(c: canvas.Canvas, tableau, titre: str, sous: list[str], numero: int) -> int:
+    """Un tableau croisé (grade × …) sur sa propre page, en paysage s'il est large."""
+    taille = A4 if len(tableau.colonnes) <= 7 else landscape(A4)
+    c.setPageSize(taille)
+    larg, haut = taille
+    premiere = 48 * mm
+    largeur_col = max(11 * mm, (larg - 2 * MARGE - premiere) / max(len(tableau.colonnes), 1))
+    police = 8 if largeur_col >= 16 * mm else 7
+
+    def entete() -> float:
+        y = entete_officiel(c, titre, sous, larg, haut)
+        c.setFillColor(MARINE)
+        c.setFont("Sans-Gras", 10.5)
+        c.drawString(MARGE, y, tableau.titre)
+        y -= 7 * mm
+        c.setFont("Sans-Gras", police)
+        for i, libelle in enumerate(tableau.colonnes):
+            x = MARGE + premiere + (i + 1) * largeur_col - 1 * mm
+            c.drawRightString(x, y, _ajuste(libelle, "Sans-Gras", police, largeur_col - 2 * mm))
+        return y - 5.5 * mm
+
+    y = entete()
+    for libelle, cellules in tableau.lignes:
+        if y < 18 * mm:
+            pied_de_page(c, numero, larg)
+            c.showPage()
+            numero += 1
+            y = entete()
+        c.setFillColor(MARINE)
+        c.setFont("Sans", police + 1)
+        c.drawString(MARGE, y, _ajuste(libelle, "Sans", police + 1, premiere - 2 * mm))
+        for i, cellule in enumerate(cellules):
+            gras = i == len(cellules) - 1
+            c.setFont("Sans-Gras" if gras else "Sans", police + 1)
+            c.drawRightString(
+                MARGE + premiere + (i + 1) * largeur_col - 1 * mm, y, str(cellule.nombre)
+            )
+        y -= 5.5 * mm
+    pied_de_page(c, numero, larg)
+    c.showPage()
+    return numero
