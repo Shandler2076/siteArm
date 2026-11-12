@@ -129,3 +129,18 @@ def test_historique_sur_la_fiche(monde, conv):
 def test_toutes_les_autorisations_bn(monde, conv, client_technique):
     r = client_technique.get(f"/evenements/{conv.evenement_id}/autorisations.pdf")
     assert r.status_code == 200 and "Test ADJOVI" in _texte(r.content)
+
+
+def test_demo_evenements(territoire, settings):
+    from django.core.management import call_command
+
+    from apps.evenements.models import Evenement, Presence
+
+    settings.SITE_DEMO = True
+    call_command("peupler_demo", membres=60, stdout=io.StringIO())
+    nativite = Evenement.objects.get(nom__startswith="Pèlerinage de la Nativité")
+    assert nativite.avec_autorisation and nativite.sessions.count() == 3
+    assert nativite.convocations.filter(active=True).count() >= 20
+    conclave = Evenement.objects.get(nom__startswith="Conclave")
+    assert not conclave.avec_autorisation
+    assert conclave.convocations.filter(presence=Presence.PRESENT).exists()

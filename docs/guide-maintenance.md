@@ -354,3 +354,18 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
 - Tâche quotidienne : `python manage.py rappel_cotisations` (versements en attente depuis plus de
   30 jours → notification au circuit), ajoutée à `taches_quotidiennes.sh`.
 - Pour la **vraie mise en service** : le BN fixe le mois de départ dans les réglages.
+
+## 23. Événements nationaux (module 3)
+
+- Application `apps/evenements`. **Seul** `services.py` écrit : `creer_evenement`,
+  `modifier_evenement` (report notifié), `annuler_evenement`, `convoquer` (notification directe du
+  Bureau national), `retirer`, `pointer` (présent, absent, excusé).
+- Pages du BN : menu « Événements » (création, sessions, convocation par filtres, pointage sur
+  téléphone, exports, impression de toutes les autorisations).
+- Membre : « Mes événements » et son autorisation PDF (carte 85 × 120 mm, photo, QR code). La
+  paroisse du membre peut l'imprimer (`perimetre.peut_imprimer_autorisation`) ; pas le circuit ni la
+  région. Les bureaux ne voient pas les événements.
+- Le QR code ouvre `/evenements/verifier/<jeton>/` (page publique) : « Autorisation valable » ou
+  « Non valable » (convocation retirée, événement annulé, code inconnu). Le jeton est aléatoire.
+- L'adresse imprimée dans le QR code vient de `DJANGO_SITE_URL` : elle doit être l'adresse réelle du
+  site (sinon le scan n'aboutit pas).

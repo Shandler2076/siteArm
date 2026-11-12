@@ -59,6 +59,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Cotisations (`apps/cotisations`) : `services.py` SEUL point d'écriture (saisie paroisse, validation
   circuit, refus, annulation, parts reçues, réglages BN) ; `regles.py` (mois dus, `situations`) ; accès
   `perimetre.unites_cotisations` (gestion + trésoriers) ; rien sur la fiche membre (état + reçu PDF à part).
+- Événements nationaux (`apps/evenements`, BN seulement) : `services.py` SEUL point d'écriture ;
+  autorisation PDF (QR → `/evenements/verifier/<jeton>/`, public, valable/non valable) ; impression par
+  le membre ou sa paroisse (`perimetre.peut_imprimer_autorisation`) ; les bureaux ne voient pas les événements.
 - Journal lisible : `apps/journal/lecture.py` (une phrase par action ; toute nouvelle action y est ajoutée).
 - Double vérification BN (`apps/securite`) : TOTP, intergiciel `DoubleVerificationObligatoire` ;
   désactivée dans les tests par `conftest.py` racine (sauf `apps/securite/tests`).

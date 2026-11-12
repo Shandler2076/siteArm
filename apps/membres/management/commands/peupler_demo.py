@@ -115,6 +115,7 @@ class Command(BaseCommand):
             simple.compte.save()
             comptes.append(("Membre simple", simple.matricule, mot))
         self._cotisations(hasard, crees, par)
+        self._evenements(hasard, crees, par)
         self._mouvements(hasard, crees, par)
         self.stdout.write(self.style.SUCCESS(f"{Membre.objects.count()} membres fictifs créés."))
         self.stdout.write("\nComptes de démonstration (à noter, ils ne seront plus affichés) :")
@@ -255,6 +256,47 @@ class Command(BaseCommand):
                 marquer_part_recue(
                     niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=validateur
                 )
+
+    def _evenements(self, hasard, membres, par):
+        """Un pèlerinage à venir (avec autorisations) et un conclave passé (présences pointées)."""
+        from django.utils import timezone
+
+        from apps.evenements.models import Presence
+        from apps.evenements.services import convoquer, creer_evenement, pointer
+
+        maintenant = timezone.localtime()
+        annee = (
+            maintenant.year if maintenant.month < 12 or maintenant.day < 24 else maintenant.year + 1
+        )
+        nativite = creer_evenement(
+            nom=f"Pèlerinage de la Nativité {annee}",
+            debut=timezone.make_aware(datetime.datetime(annee, 12, 24, 7, 0)),
+            lieu="Porto-Novo",
+            description="Fictif (démonstration). Équipes de travail par session.",
+            avec_autorisation=True,
+            sessions=["Session Mère", "Session Culte", "Session Fruits"],
+            par=par,
+        )
+        choisis = hasard.sample(membres, min(30, len(membres)))
+        sessions = list(nativite.sessions.all())
+        for i, session in enumerate(sessions):
+            convoquer(nativite, choisis[i::3], session=session, par=par)
+        conclave = creer_evenement(
+            nom="Conclave du Bureau national",
+            debut=maintenant - datetime.timedelta(days=20),
+            lieu="Siège du Bureau national",
+            avec_autorisation=False,
+            par=par,
+        )
+        convoques = convoquer(conclave, hasard.sample(membres, min(12, len(membres))), par=par)
+        for c in convoques:
+            pointer(
+                c,
+                hasard.choices([Presence.PRESENT, Presence.ABSENT, Presence.EXCUSE], [75, 15, 10])[
+                    0
+                ],
+                par=par,
+            )
 
     def _mouvements(self, hasard, membres, par):
         """Quelques situations pour essayer toutes les pages (statuts, mutation, sanction)."""

@@ -174,7 +174,8 @@ et la phrase de passe des sauvegardes.
 | Caractéristiques de la photo en tenue | BNC | À fournir |
 | Modification des coordonnées d'un membre par le bureau de sa paroisse ; alerte si le site est inaccessible | Mainteneur | Prévu |
 | Vraie mise en ligne (base neuve, `DJANGO_SITE_DEMO=False`, domaine `.bj`, e-mails) | Mainteneur | Après l'autorisation de l'APDP |
-| Modules 3 à 5 : événements et présences, communication, médias | — | À concevoir |
+| **Événements nationaux** (convocations notifiées, sessions, autorisation avec QR code, pointage, historique) | Mainteneur | **Réalisé le 12 novembre** ; à essayer sur le site d'essai |
+| Modules 4 et 5 : communication, médias | — | À concevoir |
 
 ## 8. Comment une modification est faite
 
