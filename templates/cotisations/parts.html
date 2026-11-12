@@ -4,17 +4,32 @@
 <section class="carte">
   {% include "cotisations/_entete.html" %}
   <h2>Part {{ niveau|lower }} des versements validés</h2>
-  <p class="aide">Pour chaque paroisse et chaque mois de validation, marquez la part comme reçue quand elle vous parvient.</p>
-  <div class="tableau-defilant"><table class="tableau">
-    <thead><tr><th>Paroisse</th><th>Validés en</th><th>Part due</th><th>État</th></tr></thead>
-    <tbody>
-      {% for l in lignes %}
-        <tr><td>{{ l.paroisse.nom }}</td><td>{{ l.mois|date:"F Y" }}</td><td>{{ l.montant }} F</td>
-          <td>{% if l.recue %}Reçue le {{ l.recue.date|date:"d/m/Y" }} : {{ l.recue.montant }} F{% if l.recue.montant != l.montant %} <strong>(écart : {{ l.montant }} F dus)</strong>{% endif %}{% elif l.en_cours %}<span class="aide">Mois en cours : à marquer après la fin du mois</span>{% else %}
-            <form method="post">{% csrf_token %}<input type="hidden" name="paroisse" value="{{ l.paroisse.pk }}"><input type="hidden" name="mois" value="{{ l.mois|date:'Y-m-d' }}">
-              <button type="submit" class="bouton bouton--secondaire">Marquer reçue</button></form>{% endif %}</td></tr>
-      {% empty %}<tr><td colspan="4" class="aide">Aucune part.</td></tr>{% endfor %}
-    </tbody>
-  </table></div>
+  <p class="aide">Les paroisses sont classées par région et par circuit. Pour chacune : le nombre de membres de l'Armée du Salut et ce qu'elle peut payer par mois, puis, par mois de validation, la part qui vous revient. Marquez-la comme reçue quand elle vous parvient (une fois le mois terminé).</p>
+  <form method="get" class="filtres"><label class="champ"><span>Rechercher une paroisse</span><input name="q" value="{{ q }}" placeholder="Nom de la paroisse"></label>
+    <button type="submit" class="bouton bouton--secondaire">Rechercher</button>{% if q %} <a href="?">Tout afficher</a>{% endif %}</form>
+  {% for r in regions %}
+    <h2>Région {{ r.region.code }} — {{ r.region.nom }}</h2>
+    {% for c in r.circuits %}
+      <h3>{{ c.circuit }}</h3>
+      <div class="tableau-defilant"><table class="tableau">
+        <thead><tr><th>Paroisse</th><th>Membres</th><th>Peut payer</th><th>Validés en</th><th>Part due</th><th>État</th></tr></thead>
+        <tbody>
+        {% for p in c.paroisses %}
+          {% for l in p.lignes %}
+            <tr>{% if forloop.first %}<td rowspan="{{ p.lignes|length }}"><strong>Paroisse {{ p.paroisse.nom }}</strong></td>
+              <td rowspan="{{ p.lignes|length }}">{{ p.effectif }} membre{{ p.effectif|pluralize }}</td>
+              <td rowspan="{{ p.lignes|length }}">{{ p.attendu }} F par mois</td>{% endif %}
+              <td>{{ l.mois|date:"F Y" }}</td><td>{{ l.montant }} F</td>
+              <td>{% if l.recue %}Reçue le {{ l.recue.date|date:"d/m/Y" }} : {{ l.recue.montant }} F{% if l.recue.montant != l.montant %} <strong>(écart : {{ l.montant }} F dus)</strong>{% endif %}{% elif l.en_cours %}<span class="aide">Mois en cours : à marquer après la fin du mois</span>{% else %}
+                <form method="post">{% csrf_token %}<input type="hidden" name="paroisse" value="{{ p.paroisse.pk }}"><input type="hidden" name="mois" value="{{ l.mois|date:'Y-m-d' }}">
+                  <button type="submit" class="bouton bouton--secondaire">Marquer reçue</button></form>{% endif %}</td></tr>
+          {% empty %}
+            <tr><td><strong>Paroisse {{ p.paroisse.nom }}</strong></td><td>{{ p.effectif }} membre{{ p.effectif|pluralize }}</td><td>{{ p.attendu }} F par mois</td><td colspan="3" class="aide">Aucun versement validé.</td></tr>
+          {% endfor %}
+        {% endfor %}
+        </tbody>
+      </table></div>
+    {% endfor %}
+  {% empty %}<p class="aide">Aucune paroisse{% if q %} pour « {{ q }} »{% endif %}.</p>{% endfor %}
 </section>
 {% endblock %}

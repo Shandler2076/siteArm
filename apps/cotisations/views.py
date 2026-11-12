@@ -236,35 +236,73 @@ def parts(request, cle):
         else:
             messages.success(request, f"Part de la paroisse {paroisse.nom} marquée comme reçue.")
             return redirect(request.get_full_path())
-    # Couples (paroisse, mois de validation) ayant des versements validés, du plus récent.
-    couples = set()
+    q = request.GET.get("q", "").strip()
+    if q:
+        paroisses = paroisses.filter(nom__icontains=q)
+    regions = classer_paroisses(paroisses, niveau)
+    return render(
+        request,
+        "cotisations/parts.html",
+        {"unite": unite, "regions": regions, "niveau": NiveauPart(niveau).label, "q": q},
+    )
+
+
+def classer_paroisses(paroisses, niveau: str) -> list[dict]:
+    """Région → circuit → paroisse, avec l'effectif de chaque paroisse, ce qu'elle peut payer par
+    mois (effectif × montant mensuel) et ses parts par mois de validation."""
+    from collections import defaultdict
+
+    from django.db.models import Count
+
+    from apps.cotisations.models import tarif_du
+    from apps.membres.models import Affectation, Statut
+
+    paroisses = list(paroisses.select_related("circuit__region"))
+    effectifs = dict(
+        Affectation.objects.filter(
+            paroisse__in=paroisses, date_fin__isnull=True, membre__statut=Statut.ACTIF
+        )
+        .values_list("paroisse")
+        .annotate(n=Count("membre", distinct=True))
+    )
+    couples = defaultdict(set)
     for paroisse_id, date_validation in Versement.objects.filter(
         paroisse__in=paroisses, etat=EtatVersement.VALIDE
     ).values_list("paroisse_id", "date_validation"):
-        couples.add((paroisse_id, premier_du_mois(timezone.localdate(date_validation))))
-    par_pk = {p.pk: p for p in paroisses}
+        couples[paroisse_id].add(premier_du_mois(timezone.localdate(date_validation)))
     recues = {
         (p.paroisse_id, p.mois_validation): p
         for p in PartRecue.objects.filter(niveau=niveau, paroisse__in=paroisses)
     }
-    lignes = []
-    for paroisse_id, mo in sorted(couples, key=lambda c: (-c[1].toordinal(), par_pk[c[0]].nom)):
-        montant = part_due(niveau, par_pk[paroisse_id], mo)
-        if montant:
-            lignes.append(
-                {
-                    "paroisse": par_pk[paroisse_id],
-                    "mois": mo,
-                    "montant": montant,
-                    "recue": recues.get((paroisse_id, mo)),
-                    "en_cours": mo >= premier_du_mois(timezone.localdate()),
-                }
-            )
-    return render(
-        request,
-        "cotisations/parts.html",
-        {"unite": unite, "lignes": lignes, "niveau": NiveauPart(niveau).label},
-    )
+    mois_courant = premier_du_mois(timezone.localdate())
+    montant = tarif_du(mois_courant).montant
+    arbre: dict = {}
+    for p in sorted(paroisses, key=lambda x: (x.circuit.region.code, x.circuit.nom, x.nom)):
+        effectif = effectifs.get(p.pk, 0)
+        lignes = []
+        for mo in sorted(couples.get(p.pk, ()), reverse=True):
+            due = part_due(niveau, p, mo)
+            if due:
+                lignes.append(
+                    {
+                        "mois": mo,
+                        "montant": due,
+                        "recue": recues.get((p.pk, mo)),
+                        "en_cours": mo >= mois_courant,
+                    }
+                )
+        if not effectif and not lignes:
+            continue
+        region = arbre.setdefault(p.circuit.region.pk, {"region": p.circuit.region, "circuits": {}})
+        circuit = region["circuits"].setdefault(
+            p.circuit.pk, {"circuit": p.circuit, "paroisses": []}
+        )
+        circuit["paroisses"].append(
+            {"paroisse": p, "effectif": effectif, "attendu": effectif * montant, "lignes": lignes}
+        )
+    return [
+        {"region": r["region"], "circuits": list(r["circuits"].values())} for r in arbre.values()
+    ]
 
 
 @login_required
