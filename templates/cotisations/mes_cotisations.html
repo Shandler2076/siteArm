@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titre %}Mes cotisations — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Mes cotisations mensuelles</h1>
+  <p class="matricule">{{ membre.matricule }}</p>
+  <p><strong>{% if s.a_jour %}À jour au {{ mois|date:"F Y" }}{% else %}En retard de {{ s.retard }} mois ({{ s.reste_du }} F CFA){% endif %}</strong></p>
+  <div class="tableau-defilant"><table class="tableau grille-cm">
+    <thead><tr>{% for c in cases %}<th>{{ c.nom|slice:":3" }}</th>{% endfor %}</tr></thead>
+    <tbody><tr>{% for c in cases %}<td class="case case--{{ c.etat }}">{% if c.etat == "paye" %}✓{% elif c.etat == "attente" %}…{% elif c.etat == "du" %}!{% else %}—{% endif %}</td>{% endfor %}</tr></tbody>
+  </table></div>
+  <p class="aide">✓ payé · … en attente de validation · ! dû, non payé · — non dû</p>
+  <p>Total versé en {{ annee }} : <strong>{{ s.total_annee }} F CFA</strong> · depuis le début : <strong>{{ s.total_depuis_debut }} F CFA</strong></p>
+  <div class="actions"><a class="bouton bouton--secondaire" href="{% url 'cotisations:mon_etat_pdf' %}">État des cotisations (PDF)</a></div>
+  <h2>Mes versements</h2>
+  <ul class="fonctions">
+    {% for v in versements %}
+      <li>{{ v.montant }} F — versé le {{ v.date_versement|date:"d/m/Y" }} — {{ v.get_etat_display }}
+        {% if v.numero_recu and v.etat == "valide" %}· <a href="{% url 'cotisations:recu' v.pk %}">Reçu {{ v.numero_recu }}</a>{% endif %}</li>
+    {% empty %}<li class="aide">Aucun versement.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

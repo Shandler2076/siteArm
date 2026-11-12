@@ -51,6 +51,8 @@ CLES_BASE = (
     "grade",
     "grade_min",
     "eligible",
+    "cotisation",
+    "retard_min",
     "region",
     "circuit",
     "paroisse",
@@ -150,6 +152,17 @@ def calculer_statistiques(
     sections.append(
         Section("Par statut", [cellule(str(lib), statut=[v]) for v, lib in Statut.choices])
     )
+    if not fixe & {"cotisation", "retard_min"}:
+        sections.append(
+            Section(
+                "Cotisations",
+                [
+                    cellule("À jour", cotisation="a_jour"),
+                    cellule("En retard", cotisation="en_retard"),
+                    cellule("En retard de 3 mois et plus", cotisation="en_retard", retard_min="3"),
+                ],
+            )
+        )
     inferieures = _inferieures(unite)
     if inferieures and inferieures[1] not in fixe:
         titre, champ, objets = inferieures

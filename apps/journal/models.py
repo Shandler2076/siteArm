@@ -29,6 +29,18 @@ DOUBLE_VERIFICATION = "double_verification"
 GRADE_ATTRIBUE = "grade_attribue"
 GRADE_PROMOTION = "grade_promotion"
 GRADE_CORRECTION = "grade_correction"
+VERSEMENT_SAISI = "versement_saisi"
+VERSEMENT_VALIDE = "versement_valide"
+VERSEMENT_REFUSE = "versement_refuse"
+VERSEMENT_ANNULE = "versement_annule"
+PART_RECUE = "part_recue"
+REGLAGE_COTISATIONS = "reglage_cotisations"
+EVENEMENT_CREE = "evenement_cree"
+EVENEMENT_MODIFIE = "evenement_modifie"
+EVENEMENT_ANNULE = "evenement_annule"
+CONVOCATION = "convocation"
+CONVOCATION_RETIREE = "convocation_retiree"
+PRESENCE = "presence"
 
 LIBELLES = {
     LISTE_PDF: "Liste téléchargée (PDF)",
@@ -57,6 +69,18 @@ LIBELLES = {
     GRADE_ATTRIBUE: "Grade attribué",
     GRADE_PROMOTION: "Promotion de grade",
     GRADE_CORRECTION: "Correction de grade",
+    VERSEMENT_SAISI: "Cotisation : versement enregistré",
+    VERSEMENT_VALIDE: "Cotisation : versement validé",
+    VERSEMENT_REFUSE: "Cotisation : versement refusé",
+    VERSEMENT_ANNULE: "Cotisation : versement annulé",
+    PART_RECUE: "Cotisation : part reçue",
+    REGLAGE_COTISATIONS: "Cotisations : réglages modifiés",
+    EVENEMENT_CREE: "Événement créé",
+    EVENEMENT_MODIFIE: "Événement modifié",
+    EVENEMENT_ANNULE: "Événement annulé",
+    CONVOCATION: "Convocation",
+    CONVOCATION_RETIREE: "Convocation retirée",
+    PRESENCE: "Présence pointée",
 }
 
 

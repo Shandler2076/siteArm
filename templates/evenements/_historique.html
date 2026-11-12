@@ -1,0 +1,10 @@
+{% load evenements %}{% convocations_de membre as convocations %}
+{% if convocations %}
+<h2>Événements</h2>
+<ul class="fonctions">
+  {% for c in convocations %}
+    <li><strong>{{ c.evenement.nom }}</strong> — {{ c.evenement.debut|date:"d/m/Y" }}{% if c.session %} · {{ c.session.nom }}{% endif %}<br>
+      <small class="aide">{% if not c.active %}Convocation retirée{% elif c.evenement.annule %}Événement annulé{% else %}{{ c.get_presence_display|default:"Non pointé" }}{% endif %}</small></li>
+  {% endfor %}
+</ul>
+{% endif %}

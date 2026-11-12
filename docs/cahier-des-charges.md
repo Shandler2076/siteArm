@@ -74,7 +74,7 @@ d'essai, puis mise en ligne.
 |---|---|---|---|
 | **1** | **Fondations** | Comptes, organisation territoriale, fiche membre, matricule, parcours, fonctions et bureaux, enregistrement par lots, listes et statistiques, mutations, décès, démissions, réhabilitations, sanctions, journal, sécurité | **Réalisé** ; mise en ligne en préparation |
 | **2** | **Grades et cotisations** | Grade actuel et historique, listes et statistiques par grade, éligibilité ; cotisations mensuelles (CM) mois par mois, membres à jour ou en retard | **Cahier des charges rédigé (§ 15 et 16)** ; réalisation après validation |
-| 3 | Événements et présences | Activités, invitations, convocations ciblées, présences | À concevoir |
+| **3** | **Événements et présences** | Événements nationaux, sessions, convocations, notifications, autorisation (carte) avec QR code, pointage des présences, historique | **Cahier des charges rédigé (§ 17)** ; réalisation après validation |
 | 4 | Communication | Messages officiels, espace documents, règlement intérieur en ligne, SMS / WhatsApp | À concevoir |
 | 5 | Médias | Photos et vidéos des activités | À concevoir |
 
@@ -469,7 +469,7 @@ Une personne qui a plusieurs mandats passe d'un espace à l'autre depuis l'accue
 | Voir le grade et les cotisations | Les siens | Sa paroisse | Son circuit | Sa région | Tous |
 | Enregistrer un versement de cotisation | ❌ | ✅ | ❌ | ❌ | ❌ |
 | Valider ou refuser un versement de cotisation | ❌ | ❌ | ✅ | ❌ | ❌ |
-| Marquer sa part de cotisations comme reçue | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Marquer sa part de cotisations comme reçue | ❌ | ❌ | ✅ | ✅ | ✅ |
 | Attribuer ou corriger un grade | ❌ | ❌ | ❌ | ❌ | ✅ |
 | Fixer le montant, le mois de départ et les pourcentages des cotisations | ❌ | ❌ | ❌ | ❌ | ✅ |
 
@@ -724,14 +724,24 @@ compter du mois de mise en service du site**. Il n'enregistre pas l'argent lui-m
 - Un versement ne se supprime pas : une erreur s'**annule** (avec motif), et l'annulation reste visible.
   Versements, validations, refus et annulations sont inscrits au journal.
 
-### 16.4 bis Répartition entre le circuit, la région et le national
+### 16.4 bis Répartition entre la paroisse, le circuit, la région et le national
 
-- À la validation par le circuit, le site calcule la **part de chaque niveau** : la part du **circuit**,
-  celle de la **région** et celle du **national**, selon des **pourcentages fixés par le BNC** (avec
-  date d'effet).
+- À la validation par le circuit, le site calcule la **part de chaque niveau**, selon la répartition
+  décidée par le BNC (12 novembre 2026) :
+
+  | Niveau | Part | Sur une cotisation de 100 F |
+  |---|---|---|
+  | Paroisse | 30 % | 30 F |
+  | Circuit | 20 % | 20 F |
+  | Région | 20 % | 20 F |
+  | Bureau national | 30 % | 30 F |
+  | **Total** | **100 %** | **100 F** |
+
+- Ces pourcentages sont un **réglage du BNC**, modifiable avec une date d'effet (les mois passés gardent
+  l'ancienne répartition) ; leur total doit toujours faire 100 %.
 - Chaque bureau voit, pour son périmètre et pour chaque mois, le **montant validé** et **sa part**.
-- La **région** puis le **national** marquent la part qui leur revient comme **reçue** lorsqu'ils la
-  perçoivent ; le site affiche ainsi, à chaque niveau, les parts **reçues** et **en attente**.
+- La paroisse garde sa part. Le **circuit**, la **région** et le **national** marquent la part qui
+  leur revient comme **reçue** lorsqu'ils la perçoivent ; le site affiche ainsi, à chaque niveau, les parts **reçues** et **en attente**.
 
 ### 16.5 Ce que chacun voit
 
@@ -787,27 +797,99 @@ Décisions :
 3. Un **reçu PDF** est produit pour chaque versement, et un document **« État des cotisations
    mensuelles »** à part ; rien sur la fiche du membre.
 
-Restent à confirmer par le BNC :
+4. **Répartition** (12 novembre 2026) : paroisse 30 %, circuit 20 %, région 20 %, Bureau national
+   30 %.
 
-1. Les **pourcentages** du circuit, de la région et du national sur les 100 F, et ce que garde la
-   paroisse (le cas échéant).
-2. Le reçu est-il remis **dès la saisie** par la paroisse, ou **seulement après la validation** du
-   circuit ? (Proposé : après la validation.)
-3. Un **délai** de validation par le circuit (par exemple 30 jours), avec rappel automatique ?
+Choix retenus par défaut, sauf avis contraire du BNC :
+
+1. Le **reçu** est produit **après la validation** du circuit (un versement refusé ne doit pas avoir
+   de reçu).
+2. Les versements non validés depuis **30 jours** font l'objet d'un **rappel automatique** au bureau du
+   circuit (tâche quotidienne).
 
 Ces données nouvelles (grade, versements) seront ajoutées à la page « Protection de vos données » et
 au dossier APDP.
 
-## 17. Module 3 — Événements et présences
+## 17. Module 3 — Événements et présences (espace « Événements »)
 
-- Création des activités (cultes, rassemblements, formations, tests de grade, pèlerinages) par les
-  bureaux, selon leur périmètre.
-- **Invitations et convocations ciblées**, à partir des filtres des listes (par exemple : tous les
-  Secrétaires paroissiaux d'une région).
-- Enregistrement des **présences** et historique de participation de chaque membre, consultable sur
-  sa fiche.
-- Statistiques de participation par unité.
-- **Tests de grade** : inscription des candidats éligibles (§ 15.6) et saisie des résultats.
+Décisions du BNC du 12 novembre 2026. Dans un premier temps, seuls les **événements nationaux** sont
+suivis sur le site : réunions, conclaves, pèlerinages (par exemple le **pèlerinage de la Nativité**),
+manifestations, et les bureaux d'organisation constitués pour l'occasion.
+
+### 17.1 Créer un événement
+
+- C'est le **Secrétaire national** (et plus largement le Bureau national) qui crée l'événement :
+  **dénomination**, **date et heure** de début (et de fin s'il y a lieu), **lieu**, description
+  facultative.
+- Il peut définir les **sessions** (ou postes de travail) de l'événement, par exemple pour le
+  pèlerinage de la Nativité : *session Mère*, *session Culte*, *session Fruits*…
+- Il choisit si l'événement donne lieu à une **autorisation** (voir § 17.4). Pour les grands
+  événements où il faut contrôler qui est autorisé à travailler, oui ; pour un conclave ou une
+  réunion restreinte du Bureau national, non.
+- Un événement peut être **reporté** (nouvelle date) ou **annulé** (avec motif) ; les convoqués en
+  sont notifiés. Rien ne s'efface.
+
+### 17.2 Convoquer les membres
+
+- Le Secrétaire national **coche** les membres convoqués, à partir d'une liste qu'il peut filtrer comme
+  les listes du site (région, circuit, paroisse, grade, fonction, âge…), et indique pour chacun, s'il y
+  a lieu, sa **session** (ex. « session Culte »).
+- **Celui qui n'est pas convoqué ne peut pas travailler** à l'événement.
+- Dès la convocation, chaque convoqué reçoit une **notification** sur le site (et un e-mail s'il en a
+  un), en plus des autres canaux habituels.
+- On peut ajouter ou retirer des convoqués jusqu'à l'événement ; un retrait est notifié et reste
+  dans l'historique.
+
+### 17.3 Pointer les présences
+
+- Le **Secrétaire national** (ou un membre du Bureau national) **pointe** chaque convoqué :
+  **présent**, **absent** ou **excusé**.
+- Le pointage se fait sur une liste simple, utilisable sur téléphone le jour même, avec recherche par
+  nom ou matricule, ou en **scannant le code de l'autorisation** (§ 17.4).
+- La présence d'un membre non convoqué ne s'enregistre pas : il n'était pas autorisé.
+
+### 17.4 L'autorisation (carte de petit format)
+
+Seulement pour les événements où l'option « Générer une autorisation » est cochée.
+
+- Chaque convoqué peut **télécharger son autorisation** en PDF depuis son espace (à imprimer ou à
+  montrer sur le téléphone) ; le Bureau national peut aussi les imprimer toutes d'un coup.
+- La carte, de **petit format** (type carte de visite ou A6), porte :
+  - les logos et « Armée du Salut du Bénin » ;
+  - la **photo d'identité** validée du membre ;
+  - son **grade, prénoms, NOM** et son **matricule** ;
+  - l'**événement**, sa date et son lieu ;
+  - la mention **« Est autorisé(e) à travailler — session … »** ;
+  - un **code de vérification** (QR code) : en le scannant, le contrôleur voit si l'autorisation est
+    valable (membre toujours convoqué, événement non annulé).
+- Une autorisation retirée (membre déconvoqué, événement annulé) apparaît **non valable** au
+  contrôle.
+- **Durée de validité** (décision du 12 novembre 2026) : à la création de l'événement, le Bureau
+  national indique à partir de quelle heure l'autorisation est valable (par défaut, le début de
+  l'événement) et pour combien de temps : 6 h, 12 h, 24 h, 48 h, 72 h, 4 jours ou 7 jours. La carte
+  porte « Valable du … au … ». Au contrôle : **« Pas encore valable »** avant, **« Autorisation
+  valable »** pendant, **« Non valable — expirée »** après ; une fois expirée, elle ne se télécharge
+  plus.
+- Un membre **sanctionné** peut être convoqué ou non : c'est au Secrétaire national d'en décider.
+
+### 17.5 Historique et fiche du membre
+
+- Sur la **fiche du membre** (et dans son espace) : la liste des événements auxquels il a été
+  convoqué, sa session et sa présence (présent, absent, excusé).
+- Pour chaque événement : liste des convoqués par session, taux de présence ; exports PDF et Excel.
+- Statistiques de participation (par région, par grade…) à prévoir plus tard.
+- Chaque création, convocation, retrait, report, annulation et pointage est inscrit au **journal**.
+
+### 17.6 Décisions du BNC (12 novembre 2026)
+
+1. **Les invitations viennent directement du Bureau national** à la personne convoquée. Les bureaux
+   de région, de circuit et de paroisse **ne voient pas** les événements nationaux ; le Bureau
+   national convoque qui il veut.
+2. Le **pointage** des présences, le jour même, est fait **par le Bureau national seulement**.
+3. Le membre **imprime lui-même** sa carte d'autorisation depuis son espace. **Le bureau de sa
+   paroisse** (et lui seul, pas le circuit ni la région) peut aussi l'imprimer pour l'aider : il ne
+   voit alors que les autorisations valables de ses membres, sans les autres informations de
+   l'événement.
 
 ## 18. Module 4 — Communication
 
@@ -927,7 +1009,7 @@ mis en ligne en même temps que le module 1.
 | Choix de l'hébergeur et du nom de domaine `.bj` | Mise en ligne | **À décider** après les essais |
 | Informations pour la déclaration APDP (responsable du traitement, contact) | Mise en ligne | **À fournir** |
 | Retours des essais sur le site d'essai | Mise en ligne | En cours |
-| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | Reçues le 11 novembre 2026 ; restent les **pourcentages** de répartition (§ 16.9) |
+| Réponses aux points à confirmer des grades et des cotisations (§ 15.8 et 16.9) | Module 2 | Reçues (11 et 12 novembre 2026) |
 
 ---
 

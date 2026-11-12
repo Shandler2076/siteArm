@@ -339,3 +339,35 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
   membres déjà gradés) ; un ancien fichier sans ces colonnes reste accepté.
 - Site d'essai : `python manage.py reinitialiser_demo --oui --base <nom de la base>` recrée les membres fictifs avec grades
   (PostgreSQL seulement ; à refaire ensuite : `createsuperuser`).
+
+## 22. Cotisations mensuelles (module 2)
+
+- Application `apps/cotisations`. **Seul** `services.py` écrit : `saisir_versement`, `saisir_collecte`
+  (tout ou rien), `valider` (numéro de reçu `R2026-000123`, parts figées), `refuser`, `annuler`,
+  `marquer_part_recue`, `regler`, `rappeler_en_attente`. Calculs dans `regles.py` (`situations`
+  en quelques requêtes pour tout un périmètre).
+- Réglages du BN (menu « Réglages des cotisations ») : **mois de départ** (rien n'est dû avant ;
+  tant qu'il n'est pas fixé, la saisie est fermée) et **tarifs** datés (montant, parts dont le total
+  fait 100 %). Par défaut : 100 F, paroisse 30 %, circuit 20 %, région 20 %, national 30 %.
+- Accès : gardien des périmètres, `unites_cotisations` (fonctions de gestion **et trésoriers**),
+  `peut_voir_cotisations_de` pour les PDF d'un membre.
+- Tâche quotidienne : `python manage.py rappel_cotisations` (versements en attente depuis plus de
+  30 jours → notification au circuit), ajoutée à `taches_quotidiennes.sh`.
+- Pour la **vraie mise en service** : le BN fixe le mois de départ dans les réglages.
+
+## 23. Événements nationaux (module 3)
+
+- Application `apps/evenements`. **Seul** `services.py` écrit : `creer_evenement`,
+  `modifier_evenement` (report notifié), `annuler_evenement`, `convoquer` (notification directe du
+  Bureau national), `retirer`, `pointer` (présent, absent, excusé).
+- Pages du BN : menu « Événements » (création, sessions, convocation par filtres, pointage sur
+  téléphone, exports, impression de toutes les autorisations).
+- Membre : « Mes événements » et son autorisation PDF (carte 85 × 120 mm, photo, QR code). La
+  paroisse du membre peut l'imprimer (`perimetre.peut_imprimer_autorisation`) ; pas le circuit ni la
+  région. Les bureaux ne voient pas les événements.
+- Le QR code ouvre `/evenements/verifier/<jeton>/` (page publique) : « Autorisation valable » ou
+  « Non valable » (convocation retirée, événement annulé, code inconnu). Le jeton est aléatoire.
+- Validité de la carte : `Evenement.validite_debut` (vide = début) et `validite_heures` (24 par
+  défaut) ; `services.etat_scan` donne valable / pas encore valable / expirée / non valable.
+- L'adresse imprimée dans le QR code vient de `DJANGO_SITE_URL` : elle doit être l'adresse réelle du
+  site (sinon le scan n'aboutit pas).

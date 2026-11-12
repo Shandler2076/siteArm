@@ -60,8 +60,11 @@ def _image_photo(membre: Membre):
     photo = membre.photo_acceptee
     if not photo:
         return None
-    with photo.fichier.open("rb") as f:
-        return ImageReader(io.BytesIO(f.read()))
+    try:
+        with photo.fichier.open("rb") as f:
+            return ImageReader(io.BytesIO(f.read()))
+    except OSError:
+        return None  # fichier introuvable : « Photo à venir » plutôt qu'une erreur
 
 
 def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) -> bytes:

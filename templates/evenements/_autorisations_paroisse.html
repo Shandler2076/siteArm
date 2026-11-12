@@ -1,0 +1,8 @@
+{% load evenements %}{% autorisations_valables membre as autorisations %}
+{% if autorisations %}
+<h2>Autorisations à imprimer</h2>
+<p class="aide">Vous pouvez imprimer l'autorisation de ce membre pour l'aider.</p>
+<ul class="fonctions">
+  {% for c in autorisations %}<li>{{ c.evenement.nom }}{% if c.session %} — {{ c.session.nom }}{% endif %} · <a href="{% url 'evenements:autorisation' c.pk %}">Autorisation (PDF)</a></li>{% endfor %}
+</ul>
+{% endif %}

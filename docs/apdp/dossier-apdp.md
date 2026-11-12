@@ -138,6 +138,8 @@ jour auprès de l'APDP.
 | Coordonnées | Téléphone, WhatsApp, e-mail, quartier, ville, profession | Téléphone obligatoire, le reste facultatif | Membre |
 | Personne à contacter | Nom et téléphone | Facultatif | Membre |
 | Vie dans le mouvement | Année, paroisse et région d'intégration ; affectations successives ; fonctions et mandats ; catégorie ; statut ; grade et historique des grades (date, mode, référence de la décision) | Obligatoire | BNC et bureaux |
+| Événements nationaux | Convocations (événement, session), présence, autorisation avec code de vérification | Obligatoire pour les convoqués | Bureau national ; le membre ; la paroisse (impression de l'autorisation) ; le contrôleur (vérification : ce qui figure sur la carte — photo, grade, nom, matricule, événement, session) |
+| Cotisations mensuelles | Mois payés, montant, date du versement, paroisse qui a encaissé, validation, numéro de reçu, répartition entre les niveaux | Obligatoire | BNC, bureaux et trésoriers du périmètre ; le membre lui-même |
 | Discipline interne | Sanctions prévues par le règlement intérieur (type, degré, dates, motif résumé, référence de la décision) | Uniquement si une sanction est prononcée par le BNC | BNC |
 | Données de connexion et journal | Identifiant, date et heure des connexions et des opérations sensibles, actions effectuées | Automatique | Site |
 

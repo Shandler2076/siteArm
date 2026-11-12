@@ -11,9 +11,19 @@
     {% url 'membres:ma_photo' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Ma photo</a></li>
     {% url 'membres:mes_coordonnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes coordonnées</a></li>
     {% endif %}
+    {% if user.membre %}{% url 'evenements:moi' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes événements</a></li>{% endif %}
+    {% if user.membre %}{% url 'cotisations:moi' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes cotisations</a></li>{% endif %}
     {% url 'protection_donnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Protection de vos données</a></li>
     {% url 'notifications:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Notifications{% if notifications_non_lues %} ({{ notifications_non_lues }}){% endif %}</a></li>
   </ul>
+  {% if mes_unites_cotisations %}
+    <p class="menu__titre">Cotisations mensuelles</p>
+    <ul>
+      {% for unite in mes_unites_cotisations %}
+        {% url 'cotisations:accueil' unite.cle as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>{{ unite.libelle }}</a></li>
+      {% endfor %}
+    </ul>
+  {% endif %}
   {% for unite in mes_unites %}
     <p class="menu__titre">{{ unite.libelle }}</p>
     <ul>
@@ -38,6 +48,8 @@
       {% url 'listes:statistiques' 'national' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Statistiques nationales</a></li>
       {% endif %}
       {% url 'grades:bn_serie' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Promotions en série</a></li>
+      {% url 'evenements:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Événements</a></li>
+      {% url 'cotisations:bn_reglages' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Réglages des cotisations</a></li>
       {% url 'bureaux:bn_installer' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Installer un bureau</a></li>
       {% url 'bureaux:bn_fonctions' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Fonctions et droits</a></li>
       {% url 'bureaux:bn_echeances' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mandats à échéance</a></li>

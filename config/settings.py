@@ -52,6 +52,8 @@ INSTALLED_APPS = [
     "apps.mouvements",
     "apps.securite",
     "apps.grades",
+    "apps.cotisations",
+    "apps.evenements",
     "axes",
 ]
 

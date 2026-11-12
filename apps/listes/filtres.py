@@ -15,6 +15,14 @@ from apps.membres.grades import Grade
 from apps.membres.models import Categorie, Membre, Sexe, Statut
 from apps.organisation.models import Circuit, Paroisse, Region
 
+COTISATIONS = [("", "Toutes"), ("a_jour", "À jour"), ("en_retard", "En retard")]
+
+
+def mois_des_cotisations(jour: datetime.date) -> datetime.date:
+    """Mois de référence de la situation des cotisations (le mois en cours)."""
+    return jour.replace(day=1)
+
+
 AGES = [
     ("", "Tous les âges"),
     ("moins", "Moins de X ans"),
@@ -63,6 +71,10 @@ class FiltreListeForm(forms.Form):
         required=False,
     )
     eligible = forms.BooleanField(label="Éligibles au grade suivant", required=False)
+    cotisation = forms.ChoiceField(label="Cotisations", choices=COTISATIONS, required=False)
+    retard_min = forms.IntegerField(
+        label="En retard d'au moins (mois)", required=False, min_value=1, max_value=240
+    )
     age = forms.ChoiceField(label="Âge", choices=AGES, required=False)
     age_x = forms.IntegerField(label="X (ans)", required=False, min_value=0, max_value=130)
     age_y = forms.IntegerField(label="Y (ans)", required=False, min_value=0, max_value=130)
@@ -114,6 +126,8 @@ class FiltreListeForm(forms.Form):
             "grade",
             "grade_min",
             "eligible",
+            "cotisation",
+            "retard_min",
             "region",
             "circuit",
             "paroisse",
@@ -181,6 +195,16 @@ def membres_filtres(unite: Unite, donnees: dict, aujourdhui: datetime.date):
         qs = qs.filter(filtre_eligibles(aujourdhui))
     if donnees.get("age"):
         qs = filtrer_age(qs, donnees["age"], donnees.get("age_x"), donnees.get("age_y"), aujourdhui)
+    if donnees.get("cotisation") or donnees.get("retard_min"):
+        from apps.cotisations.regles import situations
+
+        minimum = donnees.get("retard_min") or 1
+        sits = situations(qs, mois_des_cotisations(aujourdhui))
+        if donnees.get("cotisation") == "a_jour":
+            garder = [pk for pk, s in sits.items() if s.a_jour]
+        else:
+            garder = [pk for pk, s in sits.items() if s.retard >= minimum]
+        qs = Membre.objects.filter(pk__in=garder)
     return qs.order_by("nom", "prenoms", "matricule")
 
 
@@ -210,6 +234,13 @@ def resume_filtres(form: FiltreListeForm) -> list[str]:
         resume.append(f"Grade : à partir de {Grade(d['grade_min']).label}")
     if d.get("eligible"):
         resume.append("Éligibles au grade suivant")
+    if d.get("cotisation") == "a_jour":
+        resume.append("Cotisations : à jour")
+    elif d.get("cotisation") == "en_retard" or d.get("retard_min"):
+        n = d.get("retard_min") or 1
+        resume.append(
+            f"Cotisations : en retard d'au moins {n} mois" if n > 1 else "Cotisations : en retard"
+        )
     age, x, y = d.get("age"), d.get("age_x"), d.get("age_y")
     if age == "moins":
         resume.append(f"Âge : moins de {x} ans")

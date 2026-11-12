@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block titre %}Réglages des cotisations — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="aide">Bureau national</p>
+  <h1>Réglages des cotisations mensuelles</h1>
+  <h2>Mise en service</h2>
+  <p>Premier mois suivi : <strong>{% if parametres.mois_depart %}{{ parametres.mois_depart|date:"F Y" }}{% else %}non fixé — les cotisations ne sont pas encore ouvertes{% endif %}</strong>.</p>
+  <form method="post"><input type="hidden" name="action" value="depart">
+    {% with form=depart %}{% include "grades/_formulaire.html" %}{% endwith %}
+    <button type="submit" class="bouton">Enregistrer le mois de départ</button></form>
+  <h2>Montant et répartition</h2>
+  <p>Actuellement : <strong>{{ courant.montant }} F par mois</strong> — paroisse {{ courant.part_paroisse }} %, circuit {{ courant.part_circuit }} %, région {{ courant.part_region }} %, Bureau national {{ courant.part_national }} %.</p>
+  <p class="aide">Un nouveau tarif s'applique à partir du mois indiqué ; les mois précédents gardent l'ancien. Le total des parts doit faire 100 %.</p>
+  <form method="post"><input type="hidden" name="action" value="tarif">
+    {% with form=tarif %}{% include "grades/_formulaire.html" %}{% endwith %}
+    <button type="submit" class="bouton">Enregistrer le tarif</button></form>
+  {% if tarifs %}<h2>Historique des tarifs</h2><ul class="fonctions">
+    {% for t in tarifs %}<li>À compter de {{ t.date_effet|date:"F Y" }} : {{ t.montant }} F — {{ t.part_paroisse }} / {{ t.part_circuit }} / {{ t.part_region }} / {{ t.part_national }} %</li>{% endfor %}
+  </ul>{% endif %}
+</section>
+{% endblock %}

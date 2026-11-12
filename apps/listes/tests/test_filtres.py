@@ -172,6 +172,9 @@ def test_lignes_colonnes(monde):
         "Ekpe A",
         "Camarade",
         "01/01/2015",
+        0,
+        0,
+        0,
         "Membre actif",
         "Actif",
         "Secrétaire paroissial",
@@ -194,7 +197,12 @@ def test_lignes_sans_n_plus_1(monde, nouveau_membre, django_assert_max_num_queri
 
     for i in range(27):
         nouveau_membre(monde["P1"], f"Nom{i}")
+    # Colonnes du module 1 : 3 requêtes ; avec les cotisations, un nombre fixe par paquet
+    # de 500 membres (jamais une requête par membre).
+    module1 = [c for c in COLONNES_LISTE if c not in ("mois_payes", "total_verse", "reste_du")]
     with django_assert_max_num_queries(3):
+        assert len(list(lignes(preparer(Membre.objects.all(), J), module1, J))) == 34
+    with django_assert_max_num_queries(10):
         assert len(list(lignes(preparer(Membre.objects.all(), J), list(COLONNES_LISTE), J))) == 34
 
 

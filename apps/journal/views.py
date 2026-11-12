@@ -5,6 +5,7 @@ from django.db.models import Q
 from django.shortcuts import render
 
 from apps.bureaux.views_bn import bn_requis
+from apps.journal.lecture import lire
 from apps.journal.models import LIBELLES, EntreeJournal
 
 
@@ -41,6 +42,7 @@ def liste(request):
         "journal/liste.html",
         {
             "page": page,
+            "lignes": lire(page.object_list),
             "actions": sorted(LIBELLES.items(), key=lambda x: x[1]),
             "filtres": {
                 "action": action,

@@ -187,3 +187,19 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .croise td, .croise th { text-align: right; }
 .croise th[scope="row"], .croise thead th:first-child { text-align: left; white-space: nowrap; }
 .croise .nombre { font-weight: 700; color: var(--marine); }
+.grille-cm td, .grille-cm th { text-align: center; padding: 4px; }
+.grille-cm th[scope="row"] { text-align: left; white-space: nowrap; }
+.case--paye { background: #E3F4E8; color: #1F6B3A; font-weight: 700; }
+.case--attente { background: #FFF6D6; }
+.case--du { background: #FDE8E8; }
+.case--non_du { color: #9AA3B2; }
+.legende .case { display: inline-block; min-width: 1.4em; text-align: center; border-radius: 4px; }
+form.en-ligne { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+ul.pointage { list-style: none; padding: 0; }
+ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
+.verification { text-align: center; }
+.verification__etat { font-size: 1.6rem; font-weight: 800; padding: 14px; border-radius: 10px; color: #fff; }
+.verification__etat--ok { background: #1F7A3E; }
+.verification__etat--non { background: #A11D2B; }
+.verification__photo { width: 150px; height: 190px; object-fit: cover; border: 2px solid var(--marine); border-radius: 6px; }
+.verification__etat--attente { background: #B7791F; }

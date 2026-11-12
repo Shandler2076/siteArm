@@ -41,7 +41,8 @@ def test_pdf_paysage_si_beaucoup_de_colonnes(client_sec, monde):
     page = PdfReader(io.BytesIO(r.content)).pages[0]
     assert page.mediabox.width > page.mediabox.height
     # Toutes les colonnes du module 1 : les fonctions restent lisibles en entier.
-    sans_grade = [c for c in COLONNES_LISTE if c not in ("grade", "date_grade")]
+    ajoutees = ("grade", "date_grade", "mois_payes", "total_verse", "reste_du")
+    sans_grade = [c for c in COLONNES_LISTE if c not in ajoutees]
     q = "?envoye=1&" + "&".join(f"colonnes={c}" for c in sans_grade)
     assert "Secrétaire paroissial" in _texte(client_sec.get(_base(monde) + "pdf/" + q).content)
 

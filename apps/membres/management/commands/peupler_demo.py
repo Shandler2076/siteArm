@@ -114,6 +114,8 @@ class Command(BaseCommand):
             simple.compte.doit_changer_mot_de_passe = False
             simple.compte.save()
             comptes.append(("Membre simple", simple.matricule, mot))
+        self._cotisations(hasard, crees, par)
+        self._evenements(hasard, crees, par)
         self._mouvements(hasard, crees, par)
         self.stdout.write(self.style.SUCCESS(f"{Membre.objects.count()} membres fictifs créés."))
         self.stdout.write("\nComptes de démonstration (à noter, ils ne seront plus affichés) :")
@@ -186,6 +188,115 @@ class Command(BaseCommand):
                 par=par,
             )
             membre.refresh_from_db()
+
+    def _cotisations(self, hasard, membres, par):
+        """Cotisations fictives depuis janvier : à jour, en retard, en attente, refusées."""
+        from django.utils import timezone
+
+        from apps.bureaux.models import Mandat
+        from apps.cotisations.models import NiveauPart, ParametresCotisations
+        from apps.cotisations.regles import situation
+        from apps.cotisations.services import (
+            CotisationRefusee,
+            marquer_part_recue,
+            refuser,
+            saisir_versement,
+            valider,
+        )
+
+        jour = timezone.localdate()
+        # Saisie par le Secrétaire national, validation par le bureau du circuit de démonstration
+        # (celui qui saisit ne valide pas).
+        mandat = (
+            Mandat.objects.filter(fonction__niveau="circuit", fonction__droit_gerer=True)
+            .select_related("membre__compte")
+            .first()
+        )
+        validateur = mandat.membre.compte if mandat else None
+        parametres = ParametresCotisations.courant()
+        parametres.mois_depart = jour.replace(month=1, day=1)
+        parametres.save()
+        # Membres fictifs « enregistrés » l'an dernier : tous les mois de l'année sont dus.
+        debut = timezone.make_aware(datetime.datetime(jour.year - 1, 6, 1, 9))
+        Membre.objects.filter(pk__in=[m.pk for m in membres]).update(date_enregistrement=debut)
+        valides = []
+        for m in membres:
+            m.refresh_from_db()
+            dus = len(situation(m, jour.replace(day=1)).dus)
+            tirage = hasard.random()
+            try:
+                if tirage < 0.45:  # à jour, parfois d'avance
+                    nb = dus + (1 if hasard.random() < 0.2 and jour.month < 12 else 0)
+                    v = saisir_versement(m, montant=100 * nb, date_versement=jour, par=par)
+                    valides += valider([v], par=validateur)
+                elif tirage < 0.75:  # en retard
+                    nb = hasard.randint(1, max(1, dus - 2))
+                    v = saisir_versement(m, montant=100 * nb, date_versement=jour, par=par)
+                    valides += valider([v], par=validateur)
+                elif tirage < 0.85:  # versement en attente de validation
+                    v = saisir_versement(
+                        m, montant=100 * max(1, dus - 1), date_versement=jour, par=par
+                    )
+                elif tirage < 0.9:  # versement refusé par le circuit
+                    v = saisir_versement(m, montant=100, date_versement=jour, par=par)
+                    refuser(v, motif="Montant non reçu (démonstration)", par=par)
+            except CotisationRefusee:
+                continue
+        if valides:
+            # Un tiers des versements validés le mois dernier ; la part de l'un est reçue.
+            from apps.cotisations.models import Versement
+
+            anciens = [v.pk for v in valides[: max(1, len(valides) // 3)]]
+            Versement.objects.filter(pk__in=anciens).update(
+                date_validation=timezone.now() - datetime.timedelta(days=35)
+            )
+            v = Versement.objects.get(pk=anciens[0])
+            mois = timezone.localdate(v.date_validation).replace(day=1)
+            for niveau in (NiveauPart.CIRCUIT, NiveauPart.REGION):
+                marquer_part_recue(
+                    niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=validateur
+                )
+
+    def _evenements(self, hasard, membres, par):
+        """Un pèlerinage à venir (avec autorisations) et un conclave passé (présences pointées)."""
+        from django.utils import timezone
+
+        from apps.evenements.models import Presence
+        from apps.evenements.services import convoquer, creer_evenement, pointer
+
+        maintenant = timezone.localtime()
+        annee = (
+            maintenant.year if maintenant.month < 12 or maintenant.day < 24 else maintenant.year + 1
+        )
+        nativite = creer_evenement(
+            nom=f"Pèlerinage de la Nativité {annee}",
+            debut=timezone.make_aware(datetime.datetime(annee, 12, 24, 7, 0)),
+            lieu="Porto-Novo",
+            description="Fictif (démonstration). Équipes de travail par session.",
+            avec_autorisation=True,
+            sessions=["Session Mère", "Session Culte", "Session Fruits"],
+            par=par,
+        )
+        choisis = hasard.sample(membres, min(30, len(membres)))
+        sessions = list(nativite.sessions.all())
+        for i, session in enumerate(sessions):
+            convoquer(nativite, choisis[i::3], session=session, par=par)
+        conclave = creer_evenement(
+            nom="Conclave du Bureau national",
+            debut=maintenant - datetime.timedelta(days=20),
+            lieu="Siège du Bureau national",
+            avec_autorisation=False,
+            par=par,
+        )
+        convoques = convoquer(conclave, hasard.sample(membres, min(12, len(membres))), par=par)
+        for c in convoques:
+            pointer(
+                c,
+                hasard.choices([Presence.PRESENT, Presence.ABSENT, Presence.EXCUSE], [75, 15, 10])[
+                    0
+                ],
+                par=par,
+            )
 
     def _mouvements(self, hasard, membres, par):
         """Quelques situations pour essayer toutes les pages (statuts, mutation, sanction)."""

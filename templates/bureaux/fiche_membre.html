@@ -40,6 +40,7 @@
   </ul>
   {% include "mouvements/_sanctions.html" %}
   {% include "grades/_historique.html" %}
+  {% if unite.niveau == "paroisse" %}{% include "evenements/_autorisations_paroisse.html" %}{% endif %}
   {% include "mouvements/_historique.html" %}
   <h2>Signalements au Bureau national</h2>
   <ul class="liens liens--compacts">

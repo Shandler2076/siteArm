@@ -8,7 +8,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
-- Cahier des charges général (v2.3, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+- Cahier des charges général (v2.5, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
   détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
@@ -56,6 +56,13 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   est le SEUL point d'entrée (promouvoir, promouvoir_en_serie, corriger_grade, attribuer_grade_initial ;
   durées art. 78, nomination ≥ Commandant, exceptionnelle art. 84). Nom affiché `nom_complet` =
   « Grade Prénoms NOM ». Démo : `reinitialiser_demo --oui` (PostgreSQL).
+- Cotisations (`apps/cotisations`) : `services.py` SEUL point d'écriture (saisie paroisse, validation
+  circuit, refus, annulation, parts reçues, réglages BN) ; `regles.py` (mois dus, `situations`) ; accès
+  `perimetre.unites_cotisations` (gestion + trésoriers) ; rien sur la fiche membre (état + reçu PDF à part).
+- Événements nationaux (`apps/evenements`, BN seulement) : `services.py` SEUL point d'écriture ;
+  autorisation PDF (QR → `/evenements/verifier/<jeton>/`, public, valable/non valable) ; impression par
+  le membre ou sa paroisse (`perimetre.peut_imprimer_autorisation`) ; les bureaux ne voient pas les événements.
+- Journal lisible : `apps/journal/lecture.py` (une phrase par action ; toute nouvelle action y est ajoutée).
 - Double vérification BN (`apps/securite`) : TOTP, intergiciel `DoubleVerificationObligatoire` ;
   désactivée dans les tests par `conftest.py` racine (sauf `apps/securite/tests`).
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.

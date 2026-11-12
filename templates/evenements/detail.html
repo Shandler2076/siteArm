@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block titre %}{{ ev.nom }} — Événements{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'evenements:liste' %}">← Événements</a></p>
+  <h1>{{ ev.nom }}</h1>
+  <p><strong>{{ ev.debut|date:"l d/m/Y à H:i" }}</strong>{% if ev.fin %} — jusqu'au {{ ev.fin|date:"d/m/Y H:i" }}{% endif %}{% if ev.lieu %} · {{ ev.lieu }}{% endif %}</p>
+  {% if ev.annule %}<p class="message message--error">Événement annulé : {{ ev.motif_annulation }}</p>{% endif %}
+  {% if ev.description %}<p>{{ ev.description|linebreaksbr }}</p>{% endif %}
+  <p>{% if ev.avec_autorisation %}Les convoqués ont une <strong>autorisation</strong> à imprimer, valable du {{ ev.debut_validite|date:"d/m/Y H:i" }} au {{ ev.fin_validite|date:"d/m/Y H:i" }}.{% else %}Sans autorisation.{% endif %}</p>
+  <p><strong>{{ total }}</strong> convoqué(s) · {{ pointes }} pointé(s) · <strong>{{ presents }}</strong> présent(s){% if taux is not None %} · taux de présence : <strong>{{ taux }} %</strong> des pointés{% endif %}</p>
+  {% if not ev.annule %}
+  <div class="actions">
+    <a class="bouton" href="{% url 'evenements:convoquer' ev.pk %}">Convoquer des membres</a>
+    <a class="bouton bouton--secondaire" href="{% url 'evenements:pointage' ev.pk %}">Pointer les présences</a>
+    <a class="bouton bouton--secondaire" href="{% url 'evenements:modifier' ev.pk %}">Modifier</a>
+    {% if ev.avec_autorisation and total %}<a class="bouton bouton--secondaire" href="{% url 'evenements:autorisations' ev.pk %}">Imprimer toutes les autorisations</a>{% endif %}
+  </div>
+  {% endif %}
+  <div class="actions">
+    <a class="bouton bouton--secondaire" href="{% url 'evenements:export_pdf' ev.pk %}">Liste des convoqués (PDF)</a>
+    <a class="bouton bouton--secondaire" href="{% url 'evenements:export_excel' ev.pk %}">Liste des convoqués (Excel)</a>
+  </div>
+  {% for g in groupes %}
+    <h2>{% if g.session %}{{ g.session.nom }}{% else %}Sans session{% endif %} ({{ g.convocations|length }})</h2>
+    <div class="tableau-defilant"><table class="tableau">
+      <thead><tr><th>Membre</th><th>Matricule</th><th>Présence</th><th></th></tr></thead>
+      <tbody>{% for c in g.convocations %}
+        <tr><td>{{ c.membre.nom_complet }}</td><td>{{ c.membre.matricule }}</td><td>{{ c.get_presence_display|default:"Non pointé" }}</td>
+          <td>{% if not ev.annule %}<form method="post" class="en-ligne" onsubmit="return confirm('Retirer cette convocation ?');">{% csrf_token %}
+            <input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}">
+            <input name="motif" placeholder="Motif du retrait" required maxlength="300" aria-label="Motif du retrait">
+            <button type="submit" class="bouton bouton--secondaire">Retirer</button></form>{% endif %}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+  {% empty %}<p class="aide">Aucun membre convoqué.</p>{% endfor %}
+  {% if retires %}<h2>Convocations retirées</h2><ul class="fonctions">{% for c in retires %}<li>{{ c.membre.nom_complet }} — {{ c.motif_retrait }}</li>{% endfor %}</ul>{% endif %}
+  {% if not ev.annule %}
+  <h2>Annuler l'événement</h2>
+  <form method="post" onsubmit="return confirm('Annuler cet événement ? Tous les convoqués seront avertis.');">{% csrf_token %}
+    <input type="hidden" name="action" value="annuler">
+    <label class="champ champ--requis"><span>Motif</span><input name="motif" required maxlength="300"></label>
+    <button type="submit" class="bouton bouton--secondaire">Annuler l'événement</button></form>
+  {% endif %}
+</section>
+{% endblock %}

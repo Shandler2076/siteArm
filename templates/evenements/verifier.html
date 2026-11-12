@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titre %}Vérification d'une autorisation{% endblock %}
+{% block contenu %}
+<section class="carte verification">
+  {% if etat == "valable" %}
+    <p class="verification__etat verification__etat--ok">Autorisation valable</p>
+  {% elif etat == "pas_encore" %}
+    <p class="verification__etat verification__etat--attente">Pas encore valable</p>
+  {% else %}
+    <p class="verification__etat verification__etat--non">Non valable</p>
+  {% endif %}
+  <p><strong>{{ raison }}</strong></p>
+  {% if c %}
+    {% if photo %}<img class="verification__photo" src="data:image/jpeg;base64,{{ photo }}" alt="Photo d'identité">{% endif %}
+    <h1>{{ c.membre.nom_complet }}</h1>
+    {% if etat == "valable" or etat == "pas_encore" %}
+      <p class="matricule">{{ c.membre.matricule }}</p>
+      <p><strong>{{ c.evenement.nom }}</strong><br>{{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %} — {{ c.evenement.lieu }}{% endif %}</p>
+      <p>Est autorisé(e) à travailler{% if c.session %} — <strong>{{ c.session.nom }}</strong>{% endif %}.</p>
+    {% else %}
+      <p>{{ c.evenement.nom }}</p>
+    {% endif %}
+    {% if peut_pointer %}<p><a class="bouton" href="{% url 'evenements:pointage' c.evenement_id %}?q={{ c.membre.matricule|urlencode }}#c{{ c.pk }}">Pointer la présence</a></p>{% endif %}
+  {% endif %}
+</section>
+{% endblock %}
