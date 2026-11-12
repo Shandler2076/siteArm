@@ -59,7 +59,7 @@ def _enregistrer(membre, *, grade, date_effet, mode, par, reference="", motif=""
     membre.grade, membre.date_grade = grade, date_effet
     Membre.objects.filter(pk=membre.pk).update(grade=grade, date_grade=date_effet)
     if membre.compte_id:
-        membre.compte.nom_affiche = membre.nom_complet
+        membre.compte.nom_affiche = membre.nom_complet[:150]
         membre.compte.save(update_fields=["nom_affiche"])
     return h
 
@@ -223,8 +223,9 @@ def corriger_grade(
     motif = (motif or "").strip()
     if not motif:
         raise GradeRefuse("Le motif de la correction est obligatoire.")
-    if date_effet > timezone.localdate():
-        raise GradeRefuse("La date d'effet ne peut pas être dans le futur.")
+    erreurs = erreurs_grade_initial(date_effet, membre.annee_integration, membre.date_naissance)
+    if erreurs:
+        raise GradeRefuse(erreurs[0][0].upper() + erreurs[0][1:])
     with transaction.atomic():
         m = (
             Membre.objects.select_for_update(of=("self",))

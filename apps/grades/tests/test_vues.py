@@ -117,3 +117,17 @@ def test_serie(monde, client_technique):
     r = client_technique.post("/grades/bn/serie/?grade=2", {**donnees, "membres": [a.pk, b.pk]})
     assert r.status_code == 302
     assert set(Membre.objects.filter(pk__in=[a.pk, b.pk]).values_list("grade", flat=True)) == {2}
+
+
+def test_serie_region_invalide_pas_d_erreur(monde, client_technique):
+    assert client_technique.get("/grades/bn/serie/?grade=2&region=abc").status_code == 200
+
+
+def test_serie_grade_impose_par_la_page(monde, client_technique):
+    """Revue finale M-3 : le grade promu est celui de la liste affichée, pas un autre."""
+    a = _poser(monde["m1"], 1, D(2019, 1, 1))
+    client_technique.post(
+        "/grades/bn/serie/?grade=2",
+        {"grade": "9", "date_effet": "2024-01-01", "reference": "R", "membres": [a.pk]},
+    )
+    assert Membre.objects.get(pk=a.pk).grade == 2

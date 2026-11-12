@@ -15,9 +15,12 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--oui", action="store_true", help="Confirme l'effacement total.")
+        parser.add_argument(
+            "--base", default="", help="Nom exact de la base de données (seconde sécurité)."
+        )
         parser.add_argument("--membres", type=int, default=150)
 
-    def handle(self, *args, oui, membres, **options):
+    def handle(self, *args, oui, base, membres, **options):
         if not getattr(settings, "SITE_DEMO", False):
             raise CommandError(
                 "Refusé : cette commande ne fonctionne que sur un site d'essai "
@@ -27,6 +30,12 @@ class Command(BaseCommand):
             raise CommandError(
                 "Cette commande efface TOUTES les données du site d'essai, compte technique "
                 "compris. Relancez-la avec --oui pour confirmer."
+            )
+        nom = connection.settings_dict.get("NAME") or ""
+        if base != nom:
+            raise CommandError(
+                "Seconde sécurité : indiquez le nom exact de la base de données avec "
+                f"--base {nom} (relisez-le : c'est bien la base du site d'essai ?)."
             )
         if connection.vendor != "postgresql":
             raise CommandError("Cette commande demande une base PostgreSQL.")

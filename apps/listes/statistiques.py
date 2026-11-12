@@ -108,7 +108,7 @@ def _inferieures(unite: Unite):
     return None
 
 
-def _tranches_age(cellule_age) -> list:
+def _tranches_age() -> list:
     """[(libellé, filtres)] des tranches d'âge, « âge non renseigné » compris."""
     resultat = []
     for t in tranches_depuis_bornes(ReglageStatistiques.courant().liste_bornes):
@@ -125,25 +125,33 @@ def calculer_statistiques(
 ) -> list[Section]:
     """`base` : filtres de page (clés d'URL de la liste) appliqués à tous les chiffres."""
     cellule = _fabrique(unite, statuts, aujourdhui, base)
+    # Une dimension déjà fixée par un filtre de page n'est pas redétaillée : sa répartition
+    # remplacerait le filtre de page au lieu de s'y ajouter.
+    fixe = set(base or {})
 
-    sections = [
-        Section("Total", [cellule("Total des membres")]),
-        Section(
-            "Par sexe",
-            [cellule("Hommes", sexe=Sexe.MASCULIN), cellule("Femmes", sexe=Sexe.FEMININ)],
-        ),
-    ]
-    ages = [cellule(libelle, **filtres) for libelle, filtres in _tranches_age(cellule)]
-    sections.append(Section("Par tranche d'âge", ages))
-    sections.append(
-        Section("Par catégorie", [cellule(str(lib), categorie=v) for v, lib in Categorie.choices])
-    )
+    sections = [Section("Total", [cellule("Total des membres")])]
+    if "sexe" not in fixe:
+        sections.append(
+            Section(
+                "Par sexe",
+                [cellule("Hommes", sexe=Sexe.MASCULIN), cellule("Femmes", sexe=Sexe.FEMININ)],
+            )
+        )
+    if "age" not in fixe:
+        ages = [cellule(libelle, **filtres) for libelle, filtres in _tranches_age()]
+        sections.append(Section("Par tranche d'âge", ages))
+    if "categorie" not in fixe:
+        sections.append(
+            Section(
+                "Par catégorie", [cellule(str(lib), categorie=v) for v, lib in Categorie.choices]
+            )
+        )
     sections.append(Section("Par grade", [cellule(lib, grade=[v]) for v, lib in _grades(base)]))
     sections.append(
         Section("Par statut", [cellule(str(lib), statut=[v]) for v, lib in Statut.choices])
     )
     inferieures = _inferieures(unite)
-    if inferieures:
+    if inferieures and inferieures[1] not in fixe:
         titre, champ, objets = inferieures
         cellules = []
         for libelle, objet in objets:
@@ -171,12 +179,19 @@ def calculer_tableaux(
         total = cellule("Total", grade=[valeur])
         if total.nombre:
             grades.append((valeur, libelle, total))
-    colonnes_par_tableau = [
-        ("Grade × tranche d'âge", _tranches_age(cellule)),
-        ("Grade × sexe", [("Hommes", {"sexe": Sexe.MASCULIN}), ("Femmes", {"sexe": Sexe.FEMININ})]),
-    ]
+    fixe = set(base or {})  # dimensions fixées par la page : pas de tableau (voir plus haut)
+    colonnes_par_tableau = []
+    if "age" not in fixe:
+        colonnes_par_tableau.append(("Grade × tranche d'âge", _tranches_age()))
+    if "sexe" not in fixe:
+        colonnes_par_tableau.append(
+            (
+                "Grade × sexe",
+                [("Hommes", {"sexe": Sexe.MASCULIN}), ("Femmes", {"sexe": Sexe.FEMININ})],
+            )
+        )
     inferieures = _inferieures(unite)
-    if inferieures:
+    if inferieures and inferieures[1] not in fixe:
         titre, champ, objets = inferieures
         nom = {"region": "région", "circuit": "circuit", "paroisse": "paroisse"}[champ]
         colonnes_par_tableau.append(

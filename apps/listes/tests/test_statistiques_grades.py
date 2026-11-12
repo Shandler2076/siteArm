@@ -36,7 +36,7 @@ def test_par_grade_compte_juste(monde):
 
 def test_chaque_cellule_croisee_egale_sa_liste(monde):
     _situer(monde)
-    base = {"region": str(monde["HOULENOU"].pk), "age": "plus", "age_x": "40"}
+    base = {"grade_min": "1", "categorie": "actif"}
     tableaux = calculer_tableaux(NATIONAL, ["actif"], J, base)
     assert [t.titre for t in tableaux] == [
         "Grade × tranche d'âge",
@@ -46,14 +46,15 @@ def test_chaque_cellule_croisee_egale_sa_liste(monde):
     vues = 0
     for t in tableaux:
         for _libelle, cellules in t.lignes:
+            *colonnes, total = cellules
+            assert sum(c.nombre for c in colonnes) == total.nombre, t.titre
             for c in cellules:
                 assert c.nombre == _compte_liste(NATIONAL, c.filtres), (t.titre, c.filtres)
                 vues += 1
     assert vues > 10
-    # Région HOULENOU et plus de 40 ans : Adjovi (Capitaine 45 ans) et Chabi (Senior Capitaine).
-    regions = tableaux[2]
-    lignes = {lib: cellules for lib, cellules in regions.lignes}
-    assert set(lignes) == {"Capitaine", "Senior Capitaine"}
+    # Camarade (Chef) et sans grade (Tresorier) exclus par « à partir de Soldat de 3ᵉ classe ».
+    lignes = {lib for lib, _c in tableaux[2].lignes}
+    assert lignes == {"Capitaine", "Senior Capitaine", "Commandant"}
 
 
 def test_filtres_de_page_s_appliquent_a_toutes_les_sections(monde):
@@ -87,3 +88,20 @@ def test_page_et_pdf_statistiques(monde, client):
     r = client.get(base + "pdf/?envoye=1&statut=actif")
     texte = "".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
     assert "Par grade" in texte and "Grade × paroisse" in texte and "Capitaine" in texte
+
+
+def test_dimension_fixee_par_la_page_n_est_pas_redetaillee(monde):
+    """Revue finale I-1 : un filtre de page n'est jamais remplacé par celui d'une colonne."""
+    _situer(monde)
+    base = {"region": str(monde["HOULENOU"].pk), "age": "plus", "age_x": "40"}
+    s = {x.titre: x for x in calculer_statistiques(NATIONAL, ["actif"], J, base)}
+    assert "Par tranche d'âge" not in s and "Par région" not in s
+    total = s["Total"].cellules[0].nombre
+    assert sum(c.nombre for c in s["Par sexe"].cellules) == total
+    tableaux = calculer_tableaux(NATIONAL, ["actif"], J, base)
+    assert [t.titre for t in tableaux] == ["Grade × sexe"]
+    for _lib, cellules in tableaux[0].lignes:
+        *colonnes, total_ligne = cellules
+        assert sum(c.nombre for c in colonnes) == total_ligne.nombre
+    s = {x.titre: x for x in calculer_statistiques(NATIONAL, ["actif"], J, {"sexe": "F"})}
+    assert "Par sexe" not in s

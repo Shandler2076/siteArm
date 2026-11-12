@@ -32,6 +32,7 @@ class SerieForm(forms.Form):
     grade = forms.TypedChoiceField(
         label="Grade à attribuer",
         coerce=int,
+        widget=forms.HiddenInput,
         choices=[(v, lib) for v, lib in Grade.choices if v > Grade.CAMARADE],
     )
     date_effet = forms.DateField(label="Date d'effet", widget=_DATE)

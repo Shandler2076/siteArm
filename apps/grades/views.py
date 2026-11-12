@@ -79,11 +79,17 @@ def bn_serie(request):
     if grade == Grade.CAMARADE:
         grade = None
     region_pk = request.GET.get("region") or None
+    if region_pk and not (region_pk.isdigit() and Region.objects.filter(pk=region_pk).exists()):
+        region_pk = None
     candidats = list(_candidats(grade, region_pk)) if grade is not None else []
     aujourdhui = timezone.localdate()
     for m in candidats:
         m.est_eligible = eligible(m, aujourdhui) if grade < PAR_NOMINATION else True
-    form = SerieForm(request.POST or None, initial={"grade": grade, "date_effet": aujourdhui})
+    donnees = None
+    if request.method == "POST":
+        donnees = request.POST.copy()
+        donnees["grade"] = str(grade) if grade is not None else ""  # le grade de la liste affichée
+    form = SerieForm(donnees, initial={"grade": grade, "date_effet": aujourdhui})
     coches = set()
     if request.method == "POST" and form.is_valid():
         coches = {int(pk) for pk in request.POST.getlist("membres") if pk.isdigit()}
@@ -97,7 +103,8 @@ def bn_serie(request):
                 form.add_error(None, str(e))
             else:
                 messages.success(request, f"{len(faits)} grade(s) enregistré(s).")
-                return redirect(f"{request.path}?grade={grade}")
+                suite = f"&region={region_pk}" if region_pk else ""
+                return redirect(f"{request.path}?grade={grade}{suite}")
     return render(
         request,
         "grades/serie.html",

@@ -56,7 +56,17 @@ def test_reinitialiser_demo_postgresql(settings):
     call_command("charger_territoire", stdout=io.StringIO())
     call_command("peupler_demo", membres=10, stdout=io.StringIO())
     Membre.objects.filter(pk=Membre.objects.first().pk).update(nom="ZZAVANT")
-    call_command("reinitialiser_demo", oui=True, membres=10, stdout=io.StringIO())
+    base = connection.settings_dict["NAME"]
+    call_command("reinitialiser_demo", oui=True, base=base, membres=10, stdout=io.StringIO())
     assert Region.objects.exists() and Membre.objects.exists()
     assert not Membre.objects.filter(nom="ZZAVANT").exists()
     assert Fonction.objects.count() == fonctions > 0
+
+
+def test_reinitialiser_demo_exige_le_nom_de_la_base(territoire, settings):
+    """Revue finale M-11 : une seconde sécurité, le nom exact de la base."""
+    settings.SITE_DEMO = True
+    with pytest.raises(CommandError, match="--base"):
+        call_command("reinitialiser_demo", oui=True, stdout=io.StringIO())
+    with pytest.raises(CommandError, match="--base"):
+        call_command("reinitialiser_demo", oui=True, base="autre", stdout=io.StringIO())

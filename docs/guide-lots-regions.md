@@ -22,6 +22,8 @@ paroisses.
   membre **déjà gradé**, choisissez son grade dans la liste (ou écrivez-le : « Capitaine »,
   « Soldat de 3e classe »…) et indiquez dans **Date du grade** le jour où il l'a reçu
   (`JJ/MM/AAAA`). Un ancien fichier sans ces deux colonnes reste accepté.
+  N'ajoutez **pas** de colonne à vous après « Date du grade » (ex. « Observations ») : le fichier
+  serait refusé.
 - **NPI** (facultatif) : 10 chiffres.
 - 2 000 lignes au plus par fichier. Au-delà, faites plusieurs fichiers.
 

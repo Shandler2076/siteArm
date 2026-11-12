@@ -181,3 +181,31 @@ def test_eligibles_en_base_egal_python(monde):
         .values_list("pk", flat=True)
     )
     assert en_base == attendus
+
+
+def test_correction_date_absurde_refusee(soldat, compte_technique):
+    with pytest.raises(GradeRefuse, match="intégration"):
+        corriger_grade(soldat, grade=2, date_effet=D(1800, 1, 1), motif="M", par=compte_technique)
+
+
+def test_nom_affiche_tronque_si_tres_long(soldat, compte_technique):
+    Membre.objects.filter(pk=soldat.pk).update(prenoms="P" * 150, nom="N" * 100)
+    soldat.refresh_from_db()
+    promouvoir(soldat, grade=2, date_effet=D(2023, 1, 1), reference="D", par=compte_technique)
+    soldat.compte.refresh_from_db()
+    assert len(soldat.compte.nom_affiche) <= 150
+
+
+def test_migration_nom_affiche(monde):
+    """Revue finale I-2 : les comptes existants prennent le nom « Grade Prénoms NOM »."""
+    import importlib
+
+    from django.apps import apps as registre
+
+    m = monde["m1"]
+    m.compte.nom_affiche = "ADJOVI Test"
+    m.compte.save()
+    migration = importlib.import_module("apps.grades.migrations.0002_nom_affiche_avec_grade")
+    migration.recalculer(registre, None)
+    m.compte.refresh_from_db()
+    assert m.compte.nom_affiche == "Camarade Test ADJOVI"
