@@ -1,4 +1,5 @@
-"""Tâche quotidienne : rappel aux circuits des versements en attente depuis plus de 30 jours."""
+"""Tâche quotidienne ; le rappel ne part que le samedi (versements en attente depuis plus de
+30 jours), au Secrétaire de circuit. --forcer l'envoie un autre jour."""
 
 from django.core.management import BaseCommand
 from django.utils import timezone
@@ -7,10 +8,17 @@ from apps.cotisations.services import rappeler_en_attente
 
 
 class Command(BaseCommand):
-    help = "Rappelle aux circuits les versements de cotisation en attente depuis plus de 30 jours."
+    help = "Le samedi, rappelle aux circuits les versements en attente depuis plus de 30 jours."
 
-    def handle(self, *args, **options):
-        n = rappeler_en_attente(timezone.localdate())
+    def add_arguments(self, parser):
+        parser.add_argument("--forcer", action="store_true", help="Envoyer même hors samedi.")
+
+    def handle(self, *args, forcer=False, **options):
+        jour = timezone.localdate()
+        if jour.weekday() != 5 and not forcer:
+            self.stdout.write("Le rappel des cotisations part le samedi.")
+            return
+        n = rappeler_en_attente(jour, forcer=forcer)
         self.stdout.write(
             f"{n} versement(s) en attente depuis plus de 30 jours : circuits avertis."
         )

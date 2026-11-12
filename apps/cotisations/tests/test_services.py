@@ -189,19 +189,43 @@ def test_part_recue_montant_et_unicite(ancien, monde, compte_technique):
         )
 
 
-def test_rappel_30_jours(ancien, monde, compte_technique, django_capture_on_commit_callbacks):
+def test_rappel_le_samedi_au_secretaire_de_circuit(
+    ancien,
+    monde,
+    compte_technique,
+    donner_mandat,
+    nouveau_membre,
+    django_capture_on_commit_callbacks,
+):
+    """Décision du 12/11/2026 : rappel chaque samedi, au Secrétaire de circuit (sinon au bureau)."""
     from django.utils import timezone
 
     from apps.cotisations.models import Versement
 
     v = saisir_versement(ancien, montant=100, date_versement=AUJ, par=compte_technique)
-    assert rappeler_en_attente(timezone.now().date()) == 0
+    samedi = D(2026, 11, 14)
+    jeudi = D(2026, 11, 12)
+    assert samedi.weekday() == 5
     Versement.objects.filter(pk=v.pk).update(
-        date_saisie=timezone.now() - datetime.timedelta(days=31)
+        date_saisie=timezone.make_aware(datetime.datetime(2026, 10, 1, 9))
     )
+    assert rappeler_en_attente(jeudi) == 0  # pas le samedi : rien
+    # Sans Secrétaire de circuit : le Chef de section de circuit est averti.
     with django_capture_on_commit_callbacks(execute=True):
-        assert rappeler_en_attente(timezone.now().date()) == 1
+        assert rappeler_en_attente(samedi) == 1
     assert Notification.objects.filter(destinataire=monde["chef"].compte).exists()
+    Notification.objects.all().delete()
+    secretaire = nouveau_membre(monde["P2"], "Secretairecircuit")
+    donner_mandat(secretaire, "Secrétaire de Circuit", monde["Ekpe A"])
+    with django_capture_on_commit_callbacks(execute=True):
+        assert rappeler_en_attente(samedi) == 1
+    assert Notification.objects.filter(destinataire=secretaire.compte).exists()
+    assert not Notification.objects.filter(destinataire=monde["chef"].compte).exists()
+    # Versement récent (moins de 30 jours) : pas de rappel.
+    Versement.objects.filter(pk=v.pk).update(
+        date_saisie=timezone.make_aware(datetime.datetime(2026, 11, 1, 9))
+    )
+    assert rappeler_en_attente(samedi) == 0
 
 
 def test_reglages(db, compte_technique):

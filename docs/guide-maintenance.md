@@ -351,8 +351,9 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
   fait 100 %). Par défaut : 100 F, paroisse 30 %, circuit 20 %, région 20 %, national 30 %.
 - Accès : gardien des périmètres, `unites_cotisations` (fonctions de gestion **et trésoriers**),
   `peut_voir_cotisations_de` pour les PDF d'un membre.
-- Tâche quotidienne : `python manage.py rappel_cotisations` (versements en attente depuis plus de
-  30 jours → notification au circuit), ajoutée à `taches_quotidiennes.sh`.
+- Tâche quotidienne : `python manage.py rappel_cotisations`, qui n'agit que **le samedi**
+  (versements en attente depuis plus de 30 jours → Secrétaire de circuit, sur le site et par e-mail ;
+  `--forcer` pour l'envoyer un autre jour). Ajoutée à `taches_quotidiennes.sh`.
 - Pour la **vraie mise en service** : le BN fixe le mois de départ dans les réglages.
 
 ## 23. Événements nationaux (module 3)
