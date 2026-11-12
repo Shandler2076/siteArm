@@ -337,5 +337,5 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
   croisés (grade × âge, sexe, unité).
 - Fichier Excel des lots : colonnes facultatives « Grade » et « Date du grade » (régularisation des
   membres déjà gradés) ; un ancien fichier sans ces colonnes reste accepté.
-- Site d'essai : `python manage.py reinitialiser_demo --oui` recrée les membres fictifs avec grades
+- Site d'essai : `python manage.py reinitialiser_demo --oui --base <nom de la base>` recrée les membres fictifs avec grades
   (PostgreSQL seulement ; à refaire ensuite : `createsuperuser`).

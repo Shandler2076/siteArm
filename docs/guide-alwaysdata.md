@@ -182,7 +182,7 @@ recrée les membres fictifs pour les essayer. Dans la console, après `mettre_a_
 
 ```bash
 cd ~/siteArm
-~/venv-siteArm/bin/python manage.py reinitialiser_demo --oui
+~/venv-siteArm/bin/python manage.py reinitialiser_demo --oui --base COMPTE_site
 ~/venv-siteArm/bin/python manage.py createsuperuser
 ```
 
@@ -193,7 +193,9 @@ cd ~/siteArm
   vérification à la première connexion.
 - Puis ⟳ **Redémarrer** le site.
 
-Cette commande refuse de fonctionner sur le vrai site (`DJANGO_SITE_DEMO=False`).
+Par sécurité, il faut donner le **nom exact de la base** (`--base COMPTE_site`, celui de l'étape 3 ;
+en cas d'erreur, la commande affiche le bon nom sans rien effacer). Elle refuse aussi de fonctionner
+sur le vrai site (`DJANGO_SITE_DEMO=False`).
 
 ## 13. En cas de problème
 
