@@ -3,6 +3,7 @@
 Seul `apps/evenements/services.py` écrit dans ces tables. Rien ne s'efface.
 """
 
+import datetime
 import secrets
 
 from django.conf import settings
@@ -34,6 +35,10 @@ class Evenement(models.Model):
     lieu = models.CharField("lieu", max_length=200, blank=True)
     description = models.TextField("description", blank=True)
     avec_autorisation = models.BooleanField("générer une autorisation", default=False)
+    validite_debut = models.DateTimeField("autorisation valable à partir du", null=True, blank=True)
+    validite_heures = models.PositiveSmallIntegerField(
+        "durée de validité de l'autorisation (heures)", default=24
+    )
     etat = models.CharField(
         "état", max_length=10, choices=EtatEvenement.choices, default=EtatEvenement.PREVU
     )
@@ -54,6 +59,14 @@ class Evenement(models.Model):
     @property
     def annule(self) -> bool:
         return self.etat == EtatEvenement.ANNULE
+
+    @property
+    def debut_validite(self) -> datetime.datetime:
+        return self.validite_debut or self.debut
+
+    @property
+    def fin_validite(self) -> datetime.datetime:
+        return self.debut_validite + datetime.timedelta(hours=self.validite_heures)
 
 
 class Session(models.Model):

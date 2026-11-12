@@ -367,5 +367,7 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
   région. Les bureaux ne voient pas les événements.
 - Le QR code ouvre `/evenements/verifier/<jeton>/` (page publique) : « Autorisation valable » ou
   « Non valable » (convocation retirée, événement annulé, code inconnu). Le jeton est aléatoire.
+- Validité de la carte : `Evenement.validite_debut` (vide = début) et `validite_heures` (24 par
+  défaut) ; `services.etat_scan` donne valable / pas encore valable / expirée / non valable.
 - L'adresse imprimée dans le QR code vient de `DJANGO_SITE_URL` : elle doit être l'adresse réelle du
   site (sinon le scan n'aboutit pas).

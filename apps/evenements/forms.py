@@ -18,6 +18,30 @@ class EvenementForm(forms.Form):
         required=False,
         help_text="Pour les grands événements où il faut être autorisé à travailler.",
     )
+    validite_debut = forms.DateTimeField(
+        label="Autorisation valable à partir du",
+        widget=_DT,
+        required=False,
+        input_formats=["%Y-%m-%dT%H:%M"],
+        help_text="Vide : à partir du début de l'événement.",
+    )
+    validite_heures = forms.TypedChoiceField(
+        label="Durée de validité de l'autorisation",
+        coerce=int,
+        required=False,
+        empty_value=24,
+        choices=[
+            (6, "6 heures"),
+            (12, "12 heures"),
+            (24, "24 heures"),
+            (48, "48 heures"),
+            (72, "72 heures"),
+            (96, "4 jours"),
+            (168, "7 jours"),
+        ],
+        initial=24,
+        help_text="Après ce délai, l'autorisation n'est plus valable au contrôle.",
+    )
     sessions = forms.CharField(
         label="Sessions (une par ligne)",
         required=False,

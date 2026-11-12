@@ -864,6 +864,13 @@ Seulement pour les événements où l'option « Générer une autorisation » es
     valable (membre toujours convoqué, événement non annulé).
 - Une autorisation retirée (membre déconvoqué, événement annulé) apparaît **non valable** au
   contrôle.
+- **Durée de validité** (décision du 12 novembre 2026) : à la création de l'événement, le Bureau
+  national indique à partir de quelle heure l'autorisation est valable (par défaut, le début de
+  l'événement) et pour combien de temps : 6 h, 12 h, 24 h, 48 h, 72 h, 4 jours ou 7 jours. La carte
+  porte « Valable du … au … ». Au contrôle : **« Pas encore valable »** avant, **« Autorisation
+  valable »** pendant, **« Non valable — expirée »** après ; une fois expirée, elle ne se télécharge
+  plus.
+- Un membre **sanctionné** peut être convoqué ou non : c'est au Secrétaire national d'en décider.
 
 ### 17.5 Historique et fiche du membre
 

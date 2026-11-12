@@ -101,6 +101,18 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
         ty - 19 * mm,
         _ajuste(f"{debut:%d/%m/%Y à %H:%M}{lieu}", "Sans", 8, largeur_texte),
     )
+    # Période de validité
+    fin = timezone.localtime(ev.fin_validite)
+    debut_v = timezone.localtime(ev.debut_validite)
+    c.setFillColor(GRIS)
+    c.setFont("Sans", 7)
+    c.drawString(
+        x + 4 * mm,
+        ty - 25 * mm,
+        _ajuste(
+            f"Valable du {debut_v:%d/%m/%Y %H:%M} au {fin:%d/%m/%Y %H:%M}", "Sans", 7, largeur_texte
+        ),
+    )
     # Mention
     session = f" — {convocation.session.nom}" if convocation.session else ""
     c.setFillColor(MARINE)

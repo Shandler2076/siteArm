@@ -144,3 +144,13 @@ def test_demo_evenements(territoire, settings):
     conclave = Evenement.objects.get(nom__startswith="Conclave")
     assert not conclave.avec_autorisation
     assert conclave.convocations.filter(presence=Presence.PRESENT).exists()
+
+
+@pytest.fixture(autouse=True)
+def pendant_l_evenement(monkeypatch):
+    """Le contrôle se fait pendant la période de validité (24/12/2026, 10 h)."""
+    import apps.evenements.views as v
+
+    monkeypatch.setattr(
+        v, "maintenant", lambda: timezone.make_aware(datetime.datetime(2026, 12, 24, 10, 0))
+    )

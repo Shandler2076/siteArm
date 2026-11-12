@@ -7,7 +7,7 @@
   <p><strong>{{ ev.debut|date:"l d/m/Y à H:i" }}</strong>{% if ev.fin %} — jusqu'au {{ ev.fin|date:"d/m/Y H:i" }}{% endif %}{% if ev.lieu %} · {{ ev.lieu }}{% endif %}</p>
   {% if ev.annule %}<p class="message message--error">Événement annulé : {{ ev.motif_annulation }}</p>{% endif %}
   {% if ev.description %}<p>{{ ev.description|linebreaksbr }}</p>{% endif %}
-  <p>{% if ev.avec_autorisation %}Les convoqués ont une <strong>autorisation</strong> à imprimer.{% else %}Sans autorisation.{% endif %}</p>
+  <p>{% if ev.avec_autorisation %}Les convoqués ont une <strong>autorisation</strong> à imprimer, valable du {{ ev.debut_validite|date:"d/m/Y H:i" }} au {{ ev.fin_validite|date:"d/m/Y H:i" }}.{% else %}Sans autorisation.{% endif %}</p>
   <p><strong>{{ total }}</strong> convoqué(s) · {{ pointes }} pointé(s) · <strong>{{ presents }}</strong> présent(s){% if taux is not None %} · taux de présence : <strong>{{ taux }} %</strong> des pointés{% endif %}</p>
   {% if not ev.annule %}
   <div class="actions">

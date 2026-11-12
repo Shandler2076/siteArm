@@ -117,3 +117,13 @@ def test_taux_de_presence(monde, ev, client_technique):
     pointer(c1, Presence.PRESENT, par=None)
     pointer(c2, Presence.ABSENT, par=None)
     assert "50 %" in _html(client_technique.get(f"/evenements/{ev.pk}/"))
+
+
+@pytest.fixture(autouse=True)
+def pendant_l_evenement(monkeypatch):
+    """Le contrôle se fait pendant la période de validité (24/12/2026, 10 h)."""
+    import apps.evenements.views as v
+
+    monkeypatch.setattr(
+        v, "maintenant", lambda: timezone.make_aware(datetime.datetime(2026, 12, 24, 10, 0))
+    )

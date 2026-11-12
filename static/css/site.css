@@ -202,3 +202,4 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .verification__etat--ok { background: #1F7A3E; }
 .verification__etat--non { background: #A11D2B; }
 .verification__photo { width: 150px; height: 190px; object-fit: cover; border: 2px solid var(--marine); border-radius: 6px; }
+.verification__etat--attente { background: #B7791F; }

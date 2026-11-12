@@ -68,6 +68,8 @@ def nouveau(request):
                 description=d["description"],
                 avec_autorisation=d["avec_autorisation"],
                 sessions=form.liste_sessions(),
+                validite_debut=d["validite_debut"],
+                validite_heures=d["validite_heures"],
                 par=request.user,
             )
         except EvenementRefuse as e:
@@ -91,6 +93,8 @@ def modifier(request, pk):
         "lieu": ev.lieu,
         "description": ev.description,
         "avec_autorisation": ev.avec_autorisation,
+        "validite_debut": timezone.localtime(ev.validite_debut) if ev.validite_debut else None,
+        "validite_heures": ev.validite_heures,
         "sessions": "\n".join(ev.sessions.values_list("nom", flat=True)),
     }
     form = EvenementForm(request.POST or None, initial=initial)
@@ -369,41 +373,35 @@ def autorisation(request, pk):
     return r
 
 
+def maintenant():
+    return timezone.now()
+
+
 def verifier(request, jeton):
-    """Page publique du QR code : valable ou non ; jamais de coordonnées ni de NPI."""
+    """Page publique du QR code : valable, pas encore valable, expirée ou non valable."""
     import base64
 
-    from apps.evenements.services import autorisation_valable, convocation_par_jeton
+    from apps.evenements.services import convocation_par_jeton, etat_scan
 
     c = convocation_par_jeton(jeton)
-    valable = c is not None and autorisation_valable(c)
+    etat, raison = etat_scan(c, maintenant())
     photo = None
-    if valable and c.membre.photo_acceptee:
+    if etat in ("valable", "pas_encore") and c.membre.photo_acceptee:
         try:
             with c.membre.photo_acceptee.fichier.open("rb") as f:
                 photo = base64.b64encode(f.read()).decode()
         except OSError:
             photo = None  # fichier introuvable (restauration incomplète…) : pas de photo
-    raison = ""
-    if c is None:
-        raison = "Code inconnu."
-    elif not c.active:
-        raison = "Cette convocation a été retirée."
-    elif c.evenement.annule:
-        raison = "Cet événement est annulé."
-    elif not c.evenement.avec_autorisation:
-        raison = "Cet événement ne donne pas lieu à une autorisation."
-    elif c.membre.statut in {"exclu", "demissionnaire", "decede"}:
-        raison = "Cette personne n'est plus membre du mouvement."
     reponse = render(
         request,
         "evenements/verifier.html",
         {
             "c": c,
-            "valable": valable,
+            "etat": etat,
+            "valable": etat == "valable",
             "photo": photo,
             "raison": raison,
-            "peut_pointer": valable and request.user.has_perm("membres.gerer_membres"),
+            "peut_pointer": etat == "valable" and request.user.has_perm("membres.gerer_membres"),
         },
     )
     reponse["Cache-Control"] = "no-store"

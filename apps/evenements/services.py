@@ -63,6 +63,8 @@ def creer_evenement(
     description: str = "",
     avec_autorisation: bool = False,
     sessions: list[str] | None = None,
+    validite_debut: datetime.datetime | None = None,
+    validite_heures: int = 24,
 ) -> Evenement:
     nom = (nom or "").strip()
     if not nom:
@@ -77,6 +79,8 @@ def creer_evenement(
             lieu=lieu.strip(),
             description=description.strip(),
             avec_autorisation=avec_autorisation,
+            validite_debut=validite_debut,
+            validite_heures=validite_heures,
             cree_par=par,
         )
         ajouter_sessions(ev, sessions or [])
@@ -105,7 +109,16 @@ def modifier_evenement(ev: Evenement, *, par, sessions: list[str] | None = None,
         raise EvenementRefuse("Cet événement est annulé.")
     avant = (ev.debut, ev.lieu)
     for cle, valeur in champs.items():
-        if cle not in {"nom", "debut", "fin", "lieu", "description", "avec_autorisation"}:
+        if cle not in {
+            "nom",
+            "debut",
+            "fin",
+            "lieu",
+            "description",
+            "avec_autorisation",
+            "validite_debut",
+            "validite_heures",
+        }:
             raise EvenementRefuse(f"Champ inconnu : {cle}.")
         setattr(ev, cle, valeur.strip() if isinstance(valeur, str) else valeur)
     if not ev.nom:
@@ -285,10 +298,37 @@ def convocation_par_jeton(jeton: str) -> Convocation | None:
     )
 
 
-def autorisation_valable(c: Convocation) -> bool:
+def autorisation_valable(c: Convocation, maintenant: datetime.datetime | None = None) -> bool:
+    """Carte téléchargeable et valable (ou bientôt valable) : jusqu'à la fin de sa validité."""
+    maintenant = maintenant or timezone.now()
     return bool(
         c.active
         and not c.evenement.annule
         and c.evenement.avec_autorisation
         and c.membre.statut not in SORTIS
+        and maintenant < c.evenement.fin_validite
     )
+
+
+def _date(d: datetime.datetime) -> str:
+    return f"{timezone.localtime(d):%d/%m/%Y à %H:%M}"
+
+
+def etat_scan(c: Convocation | None, maintenant: datetime.datetime) -> tuple[str, str]:
+    """(état, explication) lus par le contrôleur : valable, pas_encore, expiree, non_valable."""
+    if c is None:
+        return "non_valable", "Code inconnu."
+    ev = c.evenement
+    if not c.active:
+        return "non_valable", "Cette convocation a été retirée."
+    if ev.annule:
+        return "non_valable", "Cet événement est annulé."
+    if not ev.avec_autorisation:
+        return "non_valable", "Cet événement ne donne pas lieu à une autorisation."
+    if c.membre.statut in SORTIS:
+        return "non_valable", "Cette personne n'est plus membre du mouvement."
+    if maintenant >= ev.fin_validite:
+        return "expiree", f"Autorisation expirée depuis le {_date(ev.fin_validite)}."
+    if maintenant < ev.debut_validite:
+        return "pas_encore", f"Valable à partir du {_date(ev.debut_validite)}."
+    return "valable", f"Valable jusqu'au {_date(ev.fin_validite)}."
