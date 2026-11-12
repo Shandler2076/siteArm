@@ -74,7 +74,7 @@ d'essai, puis mise en ligne.
 |---|---|---|---|
 | **1** | **Fondations** | Comptes, organisation territoriale, fiche membre, matricule, parcours, fonctions et bureaux, enregistrement par lots, listes et statistiques, mutations, décès, démissions, réhabilitations, sanctions, journal, sécurité | **Réalisé** ; mise en ligne en préparation |
 | **2** | **Grades et cotisations** | Grade actuel et historique, listes et statistiques par grade, éligibilité ; cotisations mensuelles (CM) mois par mois, membres à jour ou en retard | **Cahier des charges rédigé (§ 15 et 16)** ; réalisation après validation |
-| 3 | Événements et présences | Activités, invitations, convocations ciblées, présences | À concevoir |
+| **3** | **Événements et présences** | Événements nationaux, sessions, convocations, notifications, autorisation (carte) avec QR code, pointage des présences, historique | **Cahier des charges rédigé (§ 17)** ; réalisation après validation |
 | 4 | Communication | Messages officiels, espace documents, règlement intérieur en ligne, SMS / WhatsApp | À concevoir |
 | 5 | Médias | Photos et vidéos des activités | À concevoir |
 
@@ -810,16 +810,77 @@ Choix retenus par défaut, sauf avis contraire du BNC :
 Ces données nouvelles (grade, versements) seront ajoutées à la page « Protection de vos données » et
 au dossier APDP.
 
-## 17. Module 3 — Événements et présences
+## 17. Module 3 — Événements et présences (espace « Événements »)
 
-- Création des activités (cultes, rassemblements, formations, tests de grade, pèlerinages) par les
-  bureaux, selon leur périmètre.
-- **Invitations et convocations ciblées**, à partir des filtres des listes (par exemple : tous les
-  Secrétaires paroissiaux d'une région).
-- Enregistrement des **présences** et historique de participation de chaque membre, consultable sur
-  sa fiche.
-- Statistiques de participation par unité.
-- **Tests de grade** : inscription des candidats éligibles (§ 15.6) et saisie des résultats.
+Décisions du BNC du 12 novembre 2026. Dans un premier temps, seuls les **événements nationaux** sont
+suivis sur le site : réunions, conclaves, pèlerinages (par exemple le **pèlerinage de la Nativité**),
+manifestations, et les bureaux d'organisation constitués pour l'occasion.
+
+### 17.1 Créer un événement
+
+- C'est le **Secrétaire national** (et plus largement le Bureau national) qui crée l'événement :
+  **dénomination**, **date et heure** de début (et de fin s'il y a lieu), **lieu**, description
+  facultative.
+- Il peut définir les **sessions** (ou postes de travail) de l'événement, par exemple pour le
+  pèlerinage de la Nativité : *session Mère*, *session Culte*, *session Fruits*…
+- Il choisit si l'événement donne lieu à une **autorisation** (voir § 17.4). Pour les grands
+  événements où il faut contrôler qui est autorisé à travailler, oui ; pour un conclave ou une
+  réunion restreinte du Bureau national, non.
+- Un événement peut être **reporté** (nouvelle date) ou **annulé** (avec motif) ; les convoqués en
+  sont notifiés. Rien ne s'efface.
+
+### 17.2 Convoquer les membres
+
+- Le Secrétaire national **coche** les membres convoqués, à partir d'une liste qu'il peut filtrer comme
+  les listes du site (région, circuit, paroisse, grade, fonction, âge…), et indique pour chacun, s'il y
+  a lieu, sa **session** (ex. « session Culte »).
+- **Celui qui n'est pas convoqué ne peut pas travailler** à l'événement.
+- Dès la convocation, chaque convoqué reçoit une **notification** sur le site (et un e-mail s'il en a
+  un), en plus des autres canaux habituels.
+- On peut ajouter ou retirer des convoqués jusqu'à l'événement ; un retrait est notifié et reste
+  dans l'historique.
+
+### 17.3 Pointer les présences
+
+- Le **Secrétaire national** (ou un membre du Bureau national) **pointe** chaque convoqué :
+  **présent**, **absent** ou **excusé**.
+- Le pointage se fait sur une liste simple, utilisable sur téléphone le jour même, avec recherche par
+  nom ou matricule, ou en **scannant le code de l'autorisation** (§ 17.4).
+- La présence d'un membre non convoqué ne s'enregistre pas : il n'était pas autorisé.
+
+### 17.4 L'autorisation (carte de petit format)
+
+Seulement pour les événements où l'option « Générer une autorisation » est cochée.
+
+- Chaque convoqué peut **télécharger son autorisation** en PDF depuis son espace (à imprimer ou à
+  montrer sur le téléphone) ; le Bureau national peut aussi les imprimer toutes d'un coup.
+- La carte, de **petit format** (type carte de visite ou A6), porte :
+  - les logos et « Armée du Salut du Bénin » ;
+  - la **photo d'identité** validée du membre ;
+  - son **grade, prénoms, NOM** et son **matricule** ;
+  - l'**événement**, sa date et son lieu ;
+  - la mention **« Est autorisé(e) à travailler — session … »** ;
+  - un **code de vérification** (QR code) : en le scannant, le contrôleur voit si l'autorisation est
+    valable (membre toujours convoqué, événement non annulé).
+- Une autorisation retirée (membre déconvoqué, événement annulé) apparaît **non valable** au
+  contrôle.
+
+### 17.5 Historique et fiche du membre
+
+- Sur la **fiche du membre** (et dans son espace) : la liste des événements auxquels il a été
+  convoqué, sa session et sa présence (présent, absent, excusé).
+- Pour chaque événement : liste des convoqués par session, taux de présence ; exports PDF et Excel.
+- Statistiques de participation (par région, par grade…) à prévoir plus tard.
+- Chaque création, convocation, retrait, report, annulation et pointage est inscrit au **journal**.
+
+### 17.6 Points à confirmer par le BNC
+
+1. Les **bureaux de région, de circuit et de paroisse** voient-ils les événements nationaux auxquels
+   leurs membres sont convoqués ? (Proposé : oui, en lecture seule.)
+2. Le pointage peut-il être délégué, le jour même, à des **contrôleurs** désignés (par exemple un
+   responsable par session) ? (Proposé : plus tard ; d'abord le Bureau national seulement.)
+3. La carte d'autorisation peut-elle être **imprimée par le membre lui-même** depuis son espace ?
+   (Proposé : oui, c'est le but.)
 
 ## 18. Module 4 — Communication
 

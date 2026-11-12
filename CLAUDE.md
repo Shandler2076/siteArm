@@ -8,7 +8,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
-- Cahier des charges général (v2.4, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+- Cahier des charges général (v2.5, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
   détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
