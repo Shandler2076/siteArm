@@ -170,6 +170,8 @@ def test_lignes_colonnes(monde):
         "",
         "P1",
         "Ekpe A",
+        "Camarade",
+        "01/01/2015",
         "Membre actif",
         "Actif",
         "Secrétaire paroissial",

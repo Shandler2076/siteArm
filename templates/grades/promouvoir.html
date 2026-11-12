@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titre %}Promouvoir — {{ membre.matricule }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'membres:bn_fiche' membre.matricule %}">← {{ membre.nom_complet }}</a></p>
+  <h1>Promouvoir</h1>
+  <p><span class="matricule">{{ membre.matricule }}</span> {{ membre.nom_complet }}</p>
+  <p class="aide">Grade actuel : <strong>{{ membre.get_grade_display|default:"non renseigné" }}</strong>{% if membre.date_grade %} depuis le {{ membre.date_grade|date:"d/m/Y" }}{% endif %}.
+    Camarade → Soldat de 3ᵉ classe : première consécration. Jusqu'à Senior Capitaine : grade suivant après la durée minimale (art. 78 : 3, 3, 3, 4 et 5 ans). À partir de Commandant : nomination.</p>
+  <form method="post">
+    {% include "grades/_formulaire.html" %}
+    <button type="submit" class="bouton">Enregistrer le grade</button>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titre %}Promotions en série — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Promotions en série</h1>
+  <p class="aide">Après une consécration, un test ou une décision de nomination : choisissez le grade, cochez les membres, indiquez la date et la référence. Si un seul membre ne remplit pas les conditions, personne n'est promu.</p>
+  <form method="get" class="filtres">
+    <label class="champ"><span>Grade à attribuer</span>
+      <select name="grade" onchange="this.form.submit()">
+        <option value="">—</option>
+        {% for v, lib in grades %}<option value="{{ v }}"{% if v == grade %} selected{% endif %}>{{ lib }}</option>{% endfor %}
+      </select></label>
+    <label class="champ"><span>Région</span>
+      <select name="region" onchange="this.form.submit()">
+        <option value="">Toutes</option>
+        {% for r in regions %}<option value="{{ r.pk }}"{% if r.pk|stringformat:"s" == region_pk %} selected{% endif %}>{{ r.code }} — {{ r.nom }}</option>{% endfor %}
+      </select></label>
+    <noscript><button type="submit" class="bouton bouton--secondaire">Afficher</button></noscript>
+  </form>
+  {% if grade is not None %}
+  <form method="post">
+    {% include "grades/_formulaire.html" %}
+    <h2>{{ candidats|length }} membre(s) pouvant recevoir ce grade</h2>
+    {% if candidats %}
+    <div class="tableau-defilant"><table>
+      <thead><tr><th></th><th>Matricule</th><th>Membre</th><th>Grade depuis</th><th>Éligible</th></tr></thead>
+      <tbody>
+      {% for m in candidats %}
+        <tr><td><input type="checkbox" name="membres" value="{{ m.pk }}" id="m{{ m.pk }}"{% if m.pk in coches %} checked{% endif %}></td>
+          <td><label for="m{{ m.pk }}">{{ m.matricule }}</label></td><td>{{ m.nom_complet }}</td>
+          <td>{{ m.date_grade|date:"d/m/Y"|default:"—" }}</td><td>{% if m.est_eligible %}Oui{% else %}Non{% endif %}</td></tr>
+      {% endfor %}
+      </tbody>
+    </table></div>
+    <button type="submit" class="bouton" onclick="return confirm('Enregistrer ces promotions ?');">Promouvoir les membres cochés</button>
+    {% else %}<p class="aide">Aucun membre.</p>{% endif %}
+  </form>
+  {% endif %}
+</section>
+{% endblock %}

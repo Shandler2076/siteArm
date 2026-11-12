@@ -6,6 +6,7 @@
   <p class="matricule">{{ membre.matricule }}</p>
   <h1>{{ membre.nom_complet }}</h1>
   <dl class="fiche">
+    <dt>Grade</dt><dd>{{ membre.get_grade_display|default:"Non renseigné" }}{% if membre.date_grade %} <small class="aide">depuis le {{ membre.date_grade|date:"d/m/Y" }}</small>{% endif %}</dd>
     <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
     <dt>Statut</dt><dd>{{ membre.get_statut_display }}{% with d=membre|date_deces %}{% if d %}<br><small>Décédé le {{ d|date:"d/m/Y" }}</small>{% endif %}{% endwith %}</dd>
     <dt>Sexe</dt><dd>{{ membre.get_sexe_display }}</dd>
@@ -20,6 +21,7 @@
     <p><a href="{% url 'membres:cip' membre.matricule %}">Voir la photo du CIP</a></p>
   {% endif %}
   {% include "mouvements/_sanctions.html" with bn=True %}
+  {% include "grades/_historique.html" %}
   {% include "mouvements/_historique.html" %}
   {% block actions %}
   <div class="actions">
@@ -29,6 +31,8 @@
     </form>
     <p class="aide">Attention : un nouveau mot de passe provisoire remplace l'ancien.</p>
     <a class="bouton bouton--secondaire" href="{% url 'membres:bn_fiche_pdf' membre.matricule %}">Fiche sans identifiants (PDF)</a>
+    <a class="bouton bouton--secondaire" href="{% url 'grades:bn_promouvoir' membre.matricule %}">Promouvoir</a>
+    <a class="bouton bouton--secondaire" href="{% url 'grades:bn_corriger' membre.matricule %}">Corriger le grade</a>
     <a class="bouton bouton--secondaire" href="{% url 'membres:bn_corriger' membre.matricule %}">Correction exceptionnelle (intégration)</a>
   </div>
   {% endblock %}

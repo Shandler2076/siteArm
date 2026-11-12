@@ -3,6 +3,7 @@
 import datetime
 
 from django import forms
+from django.db.models import Q
 from django.http import QueryDict
 from django.utils import timezone
 
@@ -10,6 +11,7 @@ from apps.bureaux.models import Fonction, Mandat, Niveau
 from apps.bureaux.perimetre import Unite, membres_visibles
 from apps.listes.ages import filtrer_age
 from apps.listes.colonnes import COLONNES_LISTE, COLONNES_PAR_DEFAUT
+from apps.membres.grades import Grade
 from apps.membres.models import Categorie, Membre, Sexe, Statut
 from apps.organisation.models import Circuit, Paroisse, Region
 
@@ -47,6 +49,20 @@ class FiltreListeForm(forms.Form):
         required=False,
         empty_label="Toutes",
     )
+    grade = forms.MultipleChoiceField(
+        label="Grade",
+        choices=[(str(v), lib) for v, lib in Grade.choices] + [("aucun", "Grade non renseigné")],
+        required=False,
+        widget=forms.CheckboxSelectMultiple,
+    )
+    grade_min = forms.TypedChoiceField(
+        label="Grade : à partir de",
+        choices=[("", "—")] + [(str(v), lib) for v, lib in Grade.choices],
+        coerce=int,
+        empty_value=None,
+        required=False,
+    )
+    eligible = forms.BooleanField(label="Éligibles au grade suivant", required=False)
     age = forms.ChoiceField(label="Âge", choices=AGES, required=False)
     age_x = forms.IntegerField(label="X (ans)", required=False, min_value=0, max_value=130)
     age_y = forms.IntegerField(label="Y (ans)", required=False, min_value=0, max_value=130)
@@ -91,7 +107,18 @@ class FiltreListeForm(forms.Form):
         for nom, champ in nouveaux.items():
             champ.empty_label = "Toutes"
             self.fields[nom] = champ
-        ordre = ["statut", "sexe", "categorie", "region", "circuit", "paroisse", "annee"]
+        ordre = [
+            "statut",
+            "sexe",
+            "categorie",
+            "grade",
+            "grade_min",
+            "eligible",
+            "region",
+            "circuit",
+            "paroisse",
+            "annee",
+        ]
         self.order_fields(ordre)
 
     def clean_annee(self):
@@ -140,6 +167,18 @@ def membres_filtres(unite: Unite, donnees: dict, aujourdhui: datetime.date):
     if donnees.get("fonction"):
         en_cours = Mandat.objects.en_cours(aujourdhui).filter(fonction=donnees["fonction"])
         qs = qs.filter(pk__in=en_cours.values("membre"))
+    if donnees.get("grade"):
+        valeurs = [int(g) for g in donnees["grade"] if g != "aucun"]
+        critere = Q(grade__in=valeurs)
+        if "aucun" in donnees["grade"]:
+            critere |= Q(grade__isnull=True)
+        qs = qs.filter(critere)
+    if donnees.get("grade_min") is not None:
+        qs = qs.filter(grade__gte=donnees["grade_min"])
+    if donnees.get("eligible"):
+        from apps.grades.services import filtre_eligibles
+
+        qs = qs.filter(filtre_eligibles(aujourdhui))
     if donnees.get("age"):
         qs = filtrer_age(qs, donnees["age"], donnees.get("age_x"), donnees.get("age_y"), aujourdhui)
     return qs.order_by("nom", "prenoms", "matricule")
@@ -164,6 +203,13 @@ def resume_filtres(form: FiltreListeForm) -> list[str]:
         resume.append(f"Année d'intégration : {d['annee']}")
     if d.get("fonction"):
         resume.append(f"Fonction : {d['fonction'].nom}")
+    if d.get("grade"):
+        libelles = {str(v): lib for v, lib in Grade.choices} | {"aucun": "Grade non renseigné"}
+        resume.append("Grade : " + ", ".join(str(libelles[g]) for g in d["grade"]))
+    if d.get("grade_min") is not None:
+        resume.append(f"Grade : à partir de {Grade(d['grade_min']).label}")
+    if d.get("eligible"):
+        resume.append("Éligibles au grade suivant")
     age, x, y = d.get("age"), d.get("age_x"), d.get("age_y")
     if age == "moins":
         resume.append(f"Âge : moins de {x} ans")

@@ -148,6 +148,7 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
     naissance = membre.date_naissance.strftime("%d/%m/%Y") if membre.date_naissance else "—"
     region_int = membre.region_integration
     lignes = [
+        ("Grade", membre.get_grade_display() if membre.grade is not None else "—"),
         ("Catégorie", membre.get_categorie_display()),
         ("Statut", membre.get_statut_display()),
         ("Sexe", membre.get_sexe_display()),

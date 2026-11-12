@@ -1,0 +1,12 @@
+{% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
+{% csrf_token %}
+{% for champ in form %}
+  {% if champ.field.widget.input_type == "checkbox" %}
+    <label class="champ"><span>{{ champ }} {{ champ.label }}</span>
+      {% if champ.help_text %}<small class="aide">{{ champ.help_text }}</small>{% endif %}</label>
+  {% else %}
+    <label class="champ{% if champ.field.required %} champ--requis{% endif %}"><span>{{ champ.label }}</span>{{ champ }}
+      {% if champ.help_text %}<small class="aide">{{ champ.help_text }}</small>{% endif %}
+      {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
+  {% endif %}
+{% endfor %}
