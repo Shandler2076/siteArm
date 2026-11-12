@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block titre %}Convoquer — {{ ev.nom }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>
+  <h1>Convoquer des membres</h1>
+  <p class="aide">Filtrez les membres (région, grade, fonction…), cochez ceux à convoquer et choisissez leur session. Chacun reçoit une notification du Bureau national.</p>
+  <form method="get" class="filtres">
+    <details{% if not proposes %} open{% endif %}><summary>Filtres</summary>
+      <input type="hidden" name="envoye" value="1">
+      <div class="grille-filtres">
+        {% for champ in form %}{% if champ.name != "envoye" and champ.name != "colonnes" %}
+          <div class="champ{% if champ.name == 'statut' or champ.name == 'grade' %} choix choix--grille{% endif %}"><span>{{ champ.label }}</span>{{ champ }}
+            {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</div>
+        {% endif %}{% endfor %}
+      </div>
+    </details>
+    <button type="submit" class="bouton bouton--secondaire">Afficher les membres</button>
+  </form>
+  {% if proposes %}
+  <form method="post">{% csrf_token %}
+    {% if trop %}<p class="message message--error">Plus de 500 membres : affinez les filtres. Seuls les 500 premiers sont affichés.</p>{% endif %}
+    <label class="champ"><span>Session</span><select name="session"><option value="">Sans session</option>
+      {% for s in ev.sessions.all %}<option value="{{ s.pk }}">{{ s.nom }}</option>{% endfor %}</select></label>
+    <p><label><input type="checkbox" onclick="document.querySelectorAll('input[name=membres]').forEach(function(c){if(!c.disabled){c.checked=this.checked}}, this)"> Tout cocher</label></p>
+    <div class="tableau-defilant"><table class="tableau">
+      <thead><tr><th></th><th>Membre</th><th>Matricule</th><th>Paroisse</th></tr></thead>
+      <tbody>{% for m in proposes %}
+        <tr><td><input type="checkbox" name="membres" value="{{ m.pk }}" id="m{{ m.pk }}"></td>
+          <td><label for="m{{ m.pk }}">{{ m.nom_complet }}</label>{% if m.pk in deja %} <small class="aide">(déjà convoqué : changer de session)</small>{% endif %}</td>
+          <td>{{ m.matricule }}</td><td>{{ m.affectation_actuelle.paroisse.nom|default:"—" }}</td></tr>
+      {% endfor %}</tbody>
+    </table></div>
+    <button type="submit" class="bouton">Convoquer les membres cochés</button>
+  </form>
+  {% elif request.GET.envoye %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
+</section>
+{% endblock %}

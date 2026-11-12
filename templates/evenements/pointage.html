@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Pointage — {{ ev.nom }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>
+  <h1>Pointer les présences</h1>
+  <form method="get" class="filtres"><label class="champ"><span>Nom ou matricule</span><input name="q" value="{{ q }}" autofocus></label>
+    <button type="submit" class="bouton bouton--secondaire">Chercher</button></form>
+  <ul class="pointage">
+    {% for c in convocations %}
+      <li id="c{{ c.pk }}"><strong>{{ c.membre.nom_complet }}</strong> <small class="aide">{{ c.membre.matricule }}{% if c.session %} · {{ c.session.nom }}{% endif %}</small><br>
+        <span>{{ c.get_presence_display|default:"Non pointé" }}</span>
+        <form method="post" class="en-ligne">{% csrf_token %}<input type="hidden" name="convocation" value="{{ c.pk }}">
+          {% for valeur, libelle in presences %}<button type="submit" name="presence" value="{{ valeur }}" class="bouton{% if c.presence != valeur %} bouton--secondaire{% endif %}">{{ libelle }}</button>{% endfor %}
+        </form></li>
+    {% empty %}<li class="aide">Aucun convoqué{% if q %} pour « {{ q }} »{% endif %}.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

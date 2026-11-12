@@ -194,3 +194,6 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .case--du { background: #FDE8E8; }
 .case--non_du { color: #9AA3B2; }
 .legende .case { display: inline-block; min-width: 1.4em; text-align: center; border-radius: 4px; }
+form.en-ligne { display: inline-flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+ul.pointage { list-style: none; padding: 0; }
+ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }

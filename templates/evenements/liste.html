@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titre %}Événements — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="aide">Bureau national</p>
+  <h1>Événements</h1>
+  <div class="actions"><a class="bouton" href="{% url 'evenements:nouveau' %}">Créer un événement</a></div>
+  <h2>À venir</h2>
+  <ul class="fonctions">{% for ev in a_venir %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y H:i" }}{% if ev.lieu %}, {{ ev.lieu }}{% endif %}{% if ev.avec_autorisation %} · <small class="aide">avec autorisation</small>{% endif %}</li>{% empty %}<li class="aide">Aucun.</li>{% endfor %}</ul>
+  <h2>Passés</h2>
+  <ul class="fonctions">{% for ev in passes %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y" }}</li>{% empty %}<li class="aide">Aucun.</li>{% endfor %}</ul>
+  {% if annules %}<h2>Annulés</h2>
+  <ul class="fonctions">{% for ev in annules %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y" }} <small class="aide">({{ ev.motif_annulation }})</small></li>{% endfor %}</ul>{% endif %}
+</section>
+{% endblock %}
