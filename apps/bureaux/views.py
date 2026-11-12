@@ -48,6 +48,7 @@ def fiche_membre(request, cle, matricule):
     mandats = membre.mandats.select_related("fonction", "paroisse", "circuit", "region")
     from apps.journal.models import CONSULTATION_FICHE
     from apps.journal.services import journaliser
+    from apps.membres.rubriques import contexte_rubriques
     from apps.mouvements.views import contexte_fiche
 
     journaliser(request.user, CONSULTATION_FICHE, unite=unite.cle, membre=membre.matricule)
@@ -61,6 +62,7 @@ def fiche_membre(request, cle, matricule):
             "parcours": parcours,
             "mandats": mandats,
             **contexte_fiche(unite, membre),
+            **contexte_rubriques(request, membre, avec_evenements=unite.niveau == "national"),
         },
     )
 

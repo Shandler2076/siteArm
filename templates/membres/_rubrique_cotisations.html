@@ -1,0 +1,16 @@
+<h2>Cotisation mensuelle</h2>
+<p><strong>{% if cot_situation.a_jour %}À jour au {{ cot_mois|date:"F Y" }}{% else %}En retard de {{ cot_situation.retard }} mois ({{ cot_situation.reste_du }} F CFA){% endif %}</strong></p>
+<div class="tableau-defilant"><table class="tableau grille-cm">
+  <thead><tr>{% for c in cot_cases %}<th>{{ c.nom|slice:":3" }}</th>{% endfor %}</tr></thead>
+  <tbody><tr>{% for c in cot_cases %}<td class="case case--{{ c.etat }}">{% if c.etat == "paye" %}✓{% elif c.etat == "attente" %}…{% elif c.etat == "du" %}!{% else %}—{% endif %}</td>{% endfor %}</tr></tbody>
+</table></div>
+<p class="aide">✓ payé · … en attente de validation · ! dû, non payé · — non dû</p>
+<p>Total versé en {{ cot_annee }} : <strong>{{ cot_situation.total_annee }} F CFA</strong> · depuis le début : <strong>{{ cot_situation.total_depuis_debut }} F CFA</strong></p>
+<div class="actions"><a class="bouton bouton--secondaire" href="{% url 'cotisations:etat_membre_pdf' membre.matricule %}">État des cotisations (PDF)</a></div>
+<h3>Versements</h3>
+<ul class="fonctions">
+  {% for v in cot_versements %}
+    <li>{{ v.montant }} F — versé le {{ v.date_versement|date:"d/m/Y" }} (paroisse {{ v.paroisse.nom }}) — {{ v.get_etat_display }}
+      {% if v.etat == "valide" %}· <a href="{% url 'cotisations:recu' v.pk %}">Reçu {{ v.numero_recu }}</a>{% endif %}</li>
+  {% empty %}<li class="aide">Aucun versement.</li>{% endfor %}
+</ul>
