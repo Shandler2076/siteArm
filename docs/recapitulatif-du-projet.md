@@ -2,7 +2,7 @@
 
 ---
 
-*État au 11 novembre 2026, au soir. Document établi pour KOUDAKPO Thoovi Marc Aurel, mainteneur du
+*État au 12 novembre 2026. Document établi pour KOUDAKPO Thoovi Marc Aurel, mainteneur du
 site, pour le Bureau National de Commandement.*
 
 Ce document rassemble **tout ce qu'il faut savoir** sur le site : ce qui est fait, où se trouve chaque
@@ -20,7 +20,7 @@ et ce qui reste à faire. Il complète le cahier des charges (le *quoi*) et le g
 | **Site d'essai** | `https://armeedusalut.alwaysdata.net` (offre gratuite alwaysdata, PostgreSQL). |
 | **Code** | Dépôt GitHub privé `Shandler2076/siteArm`, branche `main`. |
 | **Langage** | Python 3.12+, Django 5.2, PostgreSQL (SQLite possible pour un essai). |
-| **Tests** | 497 tests automatiques, tous verts ; relancés par GitHub à chaque modification. |
+| **Tests** | 580 tests automatiques, tous verts (SQLite et PostgreSQL) ; relancés par GitHub à chaque modification. |
 | **Taille** | Environ 13 300 lignes de code Python (hors migrations), 67 fichiers de tests, 99 versions enregistrées depuis août 2026. |
 
 ## 2. Ce qui a été réalisé
@@ -164,7 +164,7 @@ et la phrase de passe des sauvegardes.
 
 | Sujet | Qui | État |
 |---|---|---|
-| **Grades** (12 grades, nom affiché « Capitaine Marc Aurel KOUDAKPO », historique, filtres et statistiques croisés, membres fictifs avec grades) | Mainteneur | Décisions reçues le 11 novembre (cahier des charges 2.2) ; réalisation en premier |
+| **Grades** (Camarade puis 12 grades, nom « Capitaine Marc Aurel KOUDAKPO », historique, promotions, listes et statistiques croisées, démo avec grades) | Mainteneur | **Réalisé le 12 novembre** (PR #10) ; à essayer sur le site d'essai |
 | **Cotisations mensuelles (CM)** (100 F par mois pour tous les membres ; saisie paroisse, validation circuit, parts circuit / région / national ; état des cotisations et reçu PDF à part) | Mainteneur | Décisions reçues le 11 novembre (cahier des charges 2.2) ; **pourcentages à fournir** ; réalisation après les grades |
 | Option « Faire confiance à cet appareil 30 jours » pour la double vérification | BNC | **À décider** |
 | Rubriques [à compléter] du dossier APDP, signature, dépôt | BNC | À faire |
