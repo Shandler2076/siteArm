@@ -873,14 +873,16 @@ Seulement pour les événements où l'option « Générer une autorisation » es
 - Statistiques de participation (par région, par grade…) à prévoir plus tard.
 - Chaque création, convocation, retrait, report, annulation et pointage est inscrit au **journal**.
 
-### 17.6 Points à confirmer par le BNC
+### 17.6 Décisions du BNC (12 novembre 2026)
 
-1. Les **bureaux de région, de circuit et de paroisse** voient-ils les événements nationaux auxquels
-   leurs membres sont convoqués ? (Proposé : oui, en lecture seule.)
-2. Le pointage peut-il être délégué, le jour même, à des **contrôleurs** désignés (par exemple un
-   responsable par session) ? (Proposé : plus tard ; d'abord le Bureau national seulement.)
-3. La carte d'autorisation peut-elle être **imprimée par le membre lui-même** depuis son espace ?
-   (Proposé : oui, c'est le but.)
+1. **Les invitations viennent directement du Bureau national** à la personne convoquée. Les bureaux
+   de région, de circuit et de paroisse **ne voient pas** les événements nationaux ; le Bureau
+   national convoque qui il veut.
+2. Le **pointage** des présences, le jour même, est fait **par le Bureau national seulement**.
+3. Le membre **imprime lui-même** sa carte d'autorisation depuis son espace. **Le bureau de sa
+   paroisse** (et lui seul, pas le circuit ni la région) peut aussi l'imprimer pour l'aider : il ne
+   voit alors que les autorisations valables de ses membres, sans les autres informations de
+   l'événement.
 
 ## 18. Module 4 — Communication
 

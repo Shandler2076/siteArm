@@ -11,7 +11,8 @@ Pour les grands événements, chaque convoqué télécharge une **autorisation**
 
 **Architecture:**
 - Nouvelle application `apps/evenements` ; `services.py` est le **seul** point d'écriture.
-- Toutes les pages de gestion sont réservées au BN (`has_perm("membres.gerer_membres")`).
+- Toutes les pages de gestion sont réservées au BN (`has_perm("membres.gerer_membres")`). Les bureaux de région, de circuit et de paroisse ne voient pas les événements (décision du 12/11/2026).
+- **Exception** : le bureau de la **paroisse** du membre peut imprimer ses **autorisations valables** (et rien d'autre de l'événement), depuis la fiche du membre dans l'espace de la paroisse.
 - Le membre voit ses propres convocations ; la page de vérification du QR code est publique, mais elle n'affiche que « valable / non valable », le nom et la session.
 - La sélection des convoqués réutilise les filtres des listes (`FiltreListeForm`, `membres_filtres` au niveau national).
 
@@ -120,7 +121,10 @@ Pour les grands événements, chaque convoqué télécharge une **autorisation**
   - pour le BN, **toutes les autorisations** d'un événement en une fois (plusieurs cartes par page A4).
 - **`/evenements/verifier/<jeton>/`** (sans connexion) : grand bandeau vert « Autorisation valable » ou rouge « Non valable », avec photo, grade et nom, événement, session.
 - **Fiche du membre** : historique des événements (convocation, session, présence).
+- **Paroisse** : sur `bureaux/fiche_membre.html`, au niveau paroisse seulement, un bloc « Autorisations à imprimer » (événement, session, lien PDF). L'accès au PDF est permis au membre, au BN et au bureau de la paroisse actuelle du membre, jamais au circuit ni à la région (nouvelle fonction du gardien des périmètres : `peut_imprimer_autorisation(compte, convocation)`).
 - [ ] **Tests** :
+  - `test_paroisse_imprime_l_autorisation_de_son_membre` ;
+  - `test_circuit_et_region_ne_peuvent_pas_imprimer` (404) ;
   - `test_mes_evenements_seulement_les_miens` ;
   - `test_autorisation_pdf_contenu` (nom, matricule, session, « autorisé(e) à travailler ») ;
   - `test_autorisation_sans_photo` ;
