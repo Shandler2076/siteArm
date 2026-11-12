@@ -320,3 +320,22 @@ jour. Vous pouvez ensuite effacer les anciennes sauvegardes du serveur : `rm ~/s
 
 Cette procédure a été essayée le 11 novembre 2026 (sauvegarde, déchiffrement, restauration dans une
 base neuve : mêmes nombres de membres et d'entrées du journal).
+
+## 21. Grades (module 2)
+
+- Les grades sont fixés dans `apps/membres/grades.py` : **Camarade** (rang 0, tout nouveau membre),
+  puis les 12 grades du règlement intérieur (art. 77), et les durées minimales de l'art. 78.
+- Le grade actuel et sa date sont sur la fiche (`Membre.grade`, `Membre.date_grade`) ; l'historique
+  est dans `apps/grades` (`HistoriqueGrade`, jamais supprimé).
+- **Seul** `apps/grades/services.py` modifie un grade : `promouvoir` (première consécration, test,
+  nomination, promotion exceptionnelle), `promouvoir_en_serie` (tout ou rien), `corriger_grade`,
+  `attribuer_grade_initial` (à l'enregistrement). Chaque opération est journalisée et notifiée.
+- Le nom affiché est « Grade Prénoms NOM » (`Membre.nom_complet`) ; le nom du compte
+  (`Compte.nom_affiche`) est tenu à jour par les services des grades.
+- Pages du BN : fiche du membre (« Promouvoir », « Corriger le grade ») et menu « Promotions en
+  série ». Listes : filtres grade, « à partir de », éligibles ; statistiques par grade et tableaux
+  croisés (grade × âge, sexe, unité).
+- Fichier Excel des lots : colonnes facultatives « Grade » et « Date du grade » (régularisation des
+  membres déjà gradés) ; un ancien fichier sans ces colonnes reste accepté.
+- Site d'essai : `python manage.py reinitialiser_demo --oui` recrée les membres fictifs avec grades
+  (PostgreSQL seulement ; à refaire ensuite : `createsuperuser`).

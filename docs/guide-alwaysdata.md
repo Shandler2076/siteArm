@@ -175,6 +175,26 @@ une phrase de passe, à noter sur papier et à ranger à part de la clé. Copiez
 votre ordinateur avec la commande `scp` affichée à la fin, puis sur la clé USB. Le détail, avec la
 restauration, se trouve dans le guide de maintenance (§ 20).
 
+## 12 bis. Recréer les données fictives (après une nouvelle version)
+
+Quand une nouvelle version ajoute des informations aux membres (par exemple les **grades**), on
+recrée les membres fictifs pour les essayer. Dans la console, après `mettre_a_jour.sh` :
+
+```bash
+cd ~/siteArm
+~/venv-siteArm/bin/python manage.py reinitialiser_demo --oui
+~/venv-siteArm/bin/python manage.py createsuperuser
+```
+
+- La première commande **efface toutes les données du site d'essai** (membres, comptes, journal) et
+  recrée environ 150 membres fictifs, avec des grades de toutes sortes. Elle affiche les nouveaux
+  **comptes de démonstration** : notez-les tout de suite.
+- La seconde recrée votre **compte technique** (il a été effacé) ; réactivez ensuite sa double
+  vérification à la première connexion.
+- Puis ⟳ **Redémarrer** le site.
+
+Cette commande refuse de fonctionner sur le vrai site (`DJANGO_SITE_DEMO=False`).
+
 ## 13. En cas de problème
 
 | Symptôme | Solution |

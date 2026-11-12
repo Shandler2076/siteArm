@@ -52,6 +52,10 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   fin automatique par la commande quotidienne `fin_des_sanctions` ; une sanction se lève, ne se
   supprime pas. Correction exceptionnelle : `apps/membres/services.py::corriger_integration`.
 - Journal immuable (`JournalImmuable`) ; page BN `/journal/`.
+- Grades (`apps/membres/grades.py` : Camarade = 0, puis 12 grades RI ; `apps/grades`) : `services.py`
+  est le SEUL point d'entrée (promouvoir, promouvoir_en_serie, corriger_grade, attribuer_grade_initial ;
+  durées art. 78, nomination ≥ Commandant, exceptionnelle art. 84). Nom affiché `nom_complet` =
+  « Grade Prénoms NOM ». Démo : `reinitialiser_demo --oui` (PostgreSQL).
 - Double vérification BN (`apps/securite`) : TOTP, intergiciel `DoubleVerificationObligatoire` ;
   désactivée dans les tests par `conftest.py` racine (sauf `apps/securite/tests`).
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.

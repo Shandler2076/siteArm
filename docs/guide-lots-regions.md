@@ -18,6 +18,10 @@ paroisses.
 - **Paroisse d'intégration** : choisissez-la dans la liste déroulante.
 - **Catégorie** : laissez vide pour un **membre actif** ; sinon choisissez « Membre d'honneur » ou
   « Membre sympathisant ».
+- **Grade** (facultatif) : laissez vide pour un **nouveau membre** (il sera **Camarade**). Pour un
+  membre **déjà gradé**, choisissez son grade dans la liste (ou écrivez-le : « Capitaine »,
+  « Soldat de 3e classe »…) et indiquez dans **Date du grade** le jour où il l'a reçu
+  (`JJ/MM/AAAA`). Un ancien fichier sans ces deux colonnes reste accepté.
 - **NPI** (facultatif) : 10 chiffres.
 - 2 000 lignes au plus par fichier. Au-delà, faites plusieurs fichiers.
 

@@ -100,9 +100,7 @@ class Membre(models.Model):
         "catégorie", max_length=20, choices=Categorie.choices, default=Categorie.ACTIF
     )
     statut = models.CharField("statut", max_length=20, choices=Statut.choices, default=Statut.ACTIF)
-    grade = models.PositiveSmallIntegerField(
-        "grade", choices=Grade.choices, null=True, blank=True
-    )
+    grade = models.PositiveSmallIntegerField("grade", choices=Grade.choices, null=True, blank=True)
     date_grade = models.DateField("grade depuis le", null=True, blank=True)
     compte = models.OneToOneField(
         settings.AUTH_USER_MODEL,

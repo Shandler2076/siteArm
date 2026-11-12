@@ -96,6 +96,8 @@ class Command(BaseCommand):
                 )
                 mandat.full_clean()
                 mandat.save()
+                if niveau == "national":  # des responsables nationaux hauts gradés
+                    self._grades(hasard, m, None, nomination=hasard.choice([8, 9]))
                 lieu = unites[niveau].nom if unites[niveau] else "national"
                 comptes.append((f"{nom_fonction} ({lieu})", m.matricule, mot))
             par = Membre.objects.get(matricule=comptes[1][1]).compte  # Secrétaire national
@@ -105,6 +107,7 @@ class Command(BaseCommand):
             for i in range(membres):
                 lieu = hasard.choice(proches if i % 2 == 0 else paroisses)
                 crees.append(self._membre(hasard, lieu, par))
+                self._grades(hasard, crees[-1], par)
             simple = crees[0]
             mot = generer_mot_de_passe_provisoire()
             simple.compte.set_password(mot)
@@ -147,6 +150,42 @@ class Command(BaseCommand):
             notifier=False,
             avec_mot_de_passe=avec_mot_de_passe,
         ).membre
+
+    def _grades(self, hasard, membre, par, nomination=None):
+        """Parcours de grades vraisemblable : première consécration, tests aux durées de
+        l'art. 78, parfois une nomination chez les plus anciens."""
+        from apps.grades.services import promouvoir
+        from apps.membres.grades import DUREES_MINIMALES
+        from apps.mouvements.statuts import ajouter_mois
+
+        if nomination is None and hasard.random() < 0.08:
+            return  # reste Camarade : pas encore consacré
+        aujourdhui = datetime.date.today()
+        jour = membre.date_grade
+        etapes = []
+        jour = ajouter_mois(jour, hasard.randint(3, 15))
+        if jour <= aujourdhui:
+            etapes.append((1, jour))
+            for grade in range(1, 6):
+                jour = ajouter_mois(jour, 12 * DUREES_MINIMALES[grade] + hasard.randint(0, 24))
+                if jour > aujourdhui or hasard.random() > 0.7:
+                    break
+                etapes.append((grade + 1, jour))
+        if nomination is None and etapes and etapes[-1][0] >= 5 and hasard.random() < 0.35:
+            nomination = hasard.choice([7, 7, 7, 8, 9])
+        if nomination is not None:
+            depart = etapes[-1][1] if etapes else membre.date_grade
+            jour = ajouter_mois(depart, hasard.randint(6, 48))
+            etapes.append((nomination, min(jour, aujourdhui)))
+        for grade, date_effet in etapes:
+            promouvoir(
+                membre,
+                grade=grade,
+                date_effet=date_effet,
+                reference=f"Décision fictive {date_effet.year}",
+                par=par,
+            )
+            membre.refresh_from_db()
 
     def _mouvements(self, hasard, membres, par):
         """Quelques situations pour essayer toutes les pages (statuts, mutation, sanction)."""

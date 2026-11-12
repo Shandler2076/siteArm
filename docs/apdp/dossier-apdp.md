@@ -97,7 +97,8 @@ par identifiant (matricule) et mot de passe personnel.
 
 1. **Identifier** chaque membre par un matricule unique et définitif.
 2. **Tenir le registre** des membres et de leur **parcours** au sein du mouvement : paroisses
-   successives, fonctions occupées dans les bureaux, catégorie, statut.
+   successives, fonctions occupées dans les bureaux, catégorie, statut, grade et historique des
+   grades.
 3. **Organiser la vie du mouvement** : listes et statistiques par paroisse, circuit, région et au
    niveau national ; mutations ; installation des bureaux ; convocations (évolution prévue).
 4. **Appliquer les décisions** prévues par le règlement intérieur : mutations, décès, démissions,
@@ -136,7 +137,7 @@ jour auprès de l'APDP.
 | Photo d'identité | Photo en tenue de l'Armée du Salut | Facultatif ; validée par le BNC | Le membre lui-même |
 | Coordonnées | Téléphone, WhatsApp, e-mail, quartier, ville, profession | Téléphone obligatoire, le reste facultatif | Membre |
 | Personne à contacter | Nom et téléphone | Facultatif | Membre |
-| Vie dans le mouvement | Année, paroisse et région d'intégration ; affectations successives ; fonctions et mandats ; catégorie ; statut | Obligatoire | BNC et bureaux |
+| Vie dans le mouvement | Année, paroisse et région d'intégration ; affectations successives ; fonctions et mandats ; catégorie ; statut ; grade et historique des grades (date, mode, référence de la décision) | Obligatoire | BNC et bureaux |
 | Discipline interne | Sanctions prévues par le règlement intérieur (type, degré, dates, motif résumé, référence de la décision) | Uniquement si une sanction est prononcée par le BNC | BNC |
 | Données de connexion et journal | Identifiant, date et heure des connexions et des opérations sensibles, actions effectuées | Automatique | Site |
 
