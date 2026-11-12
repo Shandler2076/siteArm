@@ -22,6 +22,7 @@ ACTIONS_NATIONALES = {
     j.GRADE_ATTRIBUE,
     j.GRADE_PROMOTION,
     j.GRADE_CORRECTION,
+    j.REGLAGE_COTISATIONS,
 }
 DOUBLE_VERIFICATION = {
     "activation": "A activé sa double vérification.",
@@ -65,6 +66,7 @@ def _unites(cles: set[str]) -> dict[str, str]:
 
 def lire(entrees) -> list[Ligne]:
     """Traduit des entrées du journal en lignes lisibles (quelques requêtes pour toute la page)."""
+    from apps.cotisations.services import periode as periode_mois
     from apps.grades.models import ModeGrade
     from apps.membres.models import Membre, Statut
     from apps.mouvements.models import TypeSanction, TypeSignalement
@@ -168,6 +170,34 @@ def lire(entrees) -> list[Ligne]:
                 "A modifié les tranches d'âge des statistiques : "
                 f"{d.get('avant')} → {d.get('apres')}."
             )
+        if a == j.VERSEMENT_SAISI:
+            mois = [datetime.date.fromisoformat(x) for x in d.get("mois", [])]
+            quand = periode_mois(mois)
+            return f"A enregistré un versement de {d.get('montant')} F pour {m} ({quand})."
+        if a == j.VERSEMENT_VALIDE:
+            return f"A validé le versement de {d.get('montant')} F de {m} (reçu {d.get('recu')})."
+        if a == j.VERSEMENT_REFUSE:
+            return (
+                f"A refusé le versement de {d.get('montant')} F de {m} "
+                f"(motif : {d.get('motif', '')})."
+            )
+        if a == j.VERSEMENT_ANNULE:
+            return (
+                f"A annulé le versement de {d.get('montant')} F de {m} "
+                f"(motif : {d.get('motif', '')})."
+            )
+        if a == j.PART_RECUE:
+            niveau = {"circuit": "du circuit", "region": "de la région"}.get(
+                d.get("niveau"), "du Bureau national"
+            )
+            mois = datetime.date.fromisoformat(d["mois"]) if d.get("mois") else None
+            quand = periode_mois([mois] if mois else [])
+            return (
+                f"A marqué comme reçue la part {niveau} : {d.get('montant')} F de la paroisse "
+                f"{d.get('paroisse')} (versements validés en {quand})."
+            )
+        if a == j.REGLAGE_COTISATIONS:
+            return "A modifié les réglages des cotisations mensuelles."
         if a == j.CONNEXION:
             return "S'est connecté au site."
         if a == j.CONNEXION_ECHOUEE:

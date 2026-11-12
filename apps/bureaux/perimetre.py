@@ -6,7 +6,7 @@ Toute vue qui affiche des membres passe par ces fonctions. Les filtres sont fait
 import datetime
 from dataclasses import dataclass
 
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import Http404
 
 from apps.bureaux.models import Mandat, Niveau
@@ -90,6 +90,54 @@ def _filtre_affectation(unite: Unite, prefixe: str) -> dict:
     if unite.niveau == Niveau.CIRCUIT:
         return {f"{prefixe}paroisse__circuit": unite.objet}
     return {f"{prefixe}paroisse__circuit__region": unite.objet}
+
+
+def _mandats_cotisations(jour: datetime.date | None = None):
+    """Gestion OU trésorerie : les trésoriers encaissent les cotisations (décision du 12/11/2026)
+    sans avoir le droit de gérer le reste du site."""
+    return Mandat.objects.en_cours(jour).filter(
+        Q(fonction__droit_gerer=True) | Q(fonction__nom__startswith="Trésorier"),
+        membre__statut=Statut.ACTIF,
+    )
+
+
+def unites_cotisations(compte, jour: datetime.date | None = None) -> list[Unite]:
+    """Unités dont le compte voit et gère les cotisations (gestion ou trésorier ; BN = national)."""
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return []
+    mandats = (
+        _mandats_cotisations(jour)
+        .filter(membre__compte=compte)
+        .select_related("fonction", "paroisse", "circuit", "region")
+    )
+    unites = {Unite(m.fonction.niveau, m.unite) for m in mandats}
+    if compte.is_superuser:
+        unites.add(Unite(Niveau.NATIONAL, None))
+    return sorted(unites, key=lambda u: (ORDRE[u.niveau], u.objet.nom if u.objet else ""))
+
+
+def unite_cotisations_depuis_cle(compte, cle: str) -> Unite:
+    """Comme `unite_depuis_cle`, pour les pages des cotisations (404 si pas le droit)."""
+    if cle == "national":
+        unite = Unite(Niveau.NATIONAL, None)
+    else:
+        niveau, _, ident = cle.partition("-")
+        if niveau not in MODELES or not ident.isdigit():
+            raise Http404
+        objet = MODELES[niveau].objects.filter(pk=int(ident)).first()
+        if objet is None:
+            raise Http404
+        unite = Unite(niveau, objet)
+    if unite in unites_cotisations(compte):
+        return unite
+    raise Http404
+
+
+def titulaires_cotisations(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
+    mandats = _mandats_cotisations(jour).filter(fonction__niveau=unite.niveau)
+    if unite.objet is not None:
+        mandats = mandats.filter(**{unite.niveau: unite.objet})
+    return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
 
 
 def membres_visibles(unite: Unite) -> QuerySet[Membre]:
