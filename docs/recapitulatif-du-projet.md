@@ -165,7 +165,7 @@ et la phrase de passe des sauvegardes.
 | Sujet | Qui | État |
 |---|---|---|
 | **Grades** (Camarade puis 12 grades, nom « Capitaine Marc Aurel KOUDAKPO », historique, promotions, listes et statistiques croisées, démo avec grades) | Mainteneur | **Réalisé le 12 novembre** (PR #10) ; à essayer sur le site d'essai |
-| **Cotisations mensuelles (CM)** (100 F par mois pour tous les membres ; saisie paroisse, validation circuit, parts circuit / région / national ; état des cotisations et reçu PDF à part) | Mainteneur | Décisions reçues le 11 novembre (cahier des charges 2.2) ; **pourcentages à fournir** ; réalisation après les grades |
+| **Cotisations mensuelles (CM)** (100 F ; paroisse 30 %, circuit 20 %, région 20 %, national 30 % ; saisie paroisse et trésoriers, validation circuit, parts reçues, état et reçu PDF, listes et statistiques) | Mainteneur | **Réalisé le 12 novembre** ; à essayer sur le site d'essai |
 | Option « Faire confiance à cet appareil 30 jours » pour la double vérification | BNC | **À décider** |
 | Rubriques [à compléter] du dossier APDP, signature, dépôt | BNC | À faire |
 | Durées de conservation, puis effacement automatique | BNC, puis mainteneur | À valider |

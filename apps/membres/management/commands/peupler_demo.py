@@ -114,6 +114,7 @@ class Command(BaseCommand):
             simple.compte.doit_changer_mot_de_passe = False
             simple.compte.save()
             comptes.append(("Membre simple", simple.matricule, mot))
+        self._cotisations(hasard, crees, par)
         self._mouvements(hasard, crees, par)
         self.stdout.write(self.style.SUCCESS(f"{Membre.objects.count()} membres fictifs créés."))
         self.stdout.write("\nComptes de démonstration (à noter, ils ne seront plus affichés) :")
@@ -186,6 +187,58 @@ class Command(BaseCommand):
                 par=par,
             )
             membre.refresh_from_db()
+
+    def _cotisations(self, hasard, membres, par):
+        """Cotisations fictives depuis janvier : à jour, en retard, en attente, refusées."""
+        from django.utils import timezone
+
+        from apps.cotisations.models import NiveauPart, ParametresCotisations
+        from apps.cotisations.regles import situation
+        from apps.cotisations.services import (
+            CotisationRefusee,
+            marquer_part_recue,
+            refuser,
+            saisir_versement,
+            valider,
+        )
+
+        jour = timezone.localdate()
+        parametres = ParametresCotisations.courant()
+        parametres.mois_depart = jour.replace(month=1, day=1)
+        parametres.save()
+        # Membres fictifs « enregistrés » l'an dernier : tous les mois de l'année sont dus.
+        debut = timezone.make_aware(datetime.datetime(jour.year - 1, 6, 1, 9))
+        Membre.objects.filter(pk__in=[m.pk for m in membres]).update(date_enregistrement=debut)
+        valides = []
+        for m in membres:
+            m.refresh_from_db()
+            dus = len(situation(m, jour.replace(day=1)).dus)
+            tirage = hasard.random()
+            try:
+                if tirage < 0.45:  # à jour, parfois d'avance
+                    nb = dus + (1 if hasard.random() < 0.2 and jour.month < 12 else 0)
+                    v = saisir_versement(m, montant=100 * nb, date_versement=jour, par=par)
+                    valides += valider([v], par=par)
+                elif tirage < 0.75:  # en retard
+                    nb = hasard.randint(1, max(1, dus - 2))
+                    v = saisir_versement(m, montant=100 * nb, date_versement=jour, par=par)
+                    valides += valider([v], par=par)
+                elif tirage < 0.85:  # versement en attente de validation
+                    v = saisir_versement(
+                        m, montant=100 * max(1, dus - 1), date_versement=jour, par=par
+                    )
+                elif tirage < 0.9:  # versement refusé par le circuit
+                    v = saisir_versement(m, montant=100, date_versement=jour, par=par)
+                    refuser(v, motif="Montant non reçu (démonstration)", par=par)
+            except CotisationRefusee:
+                continue
+        if valides:
+            v = valides[0]
+            mois = timezone.localdate(v.date_validation).replace(day=1)
+            for niveau in (NiveauPart.CIRCUIT, NiveauPart.REGION):
+                marquer_part_recue(
+                    niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=par
+                )
 
     def _mouvements(self, hasard, membres, par):
         """Quelques situations pour essayer toutes les pages (statuts, mutation, sanction)."""

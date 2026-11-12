@@ -434,3 +434,55 @@ def recu(request, pk):
     if not peut_voir_cotisations_de(request.user, v.membre):
         raise Http404
     return _pdf(recu_pdf(v), f"recu-{v.numero_recu}.pdf")
+
+
+@login_required
+def bn_reglages(request):
+    from django.core.exceptions import PermissionDenied
+
+    from apps.cotisations.forms import DepartForm, TarifForm
+    from apps.cotisations.models import Tarif, tarif_du
+    from apps.cotisations.services import regler
+
+    if not request.user.has_perm("membres.gerer_membres"):
+        raise PermissionDenied
+    parametres = ParametresCotisations.courant()
+    action = request.POST.get("action") if request.method == "POST" else None
+    depart = DepartForm(
+        request.POST if action == "depart" else None,
+        initial={"mois_depart": parametres.mois_depart},
+    )
+    courant = tarif_du(aujourdhui())
+    tarif = TarifForm(
+        request.POST if action == "tarif" else None,
+        initial={
+            "montant": courant.montant,
+            "part_paroisse": courant.part_paroisse,
+            "part_circuit": courant.part_circuit,
+            "part_region": courant.part_region,
+            "part_national": courant.part_national,
+        },
+    )
+    formulaire = {"depart": depart, "tarif": tarif}.get(action)
+    if formulaire is not None and formulaire.is_valid():
+        try:
+            if action == "depart":
+                regler(par=request.user, mois_depart=formulaire.cleaned_data["mois_depart"])
+            else:
+                regler(par=request.user, tarif=formulaire.cleaned_data)
+        except CotisationRefusee as e:
+            formulaire.add_error(None, str(e))
+        else:
+            messages.success(request, "Réglages des cotisations enregistrés.")
+            return redirect(request.path)
+    return render(
+        request,
+        "cotisations/reglages.html",
+        {
+            "depart": depart,
+            "tarif": tarif,
+            "parametres": parametres,
+            "courant": courant,
+            "tarifs": Tarif.objects.order_by("-date_effet"),
+        },
+    )

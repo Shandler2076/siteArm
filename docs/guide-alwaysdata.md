@@ -187,7 +187,7 @@ cd ~/siteArm
 ```
 
 - La première commande **efface toutes les données du site d'essai** (membres, comptes, journal) et
-  recrée environ 150 membres fictifs, avec des grades de toutes sortes. Elle affiche les nouveaux
+  recrée environ 150 membres fictifs, avec des grades et des cotisations de toutes sortes. Elle affiche les nouveaux
   **comptes de démonstration** : notez-les tout de suite.
 - La seconde recrée votre **compte technique** (il a été effacé) ; réactivez ensuite sa double
   vérification à la première connexion.

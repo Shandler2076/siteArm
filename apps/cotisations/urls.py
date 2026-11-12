@@ -5,6 +5,7 @@ from apps.cotisations import views
 app_name = "cotisations"
 urlpatterns = [
     path("versement/<int:pk>/annuler/", views.annuler_versement, name="annuler"),
+    path("bn/reglages/", views.bn_reglages, name="bn_reglages"),
     path("moi/", views.mes_cotisations, name="moi"),
     path("moi/etat.pdf", views.mon_etat_pdf, name="mon_etat_pdf"),
     path("membre/<str:matricule>/etat.pdf", views.etat_membre_pdf, name="etat_membre_pdf"),
