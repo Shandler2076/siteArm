@@ -2,10 +2,10 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Chaque membre a un grade (12 grades du RI) et un historique de grades. Il est nommé « Grade Prénoms NOM ». Le BNC attribue, promeut (y compris en série) et corrige les grades. Les listes et les statistiques filtrent et croisent par grade. Le site d'essai est recréé avec des grades variés.
+**Goal:** Chaque membre a un grade (« Camarade » à l'entrée, puis les 12 grades du RI) et un historique de grades. Il est nommé « Grade Prénoms NOM ». Le BNC attribue, promeut (y compris en série) et corrige les grades. Les listes et les statistiques filtrent et croisent par grade. Le site d'essai est recréé avec des grades variés.
 
 **Architecture:**
-- Les 12 grades sont des constantes : `apps/membres/grades.py`, `Grade(IntegerChoices)` dont la valeur est le rang 1 à 12.
+- Les grades sont des constantes : `apps/membres/grades.py`, `Grade(IntegerChoices)` dont la valeur est le rang : 0 pour **Camarade** (appellation de tout nouveau membre, décision du BNC du 12/11/2026), puis 1 à 12.
 - Le grade actuel et sa date sont dénormalisés sur `Membre` (`grade`, `date_grade`), pour filtrer en base.
 - La nouvelle application `apps/grades` contient l'historique (`HistoriqueGrade`) et les règles de l'art. 78. Ses services sont les **seuls** points d'entrée qui modifient `Membre.grade`.
 - Les listes et les statistiques réutilisent `membres_filtres`, avec de nouveaux filtres. Chaque chiffre reste égal au nombre de lignes de la liste qu'il ouvre.
@@ -19,6 +19,7 @@
 - Tout texte visible en français ; code et noms métier en français ; `ruff check .` propre (ligne de 100).
 - TDD : chaque test est écrit et vu échouer avant le code.
 - **Nom affiché partout** : `grade prénoms NOM`. Exemple : `Capitaine Marc Aurel KOUDAKPO`. Sans grade : `Marc Aurel KOUDAKPO`.
+- **Grade par défaut d'un nouveau membre : Camarade (rang 0).** Il devient Soldat de 3ᵉ classe à sa première consécration (art. 80), attribuée par le BNC sans durée minimale (le RI n'en fixe pas).
 - **Libellés exacts des 12 grades, rangs 1 à 12 :**
   1. Soldat de 3ᵉ classe
   2. Soldat de 2ᵉ classe
@@ -33,6 +34,7 @@
   11. Supérieur Général
   12. Supérieur Suprême Spirituel
 - **Durées minimales (art. 78)**, rang → rang suivant, en années : 1→2 : 3 ; 2→3 : 3 ; 3→4 : 3 ; 4→5 : 4 ; 5→6 : 5.
+- **Soldat de 3ᵉ classe (1)** : depuis Camarade seulement, mode « première consécration », sans durée minimale.
 - **Grades 2 à 6** : par test, et seulement depuis le grade juste en dessous, après la durée minimale. Sinon, promotion exceptionnelle (art. 84), avec un motif obligatoire.
 - **Grades 7 à 12** : par nomination, depuis n'importe quel grade inférieur, sans durée minimale.
 - **Une sanction ne change jamais le grade.** On ne promeut qu'un membre au statut Actif.
@@ -62,23 +64,24 @@
 
 **Interfaces:**
 - Produces:
-  - `Grade(models.IntegerChoices)` : `SOLDAT_3=1` … `SUPREME=12`, libellés exacts ci-dessus.
+  - `Grade(models.IntegerChoices)` : `CAMARADE=0`, `SOLDAT_3=1` … `SUPREME=12`, libellés exacts ci-dessus.
   - `DUREES_MINIMALES: dict[int, int]` (`{1: 3, 2: 3, 3: 3, 4: 4, 5: 5}`).
   - `PAR_NOMINATION = 7` (premier rang attribué par nomination).
   - `grade_depuis_texte(texte: str) -> Grade | None`.
   - `Membre.grade` : `PositiveSmallIntegerField(choices=Grade.choices, null=True, blank=True)`.
   - `Membre.date_grade` : `DateField(null=True, blank=True)`.
   - `Membre.nom_complet` → `"Capitaine Marc Aurel KOUDAKPO"`.
-  - `ModeGrade(TextChoices)` : `PREMIERE_CONSECRATION`, `REGULARISATION`, `TEST`, `NOMINATION`, `EXCEPTIONNELLE`, `CORRECTION`.
+  - `ModeGrade(TextChoices)` : `ENTREE` (« Entrée dans le mouvement », Camarade), `PREMIERE_CONSECRATION`, `REGULARISATION`, `TEST`, `NOMINATION`, `EXCEPTIONNELLE`, `CORRECTION`.
   - `HistoriqueGrade` : `membre` (FK PROTECT, `related_name="grades"`), `grade`, `date_effet`, `mode`, `reference` (blank), `motif` (blank), `enregistre_par` (FK Compte, SET_NULL), `date_saisie` (auto). Tri par défaut `["date_effet", "date_saisie"]`. La suppression lève `PermissionDenied`, comme `Membre`.
 
 - [ ] **Step 1: Tests**
-  - `test_douze_grades_dans_l_ordre` : `[g.label for g in Grade]` == les 12 libellés ; `Grade.CAPITAINE == 5`.
+  - `test_grades_dans_l_ordre` : `[g.label for g in Grade]` == `["Camarade"]` + les 12 libellés ; `Grade.CAMARADE == 0` ; `Grade.CAPITAINE == 5`.
   - `test_grade_depuis_texte` (paramétré) :
-    - reconnus : « capitaine » → 5 ; « Soldat de 3e classe », « soldat de 3ème classe », « 3ᵉ classe » → 1 ; « Soldat de 1ere classe » → 3 ; « sous capitaine » → 4 ; « SUPERIEUR SUPREME SPIRITUEL » → 12 ;
+    - reconnus : « camarade » → 0 ; « capitaine » → 5 ; « Soldat de 3e classe », « soldat de 3ème classe », « 3ᵉ classe » → 1 ; « Soldat de 1ere classe » → 3 ; « sous capitaine » → 4 ; « SUPERIEUR SUPREME SPIRITUEL » → 12 ;
     - non reconnus : « Général », « » → `None`.
   - `test_nom_complet_avec_grade` : `Membre(nom="koudakpo", prenoms="Marc Aurel", grade=5).nom_complet == "Capitaine Marc Aurel KOUDAKPO"`.
-  - `test_nom_complet_sans_grade` : `"Marc Aurel KOUDAKPO"`.
+  - `test_nom_complet_camarade` : `grade=0` → `"Camarade Marc Aurel KOUDAKPO"` (0 n'est pas « sans grade »).
+  - `test_nom_complet_sans_grade` : `grade=None` → `"Marc Aurel KOUDAKPO"`.
   - `test_historique_ne_se_supprime_pas` : `PermissionDenied`.
 - [ ] **Step 2:** Lancer `pytest apps/grades -q` → ÉCHEC (module introuvable).
 - [ ] **Step 3: Implémenter.**
@@ -98,13 +101,15 @@
 - Consumes: Task 1.
 - Produces :
   - `class GradeRefuse(Exception)` (message affichable tel quel).
-  - `attribuer_grade_initial(membre, *, grade: int, date_effet: date, par, regularisation: bool) -> HistoriqueGrade` : mode `REGULARISATION` si `regularisation`, sinon `PREMIERE_CONSECRATION`. N'est **pas** journalisé ni notifié à part : il fait partie de l'enregistrement.
+  - `attribuer_grade_initial(membre, *, grade: int, date_effet: date, par, regularisation: bool) -> HistoriqueGrade` : mode `REGULARISATION` si `regularisation`, sinon `ENTREE` (grade Camarade). N'est **pas** journalisé ni notifié à part : il fait partie de l'enregistrement.
   - `promouvoir(membre, *, grade: int, date_effet: date, reference: str, par, exceptionnelle: bool = False, motif: str = "") -> HistoriqueGrade`.
   - `promouvoir_en_serie(membres: list, *, grade: int, date_effet: date, reference: str, par) -> list[HistoriqueGrade]` : tout ou rien, dans une transaction. En cas de refus, lève `GradeRefuse` avec un message qui liste `"{nom_complet} : {raison}"` pour chaque membre refusé.
   - `corriger_grade(membre, *, grade: int, date_effet: date, motif: str, par) -> HistoriqueGrade`.
-  - `eligible(membre, aujourdhui: date) -> bool` et `filtre_eligibles(aujourdhui: date) -> Q` (même règle, en base) : statut Actif, `grade` de 1 à 5, `date_grade + DUREES_MINIMALES[grade] ans <= aujourdhui`.
+  - `eligible(membre, aujourdhui: date) -> bool` et `filtre_eligibles(aujourdhui: date) -> Q` (même règle, en base) : statut Actif et, soit `grade == 0` (Camarade, éligible à la première consécration sans durée), soit `grade` de 1 à 5 avec `date_grade + DUREES_MINIMALES[grade] ans <= aujourdhui`.
 
 - [ ] **Step 1: Tests**, avec un membre Actif Soldat de 3ᵉ classe depuis le 01/01/2020 :
+  - `test_premiere_consecration` : un Camarade enregistré le 10/03/2026 passe Soldat de 3ᵉ classe le 11/03/2026 → mode `PREMIERE_CONSECRATION`, accepté ; un Camarade vers le grade 2 → refus (saut).
+  - `test_eligible_camarade` : un Camarade actif est éligible, quelle que soit son ancienneté.
   - `test_promotion_apres_duree` : vers le grade 2 au 01/01/2023 → `membre.grade == 2`, `date_grade` mise à jour, historique de mode `TEST`, entrée de journal `GRADE_PROMOTION`, une notification au membre et une à la paroisse, et `membre.compte.nom_affiche == "Soldat de 2ᵉ classe Prénoms NOM"`.
   - `test_promotion_trop_tot_refusee` : au 31/12/2022 → `GradeRefuse`, contenant « 3 ans » ; rien n'est modifié.
   - `test_saut_de_grade_refuse_sauf_exceptionnelle` : vers le grade 3 → refus ; avec `exceptionnelle=True` et `motif=""` → refus « motif obligatoire » ; avec un motif → accepté, mode `EXCEPTIONNELLE`.
@@ -132,7 +137,7 @@
 
 **Files:**
 - Modify :
-  - `apps/membres/services.py::enregistrer_membre` (nouveaux paramètres `grade: int = Grade.SOLDAT_3`, `date_grade: date | None = None`, `regularisation: bool = False` ; appelle `attribuer_grade_initial` dans la même transaction ; `date_grade` par défaut = date d'intégration).
+  - `apps/membres/services.py::enregistrer_membre` (nouveaux paramètres `grade: int = Grade.CAMARADE`, `date_grade: date | None = None`, `regularisation: bool = False` ; appelle `attribuer_grade_initial` dans la même transaction ; `date_grade` par défaut = date d'intégration).
   - `apps/membres/forms.py::FormulaireEnregistrement` (champs `grade`, `date_grade` non-modèle).
   - `apps/membres/views_bn.py::enregistrer`, `templates/membres/bn_enregistrer.html`.
   - `apps/lots/colonnes.py` (colonnes facultatives `Colonne("Grade", "grade", False)` et `Colonne("Date du grade", "date_grade", False)`).
@@ -145,14 +150,14 @@
 - Produces: `enregistrer_membre(..., grade=…, date_grade=…, regularisation=…)`.
 
 - [ ] **Step 1: Tests**
-  - `test_enregistrement_soldat_3_par_defaut` : `grade == 1`, un historique de mode `PREMIERE_CONSECRATION`, `date_grade == 01/01/annee`.
+  - `test_enregistrement_camarade_par_defaut` : `grade == 0`, un historique de mode `ENTREE`, `date_grade == 01/01/annee` ; `compte.nom_affiche` commence par « Camarade ».
   - `test_enregistrement_regularisation_capitaine` : formulaire BN avec grade 5 et date 15/03/2018 → historique `REGULARISATION` ; `compte.nom_affiche` commence par « Capitaine ».
   - `test_date_grade_avant_naissance_refusee` (erreur de formulaire).
   - Lots :
     - `test_lot_grade_libre_reconnu` (« capitaine » → 5) ;
     - `test_lot_grade_inconnu_erreur_de_ligne` (message « Grade : grade inconnu (…) ») ;
-    - `test_lot_sans_colonne_grade_soldat_3` (anciens fichiers toujours acceptés).
-  - `test_lot_valide_cree_historique` : mode `REGULARISATION` quand la colonne est remplie, `PREMIERE_CONSECRATION` sinon.
+    - `test_lot_sans_colonne_grade_camarade` (anciens fichiers toujours acceptés ; grade Camarade).
+  - `test_lot_valide_cree_historique` : mode `REGULARISATION` quand la colonne est remplie, `ENTREE` sinon.
 - [ ] **Step 2:** ÉCHEC.
 - [ ] **Step 3: Implémenter.** Le grade et sa date ne passent pas par `valider_futur_membre` : ce sont des champs propres à l'enregistrement, validés dans le formulaire et dans `normaliser_ligne`.
 - [ ] **Step 4:** Suite verte.
@@ -180,7 +185,7 @@
   - `test_promouvoir_refuse_affiche_message` (pas de 500).
   - `test_pages_grades_interdites_hors_bn` (bureau de région → 403 ; membre simple → 403).
   - `test_serie` :
-    - GET `?grade=2` liste les membres Actifs de grade 1, l'éligibilité étant indiquée ;
+    - GET `?grade=2` liste les membres Actifs de grade 1, l'éligibilité étant indiquée ; GET `?grade=1` liste les Camarades ;
     - POST avec 2 cases cochées → 2 promus ;
     - POST avec un membre non éligible → aucun promu, message qui le nomme.
 - [ ] **Step 2:** ÉCHEC.
@@ -188,7 +193,7 @@
   - Formulaire de promotion : grade cible (ne propose que des grades supérieurs), date d'effet (aujourd'hui par défaut), référence de la décision, case « promotion exceptionnelle (art. 84) », motif.
   - Page de série :
     - filtre facultatif par région ;
-    - grades 2 à 6 : seulement les membres du grade juste en dessous ;
+    - grades 1 à 6 : seulement les membres du grade juste en dessous (pour le grade 1 : les Camarades — c'est la liste de la prochaine consécration) ;
     - grades 7 et plus : tous les grades inférieurs ;
     - tri par région puis nom.
 - [ ] **Step 4:** Suite verte.
@@ -198,7 +203,7 @@
 
 **Files:**
 - Modify :
-  - `apps/listes/filtres.py` (`FiltreListeForm` : `grade` = `MultipleChoiceField` avec les 12 grades + `("aucun", "Grade non renseigné")` ; `grade_min` = `ChoiceField` « À partir de » ; `eligible` = `BooleanField` « Éligibles au grade suivant » ; `membres_filtres` les applique, `eligible` via `filtre_eligibles`) ;
+  - `apps/listes/filtres.py` (`FiltreListeForm` : `grade` = `MultipleChoiceField` avec Camarade, les 12 grades + `("aucun", "Grade non renseigné")` ; `grade_min` = `ChoiceField` « À partir de » ; `eligible` = `BooleanField` « Éligibles au grade suivant » ; `membres_filtres` les applique, `eligible` via `filtre_eligibles`) ;
   - `apps/listes/filtres.py::resume_filtres` ;
   - `apps/listes/colonnes.py` (`"grade": ("Grade", 34)`, `"date_grade": ("Grade depuis", 22)`) ;
   - `templates/listes/liste.html` ;
@@ -206,7 +211,7 @@
 - Test: `apps/listes/tests/test_filtres.py`, `apps/listes/tests/test_exports.py`
 
 **Interfaces:**
-- Produces : clés de filtre d'URL `grade` (multiple, valeurs `"1"`…`"12"` ou `"aucun"`), `grade_min`, `eligible`. Utilisées par la Task 6.
+- Produces : clés de filtre d'URL `grade` (multiple, valeurs `"0"`…`"12"` ou `"aucun"`), `grade_min`, `eligible`. Utilisées par la Task 6.
 
 - [ ] **Step 1: Tests**
   - `test_filtre_grade_et_age_et_region` : Capitaines de plus de 40 ans d'une région → exactement les membres attendus.
@@ -225,7 +230,7 @@
 **Files:**
 - Modify :
   - `apps/listes/statistiques.py` :
-    - section « Par grade » (12 grades + « Grade non renseigné ») ;
+    - section « Par grade » (Camarade, 12 grades, « Grade non renseigné ») ;
     - `@dataclass Tableau(titre: str, colonnes: list[str], lignes: list[tuple[str, list[Cellule]]])` ;
     - `calculer_tableaux(unite, base: dict, aujourdhui) -> list[Tableau]` : grade × tranche d'âge, grade × sexe, grade × unité inférieure (pas pour une paroisse) ; on n'affiche que les lignes de grade non vides, plus le total.
   - `calculer_statistiques(unite, statuts, aujourdhui, base: dict | None = None)` : les filtres de page `base` (mêmes clés que la liste, sans `colonnes`) s'appliquent à **toutes** les cellules.
@@ -263,14 +268,14 @@
 - Consumes : `enregistrer_membre(grade=…, date_grade=…, regularisation=True)`, `promouvoir`.
 
 - [ ] **Step 1: Tests**
-  - `test_demo_grades_varies` : sur 300 membres (graine fixe), au moins 8 grades différents, dont Capitaine et Senior Capitaine ; aucun grade dont la date précède la date d'intégration ; les historiques respectent les durées de l'art. 78.
+  - `test_demo_grades_varies` : sur 300 membres (graine fixe), au moins 8 grades différents, dont Camarade, Capitaine et Senior Capitaine ; aucun grade dont la date précède la date d'intégration ; les historiques respectent les durées de l'art. 78.
   - `test_reinitialiser_demo_refuse_hors_demo` (`SITE_DEMO=False` → `CommandError`).
   - `test_reinitialiser_demo_refuse_sans_confirmation` (sans `--oui`).
   - `test_reinitialiser_demo_postgresql` (ignoré sous SQLite) : après la commande, il y a de nouveaux membres et le territoire est présent.
 - [ ] **Step 2:** ÉCHEC.
 - [ ] **Step 3: Implémenter.**
   - `peupler_demo` attribue un grade selon l'ancienneté (années depuis l'intégration) et l'âge :
-    - 1 à 6 par paliers de l'art. 78, avec un historique de promotions datées ;
+    - Camarade pour les intégrés depuis moins d'un an, puis 1 à 6 par paliers de l'art. 78, avec un historique de promotions datées ;
     - environ 5 % de nominations (7 à 9) chez les plus anciens ;
     - le Président et le Secrétaire national de démonstration ont des grades élevés.
   - `reinitialiser_demo --oui` : `SITE_DEMO` obligatoire et PostgreSQL obligatoire (message clair sous SQLite). Il exécute `flush` (TRUNCATE, ce qui contourne le blocage du journal, voulu ici pour des données fictives seulement), puis `charger_territoire` et `peupler_demo`, et rappelle de recréer le compte technique (`createsuperuser`).

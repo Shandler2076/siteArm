@@ -571,7 +571,9 @@ réalisation ; les éléments ci-dessous en fixent dès maintenant le contenu at
 
 ### 15.1 Les douze grades
 
-D'après le règlement intérieur (chapitre X, art. 77 et 86), du moins élevé au plus élevé :
+Tout nouveau membre porte d'abord l'appellation de **Camarade** (décision du BNC du 12 novembre 2026).
+Il devient **Soldat de 3ᵉ classe** à sa première consécration (art. 80). Viennent ensuite les douze
+grades du règlement intérieur (chapitre X, art. 77 et 86), du moins élevé au plus élevé :
 
 | N° | Grade | Épaulettes / attributs | Corde | Accès |
 |---:|---|---|---|---|
@@ -609,7 +611,8 @@ d'honneur n'est pas un grade (art. 87).
 ### 15.3 Qui enregistre les grades
 
 - **Le BNC seul** attribue un grade (art. 76 : le BNC arrête et publie les décisions d'avancement).
-- **À l'enregistrement** d'un nouveau membre : Soldat de 3ᵉ classe par défaut. Pour les membres déjà
+- **À l'enregistrement** d'un nouveau membre : **Camarade** par défaut. Le BNC enregistre ensuite sa
+  première consécration (Soldat de 3ᵉ classe), seule ou en série pour toute une consécration. Pour les membres déjà
   gradés (**régularisation**, art. 83), le BNC choisit le grade et sa date, sur le formulaire individuel
   ou dans une **colonne « Grade »** du fichier Excel des lots.
 - **Promotion** : sur la fiche d'un membre, ou **en série** après la proclamation des résultats d'un
@@ -634,7 +637,7 @@ d'honneur n'est pas un grade (art. 87).
 
 ### 15.5 Statistiques
 
-- **Répartition par grade** (les douze grades, avec « grade non renseigné »), dans le périmètre du
+- **Répartition par grade** (Camarade, les douze grades, « grade non renseigné »), dans le périmètre du
   bureau : par exemple le nombre de Capitaines, de Senior Capitaines, de Soldats de 3ᵉ classe.
 - **Tableau croisé grade × tranche d'âge** et **grade × sexe**.
 - **Tableau croisé grade × unité inférieure** : par région pour le BNC, par circuit pour une région, par
@@ -647,7 +650,8 @@ d'honneur n'est pas un grade (art. 87).
 ### 15.6 Éligibilité
 
 - Liste des **membres éligibles** au grade suivant : grade actuel, ancienneté dans ce grade, durée
-  minimale atteinte (art. 78), statut Actif.
+  minimale atteinte (art. 78), statut Actif. Les **Camarades** y figurent tous : c'est la liste de la
+  prochaine consécration (le règlement ne fixe pas de durée avant la première consécration).
 - Filtrable et exportable comme les autres listes ; sert à préparer les tests organisés par le BNC dans
   les régions (art. 75).
 - Les autres conditions (tenue, assiduité, cotisations, conduite, art. 73) restent appréciées par les
@@ -662,6 +666,8 @@ croisées.
 
 ### 15.8 Décisions (11 novembre 2026)
 
+0. **Grade par défaut : Camarade** (et non Soldat de 3ᵉ classe), jusqu'à la première consécration
+   (décision du 12 novembre 2026).
 1. **Les membres déjà gradés sont enregistrés directement avec leur grade** (régularisation,
    art. 83), sur le formulaire individuel comme dans le fichier Excel des lots.
 2. **La tenue n'est pas suivie** sur le site.
@@ -943,7 +949,7 @@ mis en ligne en même temps que le module 1.
 | **Signalement** | Demande transmise au BNC : décès, démission, réhabilitation ou changement de catégorie. |
 | **Double vérification** | Code à 6 chiffres demandé à la connexion, en plus du mot de passe, pour les comptes du BNC. |
 | **Journal** | Registre non modifiable des opérations sensibles. |
-| **Grade** | Rang du membre dans l'Armée du Salut, de Soldat de 3ᵉ classe à Supérieur Suprême Spirituel (RI art. 77). |
+| **Grade** | Rang du membre dans l'Armée du Salut : Camarade à l'entrée, puis de Soldat de 3ᵉ classe à Supérieur Suprême Spirituel (RI art. 77). |
 | **CM** | Cotisation mensuelle due par chaque membre (100 F CFA par mois à ce jour). |
 | **À jour** | Se dit d'un membre qui a payé toutes les cotisations dues jusqu'au mois en cours. |
 | **APDP** | Autorité de Protection des Données Personnelles du Bénin. |
