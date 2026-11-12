@@ -31,7 +31,7 @@ def test_paroisse_demande_mutation_en_deux_temps(client, monde, sec_p4):
     m1 = monde["m1"]
     r = client.post(url, {"matricule": m1.matricule})
     html = unescape(r.content.decode())
-    assert r.status_code == 200 and "ADJOVI Test" in html and "P1" in html
+    assert r.status_code == 200 and "Camarade Test ADJOVI" in html and "P1" in html
     assert m1.telephone not in html and not Mutation.objects.exists()
     r = client.post(url, {"matricule": m1.matricule, "motif": "Déménagement", "confirmer": "1"})
     mut = Mutation.objects.get()

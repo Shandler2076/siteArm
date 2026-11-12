@@ -8,6 +8,8 @@ class Colonne:
     entete: str
     champ: str
     obligatoire: bool
+    # Colonne ajoutée après la première version du modèle : son absence est acceptée.
+    entete_facultative: bool = False
 
 
 COLONNES = [
@@ -29,6 +31,8 @@ COLONNES = [
     Colonne("Année d'intégration*", "annee_integration", True),
     Colonne("Paroisse d'intégration*", "paroisse_integration", True),
     Colonne("Catégorie", "categorie", False),
+    Colonne("Grade", "grade", False, entete_facultative=True),
+    Colonne("Date du grade", "date_grade", False, entete_facultative=True),
 ]
 
 PAR_CHAMP = {c.champ: c for c in COLONNES}

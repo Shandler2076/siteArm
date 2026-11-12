@@ -5,9 +5,11 @@ import re
 
 from django.db.models import Q
 
+from apps.grades.services import erreurs_grade_initial
 from apps.lots.colonnes import COLONNES, PAR_CHAMP
 from apps.lots.models import EtatLigne, LigneLot
 from apps.membres.forms import valider_futur_membre
+from apps.membres.grades import grade_depuis_texte
 from apps.membres.models import Categorie, SituationMatrimoniale, cle_nom
 from apps.organisation.models import Paroisse, Region
 
@@ -86,7 +88,7 @@ def normaliser_ligne(
                 erreur(champ, VIDE)
             elif champ == "categorie":
                 donnees[champ] = Categorie.ACTIF
-            elif champ == "date_naissance":
+            elif champ in ("date_naissance", "grade", "date_grade"):
                 donnees[champ] = None
             else:
                 donnees[champ] = ""
@@ -95,8 +97,14 @@ def normaliser_ligne(
             erreur(champ, MESSAGE_NOMBRE)
             continue
         try:
-            if champ == "date_naissance":
+            if champ in ("date_naissance", "date_grade"):
                 donnees[champ] = _date(brut).isoformat()
+            elif champ == "grade":
+                grade = grade_depuis_texte(texte)
+                if grade is None:
+                    erreur(champ, f"grade inconnu « {texte} » (ex. Camarade, Capitaine)")
+                    continue
+                donnees[champ] = int(grade)
             elif champ == "sexe":
                 donnees[champ] = texte.upper()
             elif champ == "annee_integration":
@@ -118,19 +126,38 @@ def normaliser_ligne(
         except ValueError:
             messages = {
                 "date_naissance": MESSAGE_DATE,
+                "date_grade": MESSAGE_DATE,
                 "annee_integration": "nombre à 4 chiffres attendu (ex. 2015)",
                 "situation_matrimoniale": f"valeur inconnue « {texte} » (choisissez dans la liste)",
                 "categorie": f"valeur inconnue « {texte} » (choisissez dans la liste)",
             }
             erreur(champ, messages[champ])
+    if donnees.get("date_grade") and donnees.get("grade") is None and "grade" in donnees:
+        erreur("date_grade", "indiquez aussi le grade.")
     return donnees, erreurs
+
+
+def _hors_membre(donnees: dict) -> dict:
+    """Champs propres à l'enregistrement, qui ne passent pas par le modèle `Membre`."""
+    exclus = ("paroisse_integration", "annee_integration", "grade", "date_grade")
+    return {k: v for k, v in donnees.items() if k not in exclus}
+
+
+def grade_de_la_ligne(donnees: dict) -> dict:
+    """Paramètres de grade pour `enregistrer_membre` (Camarade si la colonne est vide)."""
+    if donnees.get("grade") is None:
+        return {}
+    date_grade = donnees.get("date_grade")
+    return {
+        "grade": donnees["grade"],
+        "date_grade": datetime.date.fromisoformat(date_grade) if date_grade else None,
+        "regularisation": True,
+    }
 
 
 def donnees_pour_membre(donnees: dict) -> tuple[dict, Paroisse | None, int | None]:
     """JSON de la ligne → champs du modèle `Membre`, paroisse et année d'intégration."""
-    champs = {
-        k: v for k, v in donnees.items() if k not in ("paroisse_integration", "annee_integration")
-    }
+    champs = _hors_membre(donnees)
     if champs.get("date_naissance"):
         champs["date_naissance"] = datetime.date.fromisoformat(champs["date_naissance"])
     pk = donnees.get("paroisse_integration")
@@ -157,11 +184,15 @@ def verifier_ligne(
     region = ligne.lot.region
     paroisses = paroisses_de(region) if paroisses is None else paroisses
     donnees, erreurs = normaliser_ligne(ligne.brutes, region, paroisses)
-    champs = {
-        k: v for k, v in donnees.items() if k not in ("paroisse_integration", "annee_integration")
-    }
+    champs = _hors_membre(donnees)
     if champs.get("date_naissance"):
         champs["date_naissance"] = datetime.date.fromisoformat(champs["date_naissance"])
+    grade = grade_de_la_ligne(donnees)
+    if grade.get("date_grade") and donnees.get("annee_integration"):
+        for message in erreurs_grade_initial(
+            grade["date_grade"], donnees["annee_integration"], champs.get("date_naissance")
+        ):
+            erreurs.append(f"{PAR_CHAMP['date_grade'].entete} : {message}")
     if donnees.get("annee_integration") is not None:
         champs["annee_integration"] = donnees["annee_integration"]
     paroisse = next(

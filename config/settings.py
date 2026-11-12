@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "apps.listes",
     "apps.mouvements",
     "apps.securite",
+    "apps.grades",
     "axes",
 ]
 

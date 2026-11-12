@@ -41,7 +41,7 @@ def test_nb_par_etat(lot):
 
 
 def test_colonnes_ordre_et_obligatoires():
-    assert len(COLONNES) == 18
+    assert len(COLONNES) == 20
     assert [c.entete for c in COLONNES if c.obligatoire] == [
         "Nom*",
         "Prénoms*",
@@ -50,7 +50,12 @@ def test_colonnes_ordre_et_obligatoires():
         "Année d'intégration*",
         "Paroisse d'intégration*",
     ]
-    assert COLONNES[0].champ == "nom" and COLONNES[-1].champ == "categorie"
+    assert COLONNES[0].champ == "nom" and COLONNES[17].champ == "categorie"
+    # Colonnes du grade ajoutées à la fin : les anciens fichiers restent acceptés.
+    assert [(c.champ, c.entete_facultative) for c in COLONNES[18:]] == [
+        ("grade", True),
+        ("date_grade", True),
+    ]
 
 
 def test_fichier_lot_prive(lot):

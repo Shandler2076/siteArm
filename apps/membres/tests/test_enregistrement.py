@@ -47,7 +47,7 @@ def test_enregistrement_complet(contexte):
     assert m.matricule == "2015-03AS-0001" and m.region_integration.code == "03"
     assert m.categorie == "honneur" and m.statut == "actif" and m.enregistre_par == bn
     assert m.compte.identifiant == "2015-03AS-0001"
-    assert m.compte.nom_affiche == "HOUNKPÈ Jean-Marc"
+    assert m.compte.nom_affiche == "Camarade Jean-Marc HOUNKPÈ"
     assert m.compte.doit_changer_mot_de_passe and m.compte.check_password(res.mot_de_passe)
     a = m.affectation_actuelle
     assert a.paroisse == p and a.circuit_a_date == p.circuit and a.region_a_date.code == "03"

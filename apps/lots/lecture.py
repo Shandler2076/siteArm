@@ -39,7 +39,8 @@ def lire_classeur(fichier) -> list[tuple[int, dict[str, object]]]:
     entetes = list(next(lignes, ()) or ())
     for i, colonne in enumerate(COLONNES):
         lue = entetes[i] if i < len(entetes) else None
-        if (str(lue).strip() if lue is not None else "") != colonne.entete:
+        lue = str(lue).strip() if lue is not None else ""
+        if lue != colonne.entete and not (colonne.entete_facultative and not lue):
             raise FichierInvalide(
                 "Les colonnes ne correspondent pas au modèle officiel : "
                 f"colonne {get_column_letter(i + 1)} attendue « {colonne.entete} »."

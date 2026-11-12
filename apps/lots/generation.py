@@ -6,7 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.lots.controle import controler_lot, donnees_pour_membre
+from apps.lots.controle import controler_lot, donnees_pour_membre, grade_de_la_ligne
 from apps.lots.models import A_CREER, EtatLot, Lot
 from apps.membres.models import Membre
 from apps.membres.services import enregistrer_membre
@@ -45,6 +45,7 @@ def valider_lot(lot: Lot, par) -> list[Membre]:
         crees = []
         for ligne in lot.lignes.filter(etat__in=A_CREER).order_by("numero"):
             champs, paroisse, annee = donnees_pour_membre(ligne.donnees)
+            grade = grade_de_la_ligne(ligne.donnees)
             try:
                 with transaction.atomic():
                     membre = enregistrer_membre(
@@ -54,6 +55,7 @@ def valider_lot(lot: Lot, par) -> list[Membre]:
                         par=par,
                         notifier=False,
                         avec_mot_de_passe=False,
+                        **grade,
                     ).membre
             except Exception as e:  # noqa: BLE001 — toute erreur annule le lot entier
                 raise GenerationEchouee(

@@ -11,6 +11,7 @@ from django.db import models
 from django.db.models import Q
 from django.utils import timezone
 
+from apps.membres.grades import Grade
 from apps.membres.stockage import stockage_prive
 from apps.organisation.models import Circuit, Paroisse, Region
 
@@ -99,6 +100,10 @@ class Membre(models.Model):
         "catégorie", max_length=20, choices=Categorie.choices, default=Categorie.ACTIF
     )
     statut = models.CharField("statut", max_length=20, choices=Statut.choices, default=Statut.ACTIF)
+    grade = models.PositiveSmallIntegerField(
+        "grade", choices=Grade.choices, null=True, blank=True
+    )
+    date_grade = models.DateField("grade depuis le", null=True, blank=True)
     compte = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         null=True,
@@ -156,7 +161,11 @@ class Membre(models.Model):
 
     @property
     def nom_complet(self) -> str:
-        return f"{self.nom.upper()} {self.prenoms}".strip()
+        """« Grade Prénoms NOM » (ex. « Capitaine Marc Aurel KOUDAKPO ») ; sans grade : « Prénoms NOM »."""
+        nom = f"{self.prenoms} {self.nom.upper()}".strip()
+        if self.grade is None:
+            return nom
+        return f"{Grade(self.grade).label} {nom}"
 
     def age(self, aujourdhui: datetime.date | None = None) -> int | None:
         if not self.date_naissance:

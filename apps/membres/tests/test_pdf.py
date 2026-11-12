@@ -13,7 +13,7 @@ def test_fiche_sans_identifiants(membre_enregistre):
     pdf = fiche_identification_pdf(membre_enregistre.membre)
     assert pdf.startswith(b"%PDF")
     t = _texte(pdf)
-    assert "2015-03AS-0001" in t and "HOUNKPÈ Jean-Marc" in t and "FICHE D'IDENTIFICATION" in t
+    assert "2015-03AS-0001" in t and "Camarade Jean-Marc HOUNKPÈ" in t and "FICHE D'IDENTIFICATION" in t
     assert "Membre actif" in t and "Ekpe A" in t
     assert "Mot de passe" not in t
 

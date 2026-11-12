@@ -26,6 +26,9 @@ SANCTION_LEVEE = "sanction_levee"
 FIN_SANCTION = "fin_sanction"
 CORRECTION_INTEGRATION = "correction_integration"
 DOUBLE_VERIFICATION = "double_verification"
+GRADE_ATTRIBUE = "grade_attribue"
+GRADE_PROMOTION = "grade_promotion"
+GRADE_CORRECTION = "grade_correction"
 
 LIBELLES = {
     LISTE_PDF: "Liste téléchargée (PDF)",
@@ -51,6 +54,9 @@ LIBELLES = {
     FIN_SANCTION: "Fin de sanction",
     CORRECTION_INTEGRATION: "Correction exceptionnelle",
     DOUBLE_VERIFICATION: "Double vérification",
+    GRADE_ATTRIBUE: "Grade attribué",
+    GRADE_PROMOTION: "Promotion de grade",
+    GRADE_CORRECTION: "Correction de grade",
 }
 
 
