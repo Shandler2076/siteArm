@@ -18,7 +18,7 @@
         <thead><tr><th>Membre</th>{% for n in noms_mois %}<th>{{ n|slice:":3" }}</th>{% endfor %}<th>Retard</th></tr></thead>
         <tbody>
           {% for l in lignes %}
-            <tr><th scope="row">{{ l.membre.nom_complet }}<br><small class="aide">{{ l.membre.matricule }}</small></th>
+            <tr><th scope="row">{{ l.membre.nom_complet }}<br><small class="aide">{{ l.membre.matricule }} · <a href="{% url 'cotisations:etat_membre_pdf' l.membre.matricule %}">État (PDF)</a></small></th>
               {% for c in l.cases %}
                 <td class="case case--{{ c.etat }}" title="{{ c.mois|date:'F Y' }}">
                   {% if c.etat == "paye" %}✓{% elif c.etat == "attente" %}…{% elif c.etat == "du" or c.etat == "avance" %}<input type="checkbox" name="c-{{ l.membre.pk }}" value="{{ c.mois|date:'Y-m-d' }}" aria-label="{{ l.membre.nom_complet }} — {{ c.mois|date:'F Y' }}">{% else %}—{% endif %}
@@ -37,6 +37,12 @@
     {% for v in en_attente %}
       <li>{{ v.membre.nom_complet }} — {{ v.montant }} F, versé le {{ v.date_versement|date:"d/m/Y" }}
         · <a href="{% url 'cotisations:annuler' v.pk %}">Annuler</a></li>
+    {% empty %}<li class="aide">Aucun.</li>{% endfor %}
+  </ul>
+  <h2>Derniers versements validés</h2>
+  <ul class="fonctions">
+    {% for v in valides %}
+      <li>{{ v.membre.nom_complet }} — {{ v.montant }} F · <a href="{% url 'cotisations:recu' v.pk %}">Reçu {{ v.numero_recu }}</a></li>
     {% empty %}<li class="aide">Aucun.</li>{% endfor %}
   </ul>
 </section>

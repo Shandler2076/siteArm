@@ -192,6 +192,7 @@ class Command(BaseCommand):
         """Cotisations fictives depuis janvier : à jour, en retard, en attente, refusées."""
         from django.utils import timezone
 
+        from apps.bureaux.models import Mandat
         from apps.cotisations.models import NiveauPart, ParametresCotisations
         from apps.cotisations.regles import situation
         from apps.cotisations.services import (
@@ -203,6 +204,14 @@ class Command(BaseCommand):
         )
 
         jour = timezone.localdate()
+        # Saisie par le Secrétaire national, validation par le bureau du circuit de démonstration
+        # (celui qui saisit ne valide pas).
+        mandat = (
+            Mandat.objects.filter(fonction__niveau="circuit", fonction__droit_gerer=True)
+            .select_related("membre__compte")
+            .first()
+        )
+        validateur = mandat.membre.compte if mandat else None
         parametres = ParametresCotisations.courant()
         parametres.mois_depart = jour.replace(month=1, day=1)
         parametres.save()
@@ -218,11 +227,11 @@ class Command(BaseCommand):
                 if tirage < 0.45:  # à jour, parfois d'avance
                     nb = dus + (1 if hasard.random() < 0.2 and jour.month < 12 else 0)
                     v = saisir_versement(m, montant=100 * nb, date_versement=jour, par=par)
-                    valides += valider([v], par=par)
+                    valides += valider([v], par=validateur)
                 elif tirage < 0.75:  # en retard
                     nb = hasard.randint(1, max(1, dus - 2))
                     v = saisir_versement(m, montant=100 * nb, date_versement=jour, par=par)
-                    valides += valider([v], par=par)
+                    valides += valider([v], par=validateur)
                 elif tirage < 0.85:  # versement en attente de validation
                     v = saisir_versement(
                         m, montant=100 * max(1, dus - 1), date_versement=jour, par=par
@@ -233,11 +242,18 @@ class Command(BaseCommand):
             except CotisationRefusee:
                 continue
         if valides:
-            v = valides[0]
+            # Un tiers des versements validés le mois dernier ; la part de l'un est reçue.
+            from apps.cotisations.models import Versement
+
+            anciens = [v.pk for v in valides[: max(1, len(valides) // 3)]]
+            Versement.objects.filter(pk__in=anciens).update(
+                date_validation=timezone.now() - datetime.timedelta(days=35)
+            )
+            v = Versement.objects.get(pk=anciens[0])
             mois = timezone.localdate(v.date_validation).replace(day=1)
             for niveau in (NiveauPart.CIRCUIT, NiveauPart.REGION):
                 marquer_part_recue(
-                    niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=par
+                    niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=validateur
                 )
 
     def _mouvements(self, hasard, membres, par):

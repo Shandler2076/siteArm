@@ -23,7 +23,7 @@ from apps.cotisations.models import (
     tarif_parmi,
     tarifs,
 )
-from apps.cotisations.regles import mois_suivant, situation
+from apps.cotisations.regles import HORS_MOUVEMENT, mois_suivant, situation
 from apps.membres.models import Membre
 
 MOIS = [
@@ -90,10 +90,14 @@ def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.da
     occupes = s.payes | s.en_attente
     debut = s.dus[0] if s.dus else max(depart, premier_du_mois(membre.date_enregistrement.date()))
     liste = tarifs()
+    # Paiement d'avance (mois après le mois en cours) : seulement pour un membre encore dans le
+    # mouvement. Mois passés ou en cours : seulement les mois dus (pas pendant une exclusion…).
+    avance_permise = membre.statut not in HORS_MOUVEMENT
     if mois_choisis:
         choisis = sorted({premier_du_mois(m) for m in mois_choisis})
         for m in choisis:
-            if m < debut or m > fin_annee:
+            hors = (m <= courant and m not in s.dus) or (m > courant and not avance_permise)
+            if m < debut or m > fin_annee or hors:
                 raise CotisationRefusee(
                     f"{nom_mois(m).capitalize()} : ce mois n'est pas payable pour ce membre."
                 )
@@ -107,7 +111,7 @@ def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.da
             )
         return couverts
     candidats = [m for m in s.dus if m not in occupes]
-    m = mois_suivant(courant)
+    m = mois_suivant(courant) if avance_permise else mois_suivant(fin_annee)
     while m <= fin_annee:  # paiement d'avance : mois suivants de l'année en cours
         if m not in occupes:
             candidats.append(m)
@@ -225,7 +229,7 @@ def _parts(versement, liste) -> dict[str, int]:
 
 
 def _numero_recu(jour: datetime.date) -> str:
-    ParametresCotisations.objects.select_for_update().get(pk=ParametresCotisations.courant().pk)
+    """À appeler sous le verrou de `ParametresCotisations` (pris par `valider`)."""
     prefixe = f"R{jour.year}-"
     dernier = (
         Versement.objects.filter(numero_recu__startswith=prefixe)
@@ -243,11 +247,23 @@ def valider(versements, *, par) -> list[Versement]:
     liste = tarifs()
     faits = []
     with transaction.atomic():
+        # Verrou unique pris d'abord (numéros de reçu), puis les versements par pk : pas
+        # d'interblocage entre deux validations simultanées.
+        ParametresCotisations.objects.select_for_update().get(pk=ParametresCotisations.courant().pk)
         for v in sorted(versements, key=lambda x: x.pk):
-            v = Versement.objects.select_for_update().select_related("membre").get(pk=v.pk)
+            v = (
+                Versement.objects.select_for_update(of=("self",))
+                .select_related("membre", "paroisse")
+                .get(pk=v.pk)
+            )
             if v.etat != EtatVersement.EN_ATTENTE:
                 raise CotisationRefusee(
                     f"Le versement de {v.membre.nom_complet} n'est plus en attente."
+                )
+            if par is not None and v.saisi_par_id == getattr(par, "pk", None):
+                raise CotisationRefusee(
+                    f"Vous avez saisi le versement de {v.membre.nom_complet} : un autre membre "
+                    "du bureau du circuit doit le valider."
                 )
             maintenant = timezone.now()
             v.etat, v.valide_par, v.date_validation = EtatVersement.VALIDE, par, maintenant
@@ -286,7 +302,11 @@ def refuser(versement, *, motif: str, par) -> Versement:
     if not motif:
         raise CotisationRefusee("Le motif du refus est obligatoire.")
     with transaction.atomic():
-        v = Versement.objects.select_for_update().select_related("membre").get(pk=versement.pk)
+        v = (
+            Versement.objects.select_for_update(of=("self",))
+            .select_related("membre", "paroisse")
+            .get(pk=versement.pk)
+        )
         if v.etat != EtatVersement.EN_ATTENTE:
             raise CotisationRefusee("Ce versement n'est plus en attente.")
         v.etat, v.motif, v.valide_par, v.date_validation = (
@@ -318,7 +338,11 @@ def annuler(versement, *, motif: str, par) -> Versement:
     if not motif:
         raise CotisationRefusee("Le motif de l'annulation est obligatoire.")
     with transaction.atomic():
-        v = Versement.objects.select_for_update().select_related("membre").get(pk=versement.pk)
+        v = (
+            Versement.objects.select_for_update(of=("self",))
+            .select_related("membre", "paroisse")
+            .get(pk=versement.pk)
+        )
         if v.etat not in (EtatVersement.EN_ATTENTE, EtatVersement.VALIDE):
             raise CotisationRefusee("Ce versement est déjà refusé ou annulé.")
         v.etat, v.motif = EtatVersement.ANNULE, motif
@@ -349,8 +373,20 @@ def part_due(niveau: str, paroisse, mois_validation: datetime.date) -> int:
     return total
 
 
-def marquer_part_recue(*, niveau: str, paroisse, mois_validation: datetime.date, par) -> PartRecue:
+def marquer_part_recue(
+    *,
+    niveau: str,
+    paroisse,
+    mois_validation: datetime.date,
+    par,
+    aujourd_hui: datetime.date | None = None,
+) -> PartRecue:
     mois_validation = premier_du_mois(mois_validation)
+    if mois_validation >= premier_du_mois(aujourd_hui or timezone.localdate()):
+        raise CotisationRefusee(
+            "La part se marque comme reçue une fois le mois terminé (d'autres versements "
+            "peuvent encore être validés ce mois-ci)."
+        )
     montant = part_due(niveau, paroisse, mois_validation)
     if not montant:
         raise CotisationRefusee("Aucune part à recevoir pour cette paroisse et ce mois.")
@@ -368,6 +404,10 @@ def marquer_part_recue(*, niveau: str, paroisse, mois_validation: datetime.date,
     _journal(
         par,
         "part_recue",
+        unite={
+            "circuit": f"circuit-{paroisse.circuit_id}",
+            "region": f"region-{paroisse.circuit.region_id}",
+        }.get(niveau, "national"),
         niveau=niveau,
         paroisse=paroisse.nom,
         mois=mois_validation.isoformat(),

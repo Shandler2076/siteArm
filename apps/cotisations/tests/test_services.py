@@ -110,15 +110,15 @@ def test_validation_numero_recu_et_parts(
 ):
     v = saisir_versement(ancien, montant=300, date_versement=AUJ, par=compte_technique)
     with django_capture_on_commit_callbacks(execute=True):
-        (v,) = valider([v], par=compte_technique)
+        (v,) = valider([v], par=None)
     assert v.etat == EtatVersement.VALIDE and v.numero_recu == "R2026-000001"
     assert v.parts == {"paroisse": 90, "circuit": 60, "region": 60, "national": 90}
     assert situation(ancien, M(2026, 3)).a_jour
     assert Notification.objects.filter(destinataire=ancien.compte).exists()
     v2 = saisir_versement(ancien, montant=100, date_versement=AUJ, par=compte_technique)
-    assert valider([v2], par=compte_technique)[0].numero_recu == "R2026-000002"
+    assert valider([v2], par=None)[0].numero_recu == "R2026-000002"
     with pytest.raises(CotisationRefusee):
-        valider([v2], par=compte_technique)  # déjà validé
+        valider([v2], par=None)  # déjà validé
 
 
 def test_parts_avec_arrondi_total_exact(ancien, compte_technique):
@@ -131,7 +131,7 @@ def test_parts_avec_arrondi_total_exact(ancien, compte_technique):
         part_national=17,
     )
     v = saisir_versement(ancien, montant=150, date_versement=AUJ, par=compte_technique)
-    (v,) = valider([v], par=compte_technique)
+    (v,) = valider([v], par=None)
     assert sum(v.parts.values()) == 150
 
 
@@ -152,7 +152,7 @@ def test_refus_libere_les_mois_et_notifie(
 
 def test_annulation_apres_validation(ancien, compte_technique):
     v = saisir_versement(ancien, montant=100, date_versement=AUJ, par=compte_technique)
-    valider([v], par=compte_technique)
+    valider([v], par=None)
     annuler(v, motif="Erreur de membre", par=compte_technique)
     v.refresh_from_db()
     assert v.etat == EtatVersement.ANNULE and v.numero_recu  # le numéro reste (trace)
@@ -161,13 +161,14 @@ def test_annulation_apres_validation(ancien, compte_technique):
 
 def test_part_recue_montant_et_unicite(ancien, monde, compte_technique):
     v = saisir_versement(ancien, montant=300, date_versement=AUJ, par=compte_technique)
-    (v,) = valider([v], par=compte_technique)
+    (v,) = valider([v], par=None)
     mois_val = v.date_validation.date().replace(day=1)
     p = marquer_part_recue(
         niveau=NiveauPart.CIRCUIT,
         paroisse=monde["P1"],
         mois_validation=mois_val,
         par=compte_technique,
+        aujourd_hui=mois_val + datetime.timedelta(days=40),
     )
     assert p.montant == 60
     with pytest.raises(CotisationRefusee):
@@ -176,6 +177,7 @@ def test_part_recue_montant_et_unicite(ancien, monde, compte_technique):
             paroisse=monde["P1"],
             mois_validation=mois_val,
             par=compte_technique,
+            aujourd_hui=mois_val + datetime.timedelta(days=40),
         )
     with pytest.raises(CotisationRefusee):  # rien à recevoir
         marquer_part_recue(
@@ -183,6 +185,7 @@ def test_part_recue_montant_et_unicite(ancien, monde, compte_technique):
             paroisse=monde["P2"],
             mois_validation=mois_val,
             par=compte_technique,
+            aujourd_hui=mois_val + datetime.timedelta(days=40),
         )
 
 
@@ -234,7 +237,7 @@ def test_journal_phrases_cotisations(ancien, compte_technique):
     from apps.journal.lecture import lire
 
     v = saisir_versement(ancien, montant=300, date_versement=AUJ, par=compte_technique)
-    valider([v], par=compte_technique)
+    valider([v], par=None)
     lignes = lire(EntreeJournal.objects.filter(action__startswith="versement").order_by("date"))
     assert lignes[0].texte == (
         f"A enregistré un versement de 300 F pour {ancien.nom_complet} ({ancien.matricule}) "

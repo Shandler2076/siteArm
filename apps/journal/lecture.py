@@ -197,7 +197,21 @@ def lire(entrees) -> list[Ligne]:
                 f"{d.get('paroisse')} (versements validés en {quand})."
             )
         if a == j.REGLAGE_COTISATIONS:
-            return "A modifié les réglages des cotisations mensuelles."
+            morceaux = []
+            if d.get("mois_depart"):
+                depart = datetime.date.fromisoformat(d["mois_depart"])
+                morceaux.append(f"a fixé le premier mois suivi à {periode_mois([depart])}")
+            t = d.get("tarif") or {}
+            if t:
+                effet = datetime.date.fromisoformat(t.get("date_effet", "2000-01-01")[:10])
+                morceaux.append(
+                    f"a fixé le tarif à {t.get('montant')} F par mois à compter de "
+                    f"{periode_mois([effet])} (paroisse {t.get('part_paroisse')} %, circuit "
+                    f"{t.get('part_circuit')} %, région {t.get('part_region')} %, national "
+                    f"{t.get('part_national')} %)"
+                )
+            texte = " ; ".join(morceaux) or "a modifié les réglages"
+            return f"Cotisations mensuelles : {texte}."
         if a == j.CONNEXION:
             return "S'est connecté au site."
         if a == j.CONNEXION_ECHOUEE:

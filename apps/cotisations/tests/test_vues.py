@@ -105,6 +105,13 @@ def test_refus_motif_obligatoire(prets):
 def test_parts_du_circuit(prets):
     v = saisir_versement(prets["m1"], montant=300, date_versement=D(2026, 3, 1), par=None)
     (v,) = valider([v], par=None)
+    # Versement validé le mois dernier : sa part peut être marquée (mois terminé).
+    from django.utils import timezone
+
+    Versement.objects.filter(pk=v.pk).update(
+        date_validation=timezone.now() - datetime.timedelta(days=35)
+    )
+    v.refresh_from_db()
     c = _client(prets["chef"])
     html = _html(c.get(_circuit(prets) + "parts/"))
     assert "P1" in html and "60" in html

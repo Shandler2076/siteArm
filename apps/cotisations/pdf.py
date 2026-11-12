@@ -3,6 +3,7 @@
 import datetime
 import io
 
+from django.utils import timezone
 from reportlab.lib.pagesizes import A4, A6, landscape
 from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
@@ -93,7 +94,7 @@ def recu_pdf(versement) -> bytes:
         ("Mois", periode(mois)),
         ("Versé le", versement.date_versement.strftime("%d/%m/%Y")),
         ("Encaissé par", f"Paroisse {versement.paroisse.nom}"),
-        ("Validé le", f"{versement.date_validation:%d/%m/%Y} par le circuit"),
+        ("Validé le", f"{timezone.localtime(versement.date_validation):%d/%m/%Y} par le circuit"),
     ]
     y = haut - 28 * mm
     for libelle, valeur in lignes:

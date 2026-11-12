@@ -27,7 +27,7 @@ from apps.cotisations.models import (
     Versement,
     premier_du_mois,
 )
-from apps.cotisations.regles import situations
+from apps.cotisations.regles import HORS_MOUVEMENT, situations
 from apps.cotisations.services import (
     MOIS,
     CotisationRefusee,
@@ -55,9 +55,10 @@ def _unite(request, cle, niveaux=None) -> Unite:
 
 def _annee(request) -> int:
     try:
-        return int(request.GET.get("annee", ""))
+        annee = int(request.GET.get("annee", ""))
     except ValueError:
         return aujourdhui().year
+    return min(max(annee, 2000), 2100)
 
 
 @login_required
@@ -99,7 +100,8 @@ def grille(request, cle):
             return redirect(request.get_full_path())
     sit = situations(membres_visibles(unite), premier_du_mois(jour))
     mois_annee = [datetime.date(annee, i, 1) for i in range(1, 13)]
-    fin_payable = premier_du_mois(jour).replace(month=12)
+    courant = premier_du_mois(jour)
+    fin_payable = courant.replace(month=12)
     lignes = []
     for m in membres:
         s = sit[m.pk]
@@ -112,7 +114,7 @@ def grille(request, cle):
                 etat = "attente"
             elif mo in s.dus:
                 etat = "du"
-            elif debut and debut <= mo <= fin_payable:
+            elif debut and courant < mo <= fin_payable and m.statut not in HORS_MOUVEMENT:
                 etat = "avance"  # mois futur de l'année : paiement d'avance possible
             else:
                 etat = "non_du"
@@ -131,6 +133,9 @@ def grille(request, cle):
             "en_attente": Versement.objects.filter(
                 paroisse=unite.objet, etat=EtatVersement.EN_ATTENTE
             ).select_related("membre"),
+            "valides": Versement.objects.filter(
+                paroisse=unite.objet, etat=EtatVersement.VALIDE
+            ).select_related("membre")[:30],
         },
     )
 
@@ -216,6 +221,8 @@ def parts(request, cle):
     }[unite.niveau]
     paroisses = _paroisses(unite)
     if request.method == "POST":
+        if not request.POST.get("paroisse", "").isdigit():
+            raise Http404
         paroisse = get_object_or_404(paroisses, pk=request.POST.get("paroisse"))
         try:
             mois = datetime.date.fromisoformat(request.POST.get("mois", ""))
@@ -250,6 +257,7 @@ def parts(request, cle):
                     "mois": mo,
                     "montant": montant,
                     "recue": recues.get((paroisse_id, mo)),
+                    "en_cours": mo >= premier_du_mois(timezone.localdate()),
                 }
             )
     return render(
