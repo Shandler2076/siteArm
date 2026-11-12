@@ -177,7 +177,11 @@ def promouvoir(
 ) -> HistoriqueGrade:
     reference = _reference(reference)
     with transaction.atomic():
-        m = Membre.objects.select_for_update().select_related("compte").get(pk=membre.pk)
+        m = (
+            Membre.objects.select_for_update(of=("self",))
+            .select_related("compte")
+            .get(pk=membre.pk)
+        )
         return _promouvoir(
             m, grade, date_effet, reference, par, exceptionnelle, motif, timezone.localdate()
         )
@@ -191,7 +195,7 @@ def promouvoir_en_serie(
     aujourdhui = timezone.localdate()
     with transaction.atomic():
         verrouilles = list(
-            Membre.objects.select_for_update()
+            Membre.objects.select_for_update(of=("self",))
             .select_related("compte")
             .filter(pk__in=[m.pk for m in membres])
             .order_by("pk")
@@ -222,7 +226,11 @@ def corriger_grade(
     if date_effet > timezone.localdate():
         raise GradeRefuse("La date d'effet ne peut pas être dans le futur.")
     with transaction.atomic():
-        m = Membre.objects.select_for_update().select_related("compte").get(pk=membre.pk)
+        m = (
+            Membre.objects.select_for_update(of=("self",))
+            .select_related("compte")
+            .get(pk=membre.pk)
+        )
         h = _enregistrer(
             m, grade=grade, date_effet=date_effet, mode=ModeGrade.CORRECTION, par=par, motif=motif
         )

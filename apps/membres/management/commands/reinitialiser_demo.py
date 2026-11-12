@@ -30,7 +30,13 @@ class Command(BaseCommand):
             )
         if connection.vendor != "postgresql":
             raise CommandError("Cette commande demande une base PostgreSQL.")
+        from apps.bureaux.models import Fonction
+
+        # Les fonctions (règlement intérieur, éventuellement ajustées par le BN) ne sont pas des
+        # données fictives : on les garde. `flush` vide toutes les tables, puis on les remet.
+        fonctions = [{k: v for k, v in f.items() if k != "id"} for f in Fonction.objects.values()]
         call_command("flush", interactive=False, verbosity=0)
+        Fonction.objects.bulk_create(Fonction(**f) for f in fonctions)
         call_command("charger_territoire", stdout=self.stdout)
         call_command("peupler_demo", membres=membres, stdout=self.stdout)
         self.stdout.write(

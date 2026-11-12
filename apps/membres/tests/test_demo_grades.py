@@ -46,14 +46,17 @@ def test_reinitialiser_demo_refuse_sans_confirmation(territoire, settings):
 
 
 @pytest.mark.skipif(connection.vendor != "postgresql", reason="TRUNCATE : PostgreSQL seulement")
-@pytest.mark.django_db(transaction=True)
+@pytest.mark.django_db(transaction=True, serialized_rollback=True)
 def test_reinitialiser_demo_postgresql(settings):
+    from apps.bureaux.models import Fonction
     from apps.organisation.models import Region
 
     settings.SITE_DEMO = True
+    fonctions = Fonction.objects.count()
     call_command("charger_territoire", stdout=io.StringIO())
     call_command("peupler_demo", membres=10, stdout=io.StringIO())
     Membre.objects.filter(pk=Membre.objects.first().pk).update(nom="ZZAVANT")
     call_command("reinitialiser_demo", oui=True, membres=10, stdout=io.StringIO())
     assert Region.objects.exists() and Membre.objects.exists()
     assert not Membre.objects.filter(nom="ZZAVANT").exists()
+    assert Fonction.objects.count() == fonctions > 0
