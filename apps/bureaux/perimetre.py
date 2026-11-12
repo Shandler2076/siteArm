@@ -142,6 +142,20 @@ def peut_voir_cotisations_de(compte, membre: Membre) -> bool:
     )
 
 
+def peut_imprimer_autorisation(compte, convocation) -> bool:
+    """Autorisation d'un événement : le membre lui-même, le Bureau national, ou le bureau de la
+    paroisse actuelle du membre (décision du 12/11/2026) — jamais le circuit ni la région."""
+    membre = convocation.membre
+    if membre.compte_id and membre.compte_id == getattr(compte, "pk", None):
+        return True
+    if getattr(compte, "is_authenticated", False) and (
+        compte.has_perm("membres.gerer_membres") or est_bn(compte)
+    ):
+        return True
+    a = membre.affectation_actuelle
+    return a is not None and Unite(Niveau.PAROISSE, a.paroisse) in unites_gerees(compte)
+
+
 def titulaires_cotisations(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
     mandats = _mandats_cotisations(jour).filter(fonction__niveau=unite.niveau)
     if unite.objet is not None:

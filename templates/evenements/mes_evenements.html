@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titre %}Mes événements — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Mes événements</h1>
+  <p class="aide">Les convocations du Bureau national. Pour les grands événements, imprimez votre autorisation (ou montrez-la sur votre téléphone).</p>
+  <ul class="fonctions">
+    {% for c in convocations %}
+      <li><strong>{{ c.evenement.nom }}</strong> — {{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %}, {{ c.evenement.lieu }}{% endif %}
+        {% if c.session %}<br>{{ c.session.nom }}{% endif %}
+        {% if c.evenement.annule %}<br><span class="erreur">Annulé : {{ c.evenement.motif_annulation }}</span>{% endif %}
+        {% if c.presence %}<br><small class="aide">Présence : {{ c.get_presence_display }}</small>{% endif %}
+        {% if c.valable %}<br><a class="bouton" href="{% url 'evenements:autorisation' c.pk %}">Mon autorisation (PDF)</a>{% endif %}</li>
+    {% empty %}<li class="aide">Aucune convocation.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

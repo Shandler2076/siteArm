@@ -320,4 +320,69 @@ def autorisations_pdf(request, pk):
     return r
 
 
+@login_required
+def mes_evenements(request):
+    from apps.evenements.services import autorisation_valable
+    from apps.membres.models import Membre
+
+    try:
+        membre = request.user.membre
+    except Membre.DoesNotExist:
+        membre = None
+    convocations = []
+    if membre is not None:
+        for c in membre.convocations.filter(active=True).select_related("evenement", "session"):
+            c.valable = autorisation_valable(c)
+            convocations.append(c)
+    return render(request, "evenements/mes_evenements.html", {"convocations": convocations})
+
+
+@login_required
+def autorisation(request, pk):
+    from django.http import Http404
+
+    from apps.bureaux.perimetre import peut_imprimer_autorisation
+    from apps.evenements.pdf import autorisation_pdf
+    from apps.evenements.services import autorisation_valable
+
+    c = get_object_or_404(
+        Convocation.objects.select_related("evenement", "membre", "session"), pk=pk
+    )
+    if not autorisation_valable(c) or not peut_imprimer_autorisation(request.user, c):
+        raise Http404
+    r = HttpResponse(autorisation_pdf(c), content_type="application/pdf")
+    r["Content-Disposition"] = f'inline; filename="autorisation-{c.membre.matricule}.pdf"'
+    r["Cache-Control"] = "private, no-store"
+    return r
+
+
+def verifier(request, jeton):
+    """Page publique du QR code : valable ou non ; jamais de coordonnées ni de NPI."""
+    import base64
+
+    from apps.evenements.services import autorisation_valable, convocation_par_jeton
+
+    c = convocation_par_jeton(jeton)
+    valable = c is not None and autorisation_valable(c)
+    photo = None
+    if valable and c.membre.photo_acceptee:
+        with c.membre.photo_acceptee.fichier.open("rb") as f:
+            photo = base64.b64encode(f.read()).decode()
+    raison = ""
+    if c is None:
+        raison = "Code inconnu."
+    elif not c.active:
+        raison = "Cette convocation a été retirée."
+    elif c.evenement.annule:
+        raison = "Cet événement est annulé."
+    reponse = render(
+        request,
+        "evenements/verifier.html",
+        {"c": c, "valable": valable, "photo": photo, "raison": raison},
+    )
+    reponse["Cache-Control"] = "no-store"
+    reponse["X-Robots-Tag"] = "noindex"
+    return reponse
+
+
 __all__ = ["Convocation"]

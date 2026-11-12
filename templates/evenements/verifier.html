@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Vérification d'une autorisation{% endblock %}
+{% block contenu %}
+<section class="carte verification">
+  {% if valable %}
+    <p class="verification__etat verification__etat--ok">Autorisation valable</p>
+    {% if photo %}<img class="verification__photo" src="data:image/jpeg;base64,{{ photo }}" alt="Photo d'identité">{% endif %}
+    <h1>{{ c.membre.nom_complet }}</h1>
+    <p class="matricule">{{ c.membre.matricule }}</p>
+    <p><strong>{{ c.evenement.nom }}</strong><br>{{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %} — {{ c.evenement.lieu }}{% endif %}</p>
+    <p>Est autorisé(e) à travailler{% if c.session %} — <strong>{{ c.session.nom }}</strong>{% endif %}.</p>
+  {% else %}
+    <p class="verification__etat verification__etat--non">Non valable</p>
+    {% if c %}<h1>{{ c.membre.nom_complet }}</h1><p>{{ c.evenement.nom }}</p>{% endif %}
+    <p>{{ raison }}</p>
+  {% endif %}
+</section>
+{% endblock %}
