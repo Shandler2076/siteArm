@@ -11,6 +11,7 @@
     {% url 'membres:ma_photo' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Ma photo</a></li>
     {% url 'membres:mes_coordonnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes coordonnées</a></li>
     {% endif %}
+    {% if user.membre %}{% url 'cotisations:moi' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Mes cotisations</a></li>{% endif %}
     {% url 'protection_donnees' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Protection de vos données</a></li>
     {% url 'notifications:liste' as u %}<li><a href="{{ u }}" {% if request.path == u %}class="actif"{% endif %}>Notifications{% if notifications_non_lues %} ({{ notifications_non_lues }}){% endif %}</a></li>
   </ul>

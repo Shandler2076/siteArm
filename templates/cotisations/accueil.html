@@ -3,6 +3,22 @@
 {% block contenu %}
 <section class="carte">
   {% include "cotisations/_entete.html" %}
-  {% block tableau %}<p class="aide">Choisissez une rubrique ci-dessus.</p>{% endblock %}
+  <h2>Tableau de bord {{ t.annee }}</h2>
+  <div class="grille-stats">
+    <div class="stat"><h2>Membres</h2><ul>
+      <li><span>À jour : {{ t.a_jour }}</span></li>
+      <li><span>En retard : {{ t.en_retard }}</span></li>
+      <li><span>Reste dû : {{ t.reste_du }} F</span></li>
+    </ul></div>
+    <div class="stat"><h2>Versements {{ t.annee }}</h2><ul>
+      <li><span>Validé : {{ t.valide }} F</span></li>
+      <li><span>En attente : {{ t.en_attente }} F</span></li>
+      {% if t.a_valider is not None %}<li><span>À valider : {{ t.a_valider }}</span> <a href="{% url 'cotisations:a_valider' unite.cle %}">Voir</a></li>{% endif %}
+    </ul></div>
+    <div class="stat"><h2>Part {% if unite.niveau == "paroisse" %}de la paroisse{% else %}{{ unite.libelle }}{% endif %}</h2><ul>
+      <li><span>Part des versements validés : {{ t.part }} F</span></li>
+      {% if t.part_recue is not None %}<li><span>Déjà reçue : {{ t.part_recue }} F</span></li>{% endif %}
+    </ul></div>
+  </div>
 </section>
 {% endblock %}

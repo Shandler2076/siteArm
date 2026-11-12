@@ -133,6 +133,15 @@ def unite_cotisations_depuis_cle(compte, cle: str) -> Unite:
     raise Http404
 
 
+def peut_voir_cotisations_de(compte, membre: Membre) -> bool:
+    """Le membre lui-même, ou un bureau (gestion ou trésorier) dont le périmètre le contient."""
+    if membre.compte_id and membre.compte_id == getattr(compte, "pk", None):
+        return True
+    return any(
+        membres_visibles(u).filter(pk=membre.pk).exists() for u in unites_cotisations(compte)
+    )
+
+
 def titulaires_cotisations(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
     mandats = _mandats_cotisations(jour).filter(fonction__niveau=unite.niveau)
     if unite.objet is not None:

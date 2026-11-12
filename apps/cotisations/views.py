@@ -287,8 +287,150 @@ def annuler_versement(request, pk):
     return render(request, "cotisations/annuler.html", {"versement": v, "form": form})
 
 
+def _niveau_part(unite: Unite) -> str:
+    return {
+        Niveau.PAROISSE: "paroisse",
+        Niveau.CIRCUIT: NiveauPart.CIRCUIT,
+        Niveau.REGION: NiveauPart.REGION,
+        Niveau.NATIONAL: NiveauPart.NATIONAL,
+    }[unite.niveau]
+
+
+def tableau_de_bord(unite: Unite, jour: datetime.date) -> dict:
+    mois = premier_du_mois(jour)
+    sit = situations(membres_visibles(unite), mois).values()
+    a_jour = sum(1 for s in sit if s.a_jour)
+    paroisses = (
+        Paroisse.objects.filter(pk=unite.objet.pk)
+        if unite.niveau == Niveau.PAROISSE
+        else _paroisses(unite)
+    )
+    versements = Versement.objects.filter(paroisse__in=paroisses)
+    valides = versements.filter(
+        etat=EtatVersement.VALIDE, date_validation__year=mois.year
+    ).values_list("montant", "parts")
+    niveau = _niveau_part(unite)
+    recue = None
+    if unite.niveau != Niveau.PAROISSE:
+        recue = sum(
+            PartRecue.objects.filter(
+                niveau=niveau, paroisse__in=paroisses, mois_validation__year=mois.year
+            ).values_list("montant", flat=True)
+        )
+    return {
+        "annee": mois.year,
+        "a_jour": a_jour,
+        "en_retard": len(sit) - a_jour,
+        "reste_du": sum(s.reste_du for s in sit),
+        "valide": sum(m for m, _p in valides),
+        "en_attente": sum(
+            versements.filter(etat=EtatVersement.EN_ATTENTE).values_list("montant", flat=True)
+        ),
+        "part": sum(int(p.get(niveau, 0)) for _m, p in valides),
+        "part_recue": recue,
+        "a_valider": versements.filter(etat=EtatVersement.EN_ATTENTE).count()
+        if unite.niveau == Niveau.CIRCUIT
+        else None,
+    }
+
+
 @login_required
 def accueil(request, cle):
-    """Page d'entrée des cotisations d'une unité (complétée par le tableau de bord)."""
+    """Tableau de bord des cotisations d'une unité."""
     unite = _unite(request, cle)
-    return render(request, "cotisations/accueil.html", {"unite": unite})
+    return render(
+        request,
+        "cotisations/accueil.html",
+        {"unite": unite, "t": tableau_de_bord(unite, aujourdhui())},
+    )
+
+
+def _pdf(contenu: bytes, nom: str):
+    from django.http import HttpResponse
+
+    r = HttpResponse(contenu, content_type="application/pdf")
+    r["Content-Disposition"] = f'inline; filename="{nom}"'
+    r["Cache-Control"] = "private, no-store"
+    return r
+
+
+def _membre_connecte(request):
+    from apps.membres.models import Membre
+
+    try:
+        return request.user.membre
+    except Membre.DoesNotExist as e:
+        raise Http404 from e
+
+
+@login_required
+def mes_cotisations(request):
+    from apps.cotisations.regles import situation
+
+    membre = _membre_connecte(request)
+    jour = aujourdhui()
+    s = situation(membre, premier_du_mois(jour))
+    annee = jour.year
+    cases = []
+    for i, nom in enumerate(MOIS):
+        mo = datetime.date(annee, i + 1, 1)
+        if mo in s.payes:
+            etat = "paye"
+        elif mo in s.en_attente:
+            etat = "attente"
+        elif mo in s.dus:
+            etat = "du"
+        else:
+            etat = "non_du"
+        cases.append({"nom": nom.capitalize(), "etat": etat})
+    return render(
+        request,
+        "cotisations/mes_cotisations.html",
+        {
+            "membre": membre,
+            "s": s,
+            "cases": cases,
+            "annee": annee,
+            "mois": premier_du_mois(jour),
+            "versements": membre.versements.exclude(etat=EtatVersement.ANNULE).prefetch_related(
+                "mois"
+            ),
+        },
+    )
+
+
+@login_required
+def mon_etat_pdf(request):
+    from apps.cotisations.pdf import etat_cotisations_pdf
+
+    membre = _membre_connecte(request)
+    contenu = etat_cotisations_pdf(membre, premier_du_mois(aujourdhui()))
+    return _pdf(contenu, f"cotisations-{membre.matricule}.pdf")
+
+
+@login_required
+def etat_membre_pdf(request, matricule):
+    from apps.bureaux.perimetre import peut_voir_cotisations_de
+    from apps.cotisations.pdf import etat_cotisations_pdf
+    from apps.membres.models import Membre
+
+    membre = get_object_or_404(Membre, matricule=matricule)
+    if not peut_voir_cotisations_de(request.user, membre):
+        raise Http404
+    contenu = etat_cotisations_pdf(membre, premier_du_mois(aujourdhui()))
+    return _pdf(contenu, f"cotisations-{membre.matricule}.pdf")
+
+
+@login_required
+def recu(request, pk):
+    from apps.bureaux.perimetre import peut_voir_cotisations_de
+    from apps.cotisations.pdf import recu_pdf
+
+    v = get_object_or_404(
+        Versement.objects.select_related("membre", "paroisse"),
+        pk=pk,
+        etat=EtatVersement.VALIDE,
+    )
+    if not peut_voir_cotisations_de(request.user, v.membre):
+        raise Http404
+    return _pdf(recu_pdf(v), f"recu-{v.numero_recu}.pdf")
