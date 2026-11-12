@@ -1,0 +1,11 @@
+<p class="aide">Cotisations mensuelles</p>
+<h1>{{ unite.libelle }}</h1>
+<nav class="onglets">
+  <a href="{% url 'cotisations:accueil' unite.cle %}">Tableau de bord</a>
+  {% if unite.niveau == "paroisse" %}
+    <a href="{% url 'cotisations:grille' unite.cle %}">Grille et collecte</a>
+    <a href="{% url 'cotisations:versement' unite.cle %}">Enregistrer un versement</a>
+  {% endif %}
+  {% if unite.niveau == "circuit" %}<a href="{% url 'cotisations:a_valider' unite.cle %}">Versements à valider</a>{% endif %}
+  {% if unite.niveau != "paroisse" %}<a href="{% url 'cotisations:parts' unite.cle %}">Parts reçues</a>{% endif %}
+</nav>

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titre %}Cotisations — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "cotisations/_entete.html" %}
+  {% if not ouvert %}
+    <p class="message message--error">Les cotisations ne sont pas encore ouvertes : le Bureau national doit fixer le mois de départ.</p>
+  {% endif %}
+  <form method="get" class="filtres"><label class="champ"><span>Année</span>
+    <input type="number" name="annee" value="{{ annee }}" min="2020" max="2100"></label>
+    <button type="submit" class="bouton bouton--secondaire">Afficher</button></form>
+  <p class="aide">Cochez les mois payés lors de la collecte, puis « Enregistrer la collecte ». Les versements restent <strong>en attente</strong> jusqu'à la validation du circuit.
+    <span class="legende"><span class="case case--paye">✓</span> payé · <span class="case case--attente">…</span> en attente · <span class="case case--du">!</span> dû, non payé · <span class="case case--non_du">—</span> non dû</span></p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="tableau-defilant">
+      <table class="tableau grille-cm">
+        <thead><tr><th>Membre</th>{% for n in noms_mois %}<th>{{ n|slice:":3" }}</th>{% endfor %}<th>Retard</th></tr></thead>
+        <tbody>
+          {% for l in lignes %}
+            <tr><th scope="row">{{ l.membre.nom_complet }}<br><small class="aide">{{ l.membre.matricule }}</small></th>
+              {% for c in l.cases %}
+                <td class="case case--{{ c.etat }}" title="{{ c.mois|date:'F Y' }}">
+                  {% if c.etat == "paye" %}✓{% elif c.etat == "attente" %}…{% elif c.etat == "du" or c.etat == "avance" %}<input type="checkbox" name="c-{{ l.membre.pk }}" value="{{ c.mois|date:'Y-m-d' }}" aria-label="{{ l.membre.nom_complet }} — {{ c.mois|date:'F Y' }}">{% else %}—{% endif %}
+                </td>
+              {% endfor %}
+              <td>{% if l.situation.retard %}{{ l.situation.retard }} mois<br><small>{{ l.situation.reste_du }} F</small>{% else %}À jour{% endif %}</td></tr>
+          {% empty %}<tr><td colspan="14" class="aide">Aucun membre.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <label class="champ"><span>Date de la collecte</span><input type="date" name="date_versement" value="{{ jour|date:'Y-m-d' }}"></label>
+    <button type="submit" class="bouton"{% if not ouvert %} disabled{% endif %}>Enregistrer la collecte</button>
+  </form>
+  <h2>Versements en attente de validation</h2>
+  <ul class="fonctions">
+    {% for v in en_attente %}
+      <li>{{ v.membre.nom_complet }} — {{ v.montant }} F, versé le {{ v.date_versement|date:"d/m/Y" }}
+        · <a href="{% url 'cotisations:annuler' v.pk %}">Annuler</a></li>
+    {% empty %}<li class="aide">Aucun.</li>{% endfor %}
+  </ul>
+</section>
+{% endblock %}

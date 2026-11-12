@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titre %}Enregistrer un versement — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "cotisations/_entete.html" %}
+  <h2>Enregistrer un versement</h2>
+  <p class="aide">Le montant est réparti automatiquement sur les mois non payés les plus anciens, puis sur les mois suivants de l'année (paiement d'avance). Exemple : 300 F = 3 mois.</p>
+  <form method="post">
+    {% include "grades/_formulaire.html" %}
+    <button type="submit" class="bouton">Enregistrer</button>
+  </form>
+</section>
+{% endblock %}

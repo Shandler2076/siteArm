@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block titre %}Cotisations — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "cotisations/_entete.html" %}
+  {% block tableau %}<p class="aide">Choisissez une rubrique ci-dessus.</p>{% endblock %}
+</section>
+{% endblock %}

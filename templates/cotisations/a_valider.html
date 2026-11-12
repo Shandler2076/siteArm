@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titre %}Versements à valider — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "cotisations/_entete.html" %}
+  <h2>{{ attente|length }} versement(s) à valider</h2>
+  <form method="post">
+    {% csrf_token %}
+    <div class="tableau-defilant"><table class="tableau">
+      <thead><tr><th></th><th>Paroisse</th><th>Membre</th><th>Montant</th><th>Mois</th><th>Versé le</th></tr></thead>
+      <tbody>
+        {% for v in attente %}
+          <tr><td><input type="checkbox" name="versements" value="{{ v.pk }}" id="v{{ v.pk }}"></td>
+            <td>{{ v.paroisse.nom }}</td><td><label for="v{{ v.pk }}">{{ v.membre.nom_complet }}</label></td>
+            <td>{{ v.montant }} F</td><td>{% for m in v.mois.all %}{{ m.mois|date:"m/Y" }}{% if not forloop.last %}, {% endif %}{% endfor %}</td>
+            <td>{{ v.date_versement|date:"d/m/Y" }}</td></tr>
+        {% empty %}<tr><td colspan="6" class="aide">Aucun versement en attente.</td></tr>{% endfor %}
+      </tbody>
+    </table></div>
+    {% if attente %}
+      <button type="submit" name="action" value="valider" class="bouton">Valider les versements cochés</button>
+      <label class="champ"><span>Motif du refus</span><input name="motif" maxlength="300"></label>
+      <button type="submit" name="action" value="refuser" class="bouton bouton--secondaire">Refuser les versements cochés</button>
+    {% endif %}
+  </form>
+</section>
+{% endblock %}

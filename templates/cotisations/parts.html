@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titre %}Parts reçues — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  {% include "cotisations/_entete.html" %}
+  <h2>Part {{ niveau|lower }} des versements validés</h2>
+  <p class="aide">Pour chaque paroisse et chaque mois de validation, marquez la part comme reçue quand elle vous parvient.</p>
+  <div class="tableau-defilant"><table class="tableau">
+    <thead><tr><th>Paroisse</th><th>Validés en</th><th>Part due</th><th>État</th></tr></thead>
+    <tbody>
+      {% for l in lignes %}
+        <tr><td>{{ l.paroisse.nom }}</td><td>{{ l.mois|date:"F Y" }}</td><td>{{ l.montant }} F</td>
+          <td>{% if l.recue %}Reçue le {{ l.recue.date|date:"d/m/Y" }}{% else %}
+            <form method="post">{% csrf_token %}<input type="hidden" name="paroisse" value="{{ l.paroisse.pk }}"><input type="hidden" name="mois" value="{{ l.mois|date:'Y-m-d' }}">
+              <button type="submit" class="bouton bouton--secondaire">Marquer reçue</button></form>{% endif %}</td></tr>
+      {% empty %}<tr><td colspan="4" class="aide">Aucune part.</td></tr>{% endfor %}
+    </tbody>
+  </table></div>
+</section>
+{% endblock %}
