@@ -81,6 +81,12 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .fonctions input[type="checkbox"] { width: 20px; height: 20px; }
 .onglets { display: flex; gap: 14px; margin: 8px 0 14px; border-bottom: 2px solid #DDE3EE; }
 .onglets a { padding: 6px 2px; color: var(--marine); font-weight: 700; text-decoration: none; }
+.rubriques { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0 18px;
+  border-bottom: 3px solid var(--marine); }
+.rubriques a { padding: 10px 14px; border-radius: 8px 8px 0 0; background: #E8ECF3;
+  color: var(--marine); font-weight: 700; text-decoration: none; }
+.rubriques a:hover { background: #D5DCE8; }
+.rubriques a.actif { background: var(--marine); color: #fff; }
 .recherche { display: flex; gap: 8px; }
 .recherche input { flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #C9D1DE; border-radius: 8px; }
 .recherche .bouton { width: auto; }
