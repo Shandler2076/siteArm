@@ -81,6 +81,33 @@
   pas le droit de voir).
 - La notification cliquée est marquée comme lue.
 
+## F. Statistiques : un générateur à paramètres, plus lisible
+
+1. **À chaque niveau** : statistiques nationales (BN), régionales (bureau de région), de circuit
+   (bureau de circuit) et de paroisse (bureau de paroisse), chacune limitée à son périmètre.
+   - État actuel (vérifié le 13/11/2026) : chaque bureau a déjà une page « Statistiques » limitée à
+     son périmètre, et le nouveau menu (PR #14) la met dans « Listes et statistiques ». À vérifier
+     sur place avec un compte de chaque niveau.
+2. **Statistique dynamique, à paramètres**, à la place des grands tableaux croisés tout faits (grade
+   par tranche d'âge, par sexe, par région…), difficiles à lire : trop de colonnes, il faut défiler à
+   droite.
+   - On coche les **paramètres à prendre en compte**, et le site génère la statistique et la liste
+     correspondante :
+     - tout ;
+     - par sexe ;
+     - par tranche d'âge, avec l'**âge de début** et l'**âge de fin** à saisir ;
+     - par catégorie ;
+     - par région, par grade, etc.
+   - Exemple : on coche « région » et « grade », et on obtient la statistique pour ces deux
+     paramètres seulement.
+   - Règle conservée : chaque chiffre ouvre la liste des membres qu'il compte (mêmes filtres).
+3. **Présentation par sous-cases dépliables**, plutôt que tout aligné : « Par grade » se déplie pour
+   montrer chaque grade, « Par catégorie » ses catégories, « Par région » ses régions, etc. Une
+   présentation élégante, lisible sur téléphone, sans défilement horizontal.
+4. **Recherche dans les longues listes à cocher** (paroisses, circuits) : un champ de recherche au-dessus
+   de chaque liste, pour trouver et cocher sans tout faire défiler. Cela vaut pour les statistiques,
+   les listes et la convocation.
+
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
 - Le menu par thèmes, repliable, avec la rubrique active mise en évidence.
@@ -98,6 +125,9 @@
 - Filtres de convocation : lesquels garder visibles par défaut ? Proposition :
   - visibles : recherche, Région / Circuit / Paroisse, Grade, Statut ;
   - repliés sous « Plus de filtres » : le reste.
+- Statistiques : quand deux paramètres sont cochés (ex. région + grade), faut-il un détail emboîté
+  (chaque région se déplie en grades), ou deux répartitions séparées ? Proposition : emboîté, au plus
+  deux niveaux.
 - Date passée : simple avertissement (on peut confirmer, ex. pour saisir un événement déjà tenu), ou
   refus ?
 
