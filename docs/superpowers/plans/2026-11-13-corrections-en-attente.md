@@ -20,14 +20,27 @@
      seulement si nécessaire (ex. « Organiser l'événement en sections ») ;
    - une fois l'option choisie, on **crée les sections à la main**, selon l'événement : rien de
      pré-rempli, rien à cocher ;
-   - exemples de noms : « Session Mère », « Session Culte », « Session Fruits », ou toute section
-     spéciale créée pour cet événement ;
+   - le mot est bien **SECTION** (S-E-C-T-I-O-N), partout sur le site ;
+   - exemples de noms : « Section Mer » (M-E-R, la mer), « Section Culte », « Section Fruits », ou
+     toute section spéciale créée pour cet événement ;
    - on répartit ensuite les convoqués dans ces sections.
 4. **« Générer une autorisation pour les convoqués »** :
    - la case actuelle est beaucoup trop petite ;
    - elle devient un vrai **bouton-option**, plus grand, en couleur, bien placé, facile à toucher ;
    - les champs qui en dépendent (validité de l'autorisation, etc.) s'affichent en dessous, une fois
      l'option choisie, pour être remplis.
+
+5. **Autorisation : rôle et formule** (précision du 13/11/2026) :
+   - tout le monde ne travaille pas dans une section : il y a aussi des **superviseurs** et des
+     **bureaux** conviés à l'événement, qui doivent aussi avoir leur autorisation ;
+   - pour chaque convoqué, on choisit **« Invité(e) en tant que »** :
+     - **travailleur** d'une section (on précise la section) ;
+     - **superviseur** d'une section (on précise la section) ;
+     - **bureau** (sans section) ;
+   - la formule de l'autorisation se choisit aussi : **« est autorisé(e) à travailler »** ou
+     **« est autorisé(e) à participer »**. « À travailler » ne doit pas être imposé dans tous les cas ;
+   - l'autorisation imprimée et la page de vérification du QR code affichent ce rôle, la section s'il y
+     en a une, et la formule choisie.
 
 ## B. Convoquer des membres
 
@@ -57,9 +70,12 @@
 
 ## D. Questions à poser au mainteneur avant de réaliser
 
-- Sections :
-  - un convoqué peut-il appartenir à **plusieurs** sections du même événement ?
-  - l'autorisation porte-t-elle le nom de la section ?
+- Sections : un convoqué peut-il appartenir à **plusieurs** sections du même événement (par exemple
+  superviseur d'une section et travailleur d'une autre) ?
+- Formule « à travailler » / « à participer » : choisie **par convoqué** ou **une fois pour tout
+  l'événement** ? Proposition : déduite du rôle (travailleur → « à travailler » ; superviseur et bureau
+  → « à participer »), modifiable au besoin.
+- Rôle « bureau » : faut-il préciser lequel (Bureau national, région, circuit…) sur l'autorisation ?
 - Filtres de convocation : lesquels garder visibles par défaut ? Proposition :
   - visibles : recherche, Région / Circuit / Paroisse, Grade, Statut ;
   - repliés sous « Plus de filtres » : le reste.
