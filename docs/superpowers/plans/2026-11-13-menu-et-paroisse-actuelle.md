@@ -41,7 +41,9 @@
    - la rubrique reste en évidence sur ses sous-pages (ex. fiche d'un membre ouverte depuis « Tous
      les membres ») ;
    - à l'ouverture de chaque page, le menu se place sur la rubrique choisie, au lieu de remonter
-     tout en haut.
+     tout en haut ;
+   - les groupes sont **repliés** : on clique sur le titre pour les déplier ; le groupe de la page
+     ouverte est déplié (ajout du mainteneur, 13/11/2026).
 4. **Identifiants** :
    - juste après l'enregistrement, la fiche du membre affiche en haut un encadré « Identifiants à
      remettre » avec le bouton « Imprimer la fiche avec identifiants » ;

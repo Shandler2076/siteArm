@@ -153,8 +153,17 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .menu ul { list-style: none; padding: 0; margin: 0 0 6px; }
 .menu li a { display: block; padding: 8px 10px; border-radius: 8px; color: var(--marine); text-decoration: none; font-size: .95rem; }
 .menu li a:hover { background: var(--fond); }
-.menu li a.actif { background: var(--marine); color: #fff; font-weight: 700; }
+.menu li a.actif { background: var(--marine); color: #fff; font-weight: 700;
+  box-shadow: inset 5px 0 0 var(--or); padding-left: 16px; }
 .menu__titre { margin: 14px 0 4px; padding: 0 10px; font-size: .75rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--rouge); }
+.menu__groupe { border-bottom: 1px solid #EEF1F6; }
+.menu__groupe > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; margin: 0; padding: 12px 10px; border-radius: 8px; }
+.menu__groupe > summary::-webkit-details-marker { display: none; }
+.menu__groupe > summary::after { content: "▸"; font-size: .9rem; color: var(--marine); transition: transform .15s; }
+.menu__groupe[open] > summary::after { transform: rotate(90deg); }
+.menu__groupe > summary:hover { background: var(--fond); }
+.menu__groupe > ul { padding-bottom: 8px; }
 .menu__qui { border-bottom: 2px solid var(--or); padding: 0 10px 10px; margin-bottom: 4px; }
 .menu__qui strong { display: block; color: var(--marine); }
 .menu__qui span { display: block; font-size: .82rem; color: var(--gris); line-height: 1.35; margin-top: 3px; }
