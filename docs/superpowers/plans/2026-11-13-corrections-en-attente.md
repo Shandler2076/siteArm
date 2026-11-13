@@ -247,7 +247,25 @@ Deux façons de payer coexistent :
   reversements reçus, paiements au nom du bureau).
   - Le numéro mobile money du Trésorier est le **numéro du bureau** : il paie au nom du bureau et
     reçoit les reversements mensuels du BN. Ce numéro est enregistré par le BN.
-  - Questions d'harmonisation posées au mainteneur : voir H.8.
+  - Les questions d'harmonisation et les réponses du mainteneur sont en H.8.
+
+### H.8 Espace de trésorerie : décisions du mainteneur (13/11/2026)
+- **Espèces** : seul le **Trésorier** de la paroisse saisit les cotisations mensuelles payées en
+  espèces, et paie au nom du bureau. Le Chef et le Secrétaire ne saisissent plus.
+  *(Cela remplace la décision du 12/11 « en attendant, on laisse » : aujourd'hui, c'est le bureau
+  de la paroisse qui saisit.)*
+- **Lecture** : le **Chef** et le **Secrétaire** du bureau voient la trésorerie de leur bureau (flux,
+  parts dues, reversements reçus), **sans rien pouvoir modifier ni payer**.
+- **Reversements au BN** :
+  - le **Trésorier national prépare** l'état mensuel des reversements ;
+  - le **Président** (ou le Secrétaire national) le **valide** avant les envois ;
+  - le Trésorier national fait ensuite les envois par mobile money et enregistre chaque reversement
+    (date, montant, référence).
+- **Poste de Trésorier vacant** : le **Chef du bureau** assure l'intérim (trésorerie, paiement au
+  nom du bureau, numéro qui reçoit les reversements, enregistré par le BN).
+- Question restante : au **circuit**, qui valide les versements en espèces des paroisses ? Aujourd'hui
+  c'est le bureau du circuit. Proposition : le **Trésorier du circuit**, et le Chef en cas de poste
+  vacant, avec la règle actuelle maintenue (celui qui saisit ne valide jamais).
 
 ## I. Guides d'utilisation (à préparer le moment venu)
 
