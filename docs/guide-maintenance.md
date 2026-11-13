@@ -372,3 +372,18 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
   défaut) ; `services.etat_scan` donne valable / pas encore valable / expirée / non valable.
 - L'adresse imprimée dans le QR code vient de `DJANGO_SITE_URL` : elle doit être l'adresse réelle du
   site (sinon le scan n'aboutit pas).
+
+## 24. Menu, paroisse actuelle, identifiants (13 novembre 2026)
+
+- **Menu** : construit par `apps/bureaux/menu.py::construire_menu` (groupes thématiques, droits du
+  gardien des périmètres). Pour ajouter une page au menu, ajoutez un `Lien` dans le bon groupe ; la
+  rubrique active est trouvée automatiquement (le plus long préfixe d'adresse gagne). Tests :
+  `apps/bureaux/tests/test_menu.py`.
+- **Paroisse actuelle à l'inscription** : `enregistrer_membre(..., paroisse_actuelle=...)` ferme
+  l'affectation d'intégration le jour de l'inscription et ouvre la paroisse actuelle (motif « Paroisse
+  actuelle à l'inscription sur le site »). Lots : colonne facultative « Paroisse actuelle ».
+- **Identifiants d'un nouveau membre** : fiche du membre → « Imprimer la fiche avec identifiants »
+  (encadré en haut de la fiche tant que le membre ne s'est jamais connecté). Chaque impression crée
+  un nouveau mot de passe provisoire. Le message de bienvenue (site + e-mail) ne contient jamais le mot
+  de passe.
+

@@ -97,5 +97,5 @@ def test_rendu_groupes_repliables(client_technique, monde):
     debut = html.index('<nav class="menu"')
     menu = html[debut : html.index("</nav>", debut)]
     assert menu.count("<details") == 8
-    assert menu.count("<details class=\"menu__groupe\" open") == 1
+    assert menu.count('<details class="menu__groupe" open') == 1
     assert 'class="actif" aria-current="page">Tous les membres' in menu

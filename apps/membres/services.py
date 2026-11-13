@@ -170,12 +170,26 @@ def enregistrer_membre(
         if notifier:  # les lots envoient une notification groupée à la place
             paroisse_avis = paroisse_actuelle or paroisse_integration
             transaction.on_commit(lambda: _notifier_nouveau_membre(membre, paroisse_avis))
+            transaction.on_commit(lambda: _souhaiter_bienvenue(membre))
     except Exception:
         cip = membre.photo_cip
         if cip and getattr(cip, "_committed", False) and cip.name:
             cip.storage.delete(cip.name)  # le fichier a été écrit avant l'annulation
         raise
     return ResultatEnregistrement(membre=membre, mot_de_passe=mot_de_passe)
+
+
+def _souhaiter_bienvenue(membre: Membre) -> None:
+    """Notification (et e-mail s'il en a un) au nouveau membre. JAMAIS le mot de passe."""
+    from apps.notifications.services import notifier
+
+    notifier(
+        [membre.compte],
+        "Bienvenue sur le site de l'Armée du Salut du Bénin. Votre compte est créé : votre "
+        f"identifiant est votre matricule {membre.matricule}. Votre paroisse vous remettra votre "
+        "fiche avec votre mot de passe provisoire ; vous choisirez votre propre mot de passe à "
+        "la première connexion.",
+    )
 
 
 MOTIF_PAROISSE_ACTUELLE = "Paroisse actuelle à l'inscription sur le site"

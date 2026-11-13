@@ -283,19 +283,30 @@ mandat et une mention « **droit de gérer le site** » :
 ### 9.1 Enregistrement individuel (BNC)
 
 1. Le BNC saisit la fiche : identité, contact, année, paroisse et région d'intégration, catégorie.
+   Si le membre n'est plus dans sa paroisse d'intégration, le BNC indique sa **paroisse actuelle**
+   (champ facultatif) : le membre y est affecté **à partir du jour de son inscription sur le site**
+   (on ne retrace pas les étapes antérieures ; le suivi des mutations commence ensuite). Le matricule
+   garde l'année et la région d'intégration (décision du 13 novembre 2026).
 2. Le site **signale les doublons possibles** (même nom et même date de naissance, ou même NPI) ; le
    BNC décide de poursuivre ou non.
 3. Le site attribue le **matricule**, crée le **compte** avec un mot de passe provisoire et ouvre
-   l'affectation dans la paroisse d'intégration.
+   l'affectation dans la paroisse d'intégration (puis, le cas échéant, dans la paroisse actuelle).
 4. Il produit la **fiche d'identification PDF** (nom, matricule, paroisse, circuit, région,
-   identifiants de connexion), à imprimer ou à transmettre par WhatsApp.
-5. Les bureaux de la paroisse, du circuit et de la région sont **notifiés**.
+   identifiants de connexion), à imprimer ou à transmettre par WhatsApp. Tant que le membre ne s'est
+   jamais connecté, sa fiche affiche en haut un encadré **« Identifiants à remettre »** avec le bouton
+   d'impression.
+5. Les bureaux de la paroisse **actuelle**, de son circuit et de sa région sont **notifiés**. Le membre
+   reçoit un message de **bienvenue** (sur le site et par e-mail s'il en a un) : son identifiant est son
+   matricule, sa paroisse lui remettra son mot de passe provisoire. **Le mot de passe n'est jamais
+   envoyé par e-mail.**
 6. À sa première connexion, le membre doit **choisir son propre mot de passe**.
 
 ### 9.2 Enregistrement par lots (fichier Excel)
 
 1. Le site fournit un **modèle Excel officiel** par région : colonnes fixes, listes déroulantes
-   (sexe, situation matrimoniale, paroisses de la région, catégorie) et consignes de saisie.
+   (sexe, situation matrimoniale, paroisses de la région, catégorie) et consignes de saisie. Une
+   colonne facultative **« Paroisse actuelle »** (paroisse de la même région) a le même effet que dans
+   l'enregistrement individuel ; pour une autre région, on fait ensuite une mutation.
 2. Chaque région remplit le modèle et l'envoie au Secrétaire national.
 3. Le Secrétaire national **dépose le fichier** sur le site : un **lot** est créé.
 4. **Écran de contrôle.** Le site lit le fichier **sans rien créer** et affiche chaque ligne telle
@@ -558,6 +569,14 @@ Le BNC le consulte depuis son espace, avec des filtres par action, auteur, texte
   ses logos (Armée du Salut ; Congrégation).
 - Fiches et listes PDF avec **en-tête officiel**, date et heure de génération.
 - Le site pourra être ajouté à l'écran d'accueil du téléphone comme une application.
+- **Menu** organisé par thèmes, chaque fonction une seule fois (décision du 13 novembre 2026) : Mon
+  espace ; Gestion des membres (BN) ou Mon bureau ; Listes et statistiques ; Grades ; Cotisations
+  mensuelles ; Événements ; Bureaux et droits ; Contrôle. Chacun ne voit que les groupes de ses droits.
+  Les groupes sont **repliés** et s'ouvrent d'un clic ; celui de la page ouverte est déplié. La
+  rubrique ouverte est **mise en évidence** (fond bleu marine, barre dorée), y compris sur ses
+  sous-pages, et le menu se place dessus à chaque page.
+- Fiche d'un membre en **rubriques** (onglets) : Profil, Cotisation mensuelle (grille par année, avec
+  un bouton par année), Participation aux événements (BN seulement).
 
 ---
 

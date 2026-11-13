@@ -5,6 +5,20 @@
 <section class="carte">
   <p class="matricule">{{ membre.matricule }}</p>
   <h1>{{ membre.nom_complet }}</h1>
+  {% if membre.compte and not membre.compte.last_login %}
+  <div class="encadre-identifiants" role="status">
+    <h2>Identifiants à remettre</h2>
+    <p>Ce membre ne s'est encore jamais connecté. Son identifiant est son matricule
+      <strong>{{ membre.matricule }}</strong>. Imprimez sa fiche avec identifiants (elle contient son
+      mot de passe provisoire) et remettez-la-lui, en main propre ou par sa paroisse.</p>
+    <form method="post" action="{% url 'membres:bn_fiche_identifiants' membre.matricule %}">
+      {% csrf_token %}
+      <button type="submit" class="bouton">Imprimer la fiche avec identifiants</button>
+    </form>
+    <p class="aide">Le mot de passe n'est jamais envoyé par e-mail. Chaque impression crée un
+      nouveau mot de passe provisoire et remplace le précédent.</p>
+  </div>
+  {% endif %}
   {% include "membres/_rubriques_nav.html" %}
   {% if rubrique == "cotisations" %}{% include "membres/_rubrique_cotisations.html" %}
   {% elif rubrique == "evenements" %}{% include "membres/_rubrique_evenements.html" %}

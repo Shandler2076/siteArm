@@ -79,8 +79,8 @@ Chaque dossier de `apps/` est une partie du site, avec ses propres tests (`tests
 |---|---|---|
 | `organisation` | Régions, circuits, paroisses ; fermeture et réouverture | Region, Circuit, Paroisse |
 | `comptes` | Comptes de connexion, page d'accueil, mot de passe, page « Protection de vos données » | Compte |
-| `membres` | Fiche, matricule, affectations, photos, fiche PDF, correction exceptionnelle | Membre, CompteurMatricule, Affectation, PhotoIdentite |
-| `bureaux` | Fonctions, mandats, installation des bureaux, **gardien des périmètres** (`perimetre.py`) | Fonction, Mandat |
+| `membres` | Fiche (en rubriques), matricule, affectations (dont paroisse actuelle à l'inscription), photos, fiche PDF, correction exceptionnelle | Membre, CompteurMatricule, Affectation, PhotoIdentite |
+| `bureaux` | Fonctions, mandats, installation des bureaux, **gardien des périmètres** (`perimetre.py`), **menu** (`menu.py`) | Fonction, Mandat |
 | `lots` | Enregistrement par fichier Excel | Lot, LigneLot |
 | `listes` | Listes filtrées, statistiques, exports PDF et Excel, tranches d'âge | ReglageStatistiques |
 | `mouvements` | Mutations, signalements, statuts, catégories, sanctions | HistoriqueMembre, Mutation, AvisMutation, Signalement, Sanction |

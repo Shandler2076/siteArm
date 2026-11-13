@@ -8,7 +8,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
-- Cahier des charges général (v2.5, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+- Cahier des charges général (v2.6, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
   détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
@@ -68,6 +68,10 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - PDF : ReportLab + polices DejaVu embarquées (`static/fonts/`) ; `dessiner_fiche` pour les PDF multi-fiches.
 - Lots Excel (`apps/lots`) : AUCUNE création de membre avant `valider_lot` (tout ou rien) ; validation
   des lignes par `apps/membres/forms.py::valider_futur_membre` (mêmes règles que l'individuel).
+- Menu : `apps/bureaux/menu.py::construire_menu` (groupes thématiques repliables, rubrique active
+  par plus long préfixe d'adresse) ; toute nouvelle page du menu y est ajoutée.
+- Paroisse actuelle à l'inscription : `enregistrer_membre(paroisse_actuelle=...)` (affectée dès
+  l'inscription sur le site ; lots : colonne facultative). Bienvenue au nouveau membre sans mot de passe.
 
 ## Hébergement
 - Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre

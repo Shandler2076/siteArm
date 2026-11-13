@@ -64,8 +64,9 @@ def test_paroisse_actuelle_gere_le_membre(territoire, compte_bn):
     assert m not in membres_visibles(Unite("paroisse", t["P1"]))
 
 
-def test_notification_a_la_paroisse_actuelle(territoire, compte_bn, donner_mandat,
-                                             nouveau_membre, django_capture_on_commit_callbacks):
+def test_notification_a_la_paroisse_actuelle(
+    territoire, compte_bn, donner_mandat, nouveau_membre, django_capture_on_commit_callbacks
+):
     t = territoire
     sec_p4 = nouveau_membre(t["P4"], "SecP4")
     donner_mandat(sec_p4, "Secrétaire paroissial", t["P4"])
