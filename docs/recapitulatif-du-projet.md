@@ -178,7 +178,8 @@ et la phrase de passe des sauvegardes.
 | **Événements nationaux** (convocations notifiées, sessions, autorisation avec QR code, pointage, historique) | Mainteneur | **Réalisé le 12 novembre** ; à essayer sur le site d'essai |
 | **Corrections du 13 novembre** : menu repliable, paroisse actuelle, identifiants, événements (sections, rôles, formule, recherche), notifications reliées, vérifier un membre, statistiques à paramètres | Mainteneur | **Réalisé le 13 novembre** ; à essayer sur le site d'essai |
 | **Trésorerie** : mobile money (plateforme simulée), payer pour un autre, cotisations spéciales, quittances, espace du Trésorier, reversements mensuels | Mainteneur | **Réalisé le 13 novembre** (simulation) ; choix de la plateforme réelle et ouverture du compte : BNC |
-| Guides d'utilisation (`docs/guides/`, 11 guides) | Mainteneur | **Rédigés le 13 novembre** ; captures d'écran à ajouter après essai |
+| **Remarques après la PR #14** : convocation en deux colonnes et nouveaux rôles, cotisations spéciales (unités, bureaux, membres désignés, amendes), reversements plus clairs, catégories exclusives, éligibles au grade visé, sessions de test ou d'examen, promotions spéciales, actes de promotion, matricule à l'accueil et dans les listes | Mainteneur | **Réalisé le 13 novembre** ; à essayer sur le site d'essai |
+| Guides d'utilisation (`docs/guides/`, 12 guides) | Mainteneur | **Rédigés le 13 novembre** ; captures d'écran à ajouter après essai |
 | Modules 4 et 5 : communication, médias | — | À concevoir |
 
 ## 8. Comment une modification est faite
