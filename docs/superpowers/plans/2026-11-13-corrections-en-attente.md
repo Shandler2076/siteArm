@@ -144,6 +144,48 @@ savoir qui il est. Décisions du mainteneur (13/11/2026) :
    de vos données » et dans le dossier APDP. Dans la règle du gardien des périmètres, c'est une
    exception encadrée : carte réduite, matricule exact, motif, journal.
 
+## H. Projet à étudier : paiement par mobile money et cotisations spéciales
+
+### H.1 Un seul numéro mobile money au nom du Bureau national
+- Le site passe par une plateforme de paiement (FedaPay, KkiaPay, CinetPay… à comparer). Elle accepte
+  MTN MoMo, Moov Money et Celtiis, et confirme chaque paiement au site.
+- L'argent arrive sur **un seul compte**, celui du BN.
+
+### H.2 Cotisations spéciales (créées par le BN)
+- Le BN crée une cotisation spéciale : libellé, description, montant et échéance.
+- Elle apparaît d'office sur le profil de tous les membres concernés, **« en attente »**.
+- Elle est payée **directement au BN** (100 %, sans partage).
+- Une **quittance** PDF numérotée atteste le paiement.
+
+### H.3 Cotisations mensuelles (partage 30 / 20 / 20 / 30) : proposition
+Deux façons de payer coexistent :
+1. **En espèces à la paroisse** : rien ne change. La paroisse saisit, le circuit valide, et chaque
+   niveau reçoit sa part de la main à la main, comme aujourd'hui.
+2. **Par mobile money au BN** (par le membre lui-même, ou par la paroisse pour plusieurs membres) :
+   - le BN reçoit 100 % ;
+   - le site marque les mois payés aussitôt (sans validation du circuit) ;
+   - le site **calcule et tient le compte** de ce que le BN doit à chaque paroisse (30 %), circuit
+     (20 %) et région (20 %) ;
+   - le BN **reverse périodiquement** (ex. chaque mois ou chaque trimestre) par mobile money au
+     numéro du trésorier de chaque paroisse, circuit et région ;
+   - le site produit l'**état des reversements** et note chaque reversement (date, montant,
+     référence) ;
+   - chaque niveau voit sur sa page « Parts reçues » ce qui lui est dû et ce qu'il a reçu ;
+   - les frais de la plateforme sont répartis selon une règle à décider.
+
+### H.4 Questions à trancher
+- Cotisations spéciales : même montant pour tous ? Pour tous les membres, ou seulement certains
+  (catégorie, grade, région) ? Paiement en plusieurs fois possible ? Peut-on aussi les payer en
+  espèces à la paroisse, qui reverse au BN ?
+- Reversements : à quel rythme (mensuel, trimestriel) ? Sur quel numéro (celui du trésorier de
+  chaque unité) ? Qui les effectue au BN ?
+- Frais de la plateforme : à la charge du membre (ajoutés au montant), du BN, ou répartis entre les
+  niveaux au prorata ?
+- Ouverture du compte de la plateforme : pièces de l'association, responsable désigné.
+- Protection des données : la plateforme est un sous-traitant (numéro de téléphone, montant), à
+  ajouter au dossier APDP.
+- Essais d'abord en « mode test » (sans argent réel) sur le site d'essai.
+
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
 - Le menu par thèmes, repliable, avec la rubrique active mise en évidence.
