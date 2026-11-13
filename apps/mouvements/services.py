@@ -33,7 +33,7 @@ from apps.mouvements.statuts import (
     changer_statut,
     clore_mandats,
 )
-from apps.notifications.services import notifier
+from apps.notifications.services import lien_membre, notifier
 
 NATIONAL = Unite(Niveau.NATIONAL, None)
 
@@ -458,7 +458,12 @@ def decider_signalement(
     signalante = _unite_par_cle(sig.unite)
     if signalante:
         unites.add(signalante)
-    notifier_unites(unites, texte, comptes=[membre.compte] if membre.compte_id else [])
+    notifier_unites(
+        unites,
+        texte,
+        lien_membre(membre),
+        comptes=[membre.compte] if membre.compte_id else [],
+    )
     return Decision(signalement=sig, pdf=pdf)
 
 

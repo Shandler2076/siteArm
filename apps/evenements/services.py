@@ -46,8 +46,11 @@ def _journal(par, action, **details):
 def _notifier(convocations, texte_pour):
     from apps.notifications.services import notifier
 
-    paires = [(c.membre.compte, texte_pour(c)) for c in convocations]
-    transaction.on_commit(lambda: [notifier([compte], t) for compte, t in paires])
+    paires = [
+        (c.membre.compte, texte_pour(c), f"/evenements/moi/#ev{c.evenement_id}")
+        for c in convocations
+    ]
+    transaction.on_commit(lambda: [notifier([compte], t, lien) for compte, t, lien in paires])
 
 
 def quand(ev: Evenement) -> str:

@@ -168,6 +168,34 @@ def secretaires(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Com
     return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
 
 
+# « Vérifier un membre » : Chef et Secrétaire des bureaux de paroisse, circuit et région.
+FONCTIONS_CHEF = ("Chef d'Unité paroissiale", "Chef de Section de Circuit", "Coordinateur régional")
+FONCTIONS_VERIFICATION = (
+    *FONCTIONS_CHEF,
+    "Secrétaire paroissial",
+    "Secrétaire de Circuit",
+    "Secrétaire régional",
+)
+
+
+def unites_verification(compte, jour: datetime.date | None = None) -> list[Unite]:
+    """Bureaux d'où le compte peut vérifier l'identité d'un membre hors de son périmètre."""
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return []
+    mandats = (
+        Mandat.objects.en_cours(jour)
+        .filter(
+            membre__compte=compte,
+            membre__statut=Statut.ACTIF,
+            fonction__nom__in=FONCTIONS_VERIFICATION,
+        )
+        .exclude(fonction__niveau=Niveau.NATIONAL)
+        .select_related("fonction", "paroisse", "circuit", "region")
+    )
+    unites = {Unite(m.fonction.niveau, m.unite) for m in mandats}
+    return sorted(unites, key=lambda u: (ORDRE[u.niveau], u.objet.nom if u.objet else ""))
+
+
 def titulaires_cotisations(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
     mandats = _mandats_cotisations(jour).filter(fonction__niveau=unite.niveau)
     if unite.objet is not None:

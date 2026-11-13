@@ -254,3 +254,10 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 @media (max-width: 480px) { .date-heure { gap: 0 10px; } }
 .plus-filtres { margin: 8px 0 12px; }
 .plus-filtres > summary { cursor: pointer; font-weight: 700; color: var(--marine); padding: 6px 0; }
+:target { scroll-margin-top: 80px; } li:target { background: #FFF9E6; border-radius: 8px; }
+.carte-identite { display: grid; grid-template-columns: 110px 1fr; gap: 16px; margin-top: 18px; padding: 16px;
+  border: 2px solid var(--marine); border-radius: 12px; background: #fff; }
+.carte-identite img, .carte-identite__sans-photo { width: 110px; height: 140px; object-fit: cover; border-radius: 8px; }
+.carte-identite__sans-photo { display: flex; align-items: center; justify-content: center; background: #EEF1F6; color: var(--gris); text-align: center; font-size: .85rem; }
+.carte-identite h2 { margin: 4px 0 8px; }
+@media (max-width: 480px) { .carte-identite { grid-template-columns: 1fr; } }

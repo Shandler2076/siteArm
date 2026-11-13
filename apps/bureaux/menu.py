@@ -10,7 +10,13 @@ from dataclasses import dataclass, field
 
 from django.urls import reverse
 
-from apps.bureaux.perimetre import Niveau, est_bn, unites_cotisations, unites_gerees
+from apps.bureaux.perimetre import (
+    Niveau,
+    est_bn,
+    unites_cotisations,
+    unites_gerees,
+    unites_verification,
+)
 
 ELIGIBLES = (
     "?envoye=1&statut=actif&eligible=on&colonnes=matricule&colonnes=nom&colonnes=prenoms"
@@ -110,6 +116,8 @@ def construire_menu(request) -> list[Groupe]:
             Lien(f"Anciens membres{suffixe(u)}", reverse("bureaux:anciens", args=[u.cle])),
             Lien(f"Demandes{suffixe(u)}", reverse("mouvements:demandes", args=[u.cle])),
         ]
+    if unites_verification(user):
+        liens.append(Lien("Vérifier un membre", reverse("bureaux:verifier")))
     if liens:
         groupes.append(Groupe("Gestion des membres (BN)" if gestion_bn else "Mon bureau", liens))
 

@@ -95,4 +95,8 @@ def _notifier_bureaux(membres: list[Membre], numero_lot: int) -> None:
         compte[Unite("region", p.circuit.region)] += 1
     for unite, n in compte.items():
         texte = "1 nouveau membre" if n == 1 else f"{n} nouveaux membres"
-        notifier_unite(unite, f"{texte} dans votre périmètre (lot n° {numero_lot}).")
+        notifier_unite(
+            unite,
+            f"{texte} dans votre périmètre (lot n° {numero_lot}).",
+            f"/bureau/{unite.cle}/membres/",
+        )

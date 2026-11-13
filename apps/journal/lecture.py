@@ -110,6 +110,14 @@ def lire(entrees) -> list[Ligne]:
             return f"A attribué le grade {d.get('grade')} à {m}."
         if a == j.CONSULTATION_FICHE:
             return f"A consulté la fiche de {m}."
+        if a == j.VERIFICATION_MEMBRE:
+            from apps.membres.verification import MOTIFS
+
+            motif = dict(MOTIFS).get(d.get("motif"), d.get("motif", ""))
+            precision = f" : {d['precision']}" if d.get("precision") else ""
+            if not d.get("membre"):
+                return f"A cherché à vérifier le matricule « {d.get('saisi', '')} » (introuvable)."
+            return f"A vérifié l'identité de {m} (motif : {motif}{precision})."
         if a == j.PHOTO_DECISION:
             if d.get("decision") == "accepter":
                 return f"A accepté la photo d'identité de {m}."

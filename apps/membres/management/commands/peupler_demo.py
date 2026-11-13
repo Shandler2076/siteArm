@@ -281,7 +281,7 @@ class Command(BaseCommand):
         choisis = hasard.sample(membres, min(33, len(membres)))
         sessions = list(nativite.sessions.all())
         for i, session in enumerate(sessions):
-            groupe = choisis[i : 30 : 3]
+            groupe = choisis[i:30:3]
             convoquer(nativite, groupe[:1], session=session, role="superviseur", par=par)
             convoquer(nativite, groupe[1:], session=session, par=par)
         convoquer(nativite, choisis[30:], role="bureau", par=par)

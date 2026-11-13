@@ -84,7 +84,12 @@ def test_menu_bureau_paroisse(monde):
     assert "Bureaux et droits" not in titres and "Contrôle" not in titres
     assert "Événements" not in titres
     bureau = next(g for g in menu if g.titre == "Mon bureau")
-    assert [lien.libelle for lien in bureau.liens] == ["Membres", "Anciens membres", "Demandes"]
+    assert [lien.libelle for lien in bureau.liens] == [
+        "Membres",
+        "Anciens membres",
+        "Demandes",
+        "Vérifier un membre",
+    ]
 
 
 def test_menu_membre_simple(monde):

@@ -50,6 +50,9 @@ def test_page_marque_comme_lu(client, territoire, nouveau_membre):
     client.force_login(m.compte)
     assert 'class="cloche__nombre">1<' in client.get("/").content.decode()
     html = client.get("/notifications/").content.decode()
-    assert "Message A" in html and "/membres/ma-fiche/" in html
+    n = Notification.objects.get()
+    assert "Message A" in html and f"/notifications/{n.pk}/" in html
+    # Décision du 13/11/2026 : c'est le clic qui marque la notification comme lue.
+    assert client.get(f"/notifications/{n.pk}/").url == "/membres/ma-fiche/"
     assert not Notification.objects.filter(lue=False).exists()
     assert 'class="cloche__nombre"' not in client.get("/").content.decode()

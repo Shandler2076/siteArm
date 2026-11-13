@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titre %}Vérifier un membre — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Vérifier un membre</h1>
+  <p class="aide">Pour identifier un membre d'une autre paroisse (visite, faute…). Saisissez son
+    <strong>matricule exact</strong> et le motif : la consultation est inscrite au journal du Bureau national.</p>
+  <form method="post">{% csrf_token %}
+    {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
+    {% include "evenements/_champ.html" with champ=form.matricule %}
+    {% include "evenements/_champ.html" with champ=form.motif %}
+    {% include "evenements/_champ.html" with champ=form.precision %}
+    <button type="submit" class="bouton">Vérifier</button>
+  </form>
+  {% if introuvable %}<p class="message message--error">Aucun membre ne porte ce matricule. Vérifiez-le auprès de la personne.</p>{% endif %}
+  {% if carte %}
+  <div class="carte-identite">
+    {% if carte.photo %}<img src="{{ carte.photo }}" alt="Photo d'identité">{% else %}<div class="carte-identite__sans-photo">Photo à venir</div>{% endif %}
+    <div>
+      <p class="matricule">{{ carte.matricule }}</p>
+      <h2>{{ carte.nom_complet }}</h2>
+      <dl class="fiche">
+        <dt>Statut</dt><dd>{{ carte.statut }}</dd>
+        <dt>Catégorie</dt><dd>{{ carte.categorie }}</dd>
+        <dt>Paroisse</dt><dd>{{ carte.paroisse }}</dd>
+        <dt>Circuit</dt><dd>{{ carte.circuit }}</dd>
+        <dt>Région</dt><dd>{{ carte.region }}</dd>
+        <dt>Contact de sa paroisse</dt><dd>{% for nom, tel in carte.contact_paroisse %}{{ nom }} (Secrétaire) — {{ tel }}<br>{% empty %}Aucun Secrétaire paroissial enregistré.{% endfor %}</dd>
+      </dl>
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

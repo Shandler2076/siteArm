@@ -23,6 +23,7 @@ from apps.mouvements.services import (
     notifier_unites,
 )
 from apps.mouvements.statuts import changer_statut
+from apps.notifications.services import lien_membre
 
 GRAVITE = {Statut.ACTIF: 0, Statut.SANCTIONNE: 1, Statut.EXCLU: 2}
 MOTIF_DEBUT = "Début de la sanction"
@@ -145,7 +146,10 @@ def enregistrer_sanction(
         reference=reference,
     )
     notifier_unites(
-        _unites_du_membre(membre), _message(sanction, "Sanction inscrite"), comptes=[membre.compte]
+        _unites_du_membre(membre),
+        _message(sanction, "Sanction inscrite"),
+        lien_membre(membre),
+        comptes=[membre.compte],
     )
     return sanction
 
@@ -171,7 +175,10 @@ def lever_sanction(*, sanction, motif: str, par, jour: datetime.date | None = No
         motif=sanction.motif_levee,
     )
     notifier_unites(
-        _unites_du_membre(membre), _message(sanction, "Sanction levée"), comptes=[membre.compte]
+        _unites_du_membre(membre),
+        _message(sanction, "Sanction levée"),
+        lien_membre(membre),
+        comptes=[membre.compte],
     )
     return sanction
 
@@ -206,6 +213,7 @@ def appliquer_sanctions(jour: datetime.date | None = None) -> tuple[int, int]:
             notifier_unites(
                 _unites_du_membre(membre),
                 f"{texte} : {membre.matricule} {membre.nom_complet}",
+                lien_membre(membre),
                 comptes=[membre.compte],
             )
     return debuts, fins

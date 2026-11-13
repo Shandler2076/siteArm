@@ -15,6 +15,7 @@ SIGNALEMENT_DECIDE = "signalement_decide"
 CONNEXION = "connexion"
 CONNEXION_ECHOUEE = "connexion_echouee"
 CONSULTATION_FICHE = "consultation_fiche"
+VERIFICATION_MEMBRE = "verification_membre"
 REINITIALISATION = "reinitialisation"
 PHOTO_DECISION = "photo_decision"
 ENREGISTREMENT = "enregistrement"
@@ -55,6 +56,7 @@ LIBELLES = {
     CONNEXION: "Connexion",
     CONNEXION_ECHOUEE: "Connexion échouée",
     CONSULTATION_FICHE: "Consultation d'une fiche",
+    VERIFICATION_MEMBRE: "Vérification d'un membre (hors périmètre)",
     REINITIALISATION: "Mot de passe réinitialisé",
     PHOTO_DECISION: "Décision sur une photo",
     ENREGISTREMENT: "Membre enregistré",

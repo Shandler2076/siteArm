@@ -189,6 +189,7 @@ def _souhaiter_bienvenue(membre: Membre) -> None:
         f"identifiant est votre matricule {membre.matricule}. Votre paroisse vous remettra votre "
         "fiche avec votre mot de passe provisoire ; vous choisirez votre propre mot de passe à "
         "la première connexion.",
+        "/membres/ma-fiche/",
     )
 
 
@@ -198,7 +199,7 @@ MOTIF_PAROISSE_ACTUELLE = "Paroisse actuelle à l'inscription sur le site"
 def _notifier_nouveau_membre(membre: Membre, paroisse: Paroisse | None = None) -> None:
     """Avis aux bureaux de la paroisse actuelle du membre (et de son circuit, de sa région)."""
     from apps.bureaux.perimetre import Unite
-    from apps.notifications.services import notifier_unite
+    from apps.notifications.services import lien_membre, notifier_unite
 
     paroisse = paroisse or membre.paroisse_integration
     message = f"Nouveau membre dans votre périmètre : {membre.matricule} — {membre.nom_complet}"
@@ -207,7 +208,7 @@ def _notifier_nouveau_membre(membre: Membre, paroisse: Paroisse | None = None) -
         Unite("circuit", paroisse.circuit),
         Unite("region", paroisse.circuit.region),
     ):
-        notifier_unite(unite, message)
+        notifier_unite(unite, message, lien_membre(membre))
 
 
 class CorrectionRefusee(Exception):
@@ -295,5 +296,6 @@ def corriger_integration(*, membre: Membre, annee: int, paroisse: Paroisse, moti
             [membre.compte],
             f"Votre matricule a été corrigé : {avant['matricule']} → {nouveau_matricule}. "
             "Utilisez le nouveau matricule pour vous connecter.",
+            "/membres/ma-fiche/",
         )
     return membre

@@ -68,11 +68,11 @@ def _cle_paroisse(paroisse) -> str:
     return f"paroisse-{paroisse.pk}"
 
 
-def _notifier_unite(unite, message):
+def _notifier_unite(unite, message, lien=""):
     from apps.bureaux.perimetre import titulaires_cotisations
     from apps.notifications.services import notifier
 
-    transaction.on_commit(lambda: notifier(titulaires_cotisations(unite), message))
+    transaction.on_commit(lambda: notifier(titulaires_cotisations(unite), message, lien))
 
 
 def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.date, int]]:
@@ -177,6 +177,7 @@ def saisir_versement(
         _notifier_unite(
             Unite("circuit", v.paroisse.circuit),
             f"Cotisation à valider : {v.montant} F de {m.nom_complet} ({v.paroisse.nom}).",
+            f"/cotisations/circuit-{v.paroisse.circuit_id}/a-valider/",
         )
     return v
 
@@ -213,6 +214,7 @@ def saisir_collecte(
         _notifier_unite(
             Unite("circuit", paroisse.circuit),
             f"Cotisations à valider : {len(faits)} versement(s), {total} F ({paroisse.nom}).",
+            f"/cotisations/circuit-{paroisse.circuit_id}/a-valider/",
         )
     return faits
 
@@ -286,7 +288,7 @@ def valider(versements, *, par) -> list[Versement]:
                     f"(reçu {v.numero_recu})."
                 ),
             )
-            transaction.on_commit(lambda c=compte, t=texte: notifier([c], t))
+            transaction.on_commit(lambda c=compte, t=texte: notifier([c], t, "/cotisations/moi/"))
             faits.append(v)
     return faits
 
@@ -329,6 +331,7 @@ def refuser(versement, *, motif: str, par) -> Versement:
             Unite("paroisse", v.paroisse),
             f"Versement refusé par le circuit : {v.montant} F de {v.membre.nom_complet} "
             f"(motif : {motif}).",
+            f"/cotisations/paroisse-{v.paroisse_id}/",
         )
     return v
 
@@ -470,7 +473,8 @@ def rappeler_en_attente(jour: datetime.date, forcer: bool = False) -> int:
             f"Rappel du samedi : {len(liste)} versement(s) de cotisation attendent votre "
             f"validation depuis plus de {DELAI_RAPPEL_JOURS} jours ({unite.libelle})."
         )
-        transaction.on_commit(lambda d=destinataires, t=texte: notifier(d, t))
+        lien = f"/cotisations/{unite.cle}/a-valider/"
+        transaction.on_commit(lambda d=destinataires, t=texte, x=lien: notifier(d, t, x))
     return sum(len(x) for x in par_circuit.values())
 
 
