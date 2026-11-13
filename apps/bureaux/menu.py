@@ -13,8 +13,11 @@ from django.urls import reverse
 from apps.bureaux.perimetre import (
     Niveau,
     est_bn,
+    est_tresorier_national,
+    est_validateur_reversements,
     unites_cotisations,
     unites_gerees,
+    unites_tresorerie,
     unites_verification,
 )
 
@@ -159,6 +162,22 @@ def construire_menu(request) -> list[Groupe]:
     if cot:
         groupes.append(Groupe("Cotisations mensuelles", cot))
 
+    # Trésorerie (13/11/2026) : espace de chaque bureau, et pages du BN.
+    tres = []
+    u_tres = unites_tresorerie(user)
+    for u, _agit in u_tres:
+        s = f" — {u.libelle}" if len(u_tres) > 1 else ""
+        tres.append(Lien(f"Trésorerie du bureau{s}", reverse("tresorerie:espace", args=[u.cle])))
+    if gestion_bn:
+        tres += [
+            Lien("Cotisations spéciales", reverse("tresorerie:bn_speciales")),
+            Lien("Numéros des trésoriers", reverse("tresorerie:bn_numeros")),
+        ]
+    if gestion_bn or est_tresorier_national(user) or est_validateur_reversements(user):
+        tres.append(Lien("Reversements mensuels", reverse("tresorerie:bn_reversements")))
+    if tres:
+        groupes.append(Groupe("Trésorerie", tres))
+
     if gestion_bn:
         groupes += [
             Groupe("Événements", [Lien("Événements nationaux", reverse("evenements:liste"))]),
@@ -188,6 +207,9 @@ def _mon_espace(user) -> list[Lien]:
             Lien("Ma photo", reverse("membres:ma_photo")),
             Lien("Mes coordonnées", reverse("membres:mes_coordonnees")),
             Lien("Mes cotisations", reverse("cotisations:moi")),
+            Lien(
+                "Payer (mobile money)", reverse("tresorerie:payer"), prefixes=("/tresorerie/payer",)
+            ),
             Lien("Mes événements", reverse("evenements:moi")),
         ]
     liens += [

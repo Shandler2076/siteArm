@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block titre %}Paiement {{ p.reference }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Paiement mobile money</h1>
+  {% if p.plateforme == "simulee" %}<p class="message message--error">Plateforme de paiement <strong>simulée</strong> (site d'essai) : aucun argent réel n'est prélevé.</p>{% endif %}
+  <dl class="fiche">
+    <dt>Référence</dt><dd>{{ p.reference }}</dd>
+    <dt>Objet</dt><dd>{{ p.description }}</dd>
+    <dt>Montant</dt><dd><strong>{{ p.montant }} F CFA</strong></dd>
+    <dt>État</dt><dd>{{ p.get_etat_display }}{% if p.message %} — {{ p.message }}{% endif %}</dd>
+  </dl>
+  {% if p.etat == "en_attente" %}
+    <p class="aide">Sur une vraie plateforme, vous confirmeriez maintenant le paiement sur votre téléphone avec votre code secret (le site ne le voit jamais).</p>
+    <form method="post" class="actions actions--deux">{% csrf_token %}
+      <button type="submit" name="action" value="confirmer" class="bouton">Confirmer le paiement (simulation)</button>
+      <button type="submit" name="action" value="annuler" class="bouton bouton--secondaire">Annuler</button>
+    </form>
+  {% elif p.etat == "confirme" %}
+    {% for c in p.contributions.all %}<p><a class="bouton bouton--secondaire" href="{% url 'tresorerie:quittance' c.pk %}">Quittance {{ c.quittance }} (PDF)</a></p>{% endfor %}
+    <p><a href="{% url 'cotisations:moi' %}">Voir mes cotisations</a></p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -12,8 +12,8 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from apps.cotisations.models import (
-    ModeVersement,
     EtatVersement,
+    ModeVersement,
     MoisCotise,
     NiveauPart,
     ParametresCotisations,

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block titre %}Trésorerie — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p class="aide">Trésorerie{% if not agit %} — consultation (lecture seule){% endif %}</p>
+  <h1>{{ unite.libelle }}</h1>
+  <p>Numéro mobile money du bureau : <strong>{% if numero %}{{ numero.numero }}{% if numero.titulaire %} ({{ numero.titulaire }}){% endif %}{% else %}non enregistré — à demander au Bureau national{% endif %}</strong></p>
+  {% if agit and unite.niveau == "paroisse" %}
+    <p><a class="bouton" href="{% url 'tresorerie:payer_membres' unite.cle %}">Payer pour des membres (espèces reçues)</a></p>
+  {% endif %}
+
+  <h2>Cotisations spéciales demandées au bureau</h2>
+  <ul class="fonctions">{% for x in speciales %}
+    <li><strong>{{ x.cs.libelle }}</strong> — payé : {{ x.paye }} F{% if x.reste is not None %} · reste : {{ x.reste }} F{% endif %}
+      {% if agit and not x.reglee or agit and x.cs.type_montant != "fixe" %}<br><a class="bouton bouton--secondaire" href="{% url 'tresorerie:payer_speciale' x.cs.pk %}?bureau={{ unite.cle }}">Payer au nom de : {{ unite.libelle }}</a>{% endif %}</li>
+  {% empty %}<li class="aide">Aucune.</li>{% endfor %}</ul>
+
+  <h2>Reversements reçus du Bureau national</h2>
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Mois</th><th>Montant</th><th>État</th><th>Référence</th></tr></thead>
+    <tbody>{% for r in reversements %}<tr><td>{{ r.mois|date:"m/Y" }}</td><td>{{ r.montant }} F</td><td>{{ r.get_etat_display }}</td><td>{{ r.reference_envoi|default:"—" }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="aide">Aucun reversement pour le moment.</td></tr>{% endfor %}</tbody></table></div>
+
+  <h2>Cotisations payées par mobile money (derniers paiements)</h2>
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Date</th><th>Membre</th><th>Montant</th><th>Part du bureau</th><th>Reçu</th></tr></thead>
+    <tbody>{% for v in versements %}<tr><td>{{ v.date_versement|date:"d/m/Y" }}</td><td>{{ v.membre.matricule }}</td><td>{{ v.montant }} F</td>
+      <td>{% if unite.niveau == "paroisse" %}{{ v.parts.paroisse }}{% elif unite.niveau == "circuit" %}{{ v.parts.circuit }}{% else %}{{ v.parts.region }}{% endif %} F</td><td>{{ v.numero_recu }}</td></tr>
+    {% empty %}<tr><td colspan="5" class="aide">Aucun paiement mobile money.</td></tr>{% endfor %}</tbody></table></div>
+
+  {% if contributions %}<h2>Paiements au nom du bureau</h2><ul class="fonctions">{% for c in contributions %}
+    <li>{{ c.cotisation.libelle }} — {{ c.montant }} F · <a href="{% url 'tresorerie:quittance' c.pk %}">Quittance {{ c.quittance }}</a></li>{% endfor %}</ul>{% endif %}
+</section>
+{% endblock %}

@@ -274,3 +274,4 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .repartition ul { list-style: none; margin: 0; padding: 0 14px 10px; }
 .repartition li { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid #EEF1F6; }
 .recherche-liste { width: 100%; margin-bottom: 4px; padding: 8px; border: 1px solid #C9D1DE; border-radius: 8px; font-size: .9rem; }
+.ligne-paiement { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #EEF1F6; } .ligne-paiement input { width: 70px; }

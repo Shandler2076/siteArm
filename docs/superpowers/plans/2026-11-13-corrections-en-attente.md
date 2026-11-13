@@ -16,13 +16,13 @@
 | Paroisse actuelle à l'inscription (individuelle et lots) | **Réalisé** — PR #14 |
 | Encadré « Identifiants à remettre », bienvenue sans mot de passe | **Réalisé** — PR #14 |
 | Grille des cotisations sur une ligne, boutons par année | **Réalisé** — PR #13, fusionnée |
-| A. Créer un événement | En attente |
-| B. Convoquer des membres | En attente |
-| C. Notifications qui mènent à la bonne page | En attente |
-| D. Statistiques à paramètres | En attente |
-| E. Vérifier un membre hors de son périmètre | En attente |
-| F. Trésorerie, mobile money, cotisations spéciales, reversements | En attente (projet) |
-| G. Guides d'utilisation | En attente (après réalisation) |
+| A. Créer un événement | **Réalisé** le 13/11 (sur ordre « lance tout ») |
+| B. Convoquer des membres | **Réalisé** le 13/11 (sur ordre « lance tout ») |
+| C. Notifications qui mènent à la bonne page | **Réalisé** le 13/11 (sur ordre « lance tout ») |
+| D. Statistiques à paramètres | **Réalisé** le 13/11 (sur ordre « lance tout ») |
+| E. Vérifier un membre hors de son périmètre | **Réalisé** le 13/11 (sur ordre « lance tout ») |
+| F. Trésorerie, mobile money, cotisations spéciales, reversements | **Réalisé** le 13/11 avec une plateforme **simulée** ; plateforme réelle à choisir |
+| G. Guides d'utilisation | **Rédigés** (`docs/guides/`) ; captures d'écran à ajouter |
 
 ---
 
@@ -234,7 +234,7 @@ En français simple, avec captures d'écran, établis au nom du mainteneur, en M
 
 Après chaque lot : PR, puis mise à jour du site d'essai **seulement avec l'accord du mainteneur**.
 
-## I. Questions restantes, avec une proposition par défaut
+## I. Questions restantes — propositions par défaut appliquées (« lance tout », 13/11/2026)
 
 | Question | Proposition par défaut |
 |---|---|

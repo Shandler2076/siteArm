@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block titre %}{{ cs.libelle }} — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'tresorerie:bn_speciales' %}">← Cotisations spéciales</a></p>
+  <h1>{{ cs.libelle }}</h1>
+  {% if cs.description %}<p>{{ cs.description|linebreaksbr }}</p>{% endif %}
+  <dl class="fiche">
+    <dt>Montant</dt><dd>{{ cs.get_type_montant_display }}{% if cs.montant %} : {{ cs.montant }} F{% endif %}</dd>
+    <dt>Échéance</dt><dd>{{ cs.echeance|date:"d/m/Y"|default:"—" }}</dd>
+    <dt>Membres concernés</dt><dd>{{ cs.get_pour_membres_display }} ({{ concernes }})</dd>
+    <dt>Bureaux concernés</dt><dd>{{ bureaux|join:", "|default:"—" }}</dd>
+    <dt>Total reçu</dt><dd><strong>{{ total }} F</strong> · {{ payeurs }} membre(s) ont payé</dd>
+    <dt>État</dt><dd>{% if cs.ouverte %}Ouverte{% else %}Close{% endif %}</dd>
+  </dl>
+  {% if perms.membres.gerer_membres %}<form method="post">{% csrf_token %}<button type="submit" class="bouton bouton--secondaire">{% if cs.ouverte %}Clore la cotisation{% else %}Rouvrir la cotisation{% endif %}</button></form>{% endif %}
+  <h2>Paiements</h2>
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Date</th><th>Pour</th><th>Montant</th><th>Quittance</th></tr></thead>
+    <tbody>{% for c in contributions %}<tr><td>{{ c.date|date:"d/m/Y" }}</td><td>{% if c.membre %}{{ c.membre.matricule }} — {{ c.membre.nom_complet }}{% else %}{{ c.unite_libelle }}{% endif %}</td><td>{{ c.montant }} F</td><td><a href="{% url 'tresorerie:quittance' c.pk %}">{{ c.quittance }}</a></td></tr>
+    {% empty %}<tr><td colspan="4" class="aide">Aucun paiement.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

@@ -8,7 +8,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
-- Cahier des charges général (v2.6, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+- Cahier des charges général (v2.7, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
   détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
@@ -72,6 +72,16 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   par plus long préfixe d'adresse) ; toute nouvelle page du menu y est ajoutée.
 - Paroisse actuelle à l'inscription : `enregistrer_membre(paroisse_actuelle=...)` (affectée dès
   l'inscription sur le site ; lots : colonne facultative). Bienvenue au nouveau membre sans mot de passe.
+- Notifications : liens par `notifications/services.py::resoudre_lien` (« membre:<matricule> » selon
+  les droits) ; clic = lue (`/notifications/<pk>/`).
+- Vérifier un membre hors périmètre : Chef et Secrétaire seulement (`perimetre.unites_verification`),
+  matricule exact, motif journalisé, carte réduite (`membres/verification.py`).
+- Événements : sections facultatives (`avec_sections`, modèle `Session`), rôle (travailleur,
+  superviseur, bureau) et formule de l'autorisation sur la convocation.
+- Trésorerie (`apps/tresorerie`, `services.py` SEUL point d'écriture) : paiement mobile money parti du
+  site (plateforme simulée sur le site d'essai), cotisations spéciales, quittances, reversements
+  mensuels (Trésorier national prépare, Président ou Secrétaire national valide) ; rôles dans
+  `perimetre.py` (`tresoriers`, `unites_tresorerie`…). Guides : `docs/guides/`.
 
 ## Hébergement
 - Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre

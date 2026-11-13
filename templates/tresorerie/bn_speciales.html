@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titre %}Cotisations spéciales — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Cotisations spéciales</h1>
+  <ul class="fonctions">{% for cs in liste %}
+    <li><a href="{% url 'tresorerie:bn_speciale' cs.pk %}"><strong>{{ cs.libelle }}</strong></a> — {{ cs.get_type_montant_display }}{% if cs.montant %} : {{ cs.montant }} F{% endif %}{% if not cs.ouverte %} · <span class="pastille">close</span>{% endif %}</li>
+  {% empty %}<li class="aide">Aucune cotisation spéciale.</li>{% endfor %}</ul>
+  <h2>Créer une cotisation spéciale</h2>
+  <form method="post">{% csrf_token %}
+    {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
+    {% include "evenements/_champ.html" with champ=form.libelle %}
+    {% include "evenements/_champ.html" with champ=form.description %}
+    {% include "evenements/_champ.html" with champ=form.echeance %}
+    <div class="champ"><span>{{ form.type_montant.label }}</span>{{ form.type_montant }}</div>
+    {% include "evenements/_champ.html" with champ=form.montant %}
+    <div class="champ"><span>{{ form.pour_membres.label }}</span>{{ form.pour_membres }}</div>
+    <details class="plus-filtres"><summary>Critères (si « certains membres »)</summary>
+      <div class="grille-filtres">{% for champ in filtres %}{% include "listes/_filtre.html" %}{% endfor %}</div>
+    </details>
+    <div class="champ"><span>{{ form.pour_bureaux.label }}</span>{{ form.pour_bureaux }}<small class="aide">Cochez pour demander la cotisation aux bureaux eux-mêmes (payée par leur Trésorier, au nom du bureau).</small></div>
+    <button type="submit" class="bouton">Créer</button>
+  </form>
+</section>
+{% endblock %}

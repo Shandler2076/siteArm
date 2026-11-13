@@ -105,6 +105,13 @@ par identifiant (matricule) et mot de passe personnel.
    réhabilitations, changements de catégorie, sanctions disciplinaires internes.
 5. **Informer** les membres et les bureaux des décisions qui les concernent.
 6. **Assurer la sécurité** du site : contrôle des accès, journal des opérations.
+7. **Gérer les cotisations** : cotisations mensuelles et cotisations spéciales, paiement par mobile
+   money au numéro unique du Bureau national, reçus et quittances, reversements mensuels des parts
+   aux paroisses, circuits et régions.
+8. **Vérifier l'identité d'un membre** hors du périmètre d'un bureau (membre en visite, faute
+   commise) : seulement le Chef et le Secrétaire d'un bureau, par le matricule exact, avec un motif
+   inscrit au journal, sur une carte réduite (photo, grade, nom, statut, paroisse). Ni téléphone, ni
+   adresse, ni NPI, ni photo du CIP.
 
 Évolutions prévues, dans les mêmes finalités : suivi des **grades** et de l'éligibilité aux passages de
 grade, **activités et présences**, **communication** interne (messages officiels, documents). Toute
@@ -165,6 +172,10 @@ publicitaire ou de mesure d'audience.
 | Mainteneur du site | Accès technique, pour le fonctionnement et la maintenance | Maintenance, sous l'autorité du BNC |
 | Hébergeur (sous-traitant) | Stockage technique, sans exploitation des données | Hébergement |
 | Prestataire d'envoi des e-mails de notification (sous-traitant, si utilisé) | Adresse e-mail et texte de la notification | Envoi des notifications |
+| Chef et Secrétaire d'un bureau (vérification hors périmètre) | Carte réduite d'un membre désigné par son matricule exact, avec motif journalisé | Identifier un membre en visite ou mis en cause |
+| Trésoriers des bureaux | Cotisations et paiements des membres de leur périmètre ; numéro mobile money du bureau | Trésorerie du bureau |
+| Plateforme de paiement mobile money (sous-traitant, à désigner : FedaPay, KkiaPay, CinetPay…) | Numéro de téléphone du payeur, montant, référence du paiement | Encaissement des cotisations au numéro du BN |
+| Opérateurs mobile money (MTN, Moov, Celtiis) | Numéro du payeur, montant | Exécution du paiement |
 
 Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
 

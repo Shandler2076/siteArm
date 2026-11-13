@@ -29,6 +29,7 @@ def test_menu_bn_groupes_sans_doublon(compte_technique):
         "Listes et statistiques",
         "Grades",
         "Cotisations mensuelles",
+        "Trésorerie",
         "Événements",
         "Bureaux et droits",
         "Contrôle",
@@ -101,7 +102,7 @@ def test_rendu_groupes_repliables(client_technique, monde):
     html = unescape(r.content.decode())
     debut = html.index('<nav class="menu"')
     menu = html[debut : html.index("</nav>", debut)]
-    assert menu.count("<details") == 8
+    assert menu.count("<details") == 9
     assert menu.count('<details class="menu__groupe" open') == 1
     assert 'class="actif" aria-current="page">Tous les membres' in menu
 

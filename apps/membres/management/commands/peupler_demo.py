@@ -116,6 +116,7 @@ class Command(BaseCommand):
             comptes.append(("Membre simple", simple.matricule, mot))
         self._cotisations(hasard, crees, par)
         self._evenements(hasard, crees, par)
+        self._tresorerie(hasard, crees, par)
         self._mouvements(hasard, crees, par)
         self.stdout.write(self.style.SUCCESS(f"{Membre.objects.count()} membres fictifs créés."))
         self.stdout.write("\nComptes de démonstration (à noter, ils ne seront plus affichés) :")
@@ -256,6 +257,43 @@ class Command(BaseCommand):
                 marquer_part_recue(
                     niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=validateur
                 )
+
+    def _tresorerie(self, hasard, membres, par):
+        """Trésorerie fictive : une cotisation spéciale, quelques paiements simulés, des numéros."""
+        from apps.bureaux.perimetre import Unite
+        from apps.tresorerie import services as t
+
+        cs = t.creer_cotisation_speciale(
+            libelle="Construction du siège national (fictif)",
+            description="Démonstration : contribution de chaque membre, payable en plusieurs fois.",
+            type_montant="minimum",
+            montant=2000,
+            par=par,
+        )
+        t.creer_cotisation_speciale(
+            libelle="Contribution des paroisses au pèlerinage (fictif)",
+            type_montant="fixe",
+            montant=10000,
+            pour_membres="aucun",
+            pour_bureaux=["paroisse"],
+            par=par,
+        )
+        payeurs = [m for m in membres if m.compte_id and m.statut == "actif"][:8]
+        for m in payeurs:
+            p = t.initier_paiement_special(
+                m.compte, cs, hasard.choice([1000, 2000, 2500]), membre=m
+            )
+            t.confirmer_paiement(p)
+        for m in membres[:20]:
+            a = m.affectation_actuelle
+            if a is None:
+                continue
+            for unite in (Unite("paroisse", a.paroisse), Unite("circuit", a.paroisse.circuit)):
+                if not t.NumeroMobileMoney.objects.filter(cle=unite.cle).exists():
+                    numero = "01" + "".join(hasard.choice("0123456789") for _ in range(8))
+                    t.enregistrer_numero(
+                        unite, numero=numero, titulaire="Trésorier (fictif)", par=par
+                    )
 
     def _evenements(self, hasard, membres, par):
         """Un pèlerinage à venir (avec autorisations) et un conclave passé (présences pointées)."""

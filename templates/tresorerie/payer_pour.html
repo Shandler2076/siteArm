@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block titre %}Payer pour un autre membre — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Payer pour un autre membre</h1>
+  <p class="aide">Pour aider un membre sans téléphone ou sans Internet. Le paiement est enregistré à son nom : c'est lui qui reçoit le reçu, et sa paroisse est avertie.</p>
+  <form method="get">
+    <label class="champ"><span>Matricule du membre</span><input name="matricule" value="{{ matricule }}" required placeholder="Ex. 2015-01AS-0157"></label>
+    <button type="submit" class="bouton bouton--secondaire">Chercher</button>
+  </form>
+  {% if introuvable %}<p class="message message--error">Aucun membre ne porte ce matricule.</p>{% endif %}
+  {% if beneficiaire %}
+    <p class="encadre-identifiants"><strong>{{ confirmation }}</strong><br><small>Vérifiez que c'est bien la bonne personne.</small></p>
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="matricule" value="{{ beneficiaire.matricule }}"><input type="hidden" name="confirmer" value="1">
+      <label class="champ"><span>Que payez-vous ?</span><select name="speciale" id="choix-paiement">
+        <option value="">Cotisation mensuelle</option>
+        {% for x in speciales %}<option value="{{ x.cs.pk }}">{{ x.cs.libelle }}{% if x.reste %} (reste {{ x.reste }} F){% endif %}</option>{% endfor %}</select></label>
+      <label class="champ" id="bloc-nombre"><span>Nombre de mois</span><select name="nombre">{% for n in "123456"|make_list %}<option value="{{ n }}">{{ n }} mois</option>{% endfor %}</select></label>
+      <label class="champ" id="bloc-montant" hidden><span>Montant (F CFA)</span><input type="number" name="montant" min="1"></label>
+      <button type="submit" class="bouton">Payer par mobile money</button>
+    </form>
+    <script>
+      (function () { var c = document.getElementById('choix-paiement');
+        function maj() { document.getElementById('bloc-nombre').hidden = !!c.value; document.getElementById('bloc-montant').hidden = !c.value; }
+        c.addEventListener('change', maj); maj(); })();
+    </script>
+  {% endif %}
+</section>
+{% endblock %}

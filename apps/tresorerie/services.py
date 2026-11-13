@@ -19,7 +19,7 @@ from django.utils import timezone
 from apps.bureaux.models import Niveau
 from apps.bureaux.perimetre import MODELES, Unite
 from apps.membres.models import Membre, Statut
-from apps.tresorerie.models import (
+from apps.tresorerie.models import (  # noqa: F401 — NumeroMobileMoney sert aussi à la démo
     Contribution,
     CotisationSpeciale,
     EtatPaiement,

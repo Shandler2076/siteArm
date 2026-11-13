@@ -14,6 +14,10 @@
   <p class="aide">✓ payé · … en attente de validation · ! dû, non payé · — non dû</p>
   <p>Total versé en {{ annee }} : <strong>{{ total_annee }} F CFA</strong> · depuis le début : <strong>{{ s.total_depuis_debut }} F CFA</strong></p>
   <div class="actions"><a class="bouton bouton--secondaire" href="{% url 'cotisations:mon_etat_pdf' %}">État des cotisations (PDF)</a></div>
+  <div class="actions actions--deux">
+    <a class="bouton" href="{% url 'tresorerie:payer' %}">Payer par mobile money</a>
+    <a class="bouton bouton--secondaire" href="{% url 'tresorerie:payer_pour' %}">Payer pour un autre membre</a>
+  </div>
   <h2>Mes versements</h2>
   <ul class="fonctions">
     {% for v in versements %}

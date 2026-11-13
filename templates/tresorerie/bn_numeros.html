@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Numéros des trésoriers — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Numéros mobile money des bureaux</h1>
+  <p class="aide">Le numéro de chaque bureau est celui de son Trésorier (ou du Chef pendant une vacance) : il sert aux paiements au nom du bureau et reçoit les reversements mensuels. Seul le Bureau national l'enregistre.</p>
+  <form method="get" class="recherche"><input type="search" name="q" value="{{ q }}" placeholder="Rechercher une région, un circuit, une paroisse"><button class="bouton bouton--secondaire">Rechercher</button></form>
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Bureau</th><th>Numéro</th><th>Titulaire</th><th></th></tr></thead>
+    <tbody>{% for u, n in lignes %}
+      <tr><form method="post">{% csrf_token %}<input type="hidden" name="cle" value="{{ u.cle }}"><input type="hidden" name="q" value="{{ q }}">
+        <td>{{ u.libelle }}</td>
+        <td><input name="numero" value="{{ n.numero|default:'' }}" inputmode="tel" required aria-label="Numéro de {{ u.libelle }}"></td>
+        <td><input name="titulaire" value="{{ n.titulaire|default:'' }}" aria-label="Titulaire"></td>
+        <td><button class="bouton bouton--secondaire">Enregistrer</button></td></form></tr>
+    {% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

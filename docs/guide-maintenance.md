@@ -387,3 +387,40 @@ base neuve : mêmes nombres de membres et d'entrées du journal).
   un nouveau mot de passe provisoire. Le message de bienvenue (site + e-mail) ne contient jamais le mot
   de passe.
 
+
+## 25. Événements (sections, rôles), notifications, vérification, statistiques, trésorerie
+
+- **Événements** : `Evenement.avec_sections` ; le modèle `Session` porte les **sections**.
+  `Convocation.role` (travailleur, superviseur ou bureau), `formule` (vide = déduite du rôle) et
+  `bureau_libelle`. Recherche des membres à convoquer : `/evenements/<pk>/recherche-membres/?q=`
+  (BN, JSON).
+- **Notifications** : `notifications/services.py::resoudre_lien`. Un lien « membre:<matricule> »
+  s'ouvre selon les droits de chacun (gardien des périmètres). Le clic passe par
+  `/notifications/<pk>/`, qui marque la notification lue.
+- **Vérifier un membre** : `/bureau/verifier/`.
+  - Droits : `perimetre.unites_verification` (Chef et Secrétaire seulement).
+  - Carte : `membres/verification.py::carte_de`.
+  - Journal : `verification_membre`.
+- **Statistiques** :
+  - `listes/statistiques.py::colonnes_pour` (colonnes selon les paramètres) ;
+  - `ages_debut_fin` (âge de début et de fin) ;
+  - plus de tableaux croisés sur la page ;
+  - interface (cascade, listes déroulantes, recherche) : `static/js/site.js`.
+- **Trésorerie** (`apps/tresorerie`, `services.py` SEUL point d'écriture) :
+  - Plateforme de paiement **simulée** : `/tresorerie/paiement/<référence>/`. Pour brancher une vraie
+    plateforme, son retour signé appellera `services.confirmer_paiement` (idempotent).
+  - Paiement mensuel :
+    - le service `cotisations/services.py::enregistrer_mobile_money` crée un versement **validé** en
+      mode `mobile_money`, avec reçu et parts ;
+    - un conflit (mois déjà payé entre-temps) met le paiement en « anomalie » (à régulariser par le
+      BN).
+  - Rôles :
+    - `perimetre.tresoriers`, `unites_tresorerie` (le Trésorier agit, le Chef est intérimaire, le
+      Chef et le Secrétaire sont en lecture) ;
+    - `est_tresorier_national` (prépare et envoie) ;
+    - `est_validateur_reversements` (Président ou Secrétaire national).
+  - Reversements : `preparer_reversements` (mois terminé) → `valider_reversements` → `marquer_envoye`
+    (numéro du bureau obligatoire).
+  - Quittances : `Q<année>-<n°>`.
+- **Démo** : `peupler_demo` crée aussi des cotisations spéciales, quelques paiements simulés et des
+  numéros fictifs.
