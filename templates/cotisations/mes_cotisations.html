@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cotisations %}
 {% block titre %}Mes cotisations — Armée du Salut{% endblock %}
 {% block contenu %}
 <section class="carte">
@@ -6,7 +7,7 @@
   <p class="matricule">{{ membre.matricule }}</p>
   <p><strong>{% if s.a_jour %}À jour au {{ mois|date:"F Y" }}{% else %}En retard de {{ s.retard }} mois ({{ s.reste_du }} F CFA){% endif %}</strong></p>
   <div class="tableau-defilant"><table class="tableau grille-cm">
-    <thead><tr>{% for c in cases %}<th>{{ c.nom|slice:":3" }}</th>{% endfor %}</tr></thead>
+    <thead><tr>{% for c in cases %}<th>{{ c.nom|mois_court }}</th>{% endfor %}</tr></thead>
     <tbody><tr>{% for c in cases %}<td class="case case--{{ c.etat }}">{% if c.etat == "paye" %}✓{% elif c.etat == "attente" %}…{% elif c.etat == "du" %}!{% else %}—{% endif %}</td>{% endfor %}</tr></tbody>
   </table></div>
   <p class="aide">✓ payé · … en attente de validation · ! dû, non payé · — non dû</p>

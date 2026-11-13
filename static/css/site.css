@@ -194,6 +194,7 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
 .croise th[scope="row"], .croise thead th:first-child { text-align: left; white-space: nowrap; }
 .croise .nombre { font-weight: 700; color: var(--marine); }
 .grille-cm td, .grille-cm th { text-align: center; padding: 4px; }
+.grille-cm td.case { display: table-cell; margin: 0; }
 .grille-cm th[scope="row"] { text-align: left; white-space: nowrap; }
 .case--paye { background: #E3F4E8; color: #1F6B3A; font-weight: 700; }
 .case--attente { background: #FFF6D6; }
