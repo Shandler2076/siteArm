@@ -30,16 +30,31 @@ Ce qu'il faut :
 - une **notification** (et un e-mail) aux destinataires, qui ouvrent le courrier sur le site ;
 - un **registre des courriers** (numéro, date, objet, destinataires), consultable par le BN.
 
-Questions à poser au mainteneur avant de réaliser :
-- Dans un bureau destinataire, qui lit le courrier : tout le bureau (titulaires de gestion), ou
-  seulement le Chef et le Secrétaire ?
-- Les destinataires peuvent-ils **répondre** sur le site, ou seulement lire ?
-- Faut-il un **accusé de lecture** (le BN voit qui a ouvert le courrier) ?
-- Numéro d'ordre : format libre (ex. « 012/BNC/SN/2026 ») ou automatique avec modification possible ?
-- Signataires : le Président seul, ou le Président et le Secrétaire national ?
-- Un communiqué peut-il être **public pour tous les membres** (affiché dans leur espace), ou
-  toujours réservé aux bureaux ?
-- Les bureaux de région, de circuit ou de paroisse peuvent-ils aussi écrire, à leurs propres
-  membres ou à leurs bureaux inférieurs ?
+Décisions du mainteneur (13/11/2026) :
+- **Qui reçoit dans un bureau** : seulement le **responsable** du bureau (Secrétaire, Président ou
+  Chef, selon le niveau ; la dénomination importe peu). Il lit le courrier et en fait part aux
+  membres.
+- **Les membres ne reçoivent pas directement** un courrier qui ne leur est pas adressé. Un courrier
+  qui concerne tout le monde va au responsable de chaque bureau destinataire.
+- **Communiqué visible par un membre** : seulement s'il lui est adressé directement. Sinon, les
+  membres le voient sur WhatsApp, ou le bureau de leur paroisse peut le **leur transmettre** sur le
+  site.
+- **Accusé de réception et accusé de lecture** : obligatoires. Le site note quand le responsable a
+  reçu et quand il a ouvert le courrier, et l'expéditeur le voit.
+- **Signature : le Président seul.**
+- **Numéro d'ordre** : format du type « 012… ». Le format exact sera défini **lundi 16/11/2026 à
+  8 h** à partir d'exemplaires que le mainteneur fournira (rappel programmé).
+- **Les bureaux de région, de circuit et de paroisse peuvent aussi écrire** : au Bureau national, ou
+  à un niveau inférieur.
+
+Questions à préparer pour la séance de lundi :
+- Exemplaires de courriers et de communiqués : en-tête exact, mentions, place du numéro, de la date,
+  de l'objet et de la signature.
+- Format du numéro d'ordre : numéro, sigle du bureau, sigle du signataire, année ? Remise à zéro
+  chaque année ?
+- Un bureau local qui écrit : qui signe (son Président ou son Chef) et quel numéro d'ordre (propre à
+  chaque bureau) ?
+- « Répondre » : seulement les accusés, ou aussi une réponse écrite rattachée au courrier ?
+- Pièces jointes (PDF, photos) : autorisées ?
 
 *(À compléter au fil des remarques du mainteneur.)*
