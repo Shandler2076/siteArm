@@ -81,7 +81,13 @@ def fiche(request, matricule):
         matricule=matricule,
     )
     journaliser(request.user, journal.CONSULTATION_FICHE, unite="national", membre=matricule)
-    return render(request, "membres/bn_fiche.html", {"membre": membre})
+    from apps.membres.rubriques import contexte_rubriques
+
+    return render(
+        request,
+        "membres/bn_fiche.html",
+        {"membre": membre, **contexte_rubriques(request, membre, avec_evenements=True)},
+    )
 
 
 def _reponse_pdf(contenu: bytes, matricule: str) -> HttpResponse:

@@ -49,7 +49,7 @@ def test_commande_rappel(monde, depart):
         date_saisie=timezone.now() - datetime.timedelta(days=40)
     )
     sortie = io.StringIO()
-    call_command("rappel_cotisations", stdout=sortie)
+    call_command("rappel_cotisations", forcer=True, stdout=sortie)
     assert "1 versement" in sortie.getvalue()
 
 

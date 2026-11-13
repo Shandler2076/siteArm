@@ -804,8 +804,9 @@ Choix retenus par défaut, sauf avis contraire du BNC :
 
 1. Le **reçu** est produit **après la validation** du circuit (un versement refusé ne doit pas avoir
    de reçu).
-2. Les versements non validés depuis **30 jours** font l'objet d'un **rappel automatique** au bureau du
-   circuit (tâche quotidienne).
+2. Les versements non validés depuis **30 jours** font l'objet d'un **rappel chaque samedi**, envoyé
+   au **Secrétaire de circuit** (sur le site et par e-mail) ; à défaut, aux autres responsables du
+   circuit (décision du 12 novembre 2026).
 
 Ces données nouvelles (grade, versements) seront ajoutées à la page « Protection de vos données » et
 au dossier APDP.

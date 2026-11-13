@@ -156,6 +156,18 @@ def peut_imprimer_autorisation(compte, convocation) -> bool:
     return a is not None and Unite(Niveau.PAROISSE, a.paroisse) in unites_gerees(compte)
 
 
+def secretaires(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
+    """Comptes des Secrétaires (en fonction) de l'unité : Secrétaire de Circuit, régional…"""
+    mandats = Mandat.objects.en_cours(jour).filter(
+        fonction__niveau=unite.niveau,
+        fonction__nom__startswith="Secrétaire",
+        membre__statut=Statut.ACTIF,
+    )
+    if unite.objet is not None:
+        mandats = mandats.filter(**{unite.niveau: unite.objet})
+    return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
+
+
 def titulaires_cotisations(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
     mandats = _mandats_cotisations(jour).filter(fonction__niveau=unite.niveau)
     if unite.objet is not None:

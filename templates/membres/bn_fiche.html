@@ -5,6 +5,10 @@
 <section class="carte">
   <p class="matricule">{{ membre.matricule }}</p>
   <h1>{{ membre.nom_complet }}</h1>
+  {% include "membres/_rubriques_nav.html" %}
+  {% if rubrique == "cotisations" %}{% include "membres/_rubrique_cotisations.html" %}
+  {% elif rubrique == "evenements" %}{% include "membres/_rubrique_evenements.html" %}
+  {% else %}
   <dl class="fiche">
     <dt>Grade</dt><dd>{{ membre.get_grade_display|default:"Non renseigné" }}{% if membre.date_grade %} <small class="aide">depuis le {{ membre.date_grade|date:"d/m/Y" }}</small>{% endif %}</dd>
     <dt>Catégorie</dt><dd>{{ membre.get_categorie_display }}</dd>
@@ -37,5 +41,6 @@
     <a class="bouton bouton--secondaire" href="{% url 'membres:bn_corriger' membre.matricule %}">Correction exceptionnelle (intégration)</a>
   </div>
   {% endblock %}
+  {% endif %}
 </section>
 {% endblock %}

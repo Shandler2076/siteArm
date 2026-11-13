@@ -439,10 +439,20 @@ def regler(*, par, mois_depart: datetime.date | None = None, tarif: dict | None 
         )
 
 
-def rappeler_en_attente(jour: datetime.date) -> int:
-    """Rappel aux circuits : versements en attente depuis plus de 30 jours. Rend leur nombre."""
-    from apps.bureaux.perimetre import Unite
+JOUR_DU_RAPPEL = 5  # samedi (lundi = 0)
 
+
+def rappeler_en_attente(jour: datetime.date, forcer: bool = False) -> int:
+    """Rappel hebdomadaire (le samedi) : versements en attente depuis plus de 30 jours.
+
+    Il part au Secrétaire de circuit (sur le site et par e-mail s'il en a un) ; à défaut, aux
+    autres responsables du circuit. Rend le nombre de versements concernés.
+    """
+    from apps.bureaux.perimetre import Unite, secretaires, titulaires_cotisations
+    from apps.notifications.services import notifier
+
+    if jour.weekday() != JOUR_DU_RAPPEL and not forcer:
+        return 0
     limite = timezone.make_aware(
         datetime.datetime.combine(
             jour - datetime.timedelta(days=DELAI_RAPPEL_JOURS), datetime.time()
@@ -454,11 +464,13 @@ def rappeler_en_attente(jour: datetime.date) -> int:
     ).select_related("paroisse__circuit"):
         par_circuit.setdefault(v.paroisse.circuit, []).append(v)
     for circuit, liste in par_circuit.items():
-        _notifier_unite(
-            Unite("circuit", circuit),
-            f"Rappel : {len(liste)} versement(s) de cotisation attendent votre validation depuis "
-            f"plus de {DELAI_RAPPEL_JOURS} jours.",
+        unite = Unite("circuit", circuit)
+        destinataires = list(secretaires(unite)) or list(titulaires_cotisations(unite))
+        texte = (
+            f"Rappel du samedi : {len(liste)} versement(s) de cotisation attendent votre "
+            f"validation depuis plus de {DELAI_RAPPEL_JOURS} jours ({unite.libelle})."
         )
+        transaction.on_commit(lambda d=destinataires, t=texte: notifier(d, t))
     return sum(len(x) for x in par_circuit.values())
 
 
