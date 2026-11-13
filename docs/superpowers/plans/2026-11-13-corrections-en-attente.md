@@ -104,7 +104,19 @@
 3. **Présentation par sous-cases dépliables**, plutôt que tout aligné : « Par grade » se déplie pour
    montrer chaque grade, « Par catégorie » ses catégories, « Par région » ses régions, etc. Une
    présentation élégante, lisible sur téléphone, sans défilement horizontal.
-4. **Recherche dans les longues listes à cocher** (paroisses, circuits) : un champ de recherche au-dessus
+4. **Combiner les paramètres (réponse du mainteneur)** : on choisit une ou plusieurs valeurs pour
+   chaque paramètre (ex. Région : la région concernée ; Grade : le grade concerné). Le site **croise**
+   ces choix et donne le résultat recherché (ex. les Capitaines de la région WEME), au lieu de tout
+   détailler.
+5. **Colonnes de la liste générée** :
+   - toujours affichées : **matricule, nom, prénoms, sexe, téléphone** ;
+   - les autres colonnes n'apparaissent **que si le paramètre correspondant a été choisi** :
+     - l'âge, seulement si l'âge (tranche d'âge) est un paramètre ;
+     - la paroisse, seulement si la paroisse est un paramètre (si on a choisi seulement une région,
+       on n'a pas besoin de la paroisse) ;
+     - le grade, la catégorie, la région, le circuit, etc., suivent la même règle ;
+   - pour en savoir plus sur une personne, on clique sur son matricule et on ouvre sa fiche.
+6. **Recherche dans les longues listes à cocher** (paroisses, circuits) : un champ de recherche au-dessus
    de chaque liste, pour trouver et cocher sans tout faire défiler. Cela vaut pour les statistiques,
    les listes et la convocation.
 
@@ -125,9 +137,6 @@
 - Filtres de convocation : lesquels garder visibles par défaut ? Proposition :
   - visibles : recherche, Région / Circuit / Paroisse, Grade, Statut ;
   - repliés sous « Plus de filtres » : le reste.
-- Statistiques : quand deux paramètres sont cochés (ex. région + grade), faut-il un détail emboîté
-  (chaque région se déplie en grades), ou deux répartitions séparées ? Proposition : emboîté, au plus
-  deux niveaux.
 - Date passée : simple avertissement (on peut confirmer, ex. pour saisir un événement déjà tenu), ou
   refus ?
 
