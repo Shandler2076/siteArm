@@ -130,4 +130,21 @@ Constat : en changeant de mois, on ne voyait pas si l'état serait généré aut
 4. **Démonstration** : des paiements mobile money (simulés) de cotisations mensuelles dans les mois
    passés, pour pouvoir essayer les trois étapes sur le site d'essai.
 
+## 7. Accueil : afficher le matricule
+
+Sur la page d'accueil (Mon espace → Accueil), sous « Bienvenue, Grade Prénoms NOM », afficher aussi
+le **matricule** du membre, bien visible, sans qu'il ait à ouvrir sa fiche.
+
+## 8. « Changement de catégorie » : à revoir (analyse en cours avec le mainteneur)
+
+Remarque du mainteneur : il n'y a pas lieu de faire des « changements de catégorie » (comme si un
+membre voulait quitter la catégorie active pour devenir membre d'honneur ou sympathisant).
+
+Ce que dit le règlement intérieur :
+- art. 25 : trois catégories (actifs, d'honneur, sympathisants) ;
+- art. 27 : la qualité de membre d'honneur est **accordée par le mouvement**, en reconnaissance ;
+- art. 87 : elle **ne constitue pas un grade** et ne modifie pas le grade détenu.
+
+L'analyse et les options sont proposées au mainteneur. La décision sera reportée ici.
+
 *(À compléter au fil des remarques du mainteneur.)*
