@@ -64,6 +64,12 @@ def resoudre_lien(compte, lien: str) -> str | None:
             if membres_visibles(unite).filter(pk=membre.pk).exists():
                 return f"/bureau/{unite.cle}/membres/{matricule}/"
         return None
-    if lien.startswith("/") and not lien.startswith("//"):
+    from django.utils.http import url_has_allowed_host_and_scheme
+
+    if (
+        lien.startswith("/")
+        and "\\" not in lien
+        and url_has_allowed_host_and_scheme(lien, allowed_hosts=None)
+    ):
         return lien
     return None

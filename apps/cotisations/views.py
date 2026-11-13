@@ -21,6 +21,7 @@ from apps.bureaux.perimetre import (
 from apps.cotisations.forms import AnnulationForm, VersementForm
 from apps.cotisations.models import (
     EtatVersement,
+    ModeVersement,
     NiveauPart,
     ParametresCotisations,
     PartRecue,
@@ -266,9 +267,11 @@ def classer_paroisses(paroisses, niveau: str) -> list[dict]:
         .annotate(n=Count("membre", distinct=True))
     )
     couples = defaultdict(set)
-    for paroisse_id, date_validation in Versement.objects.filter(
-        paroisse__in=paroisses, etat=EtatVersement.VALIDE
-    ).values_list("paroisse_id", "date_validation"):
+    for paroisse_id, date_validation in (
+        Versement.objects.filter(paroisse__in=paroisses, etat=EtatVersement.VALIDE)
+        .exclude(mode=ModeVersement.MOBILE_MONEY)  # parts reversées par le BN (trésorerie)
+        .values_list("paroisse_id", "date_validation")
+    ):
         couples[paroisse_id].add(premier_du_mois(timezone.localdate(date_validation)))
     recues = {
         (p.paroisse_id, p.mois_validation): p
@@ -354,7 +357,7 @@ def tableau_de_bord(unite: Unite, jour: datetime.date) -> dict:
     versements = Versement.objects.filter(paroisse__in=paroisses)
     valides = versements.filter(
         etat=EtatVersement.VALIDE, date_validation__year=mois.year
-    ).values_list("montant", "parts")
+    ).values_list("montant", "parts", "mode")
     niveau = _niveau_part(unite)
     recue = None
     if unite.niveau != Niveau.PAROISSE:
@@ -368,11 +371,14 @@ def tableau_de_bord(unite: Unite, jour: datetime.date) -> dict:
         "a_jour": a_jour,
         "en_retard": len(sit) - a_jour,
         "reste_du": sum(s.reste_du for s in sit),
-        "valide": sum(m for m, _p in valides),
+        "valide": sum(m for m, _p, _mode in valides),
         "en_attente": sum(
             versements.filter(etat=EtatVersement.EN_ATTENTE).values_list("montant", flat=True)
         ),
-        "part": sum(int(p.get(niveau, 0)) for _m, p in valides),
+        # Part due par la chaîne des espèces ; celle du mobile money est reversée par le BN.
+        "part": sum(
+            int(p.get(niveau, 0)) for _m, p, mode in valides if mode != ModeVersement.MOBILE_MONEY
+        ),
         "part_recue": recue,
         "a_valider": versements.filter(etat=EtatVersement.EN_ATTENTE).count()
         if unite.niveau == Niveau.CIRCUIT

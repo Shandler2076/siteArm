@@ -210,12 +210,29 @@ def speciales_du_bureau(unite: Unite) -> list[dict]:
 # --- Paiements (le paiement part toujours du site) ------------------------------------------------
 
 
+def paiement_ouvert() -> bool:
+    """Un paiement ne peut partir que si une plateforme est disponible. Aujourd'hui, seule la
+    plateforme simulée existe, et elle n'est permise que sur le site d'essai (PAIEMENT_SIMULE)."""
+    from django.conf import settings
+
+    return bool(getattr(settings, "PAIEMENT_SIMULE", False))
+
+
+def _verifier_ouvert() -> None:
+    if not paiement_ouvert():
+        raise TresorerieRefusee(
+            "Le paiement mobile money n'est pas encore ouvert : la plateforme de paiement n'est "
+            "pas encore choisie par le Bureau national."
+        )
+
+
 def _reference() -> str:
     return f"AS{timezone.localtime():%y%m%d}-{secrets.token_hex(4).upper()}"
 
 
 def initier_paiement_mensuel(payeur, lignes) -> Paiement:
     """`lignes` : [(membre, nombre de mois)]. Les mois payés sont les plus anciens mois dus."""
+    _verifier_ouvert()
     from apps.cotisations.services import CotisationRefusee, prochains_mois
 
     objet, total, noms = [], 0, []
@@ -223,7 +240,7 @@ def initier_paiement_mensuel(payeur, lignes) -> Paiement:
         if not nombre:
             continue
         try:
-            mois = prochains_mois(membre, int(nombre))
+            mois = prochains_mois(membre, int(nombre), exclus=_mois_reserves(membre))
         except CotisationRefusee as e:
             raise TresorerieRefusee(f"{membre.matricule} : {e}") from e
         objet.append(
@@ -250,6 +267,7 @@ def initier_paiement_mensuel(payeur, lignes) -> Paiement:
 def initier_paiement_special(
     payeur, cs: CotisationSpeciale, montant: int, *, membre=None, unite: Unite | None = None
 ) -> Paiement:
+    _verifier_ouvert()
     if not cs.ouverte:
         raise TresorerieRefusee("Cette cotisation spéciale est close.")
     if (membre is None) == (unite is None):
@@ -262,6 +280,8 @@ def initier_paiement_special(
         raise TresorerieRefusee("Le montant doit être positif.")
     cle = unite.cle if unite else ""
     reste = reste_a_payer(cs, membre=membre, unite_cle=cle)
+    if reste is not None:
+        reste = max(0, reste - _en_cours_special(cs, membre=membre, unite_cle=cle))
     if cs.type_montant == TypeMontant.FIXE and montant > reste:
         raise TresorerieRefusee(f"Le montant dépasse ce qu'il reste à payer ({reste} F).")
     objet = (
@@ -279,6 +299,41 @@ def initier_paiement_special(
         objet=objet,
         description=f"{cs.libelle} — {pour}"[:300],
     )
+
+
+DELAI_PAIEMENT = datetime.timedelta(minutes=30)
+
+
+def _en_cours():
+    """Paiements encore en attente de confirmation (au-delà de 30 minutes : abandonnés)."""
+    return Paiement.objects.filter(
+        etat=EtatPaiement.EN_ATTENTE, date_creation__gte=timezone.now() - DELAI_PAIEMENT
+    )
+
+
+def _mois_reserves(membre) -> set[datetime.date]:
+    """Mois déjà retenus par un paiement en cours : un second paiement simultané prend les
+    mois suivants au lieu de payer deux fois le même mois."""
+    reserves = set()
+    for objet in (
+        _en_cours().filter(nature=NaturePaiement.MENSUELLE).values_list("objet", flat=True)
+    ):
+        for ligne in objet.get("lignes", []):
+            if ligne.get("membre") == membre.pk:
+                reserves.update(datetime.date.fromisoformat(m) for m in ligne["mois"])
+    return reserves
+
+
+def _en_cours_special(cs, membre=None, unite_cle: str = "") -> int:
+    total = 0
+    for objet, montant in (
+        _en_cours().filter(cotisation_speciale=cs).values_list("objet", "montant")
+    ):
+        if (membre is not None and objet.get("membre") == membre.pk) or (
+            unite_cle and objet.get("unite") == unite_cle
+        ):
+            total += montant
+    return total
 
 
 def _numero_quittance(jour: datetime.date) -> str:
@@ -313,6 +368,8 @@ def confirmer_paiement(paiement: Paiement) -> Paiement:
     from apps.cotisations.services import CotisationRefusee, enregistrer_mobile_money
     from apps.notifications.services import notifier
 
+    if p_simule_interdit(paiement):
+        raise TresorerieRefusee("Paiement simulé refusé : le site n'est pas un site d'essai.")
     with transaction.atomic():
         p = Paiement.objects.select_for_update().get(pk=paiement.pk)
         if p.etat != EtatPaiement.EN_ATTENTE:
@@ -343,16 +400,22 @@ def confirmer_paiement(paiement: Paiement) -> Paiement:
 def _appliquer_mensuel(p, payeur, enregistrer_mobile_money):
     from apps.notifications.services import notifier
 
+    total = 0
     for ligne in p.objet.get("lignes", []):
         membre = Membre.objects.get(pk=ligne["membre"])
         mois = [datetime.date.fromisoformat(m) for m in ligne["mois"]]
         v = enregistrer_mobile_money(membre, mois=mois, reference=p.reference, par=payeur)
+        total += v.montant
         if membre.compte_id != payeur.pk:
             texte = (
                 f"Cotisation de {membre.nom_complet} payée par mobile money par un autre membre "
                 f"({v.montant} F, reçu {v.numero_recu})."
             )
             transaction.on_commit(lambda m=membre, t=texte: _avertir_paroisse(m, t))
+    if total != p.montant:  # tarif changé entre-temps : rien n'est enregistré (anomalie)
+        raise TresorerieRefusee(
+            f"Le montant payé ({p.montant} F) ne correspond plus aux mois ({total} F)."
+        )
     texte = f"Paiement confirmé : {p.montant} F ({p.description})."
     transaction.on_commit(lambda: notifier([payeur], texte, "/cotisations/moi/"))
 
@@ -366,6 +429,14 @@ def _appliquer_special(p, payeur):
     unite = unite_par_cle(p.objet.get("unite", "")) if not membre else None
     if membre is None and unite is None:
         raise TresorerieRefusee("Bénéficiaire du paiement introuvable.")
+    cle = unite.cle if unite else ""
+    reste = reste_a_payer(cs, membre=membre, unite_cle=cle)
+    if cs.type_montant == TypeMontant.FIXE and p.montant > reste:
+        raise TresorerieRefusee(f"Le montant dépasse ce qu'il reste à payer ({reste} F).")
+    from apps.cotisations.models import ParametresCotisations
+
+    # Verrou unique pour la numérotation des quittances (comme pour les reçus).
+    ParametresCotisations.objects.select_for_update().get(pk=ParametresCotisations.courant().pk)
     c = Contribution.objects.create(
         cotisation=cs,
         membre=membre,
@@ -396,6 +467,10 @@ def _appliquer_special(p, payeur):
         transaction.on_commit(lambda: notifier(list(tresoriers(unite)), texte, lien))
     if (membre is None or membre.compte_id != payeur.pk) and payeur is not None:
         transaction.on_commit(lambda: notifier([payeur], f"Paiement confirmé — {texte}", lien))
+
+
+def p_simule_interdit(paiement: Paiement) -> bool:
+    return paiement.plateforme == "simulee" and not paiement_ouvert()
 
 
 def echouer_paiement(paiement: Paiement, message: str = "Paiement annulé ou refusé.") -> Paiement:
@@ -453,7 +528,12 @@ def preparer_reversements(mois: datetime.date, *, par) -> list[Reversement]:
     faits = []
     with transaction.atomic():
         existants = {r.cle: r for r in Reversement.objects.select_for_update().filter(mois=mois)}
-        for cle, ligne in parts_du_mois(mois).items():
+        parts = parts_du_mois(mois)
+        for cle, r in existants.items():  # part tombée à zéro depuis la préparation
+            if cle not in parts and r.etat == EtatReversement.PREPARE and r.montant:
+                r.montant = 0
+                r.save(update_fields=["montant"])
+        for cle, ligne in parts.items():
             r = existants.get(cle)
             if r is not None and r.etat != EtatReversement.PREPARE:
                 continue
@@ -474,10 +554,17 @@ def valider_reversements(mois: datetime.date, *, par) -> int:
     mois = _premier(mois)
     with transaction.atomic():
         a_valider = list(
-            Reversement.objects.select_for_update().filter(mois=mois, etat=EtatReversement.PREPARE)
+            Reversement.objects.select_for_update().filter(
+                mois=mois, etat=EtatReversement.PREPARE, montant__gt=0
+            )
         )
         if not a_valider:
             raise TresorerieRefusee("Aucun reversement préparé à valider pour ce mois.")
+        if any(r.prepare_par_id == getattr(par, "pk", None) for r in a_valider):
+            raise TresorerieRefusee(
+                "Celui qui a préparé l'état ne peut pas le valider : le Président ou le "
+                "Secrétaire national valide."
+            )
         maintenant = timezone.now()
         for r in a_valider:
             r.etat, r.valide_par, r.date_validation = EtatReversement.VALIDE, par, maintenant

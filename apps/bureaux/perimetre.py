@@ -313,10 +313,10 @@ def peut_voir_tresorerie(compte, unite: Unite) -> bool:
 
 
 def _a_fonction_nationale(compte, noms) -> bool:
+    # Pas de raccourci pour le compte technique : la séparation des rôles (préparer, valider,
+    # envoyer) ne repose que sur de vrais mandats.
     if not getattr(compte, "is_authenticated", False) or not compte.is_active:
         return False
-    if compte.is_superuser:
-        return True
     return (
         Mandat.objects.en_cours()
         .filter(

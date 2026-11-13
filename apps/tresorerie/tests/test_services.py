@@ -46,9 +46,16 @@ def test_payer_pour_un_autre_membre(tresoriers, ouvert, django_capture_on_commit
 
 def test_paiement_en_conflit_devient_anomalie(tresoriers, ouvert):
     m1 = tresoriers["m1"]
+    from apps.tresorerie.models import Paiement
+
     p1 = s.initier_paiement_mensuel(m1.compte, [(m1, 1)])
-    p2 = s.initier_paiement_mensuel(m1.compte, [(m1, 1)])  # même mois, initié avant confirmation
-    s.confirmer_paiement(p1)
+    # p1 abandonné depuis plus de 30 minutes : sa réservation tombe, p2 reprend le même mois.
+    Paiement.objects.filter(pk=p1.pk).update(
+        date_creation=timezone.now() - datetime.timedelta(hours=1)
+    )
+    p2 = s.initier_paiement_mensuel(m1.compte, [(m1, 1)])
+    assert p2.objet["lignes"][0]["mois"] == p1.objet["lignes"][0]["mois"]
+    s.confirmer_paiement(p1)  # confirmé tardivement par la plateforme
     p2 = s.confirmer_paiement(p2)
     assert p2.etat == EtatPaiement.ANOMALIE and Versement.objects.filter(membre=m1).count() == 1
 
@@ -143,3 +150,81 @@ def test_tresorier_ou_chef_par_interim(tresoriers):
     # Circuit sans Trésorier : le Chef assure l'intérim.
     circuit = Unite("circuit", tresoriers["Ekpe A"])
     assert list(tres(circuit)) == [tresoriers["chef"].compte]
+
+
+# --- Corrections de la relecture finale ---------------------------------------------------------
+
+
+def test_mobile_money_ne_compte_pas_dans_les_parts_dues_par_la_paroisse(tresoriers, ouvert):
+    from apps.cotisations.services import part_due
+
+    m1 = tresoriers["m1"]
+    s.confirmer_paiement(s.initier_paiement_mensuel(m1.compte, [(m1, 1)]))
+    mois = timezone.localdate().replace(day=1)
+    assert part_due("circuit", tresoriers["P1"], mois) == 0
+
+
+def test_paiements_simultanes_ne_paient_pas_deux_fois_le_meme_mois(tresoriers, ouvert):
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    p1 = s.initier_paiement_mensuel(m1.compte, [(m1, 1)])
+    p2 = s.initier_paiement_mensuel(m2.compte, [(m1, 1)])  # aide simultanée
+    assert p1.objet["lignes"][0]["mois"] != p2.objet["lignes"][0]["mois"]
+    assert s.confirmer_paiement(p1).etat == EtatPaiement.CONFIRME
+    assert s.confirmer_paiement(p2).etat == EtatPaiement.CONFIRME
+
+
+def test_cotisation_fixe_deux_paiements_en_cours_ne_depassent_pas(tresoriers, compte_technique):
+    m1 = tresoriers["m1"]
+    cs = s.creer_cotisation_speciale(
+        libelle="Siège", type_montant="fixe", montant=1000, par=compte_technique
+    )
+    s.initier_paiement_special(m1.compte, cs, 1000, membre=m1)
+    with pytest.raises(s.TresorerieRefusee):
+        s.initier_paiement_special(m1.compte, cs, 500, membre=m1)
+
+
+def test_montant_change_entre_temps_devient_anomalie(tresoriers, ouvert):
+    from apps.tresorerie.models import Paiement
+
+    m1 = tresoriers["m1"]
+    p = s.initier_paiement_mensuel(m1.compte, [(m1, 1)])
+    Paiement.objects.filter(pk=p.pk).update(montant=150)  # tarif changé entre-temps
+    p.refresh_from_db()
+    assert s.confirmer_paiement(p).etat == EtatPaiement.ANOMALIE
+    assert not Versement.objects.filter(membre=m1).exists()
+
+
+def test_paiement_simule_ferme_hors_site_d_essai(tresoriers, ouvert, settings):
+    m1 = tresoriers["m1"]
+    p = s.initier_paiement_mensuel(m1.compte, [(m1, 1)])
+    settings.PAIEMENT_SIMULE = False
+    with pytest.raises(s.TresorerieRefusee):
+        s.initier_paiement_mensuel(m1.compte, [(m1, 1)])
+    with pytest.raises(s.TresorerieRefusee):
+        s.confirmer_paiement(p)
+
+
+def test_qui_prepare_ne_valide_pas_et_pas_de_raccourci_technique(
+    tresoriers, ouvert, compte_technique, monkeypatch
+):
+    from apps.bureaux.perimetre import est_tresorier_national, est_validateur_reversements
+
+    assert not est_tresorier_national(compte_technique)
+    assert not est_validateur_reversements(compte_technique)
+    m1 = tresoriers["m1"]
+    s.confirmer_paiement(s.initier_paiement_mensuel(m1.compte, [(m1, 1)]))
+    mois = timezone.localdate().replace(day=1)
+    plus_tard = timezone.localdate() + datetime.timedelta(days=40)
+    monkeypatch.setattr(s.timezone, "localdate", lambda *a: plus_tard)
+    tn = tresoriers["tresorier_national"].compte
+    s.preparer_reversements(mois, par=tn)
+    with pytest.raises(s.TresorerieRefusee):
+        s.valider_reversements(mois, par=tn)
+
+
+def test_lien_de_notification_externe_refuse(tresoriers):
+    from apps.notifications.services import resoudre_lien
+
+    compte = tresoriers["m1"].compte
+    for lien in ("//exemple.org/", "/\\exemple.org/", "https://exemple.org/"):
+        assert resoudre_lien(compte, lien) is None

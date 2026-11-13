@@ -23,7 +23,7 @@ from apps.bureaux.perimetre import (
     peut_voir_cotisations_de,
     peut_voir_tresorerie,
 )
-from apps.membres.models import Membre
+from apps.membres.models import Membre, Statut
 from apps.tresorerie import services as s
 from apps.tresorerie.models import (
     Contribution,
@@ -104,7 +104,14 @@ def payer_pour(request):
     if _membre(request.user) is None and not _bn(request.user):
         raise Http404
     matricule = (request.POST.get("matricule") or request.GET.get("matricule") or "").strip()
-    beneficiaire = Membre.objects.filter(matricule=matricule.upper()).first() if matricule else None
+    beneficiaire = (
+        Membre.objects.filter(
+            matricule=matricule.upper(), statut__in=[Statut.ACTIF, Statut.SANCTIONNE]
+        ).first()
+        if matricule
+        else None
+    )
+    soi_meme = beneficiaire is not None and beneficiaire.compte_id == request.user.pk
     if request.method == "POST" and beneficiaire and request.POST.get("confirmer"):
         try:
             cs_pk = request.POST.get("speciale", "")
@@ -118,10 +125,23 @@ def payer_pour(request):
                     request.user, [(beneficiaire, _entier(request.POST.get("nombre")))]
                 )
         except s.TresorerieRefusee as e:
-            messages.error(request, str(e))
+            # Pour un tiers, message général : ne rien révéler de la situation du membre aidé.
+            messages.error(
+                request,
+                str(e)
+                if soi_meme
+                else "Ce paiement n'est pas possible pour ce membre (nombre de mois ou montant "
+                "trop élevé, ou cotisations non ouvertes). Essayez un montant plus petit.",
+            )
         else:
             return _vers_plateforme(p)
-    speciales = s.speciales_du_membre(beneficiaire) if beneficiaire else []
+    # Seules les cotisations spéciales demandées à TOUS les membres sont proposées : une
+    # cotisation ciblée révélerait le grade, l'âge ou la catégorie du membre aidé.
+    speciales = [
+        x["cs"]
+        for x in (s.speciales_du_membre(beneficiaire) if beneficiaire else [])
+        if x["cs"].pour_membres == PourMembres.TOUS
+    ]
     return render(
         request,
         "tresorerie/payer_pour.html",
@@ -130,7 +150,7 @@ def payer_pour(request):
             "beneficiaire": beneficiaire,
             "confirmation": confirmation_reduite(beneficiaire) if beneficiaire else "",
             "introuvable": bool(matricule) and beneficiaire is None,
-            "speciales": [x for x in speciales if not x["reglee"]],
+            "speciales": speciales,
         },
     )
 
@@ -167,6 +187,8 @@ def payer_speciale(request, pk):
 def paiement(request, reference):
     """Plateforme simulée : seul le payeur voit et confirme son paiement."""
     p = get_object_or_404(Paiement, reference=reference, payeur=request.user)
+    if s.p_simule_interdit(p):
+        raise Http404
     if request.method == "POST" and p.etat == EtatPaiement.EN_ATTENTE:
         if request.POST.get("action") == "confirmer":
             p = s.confirmer_paiement(p)

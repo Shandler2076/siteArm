@@ -112,3 +112,20 @@ def test_reversements_roles(tresoriers):
     )
     html = _h(_c(tresoriers["president"]).get("/tresorerie/bn/reversements/"))
     assert "Valider l'état préparé" in html and "Préparer l'état" not in html
+
+
+def test_payer_pour_ne_revele_pas_les_cotisations_ciblees(tresoriers, compte_technique):
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    s.creer_cotisation_speciale(
+        libelle="Réservée aux Capitaines",
+        type_montant="fixe",
+        montant=1000,
+        pour_membres="certains",
+        criteres={"region": str(tresoriers["HOULENOU"].pk)},
+        par=compte_technique,
+    )
+    s.creer_cotisation_speciale(
+        libelle="Pour tous", type_montant="fixe", montant=500, par=compte_technique
+    )
+    html = _h(_c(m2).get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert "Pour tous" in html and "Réservée aux Capitaines" not in html and "reste" not in html

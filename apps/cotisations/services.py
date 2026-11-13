@@ -139,7 +139,7 @@ def _candidats(s, courant, fin_annee, occupes, avance_permise) -> list[datetime.
     return candidats
 
 
-def prochains_mois(membre, nombre: int, jour: datetime.date | None = None):
+def prochains_mois(membre, nombre: int, jour: datetime.date | None = None, exclus=()):
     """[(mois, prix)] des `nombre` plus anciens mois payables du membre (paiement mobile money).
 
     Lève CotisationRefusee si les cotisations ne sont pas ouvertes ou s'il n'y a pas assez de
@@ -152,7 +152,7 @@ def prochains_mois(membre, nombre: int, jour: datetime.date | None = None):
         raise CotisationRefusee("Choisissez au moins un mois.")
     courant = premier_du_mois(jour or aujourdhui())
     s = situation(membre, courant)
-    occupes = s.payes | s.en_attente
+    occupes = s.payes | s.en_attente | set(exclus)  # exclus : mois d'un paiement en cours
     candidats = _candidats(
         s, courant, courant.replace(month=12), occupes, membre.statut not in HORS_MOUVEMENT
     )
@@ -452,12 +452,18 @@ def part_due(niveau: str, paroisse, mois_validation: datetime.date) -> int:
     debut = premier_du_mois(mois_validation)
     fin = mois_suivant(debut)
     total = 0
-    for parts in Versement.objects.filter(
-        paroisse=paroisse,
-        etat=EtatVersement.VALIDE,
-        date_validation__date__gte=debut,
-        date_validation__date__lt=fin,
-    ).values_list("parts", flat=True):
+    # Les paiements mobile money vont à 100 % au BN, qui reverse lui-même les parts (trésorerie) :
+    # la paroisse ne doit rien à ce titre.
+    for parts in (
+        Versement.objects.filter(
+            paroisse=paroisse,
+            etat=EtatVersement.VALIDE,
+            date_validation__date__gte=debut,
+            date_validation__date__lt=fin,
+        )
+        .exclude(mode=ModeVersement.MOBILE_MONEY)
+        .values_list("parts", flat=True)
+    ):
         total += int(parts.get(niveau, 0))
     return total
 
