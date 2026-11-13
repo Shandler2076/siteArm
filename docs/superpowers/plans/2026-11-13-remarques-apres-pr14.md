@@ -104,4 +104,30 @@ Décisions du mainteneur (13/11/2026) :
 - Unités : le montant demandé à une unité est-il le même pour toutes les unités (ex. 50 000 F par
   paroisse) ? Proposition : oui, un montant par type d'unité.
 
+## 5. Numéros mobile money des bureaux
+
+On garde la page comme elle est : la recherche suffit à trouver un bureau, à saisir son numéro et à
+l'enregistrer (décision du 13/11/2026).
+
+## 6. Reversements mensuels : page plus claire
+
+Constat : en changeant de mois, on ne voyait pas si l'état serait généré automatiquement. En effet :
+- « Afficher » ne fait que choisir le mois ;
+- le bouton « Préparer » n'est visible que du Trésorier national ;
+- le site d'essai n'avait aucun paiement mobile money de cotisation mensuelle dans un mois terminé.
+
+À réaliser :
+1. **Aperçu avant de préparer** : le tableau des parts dues pour le mois choisi (paroisse, circuit,
+   région, montant, numéro du Trésorier) et le total, visibles avant toute préparation.
+2. **Messages clairs** :
+   - « Rien à reverser pour ce mois : aucune cotisation payée par mobile money » ;
+   - « Ce mois n'est pas encore terminé » ;
+   - « En attente de préparation par le Trésorier national » ;
+   - « En attente de validation par le Président ou le Secrétaire national » ;
+   - « Validé : envois à faire ».
+3. **Un rappel des trois étapes** (préparer → valider → envoyer), avec l'étape en cours mise en
+   évidence et le nom de la personne qui doit agir maintenant.
+4. **Démonstration** : des paiements mobile money (simulés) de cotisations mensuelles dans les mois
+   passés, pour pouvoir essayer les trois étapes sur le site d'essai.
+
 *(À compléter au fil des remarques du mainteneur.)*
