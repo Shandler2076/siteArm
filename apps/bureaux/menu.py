@@ -64,7 +64,9 @@ def construire_menu(request) -> list[Groupe]:
     gestion_bn = user.has_perm("membres.gerer_membres")
     national = est_bn(user)
     unites = [u for u in unites_gerees(user) if u.niveau != Niveau.NATIONAL]
-    plusieurs = len(unites) > 1
+    # Plusieurs unités (ou le national en plus d'une unité) : chaque lien porte le nom de l'unité.
+    plusieurs = len(unites) > 1 or (national and bool(unites))
+    national_suffixe = " — national" if national and unites else ""
 
     def suffixe(unite):
         return f" — {unite.libelle}" if plusieurs else ""
@@ -88,7 +90,12 @@ def construire_menu(request) -> list[Groupe]:
             Lien("Photos à valider", reverse("membres:bn_photos")),
         ]
     if national:
-        liens.append(Lien("Demandes", reverse("mouvements:demandes", args=["national"])))
+        liens.append(
+            Lien(
+                f"Demandes{national_suffixe}",
+                reverse("mouvements:demandes", args=["national"]),
+            )
+        )
     if gestion_bn:
         liens.append(
             Lien(
@@ -108,9 +115,7 @@ def construire_menu(request) -> list[Groupe]:
 
     # Listes et statistiques, grades
     cles = (["national"] if national else []) + [u.cle for u in unites]
-    noms = {"national": ""} | {u.cle: suffixe(u) for u in unites}
-    if national and unites:  # le national se distingue alors des autres unités
-        noms["national"] = " — national"
+    noms = {"national": national_suffixe} | {u.cle: suffixe(u) for u in unites}
     listes, grades = [], []
     for cle in cles:
         url_listes = reverse("listes:liste", args=[cle])

@@ -99,3 +99,13 @@ def test_rendu_groupes_repliables(client_technique, monde):
     assert menu.count("<details") == 8
     assert menu.count('<details class="menu__groupe" open') == 1
     assert 'class="actif" aria-current="page">Tous les membres' in menu
+
+
+def test_bn_avec_un_mandat_local_liens_distincts(monde, donner_mandat):
+    sec = monde["sec_p1"]
+    donner_mandat(sec, "Secrétaire national")
+    menu = _menu(sec.compte)
+    libelles = [lien.libelle for g in menu for lien in g.liens]
+    assert len(libelles) == len(set(libelles))
+    assert "Demandes — national" in libelles and "Demandes — Paroisse P1" in libelles
+    assert "Listes — Paroisse P1" in libelles
