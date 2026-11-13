@@ -21,4 +21,24 @@ Décisions du mainteneur :
 - **Téléphone** : une **barre fixe en bas de l'écran**, « N membres sélectionnés — Voir / Convoquer »,
   qui ouvre la liste des sélectionnés (avec le rôle, la section, la formule et le bouton).
 
+## 2. « Invité(e) en tant que » : nouvelle liste de rôles
+
+« Bureau » tout court n'est pas adéquat : il peut y avoir des **bureaux d'organisation**, qui sont
+aussi comme des superviseurs. Nouvelle liste :
+- **Travailleur** ;
+- **Superviseur** ;
+- **Bureau d'organisation** (remplace « Bureau ») ;
+- **Officiel** ;
+- **Autre**, écrit **à la main** (ex. « Chorale », « Protocole », « Secouriste »…). Il peut y avoir
+  **plusieurs** rôles « autres » différents dans un même événement.
+
+Questions à poser au mainteneur avant de réaliser :
+- Quels rôles se rattachent à une **section** ? Proposition : Travailleur et Superviseur ; les autres
+  (Bureau d'organisation, Officiel, Autre) sans section, sauf si on en choisit une.
+- Formule par défaut de chaque rôle : « à travailler » pour Travailleur ; « à participer » pour les
+  autres, toujours modifiable ?
+- « Autre » : un seul rôle écrit par convoqué (ex. « Protocole »), le site gardant en mémoire les rôles
+  déjà écrits pour l'événement afin de les proposer à nouveau ?
+- Pour les membres déjà convoqués « en tant que bureau » : les passer en « Bureau d'organisation » ?
+
 *(À compléter au fil des remarques du mainteneur.)*
