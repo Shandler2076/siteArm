@@ -157,9 +157,11 @@ def creer_amende(sanction, *, montant: int, par) -> CotisationSpeciale:
     """Amende liée à une sanction : en attente chez le membre seul, payée au BN."""
     if not montant or montant <= 0:
         raise TresorerieRefusee("Le montant de l'amende doit être positif.")
+    # Libellé neutre : un tiers qui paie pour le membre ne doit rien apprendre de la faute
+    # (le détail reste dans l'historique de la sanction, visible du membre et du BN).
     return creer_cotisation_speciale(
-        libelle=f"Amende — sanction du {sanction.date_debut:%d/%m/%Y}",
-        description=f"Décision {sanction.reference}",
+        libelle="Amende",
+        description="",
         type_montant=TypeMontant.FIXE,
         montant=montant,
         pour_membres=PourMembres.CERTAINS,

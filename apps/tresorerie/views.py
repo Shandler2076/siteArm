@@ -242,7 +242,7 @@ def quittance(request, pk):
 
 
 def _peut_voir_cle(user, cle) -> bool:
-    unite = s.unite_par_cle(cle)
+    unite = s.unite_par_cle((cle or "").removeprefix("unite:"))
     return unite is not None and peut_voir_tresorerie(user, unite)
 
 
@@ -282,9 +282,9 @@ def espace(request, cle):
             "versements": versements,
             "reversements": Reversement.objects.filter(cle=unite.cle).order_by("-mois")[:24],
             "speciales": s.speciales_du_bureau(unite),
-            "contributions": Contribution.objects.filter(unite_cle=unite.cle).select_related(
-                "cotisation"
-            )[:50],
+            "contributions": Contribution.objects.filter(
+                unite_cle__in=[unite.cle, s.cle_payeur("unite", unite)]
+            ).select_related("cotisation")[:50],
             "numero": NumeroMobileMoney.objects.filter(cle=unite.cle).first(),
         },
     )

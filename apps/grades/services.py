@@ -401,6 +401,8 @@ def promouvoir_admis(session, membres, *, numero, date_decision, date_effet, par
             h.acte = acte
             h.save(update_fields=["acte"])
         session.candidats.filter(membre_id__in=pks).update(promu=True)
+        acte.session = session  # une session peut donner plusieurs actes
+        acte.save(update_fields=["session"])
         session.acte = acte
         session.save(update_fields=["acte"])
         _journal(par, "acte_promotion", acte=acte.pk, numero=acte.numero, promus=len(verrouilles))

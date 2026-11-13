@@ -308,7 +308,7 @@ def bn_actes(request):
     return render(
         request,
         "grades/actes.html",
-        {"actes": ActePromotion.objects.prefetch_related("promotions", "sessions")},
+        {"actes": ActePromotion.objects.prefetch_related("promotions").select_related("session")},
     )
 
 

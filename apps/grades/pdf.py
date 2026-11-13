@@ -17,7 +17,7 @@ def _titre(acte) -> tuple[str, str]:
     if acte.nature == NatureActe.SPECIALE:
         objet = "portant promotion spéciale (article 84 du règlement intérieur)"
     else:
-        s = acte.sessions.first()
+        s = acte.session or acte.sessions.first()
         if s is None:
             epreuve = "le test"
         elif s.type == "examen":

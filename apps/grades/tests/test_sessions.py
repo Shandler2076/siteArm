@@ -146,3 +146,33 @@ def test_liste_eligibles_au_grade_vise(sous_capitaines):
     ).content.decode()
     assert sous_capitaines["m1"].matricule in html  # m1 est à P1
     assert "Éligibles au grade de Capitaine" in html
+
+
+def test_deux_actes_pour_une_session_gardent_l_epreuve(sous_capitaines, compte_technique):
+    t = sous_capitaines
+    session = s.creer_session(
+        type_epreuve="test",
+        date=timezone.localdate(),
+        grade_vise=Grade.CAPITAINE,
+        membres=[t["m1"], t["m2"]],
+        par=compte_technique,
+    )
+    s.saisir_resultats(session, {t["m1"].pk: "admis", t["m2"].pk: "admis"}, par=compte_technique)
+    a1 = s.promouvoir_admis(
+        session,
+        [t["m1"]],
+        numero="1",
+        date_decision=timezone.localdate(),
+        date_effet=timezone.localdate(),
+        par=compte_technique,
+    )
+    a2 = s.promouvoir_admis(
+        session,
+        [t["m2"]],
+        numero="2",
+        date_decision=timezone.localdate(),
+        date_effet=timezone.localdate(),
+        par=compte_technique,
+    )
+    a1.refresh_from_db()
+    assert a1.session == session and a2.session == session

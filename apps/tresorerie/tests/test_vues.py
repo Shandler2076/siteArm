@@ -163,3 +163,70 @@ def test_formulaire_bn_montant_devant_son_type_et_cibles(tresoriers, client_tech
     cs = s.CotisationSpeciale.objects.get(libelle="Pour une personne")
     assert cs.membres_designes == [tresoriers["m4"].pk] and cs.montant_suggere == 1000
     assert s.concerne_membre(cs, tresoriers["m4"]) and not s.concerne_membre(cs, tresoriers["m1"])
+
+
+# --- Corrections de la relecture (13/11/2026) ------------------------------------------------
+
+
+def test_paiement_d_unite_visible_et_quittance_ouverte(tresoriers, compte_technique, donner_mandat):
+    from apps.bureaux.perimetre import Unite
+
+    cs = s.creer_cotisation_speciale(
+        libelle="Unités",
+        type_montant="fixe",
+        montant=5000,
+        pour_membres="aucun",
+        pour_unites=["paroisse"],
+        par=compte_technique,
+    )
+    p1 = Unite("paroisse", tresoriers["P1"])
+    tres = tresoriers["tresorier"]
+    s.confirmer_paiement(
+        s.initier_paiement_special(tres.compte, cs, 5000, unite=p1, type_payeur="unite")
+    )
+    q = Contribution.objects.get()
+    html = _h(_c(tresoriers["sec_p1"]).get(f"/tresorerie/{p1.cle}/"))
+    assert q.quittance in html
+    assert _c(tresoriers["sec_p1"]).get(f"/tresorerie/quittance/{q.pk}.pdf").status_code == 200
+
+
+def test_amende_neutre_pour_un_tiers(tresoriers, compte_technique):
+    from apps.mouvements.sanctions import enregistrer_sanction
+
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    import datetime as _d
+
+    enregistrer_sanction(
+        membre=m1,
+        degre=1,
+        type="amende",
+        date_debut=_d.date(2026, 11, 1),
+        motif="Faute X",
+        reference="BNC-9",
+        par=compte_technique,
+        amende=2000,
+    )
+    amende = s.CotisationSpeciale.objects.get(sanction__isnull=False)
+    p = s.initier_paiement_special(m2.compte, amende, 2000, membre=m1)
+    assert "01/11/2026" not in p.description and "Faute" not in p.description
+
+
+def test_pas_d_amende_avec_une_exclusion(tresoriers, compte_technique):
+    import datetime as _d
+
+    import pytest as _pytest
+
+    from apps.mouvements.sanctions import MouvementRefuse, enregistrer_sanction
+
+    with _pytest.raises(MouvementRefuse):
+        enregistrer_sanction(
+            membre=tresoriers["m1"],
+            degre=3,
+            type="exclusion_definitive",
+            date_debut=_d.date(2026, 11, 1),
+            motif="Faute",
+            reference="BNC-10",
+            par=compte_technique,
+            amende=1000,
+        )
+    assert not s.CotisationSpeciale.objects.exists()

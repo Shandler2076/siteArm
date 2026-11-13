@@ -279,7 +279,7 @@ def _lignes(ev):
             m.get_grade_display() if m.grade is not None else "",
             m.nom.upper(),
             m.prenoms,
-            c.get_role_display(),
+            c.libelle_role,
             c.session.nom if c.session else "",
             c.get_presence_display() if c.presence else "Non pointé",
         ]

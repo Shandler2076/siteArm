@@ -78,6 +78,14 @@ class ActePromotion(models.Model):
     date_effet = models.DateField("date d'effet")
     motif = models.TextField("motif (promotion spéciale)", blank=True)
     signataire = models.CharField("Président (signataire)", max_length=200, blank=True)
+    session = models.ForeignKey(
+        "SessionEpreuve",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="actes",
+        verbose_name="session de test ou d'examen",
+    )
     cree_par = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )

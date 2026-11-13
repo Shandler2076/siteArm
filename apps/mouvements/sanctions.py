@@ -133,6 +133,10 @@ def enregistrer_sanction(
         if amende:
             from apps.tresorerie.services import TresorerieRefusee, creer_amende
 
+            if type in (TypeSanction.EXCLUSION_TEMPORAIRE, TypeSanction.EXCLUSION_DEFINITIVE):
+                raise MouvementRefuse(
+                    "Pas d'amende avec une exclusion : un membre exclu ne peut pas la payer."
+                )
             try:
                 creer_amende(sanction, montant=int(amende), par=par)
             except TresorerieRefusee as e:
