@@ -1,0 +1,10 @@
+{% if champ.field.widget.input_type == "checkbox" and champ.field.widget.allow_multiple_selected %}
+<div class="champ"><span>{{ champ.label }}</span>
+  <details class="deroulant"><summary><span class="deroulant__choix">Tous</span></summary>{{ champ }}</details>
+  {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</div>
+{% elif champ.field.widget.input_type == "checkbox" %}
+<label class="case">{{ champ }} {{ champ.label }}</label>
+{% else %}
+<label class="champ"><span>{{ champ.label }}</span>{{ champ }}
+  {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
+{% endif %}

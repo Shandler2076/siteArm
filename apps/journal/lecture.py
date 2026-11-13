@@ -224,9 +224,9 @@ def lire(entrees) -> list[Ligne]:
         if a == j.EVENEMENT_ANNULE:
             return f"A annulé l'événement « {d.get('nom')} » (motif : {d.get('motif', '')})."
         if a == j.CONVOCATION and "ancienne_session" in d:
-            avant = d.get("ancienne_session") or "sans session"
-            apres = d.get("session") or "sans session"
-            return f"A changé la session de {m} à « {d.get('nom')} » : {avant} → {apres}."
+            avant = d.get("ancienne_session") or "sans section"
+            apres = d.get("session") or "sans section"
+            return f"A changé la section de {m} à « {d.get('nom')} » : {avant} → {apres}."
         if a == j.CONVOCATION:
             session = f", {d['session']}" if d.get("session") else ""
             return f"A convoqué {m} à « {d.get('nom')} »{session}."

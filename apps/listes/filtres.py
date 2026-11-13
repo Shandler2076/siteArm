@@ -32,7 +32,23 @@ AGES = [
 ]
 
 
+class _SelectRattache(forms.Select):
+    """Liste d'unités dont chaque option porte sa région et son circuit (cascade côté écran)."""
+
+    def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
+        option = super().create_option(name, value, label, selected, index, subindex, attrs)
+        obj = getattr(value, "instance", None)
+        if isinstance(obj, Circuit):
+            option["attrs"]["data-region"] = obj.region_id
+        elif isinstance(obj, Paroisse):
+            option["attrs"]["data-circuit"] = obj.circuit_id
+            option["attrs"]["data-region"] = obj.circuit.region_id
+        return option
+
+
 class _ChoixUnite(forms.ModelChoiceField):
+    widget = _SelectRattache
+
     def label_from_instance(self, obj):
         return obj.nom if obj.active else f"{obj.nom} (fermée)"
 
@@ -106,7 +122,7 @@ class FiltreListeForm(forms.Form):
                 circuits = circuits.filter(region=objet)
             nouveaux["circuit"] = _ChoixUnite(label="Circuit", queryset=circuits, required=False)
         if unite.niveau != Niveau.PAROISSE:
-            paroisses = Paroisse.objects.order_by("nom")
+            paroisses = Paroisse.objects.select_related("circuit").order_by("nom")
             if unite.niveau == Niveau.REGION:
                 paroisses = paroisses.filter(circuit__region=objet)
             elif unite.niveau == Niveau.CIRCUIT:

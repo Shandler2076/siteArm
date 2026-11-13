@@ -22,11 +22,11 @@
     <a class="bouton bouton--secondaire" href="{% url 'evenements:export_excel' ev.pk %}">Liste des convoqués (Excel)</a>
   </div>
   {% for g in groupes %}
-    <h2>{% if g.session %}{{ g.session.nom }}{% else %}Sans session{% endif %} ({{ g.convocations|length }})</h2>
+    <h2>{% if g.session %}{{ g.session.nom }}{% else %}Sans section{% endif %} ({{ g.convocations|length }})</h2>
     <div class="tableau-defilant"><table class="tableau">
-      <thead><tr><th>Membre</th><th>Matricule</th><th>Présence</th><th></th></tr></thead>
+      <thead><tr><th>Membre</th><th>Matricule</th><th>Rôle</th><th>Présence</th><th></th></tr></thead>
       <tbody>{% for c in g.convocations %}
-        <tr><td>{{ c.membre.nom_complet }}</td><td>{{ c.membre.matricule }}</td><td>{{ c.get_presence_display|default:"Non pointé" }}</td>
+        <tr><td>{{ c.membre.nom_complet }}</td><td>{{ c.membre.matricule }}</td><td>{{ c.get_role_display }}{% if c.bureau_libelle %}<br><small class="aide">{{ c.bureau_libelle }}</small>{% endif %}</td><td>{{ c.get_presence_display|default:"Non pointé" }}</td>
           <td>{% if not ev.annule %}<form method="post" class="en-ligne" onsubmit="return confirm('Retirer cette convocation ?');">{% csrf_token %}
             <input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}">
             <input name="motif" placeholder="Motif du retrait" required maxlength="300" aria-label="Motif du retrait">

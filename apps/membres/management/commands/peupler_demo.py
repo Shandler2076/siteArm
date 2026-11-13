@@ -272,15 +272,19 @@ class Command(BaseCommand):
             nom=f"Pèlerinage de la Nativité {annee}",
             debut=timezone.make_aware(datetime.datetime(annee, 12, 24, 7, 0)),
             lieu="Porto-Novo",
-            description="Fictif (démonstration). Équipes de travail par session.",
+            description="Fictif (démonstration). Équipes de travail par section.",
             avec_autorisation=True,
-            sessions=["Session Mère", "Session Culte", "Session Fruits"],
+            avec_sections=True,
+            sessions=["Section Mer", "Section Culte", "Section Fruits"],
             par=par,
         )
-        choisis = hasard.sample(membres, min(30, len(membres)))
+        choisis = hasard.sample(membres, min(33, len(membres)))
         sessions = list(nativite.sessions.all())
         for i, session in enumerate(sessions):
-            convoquer(nativite, choisis[i::3], session=session, par=par)
+            groupe = choisis[i : 30 : 3]
+            convoquer(nativite, groupe[:1], session=session, role="superviseur", par=par)
+            convoquer(nativite, groupe[1:], session=session, par=par)
+        convoquer(nativite, choisis[30:], role="bureau", par=par)
         conclave = creer_evenement(
             nom="Conclave du Bureau national",
             debut=maintenant - datetime.timedelta(days=20),

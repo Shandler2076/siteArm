@@ -4,10 +4,59 @@
 <section class="carte">
   {% if ev %}<p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>{% endif %}
   <h1>{% if ev %}Modifier l'événement{% else %}Créer un événement{% endif %}</h1>
-  {% if ev %}<p class="aide">Un changement de date ou de lieu est notifié à tous les convoqués. Les sessions existantes sont conservées ; de nouvelles lignes ajoutent des sessions.</p>{% endif %}
-  <form method="post">
-    {% include "grades/_formulaire.html" %}
+  {% if ev %}<p class="aide">Un changement de date ou de lieu est notifié à tous les convoqués. Les sections existantes sont conservées ; de nouvelles lignes ajoutent des sections.</p>{% endif %}
+  <form method="post" class="formulaire-evenement">
+    {% csrf_token %}
+    {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
+    {% include "evenements/_champ.html" with champ=form.nom %}
+    <div class="date-heure">
+      {% include "evenements/_champ.html" with champ=form.debut_date %}
+      {% include "evenements/_champ.html" with champ=form.debut_heure %}
+    </div>
+    <p class="avertissement" id="date-passee" hidden>Revérifiez votre date : elle est déjà passée.</p>
+    {% if form.debut_date.errors %}<label class="case"><input type="checkbox" name="confirmer_date_passee"{% if form.confirmer_date_passee.value %} checked{% endif %}> {{ form.confirmer_date_passee.label }}</label>{% endif %}
+    <div class="date-heure">
+      {% include "evenements/_champ.html" with champ=form.fin_date %}
+      {% include "evenements/_champ.html" with champ=form.fin_heure %}
+    </div>
+    {% include "evenements/_champ.html" with champ=form.lieu %}
+    {% include "evenements/_champ.html" with champ=form.description %}
+
+    <label class="option-bouton"><input type="checkbox" name="avec_sections" data-montre="bloc-sections"{% if form.avec_sections.value %} checked{% endif %}>
+      <span><strong>{{ form.avec_sections.label }}</strong><small>{{ form.avec_sections.help_text }}</small></span></label>
+    <div class="option-bloc" id="bloc-sections">
+      {% include "evenements/_champ.html" with champ=form.sessions %}
+    </div>
+
+    <label class="option-bouton"><input type="checkbox" name="avec_autorisation" data-montre="bloc-autorisation"{% if form.avec_autorisation.value %} checked{% endif %}>
+      <span><strong>{{ form.avec_autorisation.label }}</strong><small>{{ form.avec_autorisation.help_text }}</small></span></label>
+    <div class="option-bloc" id="bloc-autorisation">
+      <div class="date-heure">
+        {% include "evenements/_champ.html" with champ=form.validite_date %}
+        {% include "evenements/_champ.html" with champ=form.validite_heure %}
+      </div>
+      {% include "evenements/_champ.html" with champ=form.validite_heures %}
+    </div>
     <button type="submit" class="bouton">Enregistrer</button>
   </form>
 </section>
+<script>
+  (function () {
+    /* Blocs liés aux options : visibles seulement si l'option est cochée. */
+    document.querySelectorAll('input[data-montre]').forEach(function (c) {
+      var bloc = document.getElementById(c.dataset.montre);
+      function maj() { bloc.hidden = !c.checked; }
+      c.addEventListener('change', maj); maj();
+    });
+    /* Date passée : avertissement immédiat. */
+    var d = document.querySelector('input[name="debut_date"]'), h = document.querySelector('input[name="debut_heure"]');
+    var alerte = document.getElementById('date-passee');
+    function verifier() {
+      if (!d.value) { alerte.hidden = true; return; }
+      var quand = new Date(d.value + 'T' + (h.value || '23:59'));
+      alerte.hidden = !(quand < new Date());
+    }
+    d.addEventListener('change', verifier); h.addEventListener('change', verifier); verifier();
+  })();
+</script>
 {% endblock %}

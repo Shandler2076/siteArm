@@ -74,9 +74,11 @@ def test_formulaire_duree(monde, client_technique):
         "/evenements/nouveau/",
         {
             "nom": "Pèlerinage",
-            "debut": "2026-12-24T07:00",
+            "debut_date": "2026-12-24",
+            "debut_heure": "07:00",
             "avec_autorisation": "on",
-            "validite_debut": "2026-12-24T05:00",
+            "validite_date": "2026-12-24",
+            "validite_heure": "05:00",
             "validite_heures": "12",
         },
     )

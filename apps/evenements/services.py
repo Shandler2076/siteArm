@@ -13,7 +13,9 @@ from apps.evenements.models import (
     Convocation,
     EtatEvenement,
     Evenement,
+    Formule,
     Presence,
+    Role,
     Session,
 )
 
@@ -63,14 +65,20 @@ def creer_evenement(
     description: str = "",
     avec_autorisation: bool = False,
     sessions: list[str] | None = None,
+    avec_sections: bool | None = None,
     validite_debut: datetime.datetime | None = None,
     validite_heures: int = 24,
 ) -> Evenement:
+    """Crée l'événement. Les sections ne sont créées que si l'option « sections » est choisie
+    (par défaut : dès qu'une section est donnée)."""
     nom = (nom or "").strip()
     if not nom:
         raise EvenementRefuse("La dénomination de l'événement est obligatoire.")
     if fin and fin < debut:
         raise EvenementRefuse("La fin ne peut pas précéder le début.")
+    sessions = [n for n in (sessions or []) if (n or "").strip()]
+    if avec_sections is None:
+        avec_sections = bool(sessions)
     with transaction.atomic():
         ev = Evenement.objects.create(
             nom=nom,
@@ -79,11 +87,13 @@ def creer_evenement(
             lieu=lieu.strip(),
             description=description.strip(),
             avec_autorisation=avec_autorisation,
+            avec_sections=avec_sections,
             validite_debut=validite_debut,
             validite_heures=validite_heures,
             cree_par=par,
         )
-        ajouter_sessions(ev, sessions or [])
+        if avec_sections:
+            ajouter_sessions(ev, sessions)
         _journal(par, "creation", evenement=ev.pk, nom=ev.nom)
     return ev
 
@@ -116,6 +126,7 @@ def modifier_evenement(ev: Evenement, *, par, sessions: list[str] | None = None,
             "lieu",
             "description",
             "avec_autorisation",
+            "avec_sections",
             "validite_debut",
             "validite_heures",
         }:
@@ -127,7 +138,7 @@ def modifier_evenement(ev: Evenement, *, par, sessions: list[str] | None = None,
         raise EvenementRefuse("La fin ne peut pas précéder le début.")
     with transaction.atomic():
         ev.save()
-        if sessions is not None:
+        if sessions is not None and ev.avec_sections:
             ajouter_sessions(ev, sessions)
         _journal(par, "modification", evenement=ev.pk, nom=ev.nom)
         if (ev.debut, ev.lieu) != avant:
@@ -158,16 +169,32 @@ def annuler_evenement(ev: Evenement, *, motif: str, par) -> Evenement:
 
 
 def _texte_convocation(ev, c) -> str:
-    session = f", {c.session.nom}" if c.session else ""
+    role = f" — {c.texte_role}" if c.role != Role.TRAVAILLEUR or c.session_id else ""
     lieu = f", {ev.lieu}" if ev.lieu else ""
     suite = (
         " Votre autorisation est disponible dans « Mes événements »."
         if ev.avec_autorisation
         else ""
     )
-    return (
-        f"Bureau national — vous êtes convoqué(e) : « {ev.nom} » {quand(ev)}{lieu}{session}.{suite}"
-    )
+    return f"Bureau national — vous êtes convoqué(e) : « {ev.nom} » {quand(ev)}{lieu}{role}.{suite}"
+
+
+def bureau_du_membre(membre) -> str:
+    """Bureau représenté par un convoqué « en tant que bureau » : ses mandats en cours."""
+    from apps.bureaux.models import Mandat
+    from apps.bureaux.perimetre import Unite
+
+    libelles = []
+    for m in (
+        Mandat.objects.en_cours()
+        .filter(membre=membre)
+        .select_related("fonction", "paroisse", "circuit", "region")
+        .order_by("fonction__niveau")
+    ):
+        libelle = Unite(m.fonction.niveau, m.unite).libelle
+        if libelle not in libelles:
+            libelles.append(libelle)
+    return ", ".join(libelles)[:200]
 
 
 def convoquer(
@@ -177,16 +204,25 @@ def convoquer(
     par,
     session: Session | None = None,
     sans_session: bool = False,
+    role: str = Role.TRAVAILLEUR,
+    formule: str = "",
 ) -> list[Convocation]:
-    """Convoque (ou change de session) ; un membre déjà convoqué n'est pas convoqué deux fois.
+    """Convoque (ou change de section, de rôle, de formule) ; jamais deux fois le même membre.
 
     Tout ou rien : un membre qui n'est plus dans le mouvement fait refuser l'ensemble.
-    `sans_session=True` remet « sans session » les membres déjà convoqués.
+    `sans_session=True` remet « sans section » les membres déjà convoqués.
+    Rôle « bureau » : jamais de section ; le bureau représenté est déduit de ses mandats.
     """
     if ev.annule:
         raise EvenementRefuse("Cet événement est annulé.")
+    if role not in Role.values:
+        raise EvenementRefuse("Rôle inconnu.")
+    if formule and formule not in Formule.values:
+        raise EvenementRefuse("Formule inconnue.")
     if session is not None and session.evenement_id != ev.pk:
-        raise EvenementRefuse("Cette session n'appartient pas à l'événement.")
+        raise EvenementRefuse("Cette section n'appartient pas à l'événement.")
+    if role == Role.BUREAU:
+        session, sans_session = None, True
     membres = list(membres)
     sortis = [m.nom_complet for m in membres if m.statut in SORTIS]
     if sortis:
@@ -198,13 +234,20 @@ def convoquer(
     resultat, a_notifier = [], []
     with transaction.atomic():
         for membre in membres:
+            bureau = bureau_du_membre(membre) if role == Role.BUREAU else ""
             existante = ev.convocations.filter(membre=membre, active=True).first()
             if existante:
                 nouvelle = session.pk if session is not None else None
-                if (session is not None or sans_session) and existante.session_id != nouvelle:
+                change_section = (
+                    session is not None or sans_session
+                ) and existante.session_id != nouvelle
+                if change_section or (existante.role, existante.formule) != (role, formule):
                     ancienne = existante.session.nom if existante.session else ""
-                    existante.session = session
-                    existante.save(update_fields=["session"])
+                    if session is not None or sans_session:
+                        existante.session = session
+                    existante.role, existante.formule = role, formule
+                    existante.bureau_libelle = bureau
+                    existante.save(update_fields=["session", "role", "formule", "bureau_libelle"])
                     a_notifier.append(existante)
                     _journal(
                         par,
@@ -212,15 +255,22 @@ def convoquer(
                         evenement=ev.pk,
                         nom=ev.nom,
                         membre=membre.matricule,
-                        session=session.nom if session else "",
+                        session=existante.session.nom if existante.session else "",
                         ancienne_session=ancienne,
+                        role=role,
                     )
                 resultat.append(existante)
                 continue
             try:
                 with transaction.atomic():
                     c = Convocation.objects.create(
-                        evenement=ev, membre=membre, session=session, convoque_par=par
+                        evenement=ev,
+                        membre=membre,
+                        session=session,
+                        role=role,
+                        formule=formule,
+                        bureau_libelle=bureau,
+                        convoque_par=par,
                     )
             except IntegrityError:
                 # Convoqué au même instant par une autre requête : déjà notifié et journalisé.
@@ -235,9 +285,28 @@ def convoquer(
                 nom=ev.nom,
                 membre=membre.matricule,
                 session=session.nom if session else "",
+                role=role,
             )
         _notifier(a_notifier, lambda c: _texte_convocation(ev, c))
     return resultat
+
+
+def rechercher_membres(texte: str, limite: int = 20):
+    """Recherche d'un membre à convoquer (BN seulement) : matricule ou nom / prénoms."""
+    from django.db.models import Q
+
+    from apps.membres.models import Membre
+
+    texte = (texte or "").strip()
+    if len(texte) < 2:
+        return Membre.objects.none()
+    par_nom = Q()
+    for mot in texte.split():  # chaque mot doit se trouver dans le nom ou les prénoms
+        par_nom &= Q(nom__icontains=mot) | Q(prenoms__icontains=mot)
+    filtre = Q(matricule__icontains=texte) | par_nom
+    return (
+        Membre.objects.filter(filtre).exclude(statut__in=SORTIS).order_by("nom", "prenoms")[:limite]
+    )
 
 
 def retirer(convocation: Convocation, *, motif: str, par) -> Convocation:

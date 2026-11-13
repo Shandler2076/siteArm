@@ -46,7 +46,8 @@ def test_creer_un_evenement(monde, client_technique):
         "/evenements/nouveau/",
         {
             "nom": "Conclave du Bureau national",
-            "debut": "2026-12-01T09:00",
+            "debut_date": "2026-12-01",
+            "debut_heure": "09:00",
             "lieu": "Siège",
             "sessions": "",
         },
@@ -112,3 +113,98 @@ def test_export_convoques_sans_npi(monde, ev, client_technique):
     assert "Test" in valeurs and "1234567890" not in [str(v) for v in valeurs]
     r = client_technique.get(f"/evenements/{ev.pk}/convoques.pdf")
     assert r.status_code == 200 and r.content.startswith(b"%PDF")
+
+
+# --- Décisions du 13/11/2026 : formulaire, sections, rôles, recherche ---------------------------
+
+
+def test_date_passee_signalee_puis_confirmee(monde, client_technique):
+    donnees = {"nom": "Conclave tenu", "debut_date": "2020-05-01", "debut_heure": "09:00"}
+    r = client_technique.post("/evenements/nouveau/", donnees)
+    assert r.status_code == 200 and "Revérifiez votre date" in _html(r)
+    assert not Evenement.objects.exists()
+    r = client_technique.post("/evenements/nouveau/", {**donnees, "confirmer_date_passee": "on"})
+    assert r.status_code == 302 and Evenement.objects.count() == 1
+
+
+def test_sections_seulement_si_option_choisie(monde, client_technique):
+    base = {"nom": "Pèlerinage", "debut_date": "2026-12-24", "debut_heure": "07:00"}
+    client_technique.post("/evenements/nouveau/", {**base, "sessions": "Section Mer"})
+    sans = Evenement.objects.get()
+    assert not sans.avec_sections and not sans.sessions.exists()
+    client_technique.post(
+        "/evenements/nouveau/",
+        {
+            **base,
+            "nom": "Pèlerinage 2",
+            "avec_sections": "on",
+            "sessions": "Section Mer\nSection Culte",
+        },
+    )
+    avec = Evenement.objects.get(nom="Pèlerinage 2")
+    assert avec.avec_sections and [s.nom for s in avec.sessions.all()] == [
+        "Section Mer",
+        "Section Culte",
+    ]
+    html = _html(client_technique.get("/evenements/nouveau/"))
+    assert "Sections (une par ligne)" in html and "Session Mère" not in html
+
+
+def test_formulaire_heure_separee(monde, client_technique):
+    html = _html(client_technique.get("/evenements/nouveau/"))
+    assert 'name="debut_date"' in html and 'type="date"' in html
+    assert 'name="debut_heure"' in html and 'type="time"' in html
+    assert "Générer une autorisation pour les convoqués" in html and "option-bouton" in html
+
+
+def test_recherche_membre_par_matricule_ou_nom(monde, ev, client_technique):
+    url = f"/evenements/{ev.pk}/recherche-membres/"
+    r = client_technique.get(url, {"q": monde["m1"].matricule}).json()
+    assert [m["matricule"] for m in r["resultats"]] == [monde["m1"].matricule]
+    r = client_technique.get(url, {"q": "dossou"}).json()
+    assert [m["matricule"] for m in r["resultats"]] == [monde["m4"].matricule]
+    assert client_technique.get(url, {"q": "a"}).json()["resultats"] == []
+
+
+def test_recherche_reservee_au_bn(monde, ev):
+    from django.test import Client
+
+    c = Client()
+    c.force_login(monde["sec_p1"].compte)
+    assert c.get(f"/evenements/{ev.pk}/recherche-membres/", {"q": "adjovi"}).status_code == 403
+
+
+def test_convoquer_superviseur_et_bureau(monde, ev, client_technique, donner_mandat):
+    from apps.evenements.models import Role
+
+    culte = ev.sessions.get(nom="Session Culte")
+    url = f"/evenements/{ev.pk}/convoquer/"
+    client_technique.post(
+        url, {"membres": [monde["m1"].pk], "session": culte.pk, "role": "superviseur"}
+    )
+    c = Convocation.objects.get(membre=monde["m1"])
+    assert c.role == Role.SUPERVISEUR and c.session == culte
+    assert c.texte_formule == "Est autorisé(e) à participer"
+    assert c.texte_role == "Invité(e) en tant que superviseur — Session Culte"
+    # Bureau : jamais de section, le bureau représenté vient de ses mandats.
+    client_technique.post(
+        url, {"membres": [monde["sec_p1"].pk], "session": culte.pk, "role": "bureau"}
+    )
+    b = Convocation.objects.get(membre=monde["sec_p1"])
+    assert b.role == Role.BUREAU and b.session is None and "P1" in b.bureau_libelle
+    # Formule choisie : elle l'emporte sur celle du rôle.
+    client_technique.post(
+        url, {"membres": [monde["m2"].pk], "role": "superviseur", "formule": "travailler"}
+    )
+    assert Convocation.objects.get(membre=monde["m2"]).texte_formule == (
+        "Est autorisé(e) à travailler"
+    )
+
+
+def test_page_convoquer_filtres_ranges_et_cascade(monde, ev, client_technique):
+    html = _html(client_technique.get(f"/evenements/{ev.pk}/convoquer/"))
+    assert "Rechercher un membre (matricule ou nom)" in html
+    assert "Plus de filtres" in html and 'class="deroulant"' in html
+    p1 = monde["P1"]
+    assert f'data-circuit="{p1.circuit_id}"' in html
+    assert f'data-region="{p1.circuit.region_id}"' in html
