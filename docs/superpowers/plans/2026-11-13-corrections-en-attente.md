@@ -193,14 +193,22 @@ Deux façons de payer coexistent :
 - **Compte de la plateforme, pièces de l'association, responsable désigné : on en discutera plus
   tard.** On reste en phase d'essai (mode test, sans argent réel).
 
-### H.5 Questions restantes
-- Cotisations spéciales : concernent-elles toujours **tous** les membres, ou parfois seulement
-  certains (catégorie, grade, région, paroisse) ?
-- Cotisations mensuelles payées par mobile money par la paroisse pour plusieurs membres : la paroisse
-  choisit-elle les membres et les mois sur le site avant de payer (proposition : oui, comme la grille
-  de collecte actuelle) ?
-- Le numéro mobile money du trésorier de chaque unité : saisi par qui (le BN, ou le trésorier
-  lui-même) ?
+### H.5 Décisions complémentaires (13/11/2026)
+- **Cotisation spéciale : pour qui.** À la création, le BN choisit :
+  - **tous les membres** (le cas le plus fréquent, choisi par défaut) ;
+  - ou **certains membres**, en choisissant parmi : catégorie, grade, statut, région, circuit,
+    paroisse, sexe, tranche d'âge (mêmes filtres que les listes).
+- **Paiement d'une paroisse pour plusieurs membres** :
+  - le paiement part **du site**, et non d'un transfert libre depuis le téléphone ;
+  - la paroisse coche sur le site les membres (matricules) et les mois, puis clique sur « Payer par
+    mobile money » ;
+  - le site garde la liste des matricules et des mois, liée à la référence du paiement ;
+  - la description du paiement envoyée à la plateforme peut aussi mentionner les matricules, à titre
+    indicatif ;
+  - dès que la plateforme confirme, le site marque payés exactement ces mois-là pour ces membres.
+  - Raison : un transfert mobile money fait à la main (code USSD, message libre) ne permet pas au
+    site de savoir sûrement pour quels membres il a été fait.
+- **Numéro mobile money du trésorier de chaque unité : enregistré par le BN seulement.**
 
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
