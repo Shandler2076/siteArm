@@ -173,18 +173,34 @@ Deux façons de payer coexistent :
    - chaque niveau voit sur sa page « Parts reçues » ce qui lui est dû et ce qu'il a reçu ;
    - les frais de la plateforme sont répartis selon une règle à décider.
 
-### H.4 Questions à trancher
-- Cotisations spéciales : même montant pour tous ? Pour tous les membres, ou seulement certains
-  (catégorie, grade, région) ? Paiement en plusieurs fois possible ? Peut-on aussi les payer en
-  espèces à la paroisse, qui reverse au BN ?
-- Reversements : à quel rythme (mensuel, trimestriel) ? Sur quel numéro (celui du trésorier de
-  chaque unité) ? Qui les effectue au BN ?
-- Frais de la plateforme : à la charge du membre (ajoutés au montant), du BN, ou répartis entre les
-  niveaux au prorata ?
-- Ouverture du compte de la plateforme : pièces de l'association, responsable désigné.
-- Protection des données : la plateforme est un sous-traitant (numéro de téléphone, montant), à
-  ajouter au dossier APDP.
-- Essais d'abord en « mode test » (sans argent réel) sur le site d'essai.
+### H.4 Décisions du mainteneur (13/11/2026)
+- **Reversements : chaque mois.** Le BN reverse par mobile money la part de chacun au numéro du
+  **trésorier** de chaque paroisse, circuit et région. Le site produit l'état mensuel des
+  reversements.
+- Pour les paiements par mobile money, **ni le circuit ni la région n'ont rien à valider** : tout se
+  fait au niveau du BN.
+- **Frais de la plateforme : à la charge du BN.** Le membre paie le montant exact, et les parts de la
+  paroisse, du circuit et de la région sont calculées sur ce montant.
+- **Cotisations spéciales**, l'option se choisit à la création :
+  - **montant fixe** ;
+  - **montant minimum** (on peut payer au-delà) ;
+  - **montant libre / facultatif** (comme un don).
+- **Paiement en plusieurs fois** possible pour une cotisation spéciale, jusqu'à atteindre le montant ;
+  une quittance pour chaque paiement.
+- **Pas d'espèces enregistrées sur le site pour les cotisations spéciales** : si un membre remet de
+  l'argent à sa paroisse, la paroisse le **transmet elle-même par mobile money** au numéro unique du
+  BN, au nom de ce membre.
+- **Compte de la plateforme, pièces de l'association, responsable désigné : on en discutera plus
+  tard.** On reste en phase d'essai (mode test, sans argent réel).
+
+### H.5 Questions restantes
+- Cotisations spéciales : concernent-elles toujours **tous** les membres, ou parfois seulement
+  certains (catégorie, grade, région, paroisse) ?
+- Cotisations mensuelles payées par mobile money par la paroisse pour plusieurs membres : la paroisse
+  choisit-elle les membres et les mois sur le site avant de payer (proposition : oui, comme la grille
+  de collecte actuelle) ?
+- Le numéro mobile money du trésorier de chaque unité : saisi par qui (le BN, ou le trésorier
+  lui-même) ?
 
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
