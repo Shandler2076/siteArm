@@ -214,4 +214,14 @@ l'historique et au journal. Mais la fonction est **cachée** : il faut ouvrir la
 - Une liste des **promotions spéciales accordées** (date, membre, ancien → nouveau grade,
   référence), consultable par le BN.
 
+## 12. Cumul de fonctions : rien à changer (décision)
+
+Au sein de l'Armée du Salut, une même personne peut cumuler des fonctions à tous les niveaux
+(national, région, circuit, paroisse). Le « comité régional » des art. 143 à 146 du règlement
+intérieur ne concerne pas l'Armée du Salut. **Aucun avertissement ni aucune restriction de cumul**
+n'est à ajouter, sauf mention contraire que le mainteneur transmettra plus tard.
+
+Le site gère déjà ce cumul : plusieurs mandats par personne, des droits additionnés, et des liens
+distincts dans le menu (« — national », « — Paroisse de … »).
+
 *(À compléter au fil des remarques du mainteneur.)*
