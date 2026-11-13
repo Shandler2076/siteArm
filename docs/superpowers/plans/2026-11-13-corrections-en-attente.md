@@ -62,6 +62,25 @@
    - Ce point vaut aussi pour les autres pages qui ont ces filtres (Listes).
 5. L'option **« Tout cocher »** est bonne : on la garde.
 
+## E. Notifications qui mènent à la bonne page
+
+- Quand on clique sur une notification, on arrive **directement à la page concernée**. La notification
+  ne reste pas un simple message, sauf pour une information libre.
+- Exemples :
+  - « Vous êtes convoqué(e) à un événement » → page « Mes événements », sur cet événement (section,
+    autorisation à imprimer…) ;
+  - nouveau membre dans le périmètre → fiche du membre ;
+  - demande de mutation ou signalement → la demande ;
+  - versement à valider → « Versements à valider » ;
+  - photo acceptée ou refusée → « Ma photo » ;
+  - décision de grade → « Ma fiche » ;
+  - cotisation validée → « Mes cotisations ».
+- État actuel (vérifié le 13/11/2026) : le site sait déjà rendre une notification cliquable, mais une
+  seule sorte de notification sur une trentaine porte un lien. Il faut donc relier chaque sorte de
+  notification à sa page, en respectant les droits (un lien ne montre jamais ce que la personne n'a
+  pas le droit de voir).
+- La notification cliquée est marquée comme lue.
+
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
 - Le menu par thèmes, repliable, avec la rubrique active mise en évidence.
