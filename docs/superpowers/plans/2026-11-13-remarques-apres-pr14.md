@@ -224,4 +224,24 @@ n'est à ajouter, sauf mention contraire que le mainteneur transmettra plus tard
 Le site gère déjà ce cumul : plusieurs mandats par personne, des droits additionnés, et des liens
 distincts dans le menu (« — national », « — Paroisse de … »).
 
+## 13. « Promotion après test ou examen » et acte de promotion
+
+Décisions du mainteneur (13/11/2026) :
+- **« Promotions en série » devient « Promotion après test ou examen »**, distincte de la
+  **« Promotion spéciale »** (point 11). Les deux sont dans le groupe « Grades ».
+- **L'épreuve** est précisée : **type** (test ou examen), **date** et **lieu** (facultatif). Ces
+  informations figurent sur l'acte et dans l'historique de chaque promu.
+- **Acte de promotion généré** (PDF, format pré-rempli, en-tête officiel) pour chaque décision :
+  - « Décision n° … du … portant promotion après le test (ou l'examen) du … » ;
+  - la liste des promus (matricule, grade, prénoms et NOM, ancien grade → nouveau grade, paroisse) ;
+  - la date d'effet.
+  - **Numéro de la décision : saisi à la main** par le BN.
+  - **Signature : le Président seul** (un bloc de signature pré-rempli avec son nom, à signer à la
+    main après impression).
+- **Le même acte sert pour la promotion spéciale** (art. 84), avec son motif.
+- **Extrait pour chaque promu** : chaque membre promu peut télécharger, depuis sa fiche, un extrait de
+  l'acte qui ne le concerne que lui (en plus de la notification).
+- **Archive des actes** : une liste des actes de promotion (numéro, date, type d'épreuve ou
+  « spéciale », nombre de promus), consultable et réimprimable par le BN.
+
 *(À compléter au fil des remarques du mainteneur.)*
