@@ -53,8 +53,10 @@ REVERSEMENT_ENVOYE = "reversement_envoye"
 SESSION_EPREUVE = "session_epreuve"
 RESULTATS_EPREUVE = "resultats_epreuve"
 ACTE_PROMOTION = "acte_promotion"
+CATEGORIE = "categorie_membre"
 
 LIBELLES = {
+    CATEGORIE: "Catégorie d'un membre",
     SESSION_EPREUVE: "Session de test ou d'examen créée",
     RESULTATS_EPREUVE: "Résultats d'un test ou examen",
     ACTE_PROMOTION: "Acte de promotion",

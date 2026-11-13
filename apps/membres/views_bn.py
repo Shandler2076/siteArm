@@ -178,3 +178,40 @@ def corriger(request, matricule):
             messages.success(request, "Correction enregistrée.")
             return redirect("membres:bn_fiche", matricule=membre.matricule)
     return render(request, "membres/bn_corriger.html", {"membre": membre, "form": form})
+
+
+@login_required
+@gerer_membres
+@require_POST
+def categorie(request, matricule):
+    """Admission sympathisant → actif (décision du BNC) ou correction d'une erreur de saisie."""
+    import datetime
+
+    from apps.mouvements.statuts import CategorieRefusee, admettre_comme_actif, corriger_categorie
+
+    membre = get_object_or_404(Membre, matricule=matricule)
+    try:
+        if request.POST.get("action") == "admettre":
+            try:
+                date_effet = datetime.date.fromisoformat(request.POST.get("date_effet", ""))
+            except ValueError:
+                date_effet = timezone.localdate()
+            admettre_comme_actif(
+                membre,
+                date_effet=date_effet,
+                reference=request.POST.get("reference", ""),
+                motif=request.POST.get("motif", ""),
+                par=request.user,
+            )
+            messages.success(request, "Le membre est admis comme membre actif.")
+        else:
+            corriger_categorie(
+                membre,
+                nouvelle=request.POST.get("categorie", ""),
+                motif=request.POST.get("motif", ""),
+                par=request.user,
+            )
+            messages.success(request, "Catégorie corrigée.")
+    except CategorieRefusee as e:
+        messages.error(request, str(e))
+    return redirect("membres:bn_fiche", matricule=membre.matricule)

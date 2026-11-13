@@ -184,7 +184,7 @@ def types_permis(unite: Unite, membre) -> list[str]:
             types += [TypeSignalement.DECES, TypeSignalement.DEMISSION]
         if membre.statut in (Statut.DEMISSIONNAIRE, Statut.EXCLU):
             types.append(TypeSignalement.REHABILITATION)
-    types.append(TypeSignalement.CATEGORIE)
+    # Plus de « changement de catégorie » demandé par les bureaux (décision du 13/11/2026).
     return types
 
 

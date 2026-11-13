@@ -70,7 +70,7 @@ def test_signalements_refuses(monde):
         (dict(type="deces", date_effet=date(2026, 11, 12)), "futur"),
         (dict(type="deces", date_effet=date(1980, 1, 1)), "naissance"),
         (dict(type="deces"), "date"),
-        (dict(type="categorie", nouvelle_categorie="actif"), "déjà"),
+        (dict(type="categorie", nouvelle_categorie="honneur"), "Procédure supprimée"),
         (dict(type="rehabilitation"), "démissionnaire ou exclu"),
     ]
     for kw, attendu in cas:
@@ -149,15 +149,18 @@ def test_date_inconnue_bloque(monde):
     assert "Date de démission ou d'exclusion inconnue" in blocage_rehabilitation(m1, J)
 
 
-def test_categorie_validee(monde):
+def test_admission_comme_actif_notifiee(monde, compte_technique):
+    from apps.membres.models import Membre
+    from apps.mouvements.statuts import admettre_comme_actif
+
     m1 = monde["m1"]
-    sig = _sig(monde, type="categorie", nouvelle_categorie="honneur", unite="circuit-1")
-    _decider(sig)
+    Membre.objects.filter(pk=m1.pk).update(categorie="sympathisant")
     m1.refresh_from_db()
-    assert m1.categorie == "honneur" and m1.historique.get().type == "categorie"
-    assert Notification.objects.filter(
-        destinataire=m1.compte, message__contains="Membre d'honneur"
-    ).exists()
+    admettre_comme_actif(
+        m1, date_effet=date(2026, 11, 1), reference="D-1", motif="", par=compte_technique
+    )
+    m1.refresh_from_db()
+    assert m1.categorie == "actif" and m1.historique.get().type == "categorie"
 
 
 def test_confirmer_deux_fois(monde):

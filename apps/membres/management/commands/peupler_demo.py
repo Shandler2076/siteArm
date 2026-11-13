@@ -344,7 +344,7 @@ class Command(BaseCommand):
     def _mouvements(self, hasard, membres, par):
         """Quelques situations pour essayer toutes les pages (statuts, mutation, sanction)."""
         from apps.mouvements.sanctions import enregistrer_sanction
-        from apps.mouvements.services import demander_mutation, signaler
+        from apps.mouvements.services import demander_mutation
         from apps.mouvements.statuts import changer_statut
 
         aujourdhui = datetime.date.today()
@@ -369,10 +369,3 @@ class Command(BaseCommand):
         )
         if autres:
             demander_mutation(membre=membres[5], paroisse_arrivee=autres[0], par=par)
-        signaler(
-            membre=membres[6],
-            type="categorie",
-            par=par,
-            unite="national",
-            nouvelle_categorie="honneur" if membres[6].categorie != "honneur" else "actif",
-        )

@@ -187,6 +187,10 @@ def lire(entrees) -> list[Ligne]:
             mois = [datetime.date.fromisoformat(x) for x in d.get("mois", [])]
             quand = periode_mois(mois)
             return f"A enregistré un versement de {d.get('montant')} F pour {m} ({quand})."
+        if a == j.CATEGORIE:
+            if d.get("correction"):
+                return f"A corrigé la catégorie de {m} : {d.get('ancien')} → {d.get('nouveau')}."
+            return f"A admis {m} comme membre actif (décision {d.get('reference')})."
         if a == j.SESSION_EPREUVE:
             return f"A créé la session « {d.get('epreuve')} » ({d.get('candidats')} candidat(s))."
         if a == j.RESULTATS_EPREUVE:

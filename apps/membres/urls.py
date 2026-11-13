@@ -14,6 +14,7 @@ urlpatterns = [
     path("bn/enregistrer/", views_bn.enregistrer, name="bn_enregistrer"),
     path("bn/photos/", views_bn.photos, name="bn_photos"),
     path("bn/<str:matricule>/", views_bn.fiche, name="bn_fiche"),
+    path("bn/<str:matricule>/categorie/", views_bn.categorie, name="bn_categorie"),
     path("bn/<str:matricule>/fiche.pdf", views_bn.fiche_pdf, name="bn_fiche_pdf"),
     path("bn/<str:matricule>/corriger/", views_bn.corriger, name="bn_corriger"),
     path(
