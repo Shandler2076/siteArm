@@ -231,6 +231,24 @@ Deux façons de payer coexistent :
 - **Confirmation réduite validée** (grade, prénoms, initiale du nom, paroisse ; ex. « Soldat Albert
   A. — Paroisse de GBOA ») : suffisante, rien de plus.
 
+### H.7 Cotisations demandées aux bureaux, paiement au nom d'un bureau, trésoriers (13/11/2026)
+- **Cible d'une cotisation spéciale** : à la création, le BN coche **tous les membres** (ou
+  certains), et/ou **tous les bureaux**, ou seulement **tous les bureaux de paroisse**, **de circuit**
+  ou **de région**. Pour un bureau concerné, la cotisation apparaît « en attente » dans son espace.
+- **Payer au nom d'un bureau, sans rien taper** : le site connaît le bureau par le mandat de la
+  personne connectée. Elle choisit « Payer au nom de : Paroisse de … ». La quittance et la liste des
+  contributeurs portent le nom du bureau.
+  - Un paiement volontaire au nom du bureau (ex. une paroisse qui veut figurer parmi les
+    contributeurs) s'ajoute aux paiements de ses membres ; il ne paie pas pour eux.
+- **Pas de code ni de matricule pour les unités** pour le moment (décision du mainteneur).
+- **Le paiement au nom d'un bureau est fait par son Trésorier.**
+- **Espace de trésorerie** à introduire pour le **Trésorier** de chaque bureau, en sa fonction : accès
+  aux flux financiers de son bureau (cotisations mensuelles, cotisations spéciales, parts dues et
+  reversements reçus, paiements au nom du bureau).
+  - Le numéro mobile money du Trésorier est le **numéro du bureau** : il paie au nom du bureau et
+    reçoit les reversements mensuels du BN. Ce numéro est enregistré par le BN.
+  - Questions d'harmonisation posées au mainteneur : voir H.8.
+
 ## I. Guides d'utilisation (à préparer le moment venu)
 
 Une fois les fonctions réalisées, préparer un **guide d'utilisation** pour chaque partie décrite, en
