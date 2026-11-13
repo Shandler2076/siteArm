@@ -307,3 +307,17 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
   .panneau-selection--ouvert .panneau-selection__contenu { display: block; }
 }
 [hidden] { display: none !important; }
+/* Cotisations spéciales : montant juste devant son type, cibles cochables (13/11/2026). */
+.groupe-choix { border: 1px solid #DDE3EE; border-radius: 12px; padding: 10px 14px 14px; margin: 16px 0; }
+.groupe-choix legend { font-weight: 800; color: var(--marine); padding: 0 6px; }
+.choix-montant { display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 10px; align-items: center; margin: 6px 0; }
+.choix-montant label, .option-ligne { display: flex; gap: 10px; align-items: center; padding: 10px; border: 1px solid #DDE3EE; border-radius: 8px; background: #fff; cursor: pointer; margin: 6px 0; font-weight: 400; }
+.choix-montant label:has(input:checked), .option-ligne:has(input:checked) { border-color: var(--marine); background: #EEF2F9; font-weight: 700; }
+.choix-montant input[type="radio"], .option-ligne input[type="checkbox"] { width: 22px; height: 22px; flex: none; margin: 0; accent-color: var(--marine); }
+.choix-montant input[type="number"] { padding: 10px; border: 1px solid #C9D1DE; border-radius: 8px; font-size: 1rem; width: 100%; }
+@media (max-width: 520px) { .choix-montant { grid-template-columns: 1fr; } }
+.recherche-membre input[type="search"] { width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #C9D1DE; border-radius: 8px; }
+.etapes { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0; margin: 12px 0; }
+.etapes li { padding: 10px; border: 1px solid #DDE3EE; border-radius: 10px; background: #fff; color: var(--gris); }
+.etapes .etape--courante { border: 2px solid var(--or); background: #FFF9E6; color: var(--marine); }
+.etapes .etape--faite { background: #E3F4E8; color: #1F6B3A; }

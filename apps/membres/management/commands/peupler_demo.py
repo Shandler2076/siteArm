@@ -284,6 +284,24 @@ class Command(BaseCommand):
                 m.compte, cs, hasard.choice([1000, 2000, 2500]), membre=m
             )
             t.confirmer_paiement(p)
+        from django.utils import timezone
+
+        # Cotisations mensuelles payées par mobile money (simulé) le mois dernier : pour essayer
+        # les reversements mensuels (préparer → valider → envoyer).
+        from apps.cotisations.models import Versement
+
+        mois_dernier = (timezone.localdate().replace(day=1) - datetime.timedelta(days=1)).replace(
+            day=5
+        )
+        for m in [x for x in membres if x.compte_id and x.statut == "actif"][8:20]:
+            try:
+                p = t.initier_paiement_mensuel(m.compte, [(m, 1)])
+            except t.TresorerieRefusee:
+                continue
+            t.confirmer_paiement(p)
+            Versement.objects.filter(reference_paiement=p.reference).update(
+                date_versement=mois_dernier
+            )
         for m in membres[:20]:
             a = m.affectation_actuelle
             if a is None:

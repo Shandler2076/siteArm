@@ -110,7 +110,7 @@ def test_cotisation_demandee_aux_bureaux(tresoriers, compte_technique):
     tres = tresoriers["tresorier"]
     s.confirmer_paiement(s.initier_paiement_special(tres.compte, cs, 10000, unite=p1))
     c = Contribution.objects.get()
-    assert c.unite_libelle == p1.libelle and c.membre is None
+    assert c.unite_libelle == "Bureau de l'unité paroissiale de P1" and c.membre is None
     assert s.est_reglee(cs, unite_cle=p1.cle)
 
 
@@ -228,3 +228,83 @@ def test_lien_de_notification_externe_refuse(tresoriers):
     compte = tresoriers["m1"].compte
     for lien in ("//exemple.org/", "/\\exemple.org/", "https://exemple.org/"):
         assert resoudre_lien(compte, lien) is None
+
+
+# --- Cibles et montants (13/11/2026) ------------------------------------------------------------
+
+
+def test_unite_paie_ensemble_et_quittance_distincte(tresoriers, compte_technique):
+    from apps.bureaux.perimetre import Unite
+
+    cs = s.creer_cotisation_speciale(
+        libelle="Contribution des unités",
+        type_montant="fixe",
+        montant=50000,
+        pour_membres="aucun",
+        pour_unites=["paroisse"],
+        pour_bureaux=["paroisse"],
+        par=compte_technique,
+    )
+    p1 = Unite("paroisse", tresoriers["P1"])
+    tres = tresoriers["tresorier"].compte
+    s.confirmer_paiement(s.initier_paiement_special(tres, cs, 50000, unite=p1, type_payeur="unite"))
+    s.confirmer_paiement(s.initier_paiement_special(tres, cs, 1000, unite=p1, type_payeur="bureau"))
+    libelles = sorted(Contribution.objects.values_list("unite_libelle", flat=True))
+    assert libelles == ["Bureau de l'unité paroissiale de P1", "Unité paroissiale de P1"]
+    assert s.est_reglee(cs, unite_cle=s.cle_payeur("unite", p1))
+    assert not s.est_reglee(cs, unite_cle=s.cle_payeur("bureau", p1))
+    types = {x["type"] for x in s.speciales_du_bureau(p1)}
+    assert types == {"unite", "bureau"}
+
+
+def test_certains_membres_designes_et_membres_des_bureaux(tresoriers, compte_technique):
+    cs = s.creer_cotisation_speciale(
+        libelle="Ciblée",
+        type_montant="fixe",
+        montant=500,
+        pour_membres="certains",
+        membres_designes=[tresoriers["m4"].pk],
+        membres_des_bureaux=["paroisse"],
+        par=compte_technique,
+    )
+    assert s.concerne_membre(cs, tresoriers["m4"])  # désigné
+    assert s.concerne_membre(cs, tresoriers["sec_p1"])  # membre d'un bureau de paroisse
+    assert not s.concerne_membre(cs, tresoriers["m1"])
+    with pytest.raises(s.TresorerieRefusee):
+        s.creer_cotisation_speciale(
+            libelle="Vide",
+            type_montant="fixe",
+            montant=1,
+            pour_membres="certains",
+            par=compte_technique,
+        )
+
+
+def test_montant_libre_avec_suggestion(tresoriers, compte_technique):
+    cs = s.creer_cotisation_speciale(
+        libelle="Don", type_montant="libre", montant_suggere=2000, par=compte_technique
+    )
+    assert cs.montant is None and cs.montant_suggere == 2000
+
+
+def test_amende_liee_a_la_sanction(tresoriers, compte_technique):
+    from apps.mouvements.sanctions import enregistrer_sanction
+
+    m1 = tresoriers["m1"]
+    sanction = enregistrer_sanction(
+        membre=m1,
+        degre=1,
+        type="amende",
+        date_debut=timezone.localdate(),
+        motif="Retards",
+        reference="BNC-12",
+        par=compte_technique,
+        amende=3000,
+    )
+    amende = sanction.amendes.get()
+    assert s.concerne_membre(amende, m1) and not s.concerne_membre(amende, tresoriers["m2"])
+    from apps.bureaux.perimetre import Unite
+
+    assert amende not in [
+        x["cs"] for x in s.speciales_du_bureau(Unite("paroisse", tresoriers["P1"]))
+    ]

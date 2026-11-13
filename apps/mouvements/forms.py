@@ -74,3 +74,10 @@ class SanctionForm(forms.Form):
     )
     motif = forms.CharField(label="Motif résumé", max_length=300)
     reference = forms.CharField(label="Référence de la décision", max_length=120)
+    amende = forms.IntegerField(
+        label="Amende à payer en numéraire (F CFA, facultatif)",
+        required=False,
+        min_value=1,
+        help_text="Elle apparaît en attente chez le membre seul, avec une quittance à chaque "
+        "paiement.",
+    )

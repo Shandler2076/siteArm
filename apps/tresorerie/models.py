@@ -66,12 +66,34 @@ class CotisationSpeciale(SansSuppression):
         "type de montant", max_length=10, choices=TypeMontant.choices, default=TypeMontant.FIXE
     )
     montant = models.PositiveIntegerField("montant (F CFA)", null=True, blank=True)
+    montant_suggere = models.PositiveIntegerField(
+        "montant suggéré (montant libre)", null=True, blank=True
+    )
     pour_membres = models.CharField(
         "membres concernés", max_length=10, choices=PourMembres.choices, default=PourMembres.TOUS
     )
     criteres = models.JSONField("critères (mêmes filtres que les listes)", default=dict, blank=True)
     pour_bureaux = models.JSONField(
         "bureaux concernés (paroisse, circuit, region)", default=list, blank=True
+    )
+    pour_unites = models.JSONField(
+        "unités concernées, qui paient ensemble (paroisse, circuit, region)",
+        default=list,
+        blank=True,
+    )
+    membres_des_bureaux = models.JSONField(
+        "membres des bureaux (paroisse, circuit, region, national), chacun pour soi",
+        default=list,
+        blank=True,
+    )
+    membres_designes = models.JSONField("membres désignés (identifiants)", default=list, blank=True)
+    sanction = models.ForeignKey(
+        "mouvements.Sanction",
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="amendes",
+        verbose_name="amende de la sanction",
     )
     ouverte = models.BooleanField("ouverte", default=True)
     cree_par = _compte("créée par")

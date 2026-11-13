@@ -111,7 +111,10 @@ def enregistrer_sanction(
     date_fin: datetime.date | None = None,
     precision: str = "",
     jour: datetime.date | None = None,
+    amende: int | None = None,
 ) -> Sanction:
+    """`amende` : montant à payer en numéraire (13/11/2026). L'amende apparaît en attente chez le
+    membre seul et se paie au BN ; elle n'est pas dans la liste des cotisations spéciales."""
     jour = jour or timezone.localdate()
     with transaction.atomic():
         membre = _verrouiller_membre(membre.pk)
@@ -127,6 +130,13 @@ def enregistrer_sanction(
             reference=reference,
             par=par,
         )
+        if amende:
+            from apps.tresorerie.services import TresorerieRefusee, creer_amende
+
+            try:
+                creer_amende(sanction, montant=int(amende), par=par)
+            except TresorerieRefusee as e:
+                raise MouvementRefuse(str(e)) from e
         _ajuster_statut(
             membre,
             jour,

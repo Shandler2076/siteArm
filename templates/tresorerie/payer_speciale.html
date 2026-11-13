@@ -5,9 +5,10 @@
   <h1>{{ cs.libelle }}</h1>
   {% if cs.description %}<p>{{ cs.description|linebreaksbr }}</p>{% endif %}
   <p class="aide">{{ cs.get_type_montant_display }}{% if cs.montant %} : {{ cs.montant }} F{% endif %}{% if reste is not None %} · reste à payer : {{ reste }} F{% endif %}. Paiement en une ou plusieurs fois ; une quittance à chaque paiement.</p>
-  {% if unite %}<p class="encadre-identifiants">Paiement <strong>au nom de : {{ unite.libelle }}</strong></p>{% endif %}
+  {% if unite %}<p class="encadre-identifiants">Paiement <strong>au nom de : {{ pour }}</strong></p>{% endif %}
+  {% if cs.montant_suggere %}<p class="aide">Montant suggéré : <strong>{{ cs.montant_suggere }} F</strong> (chacun donne ce qu'il veut).</p>{% endif %}
   <form method="post">{% csrf_token %}
-    {% if unite %}<input type="hidden" name="bureau" value="{{ unite.cle }}">{% endif %}
+    {% if unite %}<input type="hidden" name="bureau" value="{{ unite.cle }}"><input type="hidden" name="type" value="{{ type_payeur }}">{% endif %}
     <label class="champ"><span>Montant (F CFA)</span><input type="number" name="montant" min="1" required
       {% if cs.type_montant == "fixe" and reste %}value="{{ reste }}" max="{{ reste }}"{% elif cs.type_montant == "minimum" and reste %}value="{{ reste }}"{% endif %}></label>
     <button type="submit" class="bouton">Payer par mobile money</button>
