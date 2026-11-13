@@ -252,3 +252,88 @@ def membre_pour_mutation(matricule: str) -> Membre | None:
         .prefetch_related("affectations__paroisse")
         .first()
     )
+
+
+# --- Trésorerie (décisions du mainteneur du 13/11/2026) ------------------------------------------
+TRESORIERS_LOCAUX = {
+    Niveau.PAROISSE: "Trésorier paroissial",
+    Niveau.CIRCUIT: "Trésorier de Circuit",
+    Niveau.REGION: "Trésorier régional",
+}
+SECRETAIRES_LOCAUX = ("Secrétaire paroissial", "Secrétaire de Circuit", "Secrétaire régional")
+
+
+def _mandats_unite(unite: Unite, noms, jour=None):
+    mandats = Mandat.objects.en_cours(jour).filter(
+        fonction__niveau=unite.niveau, fonction__nom__in=noms, membre__statut=Statut.ACTIF
+    )
+    if unite.objet is not None:
+        mandats = mandats.filter(**{unite.niveau: unite.objet})
+    return mandats
+
+
+def tresoriers(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
+    """Comptes qui tiennent la trésorerie de l'unité : le Trésorier, ou le Chef si le poste est
+    vacant (intérim)."""
+    noms = [TRESORIERS_LOCAUX.get(unite.niveau, "Trésorier national")]
+    mandats = _mandats_unite(unite, noms, jour)
+    if not mandats.exists():
+        mandats = _mandats_unite(unite, FONCTIONS_CHEF, jour)
+    return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
+
+
+def unites_tresorerie(compte, jour: datetime.date | None = None) -> list[tuple[Unite, bool]]:
+    """[(unité, peut_agir)] : le Trésorier (ou le Chef par intérim) agit ; le Chef et le
+    Secrétaire voient en lecture seule. Niveaux paroisse, circuit et région."""
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return []
+    noms = (*TRESORIERS_LOCAUX.values(), *FONCTIONS_CHEF, *SECRETAIRES_LOCAUX)
+    mandats = (
+        Mandat.objects.en_cours(jour)
+        .filter(membre__compte=compte, membre__statut=Statut.ACTIF, fonction__nom__in=noms)
+        .exclude(fonction__niveau=Niveau.NATIONAL)
+        .select_related("fonction", "paroisse", "circuit", "region")
+    )
+    resultat: dict[Unite, bool] = {}
+    for m in mandats:
+        unite = Unite(m.fonction.niveau, m.unite)
+        agit = tresoriers(unite, jour).filter(pk=compte.pk).exists()
+        resultat[unite] = resultat.get(unite, False) or agit
+    return sorted(
+        resultat.items(), key=lambda p: (ORDRE[p[0].niveau], p[0].objet.nom if p[0].objet else "")
+    )
+
+
+def peut_agir_tresorerie(compte, unite: Unite) -> bool:
+    return any(u == unite and agit for u, agit in unites_tresorerie(compte))
+
+
+def peut_voir_tresorerie(compte, unite: Unite) -> bool:
+    return any(u == unite for u, _agit in unites_tresorerie(compte))
+
+
+def _a_fonction_nationale(compte, noms) -> bool:
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return False
+    if compte.is_superuser:
+        return True
+    return (
+        Mandat.objects.en_cours()
+        .filter(
+            membre__compte=compte,
+            membre__statut=Statut.ACTIF,
+            fonction__niveau=Niveau.NATIONAL,
+            fonction__nom__in=noms,
+        )
+        .exists()
+    )
+
+
+def est_tresorier_national(compte) -> bool:
+    """Prépare l'état des reversements et enregistre les envois."""
+    return _a_fonction_nationale(compte, ("Trésorier national", "Trésorier national adjoint"))
+
+
+def est_validateur_reversements(compte) -> bool:
+    """Valide l'état mensuel des reversements : le Président ou le Secrétaire national."""
+    return _a_fonction_nationale(compte, ("Président", "Secrétaire national"))

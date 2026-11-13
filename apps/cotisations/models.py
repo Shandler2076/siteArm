@@ -103,6 +103,11 @@ def _compte(nom):
     )
 
 
+class ModeVersement(models.TextChoices):
+    ESPECES = "especes", "Espèces (saisie par la paroisse)"
+    MOBILE_MONEY = "mobile_money", "Mobile money (Bureau national)"
+
+
 class Versement(models.Model):
     membre = models.ForeignKey(
         "membres.Membre", on_delete=models.PROTECT, related_name="versements"
@@ -125,6 +130,10 @@ class Versement(models.Model):
     motif = models.CharField("motif (refus ou annulation)", max_length=300, blank=True)
     numero_recu = models.CharField("numéro de reçu", max_length=20, blank=True)
     parts = models.JSONField("parts (F CFA)", default=dict, blank=True)
+    mode = models.CharField(
+        "mode de paiement", max_length=14, choices=ModeVersement.choices, default="especes"
+    )
+    reference_paiement = models.CharField("référence du paiement", max_length=40, blank=True)
 
     class Meta:
         verbose_name = "versement"

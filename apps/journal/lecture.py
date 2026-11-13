@@ -187,6 +187,32 @@ def lire(entrees) -> list[Ligne]:
             mois = [datetime.date.fromisoformat(x) for x in d.get("mois", [])]
             quand = periode_mois(mois)
             return f"A enregistré un versement de {d.get('montant')} F pour {m} ({quand})."
+        if a == j.VERSEMENT_MOBILE_MONEY:
+            return (
+                f"A payé par mobile money {d.get('montant')} F de cotisation pour {m} "
+                f"(reçu {d.get('recu')})."
+            )
+        if a == j.COTISATION_SPECIALE:
+            return f"A créé la cotisation spéciale « {d.get('libelle')} »."
+        if a == j.CONTRIBUTION:
+            pour = d.get("unite_libelle") or m
+            return (
+                f"A payé {d.get('montant')} F à la cotisation spéciale « {d.get('libelle')} » "
+                f"pour {pour} (quittance {d.get('quittance')})."
+            )
+        if a == j.PAIEMENT_ECHOUE:
+            return f"Paiement mobile money {d.get('reference')} non abouti."
+        if a == j.NUMERO_TRESORIER:
+            return f"A enregistré le numéro mobile money de {d.get('unite_libelle')}."
+        if a == j.REVERSEMENTS_PREPARES:
+            return f"A préparé l'état des reversements de {d.get('mois')} ({d.get('total')} F)."
+        if a == j.REVERSEMENTS_VALIDES:
+            return f"A validé l'état des reversements de {d.get('mois')} ({d.get('total')} F)."
+        if a == j.REVERSEMENT_ENVOYE:
+            return (
+                f"A envoyé {d.get('montant')} F à {d.get('unite_libelle')} "
+                f"(reversement de {d.get('mois')}, référence {d.get('reference')})."
+            )
         if a == j.VERSEMENT_VALIDE:
             return f"A validé le versement de {d.get('montant')} F de {m} (reçu {d.get('recu')})."
         if a == j.VERSEMENT_REFUSE:
