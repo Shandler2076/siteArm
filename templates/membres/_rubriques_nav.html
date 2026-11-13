@@ -1,3 +1,3 @@
-<nav class="onglets" aria-label="Rubriques de la fiche">
+<nav class="rubriques" aria-label="Rubriques de la fiche">
   {% for cle, libelle in rubriques %}<a href="?rubrique={{ cle }}"{% if cle == rubrique %} class="actif" aria-current="page"{% endif %}>{{ libelle }}</a>{% endfor %}
 </nav>

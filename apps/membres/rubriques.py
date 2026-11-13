@@ -3,8 +3,6 @@
 Les événements ne sont visibles que du Bureau national (décision du 12/11/2026).
 """
 
-import datetime
-
 from django.utils import timezone
 
 RUBRIQUES = [
@@ -21,7 +19,7 @@ def contexte_rubriques(request, membre, avec_evenements: bool) -> dict:
         rubrique = "profil"
     ctx = {"rubriques": possibles, "rubrique": rubrique}
     if rubrique == "cotisations":
-        ctx.update(_cotisations(membre))
+        ctx.update(_cotisations(request, membre))
     elif rubrique == "evenements":
         ctx["convocations"] = membre.convocations.select_related("evenement", "session").order_by(
             "-evenement__debut"
@@ -29,30 +27,21 @@ def contexte_rubriques(request, membre, avec_evenements: bool) -> dict:
     return ctx
 
 
-def _cotisations(membre) -> dict:
+def _cotisations(request, membre) -> dict:
     from apps.cotisations.models import EtatVersement
-    from apps.cotisations.regles import situation
-    from apps.cotisations.services import MOIS
+    from apps.cotisations.regles import annees_consultables, cases_annee, choisir_annee, situation
 
     jour = timezone.localdate()
     mois_courant = jour.replace(day=1)
     s = situation(membre, mois_courant)
-    cases = []
-    for i, nom in enumerate(MOIS):
-        mo = datetime.date(jour.year, i + 1, 1)
-        if mo in s.payes:
-            etat = "paye"
-        elif mo in s.en_attente:
-            etat = "attente"
-        elif mo in s.dus:
-            etat = "du"
-        else:
-            etat = "non_du"
-        cases.append({"nom": nom.capitalize(), "etat": etat})
+    annees = annees_consultables(membre, s, jour.year)
+    annee = choisir_annee(request.GET.get("annee"), annees, jour.year)
     return {
         "cot_situation": s,
-        "cot_cases": cases,
-        "cot_annee": jour.year,
+        "cot_cases": cases_annee(s, annee),
+        "cot_annee": annee,
+        "cot_annees": annees,
+        "cot_total_annee": s.totaux_par_annee.get(annee, 0),
         "cot_mois": mois_courant,
         "cot_versements": membre.versements.exclude(etat=EtatVersement.ANNULE)
         .select_related("paroisse")

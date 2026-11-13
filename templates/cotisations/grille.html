@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load cotisations %}
 {% block titre %}Cotisations — {{ unite.libelle }}{% endblock %}
 {% block contenu %}
 <section class="carte">
@@ -15,7 +16,7 @@
     {% csrf_token %}
     <div class="tableau-defilant">
       <table class="tableau grille-cm">
-        <thead><tr><th>Membre</th>{% for n in noms_mois %}<th>{{ n|slice:":3" }}</th>{% endfor %}<th>Retard</th></tr></thead>
+        <thead><tr><th>Membre</th>{% for n in noms_mois %}<th>{{ n|mois_court }}</th>{% endfor %}<th>Retard</th></tr></thead>
         <tbody>
           {% for l in lignes %}
             <tr><th scope="row">{{ l.membre.nom_complet }}<br><small class="aide">{{ l.membre.matricule }} · <a href="{% url 'cotisations:etat_membre_pdf' l.membre.matricule %}">État (PDF)</a></small></th>

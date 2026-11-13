@@ -48,7 +48,7 @@ def _circuit(monde):
 def test_grille_paroisse(prets):
     r = _client(prets["sec_p1"]).get(_p1(prets) + "grille/")
     html = _html(r)
-    assert r.status_code == 200 and "Test ADJOVI" in html and "Mar</th>" in html
+    assert r.status_code == 200 and "Test ADJOVI" in html and "Mars</th>" in html
     assert "Test BIO" not in html  # autre paroisse
 
 

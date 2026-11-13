@@ -411,24 +411,19 @@ def _membre_connecte(request):
 
 @login_required
 def mes_cotisations(request):
-    from apps.cotisations.regles import situation
+    from apps.cotisations.regles import (
+        annees_consultables,
+        cases_annee,
+        choisir_annee,
+        situation,
+    )
 
     membre = _membre_connecte(request)
     jour = aujourdhui()
     s = situation(membre, premier_du_mois(jour))
-    annee = jour.year
-    cases = []
-    for i, nom in enumerate(MOIS):
-        mo = datetime.date(annee, i + 1, 1)
-        if mo in s.payes:
-            etat = "paye"
-        elif mo in s.en_attente:
-            etat = "attente"
-        elif mo in s.dus:
-            etat = "du"
-        else:
-            etat = "non_du"
-        cases.append({"nom": nom.capitalize(), "etat": etat})
+    annees = annees_consultables(membre, s, jour.year)
+    annee = choisir_annee(request.GET.get("annee"), annees, jour.year)
+    cases = cases_annee(s, annee)
     return render(
         request,
         "cotisations/mes_cotisations.html",
@@ -437,6 +432,8 @@ def mes_cotisations(request):
             "s": s,
             "cases": cases,
             "annee": annee,
+            "annees": annees,
+            "total_annee": s.totaux_par_annee.get(annee, 0),
             "mois": premier_du_mois(jour),
             "versements": membre.versements.exclude(etat=EtatVersement.ANNULE).prefetch_related(
                 "mois"
