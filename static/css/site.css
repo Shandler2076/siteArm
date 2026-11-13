@@ -284,3 +284,26 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .champ ul { list-style: none; padding: 0; margin: 0; }
 .accueil-matricule { margin: 0 0 10px; }
 .lien-matricule { font-weight: 700; color: var(--marine); }
+/* Convocation en deux colonnes (13/11/2026) : à gauche on cherche, à droite les sélectionnés. */
+.carte--large { max-width: 1100px; }
+.convocation-grille { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 22px; align-items: start; }
+.panneau-selection { position: sticky; top: 12px; border: 2px solid var(--marine); border-radius: 12px; background: #fff; padding: 4px 14px 14px; }
+.panneau-selection__barre { display: none; }
+.selection { list-style: none; padding: 0; margin: 0; max-height: 45vh; overflow-y: auto; }
+.selection li { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px solid #EEF1F6; }
+.selection small { display: block; }
+.retirer { flex: none; width: 32px; height: 32px; border: 1px solid #DDE3EE; border-radius: 50%; background: #fff; color: var(--rouge); cursor: pointer; font-weight: 700; }
+.propositions { list-style: none; padding: 0; margin: 0; }
+.propositions label { display: flex; gap: 10px; align-items: center; padding: 8px 10px; margin: 4px 0; border: 1px solid #DDE3EE; border-radius: 8px; background: #fff; cursor: pointer; }
+.propositions label:has(input:checked) { border-color: var(--marine); background: #EEF2F9; }
+.propositions input { width: 22px; height: 22px; flex: none; }
+@media (max-width: 860px) {
+  .convocation-grille { grid-template-columns: 1fr; padding-bottom: 70px; }
+  .panneau-selection { position: fixed; left: 0; right: 0; bottom: 0; top: auto; z-index: 40; border-radius: 14px 14px 0 0;
+    border-width: 2px 0 0; padding: 0; box-shadow: 0 -6px 18px rgba(20,40,75,.18); }
+  .panneau-selection__barre { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 14px 16px;
+    border: 0; background: var(--marine); color: #fff; font: inherit; font-weight: 700; border-radius: 12px 12px 0 0; cursor: pointer; }
+  .panneau-selection__contenu { display: none; max-height: 70vh; overflow-y: auto; padding: 0 14px 14px; }
+  .panneau-selection--ouvert .panneau-selection__contenu { display: block; }
+}
+[hidden] { display: none !important; }

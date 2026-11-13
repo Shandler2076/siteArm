@@ -322,7 +322,8 @@ class Command(BaseCommand):
             groupe = choisis[i:30:3]
             convoquer(nativite, groupe[:1], session=session, role="superviseur", par=par)
             convoquer(nativite, groupe[1:], session=session, par=par)
-        convoquer(nativite, choisis[30:], role="bureau", par=par)
+        convoquer(nativite, choisis[30:32], role="bureau_organisation", par=par)
+        convoquer(nativite, choisis[32:], role="officiel", par=par)
         conclave = creer_evenement(
             nom="Conclave du Bureau national",
             debut=maintenant - datetime.timedelta(days=20),

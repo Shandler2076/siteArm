@@ -182,24 +182,6 @@ def _texte_convocation(ev, c) -> str:
     return f"Bureau national — vous êtes convoqué(e) : « {ev.nom} » {quand(ev)}{lieu}{role}.{suite}"
 
 
-def bureau_du_membre(membre) -> str:
-    """Bureau représenté par un convoqué « en tant que bureau » : ses mandats en cours."""
-    from apps.bureaux.models import Mandat
-    from apps.bureaux.perimetre import Unite
-
-    libelles = []
-    for m in (
-        Mandat.objects.en_cours()
-        .filter(membre=membre)
-        .select_related("fonction", "paroisse", "circuit", "region")
-        .order_by("fonction__niveau")
-    ):
-        libelle = Unite(m.fonction.niveau, m.unite).libelle
-        if libelle not in libelles:
-            libelles.append(libelle)
-    return ", ".join(libelles)[:200]
-
-
 def convoquer(
     ev: Evenement,
     membres,
@@ -209,12 +191,14 @@ def convoquer(
     sans_session: bool = False,
     role: str = Role.TRAVAILLEUR,
     formule: str = "",
+    role_autre: str = "",
 ) -> list[Convocation]:
     """Convoque (ou change de section, de rôle, de formule) ; jamais deux fois le même membre.
 
     Tout ou rien : un membre qui n'est plus dans le mouvement fait refuser l'ensemble.
     `sans_session=True` remet « sans section » les membres déjà convoqués.
-    Rôle « bureau » : jamais de section ; le bureau représenté est déduit de ses mandats.
+    Rôles (13/11/2026) : travailleur, superviseur, bureau d'organisation, officiel, ou autre rôle
+    écrit à la main (`role_autre`). Une section reste possible pour chaque rôle.
     """
     if ev.annule:
         raise EvenementRefuse("Cet événement est annulé.")
@@ -224,8 +208,9 @@ def convoquer(
         raise EvenementRefuse("Formule inconnue.")
     if session is not None and session.evenement_id != ev.pk:
         raise EvenementRefuse("Cette section n'appartient pas à l'événement.")
-    if role == Role.BUREAU:
-        session, sans_session = None, True
+    role_autre = (role_autre or "").strip()[:100] if role == Role.AUTRE else ""
+    if role == Role.AUTRE and not role_autre:
+        raise EvenementRefuse("Écrivez le rôle (« Autre ») : par exemple « Protocole ».")
     membres = list(membres)
     sortis = [m.nom_complet for m in membres if m.statut in SORTIS]
     if sortis:
@@ -237,20 +222,23 @@ def convoquer(
     resultat, a_notifier = [], []
     with transaction.atomic():
         for membre in membres:
-            bureau = bureau_du_membre(membre) if role == Role.BUREAU else ""
             existante = ev.convocations.filter(membre=membre, active=True).first()
             if existante:
                 nouvelle = session.pk if session is not None else None
                 change_section = (
                     session is not None or sans_session
                 ) and existante.session_id != nouvelle
-                if change_section or (existante.role, existante.formule) != (role, formule):
+                nouveau = (role, formule, role_autre)
+                if change_section or (
+                    existante.role,
+                    existante.formule,
+                    existante.role_autre,
+                ) != nouveau:
                     ancienne = existante.session.nom if existante.session else ""
                     if session is not None or sans_session:
                         existante.session = session
-                    existante.role, existante.formule = role, formule
-                    existante.bureau_libelle = bureau
-                    existante.save(update_fields=["session", "role", "formule", "bureau_libelle"])
+                    existante.role, existante.formule, existante.role_autre = nouveau
+                    existante.save(update_fields=["session", "role", "formule", "role_autre"])
                     a_notifier.append(existante)
                     _journal(
                         par,
@@ -272,7 +260,7 @@ def convoquer(
                         session=session,
                         role=role,
                         formule=formule,
-                        bureau_libelle=bureau,
+                        role_autre=role_autre,
                         convoque_par=par,
                     )
             except IntegrityError:

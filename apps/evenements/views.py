@@ -179,6 +179,7 @@ def convoquer_vue(request, pk):
                 sans_session=session is None,
                 role=request.POST.get("role", Role.TRAVAILLEUR),
                 formule=request.POST.get("formule", ""),
+                role_autre=request.POST.get("role_autre", ""),
                 par=request.user,
             )
         except EvenementRefuse as e:
@@ -212,6 +213,9 @@ def convoquer_vue(request, pk):
             "deja": deja,
             "roles": Role.choices,
             "formules": Formule.choices,
+            "roles_autres": sorted(
+                set(ev.convocations.exclude(role_autre="").values_list("role_autre", flat=True))
+            ),
         },
     )
 

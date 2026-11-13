@@ -97,11 +97,13 @@ class Presence(models.TextChoices):
 
 
 class Role(models.TextChoices):
-    """« Invité(e) en tant que » (décision du 13/11/2026)."""
+    """« Invité(e) en tant que » (décisions du 13/11/2026)."""
 
     TRAVAILLEUR = "travailleur", "Travailleur"
     SUPERVISEUR = "superviseur", "Superviseur"
-    BUREAU = "bureau", "Bureau"
+    BUREAU_ORGANISATION = "bureau_organisation", "Bureau d'organisation"
+    OFFICIEL = "officiel", "Officiel"
+    AUTRE = "autre", "Autre (à préciser)"
 
 
 class Formule(models.TextChoices):
@@ -131,8 +133,9 @@ class Convocation(models.Model):
         verbose_name="section",
     )
     role = models.CharField(
-        "invité(e) en tant que", max_length=12, choices=Role.choices, default=Role.TRAVAILLEUR
+        "invité(e) en tant que", max_length=20, choices=Role.choices, default=Role.TRAVAILLEUR
     )
+    role_autre = models.CharField("autre rôle (écrit à la main)", max_length=100, blank=True)
     formule = models.CharField(
         "formule de l'autorisation", max_length=12, choices=Formule.choices, blank=True
     )
@@ -182,9 +185,16 @@ class Convocation(models.Model):
         )
 
     @property
+    def libelle_role(self) -> str:
+        """« Superviseur », « Bureau d'organisation », ou le rôle écrit à la main (« Protocole »)."""
+        if self.role == Role.AUTRE:
+            return self.role_autre or "Autre"
+        if self.role == "bureau":  # ancien rôle (avant le 13/11/2026)
+            return "Bureau d'organisation"
+        return self.get_role_display()
+
+    @property
     def texte_role(self) -> str:
-        """« Invité(e) en tant que superviseur — Section Mer », « … bureau — Région WEME »."""
-        texte = f"Invité(e) en tant que {self.get_role_display().lower()}"
-        if self.role == Role.BUREAU:
-            return f"{texte} — {self.bureau_libelle}" if self.bureau_libelle else texte
+        """« Invité(e) en tant que superviseur — Section Mer », « … officiel »."""
+        texte = f"Invité(e) en tant que {self.libelle_role[0].lower()}{self.libelle_role[1:]}"
         return f"{texte} — {self.session.nom}" if self.session_id else texte
