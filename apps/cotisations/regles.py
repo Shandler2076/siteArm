@@ -33,6 +33,7 @@ class Situation:
     a_jour: bool = True
     total_annee: int = 0
     total_depuis_debut: int = 0
+    totaux_par_annee: dict = field(default_factory=dict)
 
 
 def mois_suivant(mois: datetime.date) -> datetime.date:
@@ -91,10 +92,12 @@ def mois_dus(membre, jusqu_a: datetime.date) -> list[datetime.date]:
 def _situation(dus, cotises, liste_tarifs, mois_courant) -> Situation:
     payes, en_attente = set(), set()
     total_annee = total = 0
+    par_annee = defaultdict(int)
     for mois, montant, etat in cotises:
         if etat == EtatVersement.VALIDE:
             payes.add(mois)
             total += montant
+            par_annee[mois.year] += montant
             if mois.year == mois_courant.year:
                 total_annee += montant
         elif etat == EtatVersement.EN_ATTENTE:
@@ -110,6 +113,7 @@ def _situation(dus, cotises, liste_tarifs, mois_courant) -> Situation:
         a_jour=not manquants,
         total_annee=total_annee,
         total_depuis_debut=total,
+        totaux_par_annee=dict(par_annee),
     )
 
 
@@ -140,3 +144,47 @@ def situation(membre, mois_courant: datetime.date) -> Situation:
     from apps.membres.models import Membre
 
     return situations(Membre.objects.filter(pk=membre.pk), mois_courant)[membre.pk]
+
+
+def annees_consultables(membre, s: Situation, annee_courante: int) -> list[int]:
+    """Années que l'on peut afficher : du début des cotisations du membre à l'année en cours.
+
+    Début = le plus tardif entre le départ des cotisations sur le site et l'enregistrement du
+    membre. Une année où un mois a été payé d'avance s'ajoute aussi.
+    """
+    debut = annee_courante
+    mois_depart = ParametresCotisations.courant().mois_depart
+    if mois_depart is not None:
+        inscrit = premier_du_mois(membre.date_enregistrement.date())
+        debut = min(debut, max(mois_depart, inscrit).year)
+    annees = set(range(debut, annee_courante + 1))
+    annees |= {m.year for m in s.payes | s.en_attente}
+    return sorted(annees)
+
+
+def choisir_annee(valeur, annees: list[int], defaut: int) -> int:
+    """Année demandée dans l'adresse (`?annee=`), sinon l'année en cours."""
+    try:
+        annee = int(valeur)
+    except (TypeError, ValueError):
+        return defaut
+    return annee if annee in annees else defaut
+
+
+def cases_annee(s: Situation, annee: int) -> list[dict]:
+    """Les 12 mois de `annee` : payé, en attente, dû ou non dû."""
+    from apps.cotisations.services import MOIS
+
+    cases = []
+    for i, nom in enumerate(MOIS):
+        mo = datetime.date(annee, i + 1, 1)
+        if mo in s.payes:
+            etat = "paye"
+        elif mo in s.en_attente:
+            etat = "attente"
+        elif mo in s.dus:
+            etat = "du"
+        else:
+            etat = "non_du"
+        cases.append({"nom": nom.capitalize(), "etat": etat})
+    return cases

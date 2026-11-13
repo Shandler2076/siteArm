@@ -87,6 +87,10 @@ h2 { color: var(--marine); font-size: 1.15rem; margin: 22px 0 8px; }
   color: var(--marine); font-weight: 700; text-decoration: none; }
 .rubriques a:hover { background: #D5DCE8; }
 .rubriques a.actif { background: var(--marine); color: #fff; }
+.annees { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.annees a { padding: 6px 14px; border: 2px solid var(--marine); border-radius: 999px;
+  color: var(--marine); font-weight: 700; text-decoration: none; }
+.annees a.actif { background: var(--or); border-color: var(--or); color: var(--marine); }
 .recherche { display: flex; gap: 8px; }
 .recherche input { flex: 1; padding: 10px; font-size: 1rem; border: 1px solid #C9D1DE; border-radius: 8px; }
 .recherche .bouton { width: auto; }

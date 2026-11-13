@@ -1,0 +1,4 @@
+<nav class="annees" aria-label="Année affichée">
+  {% for a in annees %}<a href="?{{ prefixe }}annee={{ a }}"{% if a == annee %} class="actif" aria-current="page"{% endif %}>{{ a }}</a>{% endfor %}
+</nav>
+<h3>Année {{ annee }}</h3>
