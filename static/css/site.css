@@ -275,3 +275,12 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .repartition li { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid #EEF1F6; }
 .recherche-liste { width: 100%; margin-bottom: 4px; padding: 8px; border: 1px solid #C9D1DE; border-radius: 8px; font-size: .9rem; }
 .ligne-paiement { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #EEF1F6; } .ligne-paiement input { width: 70px; }
+/* Ronds et cases à cocher : toujours à gauche de leur texte, sur la même ligne, ligne cliquable. */
+.champ input[type="radio"], .champ input[type="checkbox"],
+.case input[type="radio"], .case input[type="checkbox"] { width: 22px; height: 22px; padding: 0; margin: 0; flex: none; accent-color: var(--marine); }
+.champ div > div > label, .champ ul > li > label { display: flex; gap: 10px; align-items: center; font-weight: 400;
+  padding: 8px 10px; margin: 4px 0; border: 1px solid #DDE3EE; border-radius: 8px; background: #fff; cursor: pointer; }
+.champ div > div > label:has(input:checked), .champ ul > li > label:has(input:checked) { border-color: var(--marine); background: #EEF2F9; font-weight: 700; }
+.champ ul { list-style: none; padding: 0; margin: 0; }
+.accueil-matricule { margin: 0 0 10px; }
+.lien-matricule { font-weight: 700; color: var(--marine); }

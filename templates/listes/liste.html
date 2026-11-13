@@ -33,7 +33,7 @@
         <thead><tr>{% for e in entetes %}<th>{{ e }}</th>{% endfor %}</tr></thead>
         <tbody>
           {% for rangee in rangees %}
-            <tr>{% for v in rangee %}<td>{{ v|default_if_none:"" }}</td>{% endfor %}</tr>
+            <tr>{% for c in rangee %}<td>{% if c.lien %}<a class="lien-matricule" href="{{ c.lien }}">{{ c.valeur }}</a>{% else %}{{ c.valeur|default_if_none:"" }}{% endif %}</td>{% endfor %}</tr>
           {% empty %}
             <tr><td colspan="{{ entetes|length }}" class="aide">Aucun membre ne correspond.</td></tr>
           {% endfor %}

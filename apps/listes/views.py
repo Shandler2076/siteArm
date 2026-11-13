@@ -62,10 +62,24 @@ def liste(request, cle):
         contexte.update(
             page=page,
             entetes=[COLONNES_LISTE[c][0] for c in colonnes],
-            rangees=list(lignes(page.object_list, colonnes, aujourdhui)),
+            rangees=_avec_liens(
+                unite, colonnes, list(lignes(page.object_list, colonnes, aujourdhui))
+            ),
             resume=resume_filtres(form),
         )
     return render(request, "listes/liste.html", contexte)
+
+
+def _avec_liens(unite, colonnes, rangees):
+    """Le matricule ouvre la fiche du membre dans l'espace du bureau qui consulte (13/11/2026)."""
+    i = colonnes.index("matricule") if "matricule" in colonnes else None
+    resultat = []
+    for rangee in rangees:
+        cellules = [{"valeur": v, "lien": ""} for v in rangee]
+        if i is not None and rangee[i]:
+            cellules[i]["lien"] = reverse("bureaux:fiche_membre", args=[unite.cle, rangee[i]])
+        resultat.append(cellules)
+    return resultat
 
 
 def _statuts(request) -> list[str]:
