@@ -105,7 +105,8 @@ par identifiant (matricule) et mot de passe personnel.
    réhabilitations, changements de catégorie, sanctions disciplinaires internes.
 5. **Informer** les membres et les bureaux des décisions qui les concernent.
 6. **Assurer la sécurité** du site : contrôle des accès, journal des opérations.
-7. **Gérer les cotisations** : cotisations mensuelles et cotisations spéciales, paiement par mobile
+7. **Gérer les cotisations** : cotisations mensuelles et cotisations spéciales (y compris les amendes
+   liées à une sanction, visibles du membre et du BN seulement), paiement par mobile
    money au numéro unique du Bureau national, reçus et quittances, reversements mensuels des parts
    aux paroisses, circuits et régions.
 8. **Vérifier l'identité d'un membre** hors du périmètre d'un bureau (membre en visite, faute

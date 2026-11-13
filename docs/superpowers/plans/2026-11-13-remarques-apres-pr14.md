@@ -1,5 +1,8 @@
 # Remarques du mainteneur après la PR #14 — liste en cours (à compiler, NE PAS exécuter)
 
+> **État (13/11/2026)** : tous les points ont été **réalisés** sur l'ordre « lance tout » ; les
+> propositions par défaut ont été retenues pour les questions restantes.
+>
 > **Règle du mainteneur** : on compile seulement. **On ne modifie rien sans son accord** ; la
 > réalisation se fera en bloc, après l'ensemble de ses remarques.
 

@@ -21,6 +21,12 @@
 6. Le membre reçoit un **message de bienvenue** (sur le site et par e-mail s'il en a un). Ce message
    ne contient **jamais** le mot de passe.
 
+## La catégorie
+Les trois catégories (actif, d'honneur, sympathisant) **s'excluent** (art. 25 à 28) et sont fixées
+par le BN. Un bureau ne peut plus demander de changement de catégorie. Seul passage prévu :
+**sympathisant → membre actif**, par décision du BNC (fiche du membre → Catégorie → « Admettre comme
+membre actif »). Une erreur de saisie se corrige par le BN, avec un motif.
+
 ## Par lots (fichier Excel)
 1. **Enregistrer par lots** → téléchargez le modèle Excel de la région.
 2. Colonne facultative **« Paroisse actuelle »** : seulement si le membre n'est plus dans sa paroisse

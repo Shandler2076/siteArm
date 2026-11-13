@@ -996,6 +996,39 @@ Décisions du mainteneur après la visite du site d'essai. Le détail est dans
 - Message de bienvenue sans mot de passe.
 - Menu par thèmes, repliable, avec la rubrique active mise en évidence.
 
+## 17 ter. Évolutions décidées le 13 novembre 2026 (après la PR #14)
+
+Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` ; guides dans
+`docs/guides/`.
+
+- **Convocation** :
+  - deux colonnes : on cherche à gauche, les **membres sélectionnés** restent à droite (barre en
+    bas sur téléphone) ;
+  - rôles : travailleur, superviseur, bureau d'organisation, officiel, ou autre écrit à la main ;
+    une section possible pour chaque rôle.
+- **Cotisations spéciales** :
+  - le montant s'écrit juste devant son type : fixe, minimum, ou libre avec un montant suggéré ;
+  - cibles combinables : tous les membres ; certains membres (membres des bureaux, critères,
+    membres désignés) ; **unités**, qui paient ensemble ; **bureaux** ;
+  - pour une unité ou un bureau, c'est le Trésorier qui paie, et la quittance distingue
+    « Unité paroissiale de … » de « Bureau de l'unité paroissiale de … » ;
+  - **amende** liée à une sanction : en attente chez le membre seul ; absente de la liste.
+- **Reversements** : aperçu des parts dues, trois étapes visibles, messages d'état.
+- **Accueil** : le matricule est affiché. **Listes** : le matricule ouvre la fiche.
+- **Catégories exclusives** (art. 25 à 28) :
+  - plus de changement de catégorie demandé par les bureaux ;
+  - seul passage : sympathisant → actif, par décision du BNC ;
+  - correction d'une erreur de saisie par le BN seulement.
+- **Grades** :
+  - éligibles au **grade visé** ;
+  - sessions de test ou d'examen (seuls des éligibles ; candidats notifiés ; résultats admis,
+    ajourné ou absent) ;
+  - promotion des admis cochés ;
+  - **promotions spéciales** (art. 84) à part ;
+  - **acte de promotion** PDF pré-rempli (numéro saisi, signature du Président), extrait pour
+    chaque promu, archive des actes.
+- **Cumul de fonctions** : permis à tous les niveaux de l'Armée du Salut (aucune restriction).
+
 ## 18. Module 4 — Communication
 
 - **Messages officiels** du BNC aux membres, par périmètre.
