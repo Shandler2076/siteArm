@@ -210,6 +210,27 @@ Deux façons de payer coexistent :
     site de savoir sûrement pour quels membres il a été fait.
 - **Numéro mobile money du trésorier de chaque unité : enregistré par le BN seulement.**
 
+## I. Guides d'utilisation (à préparer le moment venu)
+
+Une fois les fonctions réalisées, préparer un **guide d'utilisation** pour chaque partie décrite, en
+français simple, avec des captures d'écran, établi au nom du mainteneur. Chaque guide existera en
+Markdown et en PDF, dans `docs/guides/`.
+
+| Guide | Pour qui | Contenu |
+|---|---|---|
+| Le menu et la navigation | Tous | Groupes, rubrique active, Mon espace |
+| Enregistrer un membre (individuel, lots) | BN | Paroisse actuelle, identifiants à remettre |
+| La fiche d'un membre | BN, bureaux | Rubriques Profil / Cotisation mensuelle / Événements, années |
+| Vérifier un membre | Chef et Secrétaire des bureaux | Matricule exact, motif, carte d'identité |
+| Listes et statistiques | Bureaux, BN | Paramètres, sous-cases, colonnes, recherche |
+| Événements | BN | Créer, sections, convoquer (recherche), rôles, autorisations, pointage |
+| Mes événements et mon autorisation | Membres, paroisses | Imprimer, QR code |
+| Cotisations mensuelles | Paroisse, circuit, région, BN | Espèces, grille, validation, parts, reversements |
+| **Payer par mobile money** | Membres, paroisses | Payer ses mois, payer pour plusieurs membres, reçu |
+| **Cotisations spéciales** | BN, membres | Créer (montant fixe / minimum / libre, cible), payer, quittance |
+| **Reversements mensuels** | BN, trésoriers | État des reversements, numéros des trésoriers, suivi |
+| Notifications | Tous | Cliquer pour aller à la bonne page |
+
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
 - Le menu par thèmes, repliable, avec la rubrique active mise en évidence.
