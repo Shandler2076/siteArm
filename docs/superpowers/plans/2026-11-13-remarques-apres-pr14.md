@@ -54,4 +54,54 @@ et à droite.
 - vérifier tous les autres formulaires du site qui ont des ronds ou des cases (une règle de style
   commune).
 
+## 4. Page « Cotisations spéciales » (BN) : réorganisation complète
+
+Décisions du mainteneur (13/11/2026) :
+
+### 4.1 Type de montant
+- Ronds alignés, explicites, faciles à cocher (voir point 3).
+- **Montant fixe** : une case « montant » s'ouvre **juste devant**, obligatoire.
+- **Montant minimum** : une case « montant minimum » s'ouvre **juste devant**, obligatoire.
+- **Montant libre** (don) : une case **« montant suggéré »**, facultative, s'ouvre devant. Elle est
+  montrée aux membres comme indication ; chacun donne ce qu'il veut.
+- Il n'y a plus de case « montant » commune en bas.
+
+### 4.2 À qui s'adresse la cotisation (choix combinables)
+- **Tous les membres** : rien d'autre à choisir.
+- **Unités**, où toute l'unité paie **ensemble** un montant :
+  - unité paroissiale ;
+  - unité de section circuit ;
+  - unité régionale de coordination.
+- **Bureaux**, où le bureau de l'unité paie :
+  - bureau de l'unité paroissiale ;
+  - bureau de l'unité de section circuit ;
+  - bureau de l'unité régionale de coordination.
+- Pour une unité comme pour un bureau, **c'est le Trésorier de l'unité qui paie** depuis le site
+  (après avoir collecté l'argent). La **quittance porte deux noms distincts** : « Unité paroissiale
+  de … » pour une cotisation d'unité, « Bureau de l'unité paroissiale de … » pour une cotisation de
+  bureau. On sait ainsi qui a payé quoi.
+- **Certains membres** : en cliquant, une liste se déroule avec **trois façons de choisir,
+  combinables** :
+  1. **les membres des bureaux** (bureaux d'unité paroissiale, de section circuit, d'unité régionale
+     de coordination, national), chaque membre de bureau payant pour lui-même ;
+  2. **par critères** (grade, région, catégorie, âge…) ;
+  3. **membres désignés** : recherche par **nom ou matricule**, on ajoute une ou plusieurs personnes
+     (par exemple une seule personne).
+- On peut cocher plusieurs cibles à la fois (ex. tous les membres + les unités paroissiales).
+
+### 4.3 Sanction à payer en numéraire (amende)
+- **Liée à la sanction** :
+  - le BNC inscrit la sanction (comme aujourd'hui) et indique « amende à payer : X F » ;
+  - l'amende apparaît **en attente chez le membre seul**, avec une quittance à chaque paiement ;
+  - elle reste dans l'historique de la sanction (motif : la faute et la décision prise à telle date).
+- Pour la discrétion, l'amende **n'apparaît pas** dans la liste des cotisations spéciales.
+- Elle est payée au BN par mobile money, comme les cotisations spéciales. Comme aujourd'hui, seul le
+  BNC inscrit les sanctions.
+
+### 4.4 Questions restantes
+- Amende : peut-on la payer pour un autre membre (« payer pour un autre ») ? Proposition : oui, mais
+  le payeur ne voit que « Amende — X F » et rien de la faute.
+- Unités : le montant demandé à une unité est-il le même pour toutes les unités (ex. 50 000 F par
+  paroisse) ? Proposition : oui, un montant par type d'unité.
+
 *(À compléter au fil des remarques du mainteneur.)*
