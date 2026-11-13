@@ -228,8 +228,8 @@ Deux façons de payer coexistent :
   - les mois payés sont les **plus anciens mois dus** du bénéficiaire, sans les afficher au payeur.
     Le payeur choisit seulement le **nombre de mois**.
 - **Décision du mainteneur (13/11/2026) : n'importe quel membre peut payer pour un autre.**
-- Question restante : la confirmation réduite proposée (grade, prénoms, initiale du nom, paroisse)
-  convient-elle ?
+- **Confirmation réduite validée** (grade, prénoms, initiale du nom, paroisse ; ex. « Soldat Albert
+  A. — Paroisse de GBOA ») : suffisante, rien de plus.
 
 ## I. Guides d'utilisation (à préparer le moment venu)
 
