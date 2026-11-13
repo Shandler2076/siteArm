@@ -229,11 +229,15 @@ def convoquer(
                     session is not None or sans_session
                 ) and existante.session_id != nouvelle
                 nouveau = (role, formule, role_autre)
-                if change_section or (
-                    existante.role,
-                    existante.formule,
-                    existante.role_autre,
-                ) != nouveau:
+                if (
+                    change_section
+                    or (
+                        existante.role,
+                        existante.formule,
+                        existante.role_autre,
+                    )
+                    != nouveau
+                ):
                     ancienne = existante.session.nom if existante.session else ""
                     if session is not None or sans_session:
                         existante.session = session

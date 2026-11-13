@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titre %}Promotion après test ou examen — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Promotion après test ou examen</h1>
+  <p class="aide">1. Éligibles au grade visé → 2. session (candidats notifiés) → 3. résultats → 4. promotion des admis cochés, avec l'acte de promotion.</p>
+  <p><a class="bouton bouton--secondaire" href="{% url 'grades:bn_eligibles' %}">Nouvelle session (depuis les éligibles)</a></p>
+  <ul class="fonctions">{% for s in sessions %}
+    <li><a href="{% url 'grades:bn_session' s.pk %}"><strong>{{ s.get_type_display }} du {{ s.date|date:"d/m/Y" }}</strong></a> — grade visé : {{ s.get_grade_vise_display }}{% if s.lieu %} — {{ s.lieu }}{% endif %}<br>
+      <small class="aide">{{ s.candidats.all|length }} candidat(s){% if s.acte %} · {{ s.acte }}{% endif %}</small></li>
+  {% empty %}<li class="aide">Aucune session.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

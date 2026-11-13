@@ -22,7 +22,7 @@ from apps.bureaux.perimetre import (
 )
 
 ELIGIBLES = (
-    "?envoye=1&statut=actif&eligible=on&colonnes=matricule&colonnes=nom&colonnes=prenoms"
+    "?envoye=1&statut=actif&eligible_a=&colonnes=matricule&colonnes=nom&colonnes=prenoms"
     "&colonnes=grade&colonnes=date_grade&colonnes=paroisse"
 )
 
@@ -39,7 +39,11 @@ class Lien:
 
     def score(self, chemin: str, parametres) -> int:
         """Longueur du préfixe reconnu (0 : pas reconnu)."""
-        if any(parametres.get(k) != v for k, v in self.requis.items()):
+        # Valeur None : le paramètre doit seulement être présent (sa valeur varie).
+        if any(
+            (k not in parametres) if v is None else parametres.get(k) != v
+            for k, v in self.requis.items()
+        ):
             return 0
         chemin_lien = self.url.split("?", 1)[0]
         if self.exact:
@@ -134,16 +138,28 @@ def construire_menu(request) -> list[Groupe]:
             Lien(f"Listes{noms[cle]}", url_listes),
             Lien(f"Statistiques{noms[cle]}", reverse("listes:statistiques", args=[cle])),
         ]
-        grades.append(
-            Lien(
-                f"Éligibles au grade suivant{noms[cle]}",
-                url_listes + ELIGIBLES,
-                requis={"eligible": "on"},
+        if not (cle == "national" and gestion_bn):  # le BN a sa propre page (sessions de test)
+            grades.append(
+                Lien(
+                    f"Éligibles au grade visé{noms[cle]}",
+                    url_listes + ELIGIBLES,
+                    requis={"eligible_a": None},
+                )
             )
-        )
     if gestion_bn:
         listes.append(Lien("Tranches d'âge", reverse("listes:tranches")))
-        grades.append(Lien("Promotions en série", reverse("grades:bn_serie")))
+        # Grades (13/11/2026) : éligibles au grade visé → test ou examen → promotion ; à part,
+        # la promotion spéciale (art. 84) ; et les actes.
+        grades = [
+            Lien("Éligibles au grade visé", reverse("grades:bn_eligibles")),
+            Lien(
+                "Promotion après test ou examen",
+                reverse("grades:bn_sessions"),
+                prefixes=("/grades/bn/serie/",),
+            ),
+            Lien("Promotions spéciales", reverse("grades:bn_speciales")),
+            Lien("Actes de promotion", reverse("grades:bn_actes")),
+        ] + grades
     if listes:
         groupes.append(Groupe("Listes et statistiques", listes))
     if grades:

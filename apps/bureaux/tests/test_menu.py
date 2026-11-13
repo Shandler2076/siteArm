@@ -65,11 +65,15 @@ def test_menu_rubrique_active_sur_sous_page(compte_technique, monde):
     assert _actifs(menu) == [("Cotisations mensuelles", "Parts reçues")]
 
 
-def test_eligibles_distingues_des_listes(compte_technique):
-    menu = _menu(compte_technique, "/bureau/national/listes/", envoye="1", eligible="on")
-    assert _actifs(menu) == [("Grades", "Éligibles au grade suivant")]
-    menu = _menu(compte_technique, "/bureau/national/listes/")
-    assert _actifs(menu) == [("Listes et statistiques", "Listes")]
+def test_eligibles_distingues_des_listes(compte_technique, monde):
+    sec = monde["sec_p1"].compte
+    url = f"/bureau/paroisse-{monde['P1'].pk}/listes/"
+    menu = _menu(sec, url, envoye="1", eligible_a="5")
+    assert _actifs(menu) == [("Grades", "Éligibles au grade visé")]
+    assert _actifs(_menu(sec, url)) == [("Listes et statistiques", "Listes")]
+    # Le BN a sa propre page « Éligibles au grade visé » (sessions de test).
+    menu = _menu(compte_technique, "/grades/bn/eligibles/", grade="5")
+    assert _actifs(menu) == [("Grades", "Éligibles au grade visé")]
 
 
 def test_accueil_seulement_sur_la_page_d_accueil(compte_technique):

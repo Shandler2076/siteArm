@@ -2,7 +2,8 @@
 <ul class="fonctions">
   {% for h in membre.grades.all %}
     <li><strong>{{ h.get_grade_display }}</strong> — depuis le {{ h.date_effet|date:"d/m/Y" }}<br>
-      <small class="aide">{{ h.get_mode_display }}{% if h.reference %} · Réf. {{ h.reference }}{% endif %}{% if h.motif %} · {{ h.motif }}{% endif %}</small></li>
+      <small class="aide">{{ h.get_mode_display }}{% if h.reference %} · Réf. {{ h.reference }}{% endif %}{% if h.motif %} · {{ h.motif }}{% endif %}
+        {% if h.acte_id and user.pk == membre.compte_id or h.acte_id and perms.membres.gerer_membres %} · <a href="{% url 'grades:extrait' h.acte_id %}?matricule={{ membre.matricule }}">Extrait de l'acte (PDF)</a>{% endif %}</small></li>
   {% empty %}
     <li class="aide">Grade non renseigné.</li>
   {% endfor %}

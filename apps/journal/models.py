@@ -50,8 +50,14 @@ NUMERO_TRESORIER = "numero_tresorier"
 REVERSEMENTS_PREPARES = "reversements_prepares"
 REVERSEMENTS_VALIDES = "reversements_valides"
 REVERSEMENT_ENVOYE = "reversement_envoye"
+SESSION_EPREUVE = "session_epreuve"
+RESULTATS_EPREUVE = "resultats_epreuve"
+ACTE_PROMOTION = "acte_promotion"
 
 LIBELLES = {
+    SESSION_EPREUVE: "Session de test ou d'examen créée",
+    RESULTATS_EPREUVE: "Résultats d'un test ou examen",
+    ACTE_PROMOTION: "Acte de promotion",
     VERSEMENT_MOBILE_MONEY: "Cotisation payée par mobile money",
     COTISATION_SPECIALE: "Cotisation spéciale créée",
     CONTRIBUTION: "Cotisation spéciale payée",

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block titre %}Actes de promotion — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Actes de promotion</h1>
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Décision</th><th>Nature</th><th>Épreuve</th><th>Promus</th><th></th></tr></thead>
+    <tbody>{% for a in actes %}<tr><td>n° {{ a.numero }} du {{ a.date_decision|date:"d/m/Y" }}</td><td>{{ a.get_nature_display }}</td>
+      <td>{% for s in a.sessions.all %}{{ s.get_type_display }} du {{ s.date|date:"d/m/Y" }}{% empty %}—{% endfor %}</td>
+      <td>{{ a.promotions.all|length }}</td><td><a href="{% url 'grades:acte_pdf' a.pk %}">Acte (PDF)</a></td></tr>
+    {% empty %}<tr><td colspan="5" class="aide">Aucun acte.</td></tr>{% endfor %}</tbody></table></div>
+</section>
+{% endblock %}

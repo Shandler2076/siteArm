@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titre %}Éligibles au grade visé — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Éligibles au grade visé</h1>
+  <p class="aide">Choisissez le grade que les membres pourraient recevoir. Le site montre les membres du grade juste en dessous qui remplissent les conditions (art. 78). Exemple : « Capitaine » → les Sous-Capitaines éligibles.</p>
+  <form method="get" class="filtres">
+    <label class="champ"><span>Éligibles au grade de</span>
+      <select name="grade" onchange="this.form.submit()"><option value="">— Choisir —</option>
+        {% for v, lib in grades %}<option value="{{ v }}"{% if v == grade %} selected{% endif %}>{{ lib }}</option>{% endfor %}</select></label>
+    <noscript><button class="bouton bouton--secondaire">Afficher</button></noscript>
+  </form>
+  {% if grade %}
+    {% if par_nomination %}<p class="alerte">Grade <strong>par nomination</strong> : aucune durée ne suffit. La liste montre tout le grade inférieur, avec la durée dans le grade, pour éclairer la décision.</p>{% endif %}
+    <h2>{{ eligibles|length }} membre(s)</h2>
+    {% if eligibles %}
+    <form method="post">{% csrf_token %}<input type="hidden" name="grade" value="{{ grade }}">
+      <p><label class="case"><input type="checkbox" checked onclick="document.querySelectorAll('input[name=membres]').forEach(function(c){c.checked=this.checked}, this)"> Tout cocher</label></p>
+      <ul class="propositions">{% for m in eligibles %}
+        <li><label><input type="checkbox" name="membres" value="{{ m.pk }}" checked>
+          <span>{{ m.nom_complet }}<br><small class="aide">{{ m.matricule }} — grade depuis le {{ m.date_grade|date:"d/m/Y"|default:"—" }}</small></span></label></li>
+      {% endfor %}</ul>
+      <h2>Créer une session de test ou d'examen</h2>
+      <div class="champ"><span>Type d'épreuve</span>
+        <div>{% for v, l in types %}<div><label><input type="radio" name="type" value="{{ v }}"{% if forloop.first %} checked{% endif %}> {{ l }}</label></div>{% endfor %}</div></div>
+      <div class="date-heure">
+        <label class="champ"><span>Date de l'épreuve</span><input type="date" name="date" value="{{ aujourdhui|date:'Y-m-d' }}" required></label>
+        <label class="champ"><span>Lieu (facultatif)</span><input name="lieu" maxlength="200"></label>
+      </div>
+      <button type="submit" class="bouton">Créer la session avec les membres cochés</button>
+    </form>
+    {% else %}<p class="aide">Aucun membre éligible à ce grade.</p>{% endif %}
+  {% endif %}
+  <p><a href="{% url 'grades:bn_sessions' %}">Voir les sessions de test ou d'examen →</a></p>
+</section>
+{% endblock %}

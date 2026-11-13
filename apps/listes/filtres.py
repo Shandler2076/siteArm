@@ -74,7 +74,7 @@ class FiltreListeForm(forms.Form):
         empty_label="Toutes",
     )
     grade = forms.MultipleChoiceField(
-        label="Grade",
+        label="Grade actuel",
         choices=[(str(v), lib) for v, lib in Grade.choices] + [("aucun", "Grade non renseigné")],
         required=False,
         widget=forms.CheckboxSelectMultiple,
@@ -86,7 +86,14 @@ class FiltreListeForm(forms.Form):
         empty_value=None,
         required=False,
     )
-    eligible = forms.BooleanField(label="Éligibles au grade suivant", required=False)
+    eligible = forms.BooleanField(label="Éligibles au grade suivant leur grade", required=False)
+    eligible_a = forms.TypedChoiceField(
+        label="Éligibles au grade de (grade visé)",
+        coerce=int,
+        required=False,
+        empty_value=None,
+        choices=[("", "—")] + [(v, lib) for v, lib in Grade.choices if v > 0],
+    )
     cotisation = forms.ChoiceField(label="Cotisations", choices=COTISATIONS, required=False)
     retard_min = forms.IntegerField(
         label="En retard d'au moins (mois)", required=False, min_value=1, max_value=240
@@ -141,6 +148,7 @@ class FiltreListeForm(forms.Form):
             "categorie",
             "grade",
             "grade_min",
+            "eligible_a",
             "eligible",
             "cotisation",
             "retard_min",
@@ -205,6 +213,10 @@ def membres_filtres(unite: Unite, donnees: dict, aujourdhui: datetime.date):
         qs = qs.filter(critere)
     if donnees.get("grade_min") is not None:
         qs = qs.filter(grade__gte=donnees["grade_min"])
+    if donnees.get("eligible_a"):
+        from apps.grades.services import eligibles_au_grade
+
+        qs = qs.filter(pk__in=eligibles_au_grade(donnees["eligible_a"], aujourdhui).values("pk"))
     if donnees.get("eligible"):
         from apps.grades.services import filtre_eligibles
 
@@ -248,6 +260,8 @@ def resume_filtres(form: FiltreListeForm) -> list[str]:
         resume.append("Grade : " + ", ".join(str(libelles[g]) for g in d["grade"]))
     if d.get("grade_min") is not None:
         resume.append(f"Grade : à partir de {Grade(d['grade_min']).label}")
+    if d.get("eligible_a"):
+        resume.append(f"Éligibles au grade de {Grade(d['eligible_a']).label}")
     if d.get("eligible"):
         resume.append("Éligibles au grade suivant")
     if d.get("cotisation") == "a_jour":
