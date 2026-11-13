@@ -227,10 +227,9 @@ Deux façons de payer coexistent :
     paroisse ;
   - les mois payés sont les **plus anciens mois dus** du bénéficiaire, sans les afficher au payeur.
     Le payeur choisit seulement le **nombre de mois**.
-- Questions :
-  - Qui peut payer pour un autre : **tout membre**, ou seulement les bureaux et des proches ?
-    Proposition : tout membre, puisque le paiement ne révèle rien.
-  - La confirmation réduite proposée convient-elle ?
+- **Décision du mainteneur (13/11/2026) : n'importe quel membre peut payer pour un autre.**
+- Question restante : la confirmation réduite proposée (grade, prénoms, initiale du nom, paroisse)
+  convient-elle ?
 
 ## I. Guides d'utilisation (à préparer le moment venu)
 
