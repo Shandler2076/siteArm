@@ -186,7 +186,7 @@ class Convocation(models.Model):
 
     @property
     def libelle_role(self) -> str:
-        """« Superviseur », « Bureau d'organisation », ou le rôle écrit à la main (« Protocole »)."""
+        """« Superviseur », « Bureau d'organisation », ou le rôle écrit à la main."""
         if self.role == Role.AUTRE:
             return self.role_autre or "Autre"
         if self.role == "bureau":  # ancien rôle (avant le 13/11/2026)
