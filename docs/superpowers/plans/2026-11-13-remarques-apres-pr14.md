@@ -159,4 +159,15 @@ Décisions du mainteneur (13/11/2026) :
   site d'essai sont clos avec la mention « procédure supprimée ».
 - Documents à mettre à jour : cahier des charges, guides, page « Protection de vos données ».
 
+## 9. Listes : le matricule ouvre la fiche
+
+Dans toute liste générée (depuis une statistique ou la page Listes), le **matricule** de chaque
+ligne devient un **lien** vers la fiche complète du membre, avec ses rubriques : Profil, Cotisation
+mensuelle, Participation aux événements (BN seulement).
+- Le lien ouvre la fiche **dans l'espace du bureau qui consulte** (gardien des périmètres) : le
+  bureau ne voit que les membres de son périmètre, déjà les seuls de sa liste ; au niveau national,
+  c'est la fiche du BN.
+- Chaque ouverture de fiche reste inscrite au journal, comme aujourd'hui.
+- Les exports PDF et Excel ne changent pas.
+
 *(À compléter au fil des remarques du mainteneur.)*
