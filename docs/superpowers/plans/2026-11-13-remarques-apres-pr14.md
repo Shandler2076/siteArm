@@ -244,4 +244,26 @@ Décisions du mainteneur (13/11/2026) :
 - **Archive des actes** : une liste des actes de promotion (numéro, date, type d'épreuve ou
   « spéciale », nombre de promus), consultable et réimprimable par le BN.
 
+## 14. Du test à la promotion : un seul parcours
+
+Décision du mainteneur (13/11/2026) : la promotion après test ou examen ne concerne **que les
+éligibles**, et ce sont les éligibles qui passent le test. Le parcours se suit d'un bout à l'autre :
+
+1. **Éligibles** (point 10) : on choisit le **grade visé** ; le site sort la liste des éligibles.
+2. **Créer une session de test ou d'examen** à partir de cette liste :
+   - type (test ou examen), date, lieu (facultatif), grade visé ;
+   - les éligibles retenus deviennent les **candidats** ;
+   - chaque candidat est **notifié** (date, lieu, grade visé).
+3. **Après l'épreuve**, saisir le résultat de chaque candidat : **admis**, **ajourné** ou **absent**.
+4. **« Promouvoir les admis »** : on **coche** les admis à promouvoir, on saisit le **numéro de la
+   décision** et la date d'effet. Le site :
+   - promeut les admis cochés au grade visé ;
+   - génère l'**acte de promotion** (point 13), avec la mention de l'épreuve ;
+   - notifie chaque promu et sa paroisse, et inscrit tout au journal.
+- Seuls des **éligibles** peuvent être candidats. Un membre non éligible ne peut être promu que par
+  **promotion spéciale** (art. 84, point 11).
+- Les **ajournés** et les **absents** restent éligibles et pourront être candidats à une session
+  suivante.
+- Les sessions passées restent consultables : candidats, résultats, acte associé.
+
 *(À compléter au fil des remarques du mainteneur.)*
