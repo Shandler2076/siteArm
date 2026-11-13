@@ -145,6 +145,18 @@ Ce que dit le règlement intérieur :
 - art. 27 : la qualité de membre d'honneur est **accordée par le mouvement**, en reconnaissance ;
 - art. 87 : elle **ne constitue pas un grade** et ne modifie pas le grade détenu.
 
-L'analyse et les options sont proposées au mainteneur. La décision sera reportée ici.
+Décisions du mainteneur (13/11/2026) :
+- **Les trois catégories s'excluent** : un membre actif n'est pas membre d'honneur, il reste actif. La
+  qualité de membre d'honneur s'accorde à une personne qui n'est pas membre actif ; elle est fixée
+  par le BN (à l'enregistrement, ou par décision du BNC), avec la préséance de l'art. 87.
+- **Suppression** du signalement « changement de catégorie » par les bureaux : un bureau ne peut
+  plus demander de changer la catégorie d'un membre.
+- **Seul passage prévu : sympathisant → membre actif**, par **décision du BNC** (date, référence de
+  la décision, motif), inscrite à l'historique du membre et au journal ; le membre en est notifié.
+- **Erreur de saisie** de la catégorie : corrigée seulement par le BN, comme correction
+  exceptionnelle journalisée.
+- Les données existantes ne sont pas touchées ; les signalements « catégorie » déjà en cours sur le
+  site d'essai sont clos avec la mention « procédure supprimée ».
+- Documents à mettre à jour : cahier des charges, guides, page « Protection de vos données ».
 
 *(À compléter au fil des remarques du mainteneur.)*
