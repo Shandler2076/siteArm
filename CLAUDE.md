@@ -8,7 +8,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
-- Cahier des charges général (v2.7, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+- Cahier des charges général (v2.8, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
   détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
@@ -82,6 +82,15 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   site (plateforme simulée sur le site d'essai), cotisations spéciales, quittances, reversements
   mensuels (Trésorier national prépare, Président ou Secrétaire national valide) ; rôles dans
   `perimetre.py` (`tresoriers`, `unites_tresorerie`…). Guides : `docs/guides/`.
+- Cotisations spéciales : cibles `pour_membres` (tous/certains/aucun), `membres_des_bureaux`,
+  `membres_designes`, critères, `pour_unites` (l'unité paie ensemble) et `pour_bureaux` ; clé de
+  payeur `cle_payeur` (« unite:paroisse-3 » / « paroisse-3 ») ; amende = cotisation liée à une
+  `Sanction` (`creer_amende`), jamais listée.
+- Grades : `eligibles_au_grade` (grade visé), `SessionEpreuve` / `Candidat` (test ou examen),
+  `promouvoir_admis`, `promotion_speciale`, `ActePromotion` (PDF `grades/pdf.py`, signature du
+  Président, extrait par promu).
+- Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
+  (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 
 ## Hébergement
 - Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre

@@ -9,10 +9,10 @@
     <p><a class="bouton" href="{% url 'tresorerie:payer_membres' unite.cle %}">Payer pour des membres (espèces reçues)</a></p>
   {% endif %}
 
-  <h2>Cotisations spéciales demandées au bureau</h2>
+  <h2>Cotisations spéciales demandées à l'unité et au bureau</h2>
   <ul class="fonctions">{% for x in speciales %}
-    <li><strong>{{ x.cs.libelle }}</strong> — payé : {{ x.paye }} F{% if x.reste is not None %} · reste : {{ x.reste }} F{% endif %}
-      {% if agit and not x.reglee or agit and x.cs.type_montant != "fixe" %}<br><a class="bouton bouton--secondaire" href="{% url 'tresorerie:payer_speciale' x.cs.pk %}?bureau={{ unite.cle }}">Payer au nom de : {{ unite.libelle }}</a>{% endif %}</li>
+    <li><strong>{{ x.cs.libelle }}</strong> — pour : {{ x.pour }}<br><small class="aide">payé : {{ x.paye }} F{% if x.reste is not None %} · reste : {{ x.reste }} F{% endif %}</small>
+      {% if agit and not x.reglee or agit and x.cs.type_montant != "fixe" %}<br><a class="bouton bouton--secondaire" href="{% url 'tresorerie:payer_speciale' x.cs.pk %}?bureau={{ unite.cle }}&amp;type={{ x.type }}">Payer au nom de : {{ x.pour }}</a>{% endif %}</li>
   {% empty %}<li class="aide">Aucune.</li>{% endfor %}</ul>
 
   <h2>Reversements reçus du Bureau national</h2>

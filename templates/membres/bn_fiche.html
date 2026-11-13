@@ -39,6 +39,29 @@
     <p><a href="{% url 'membres:cip' membre.matricule %}">Voir la photo du CIP</a></p>
   {% endif %}
   {% include "mouvements/_sanctions.html" with bn=True %}
+  <details class="plus-filtres"><summary>Catégorie : {{ membre.get_categorie_display }}</summary>
+    {% if membre.categorie == "sympathisant" %}
+    <form method="post" action="{% url 'membres:bn_categorie' membre.matricule %}">{% csrf_token %}
+      <input type="hidden" name="action" value="admettre">
+      <h3>Admettre comme membre actif (décision du BNC)</h3>
+      <div class="date-heure">
+        <label class="champ champ--requis"><span>Référence de la décision</span><input name="reference" required maxlength="120"></label>
+        <label class="champ"><span>À compter du</span><input type="date" name="date_effet" value="{% now 'Y-m-d' %}"></label>
+      </div>
+      <label class="champ"><span>Motif (facultatif)</span><input name="motif" maxlength="300"></label>
+      <button type="submit" class="bouton">Admettre comme membre actif</button>
+    </form>
+    {% endif %}
+    <form method="post" action="{% url 'membres:bn_categorie' membre.matricule %}">{% csrf_token %}
+      <input type="hidden" name="action" value="corriger">
+      <h3>Corriger la catégorie (erreur de saisie)</h3>
+      <label class="champ"><span>Catégorie exacte</span><select name="categorie">
+        <option value="actif">Membre actif</option><option value="honneur">Membre d'honneur</option><option value="sympathisant">Membre sympathisant</option></select></label>
+      <label class="champ champ--requis"><span>Motif de la correction</span><input name="motif" required maxlength="300"></label>
+      <button type="submit" class="bouton bouton--secondaire" onclick="return confirm('Corriger la catégorie ?');">Corriger la catégorie</button>
+    </form>
+    <p class="aide">Les catégories s'excluent (art. 25 à 28). Un bureau ne peut plus demander de changement de catégorie.</p>
+  </details>
   {% include "grades/_historique.html" %}
   {% include "evenements/_historique.html" %}
   {% include "mouvements/_historique.html" %}

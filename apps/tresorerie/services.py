@@ -33,6 +33,7 @@ from apps.tresorerie.models import (  # noqa: F401 — NumeroMobileMoney sert au
 )
 
 NATIONAL = Unite(Niveau.NATIONAL, None)
+NIVEAUX_MANDATS = ("paroisse", "circuit", "region", "national")
 NIVEAUX_BUREAUX = [
     (Niveau.PAROISSE, "Bureaux de paroisse"),
     (Niveau.CIRCUIT, "Bureaux de circuit"),
@@ -100,7 +101,14 @@ def creer_cotisation_speciale(
     pour_membres: str = PourMembres.TOUS,
     criteres: dict | None = None,
     pour_bureaux: list[str] | None = None,
+    pour_unites: list[str] | None = None,
+    membres_des_bureaux: list[str] | None = None,
+    membres_designes: list[int] | None = None,
+    montant_suggere: int | None = None,
+    sanction=None,
 ) -> CotisationSpeciale:
+    """Cibles combinables (13/11/2026) : tous les membres, certains membres (membres des bureaux,
+    critères, membres désignés), unités qui paient ensemble, bureaux."""
     libelle = (libelle or "").strip()
     if not libelle:
         raise TresorerieRefusee("Le libellé est obligatoire.")
@@ -108,11 +116,22 @@ def creer_cotisation_speciale(
         raise TresorerieRefusee("Choix inconnu.")
     if type_montant == TypeMontant.LIBRE:
         montant = None
-    elif not montant or montant <= 0:
-        raise TresorerieRefusee("Indiquez le montant (fixe ou minimum).")
+        montant_suggere = montant_suggere if montant_suggere and montant_suggere > 0 else None
+    else:
+        montant_suggere = None
+        if not montant or montant <= 0:
+            raise TresorerieRefusee("Indiquez le montant (fixe ou minimum).")
     bureaux = [n for n in (pour_bureaux or []) if n in dict(NIVEAUX_BUREAUX)]
-    if pour_membres == PourMembres.AUCUN and not bureaux:
-        raise TresorerieRefusee("Choisissez au moins des membres ou des bureaux concernés.")
+    unites = [n for n in (pour_unites or []) if n in dict(NIVEAUX_BUREAUX)]
+    des_bureaux = [n for n in (membres_des_bureaux or []) if n in NIVEAUX_MANDATS]
+    designes = sorted({int(x) for x in (membres_designes or []) if str(x).isdigit()})
+    if pour_membres == PourMembres.CERTAINS and not (criteres or des_bureaux or designes):
+        raise TresorerieRefusee(
+            "« Certains membres » : choisissez des membres des bureaux, des critères ou des "
+            "membres désignés."
+        )
+    if pour_membres == PourMembres.AUCUN and not bureaux and not unites:
+        raise TresorerieRefusee("Choisissez au moins des membres, des unités ou des bureaux.")
     cs = CotisationSpeciale.objects.create(
         libelle=libelle,
         description=(description or "").strip(),
@@ -122,10 +141,58 @@ def creer_cotisation_speciale(
         pour_membres=pour_membres,
         criteres=(criteres or {}) if pour_membres == PourMembres.CERTAINS else {},
         pour_bureaux=bureaux,
+        pour_unites=unites,
+        membres_des_bureaux=des_bureaux if pour_membres == PourMembres.CERTAINS else [],
+        membres_designes=designes if pour_membres == PourMembres.CERTAINS else [],
+        montant_suggere=montant_suggere,
+        sanction=sanction,
         cree_par=par,
     )
-    _journal(par, "cotisation_speciale", libelle=cs.libelle, cotisation=cs.pk)
+    if sanction is None:  # une amende ne figure pas dans la liste (discrétion)
+        _journal(par, "cotisation_speciale", libelle=cs.libelle, cotisation=cs.pk)
     return cs
+
+
+def creer_amende(sanction, *, montant: int, par) -> CotisationSpeciale:
+    """Amende liée à une sanction : en attente chez le membre seul, payée au BN."""
+    if not montant or montant <= 0:
+        raise TresorerieRefusee("Le montant de l'amende doit être positif.")
+    # Libellé neutre : un tiers qui paie pour le membre ne doit rien apprendre de la faute
+    # (le détail reste dans l'historique de la sanction, visible du membre et du BN).
+    return creer_cotisation_speciale(
+        libelle="Amende",
+        description="",
+        type_montant=TypeMontant.FIXE,
+        montant=montant,
+        pour_membres=PourMembres.CERTAINS,
+        membres_designes=[sanction.membre_id],
+        sanction=sanction,
+        par=par,
+    )
+
+
+TYPES_PAYEUR = ("bureau", "unite")
+_NOMS_UNITES = {
+    Niveau.PAROISSE: ("Unité paroissiale", "Bureau de l'unité paroissiale"),
+    Niveau.CIRCUIT: ("Unité de section circuit", "Bureau de l'unité de section circuit"),
+    Niveau.REGION: (
+        "Unité régionale de coordination",
+        "Bureau de l'unité régionale de coordination",
+    ),
+}
+
+
+def cle_payeur(type_payeur: str, unite: Unite) -> str:
+    """Clé de paiement : « paroisse-3 » pour le bureau, « unite:paroisse-3 » pour l'unité."""
+    return f"unite:{unite.cle}" if type_payeur == "unite" else unite.cle
+
+
+def libelle_payeur(type_payeur: str, unite: Unite) -> str:
+    """« Unité paroissiale de P1 » ou « Bureau de l'unité paroissiale de P1 » (quittance)."""
+    noms = _NOMS_UNITES.get(unite.niveau)
+    if noms is None:
+        return unite.libelle
+    return f"{noms[1 if type_payeur == 'bureau' else 0]} de {unite.objet.nom}"
 
 
 def membres_concernes(cs: CotisationSpeciale):
@@ -137,24 +204,37 @@ def membres_concernes(cs: CotisationSpeciale):
     vivants = Membre.objects.filter(statut__in=[Statut.ACTIF, Statut.SANCTIONNE])
     if cs.pour_membres == PourMembres.TOUS:
         return vivants
-    donnees = QueryDict(mutable=True)
-    for cle, valeur in (cs.criteres or {}).items():
-        donnees.setlist(cle, valeur if isinstance(valeur, list) else [valeur])
-    donnees["envoye"] = "1"
-    form = FiltreListeForm(NATIONAL, donnees)
-    if not form.is_valid():
-        return Membre.objects.none()
-    return membres_filtres(NATIONAL, form.cleaned_data, timezone.localdate()).filter(
-        pk__in=vivants.values("pk")
-    )
+    pks = set(cs.membres_designes or [])
+    if cs.membres_des_bureaux:
+        from apps.bureaux.models import Mandat
+
+        pks |= set(
+            Mandat.objects.en_cours()
+            .filter(fonction__niveau__in=cs.membres_des_bureaux)
+            .values_list("membre_id", flat=True)
+        )
+    if cs.criteres:
+        donnees = QueryDict(mutable=True)
+        for cle, valeur in cs.criteres.items():
+            donnees.setlist(cle, valeur if isinstance(valeur, list) else [valeur])
+        donnees["envoye"] = "1"
+        form = FiltreListeForm(NATIONAL, donnees)
+        if form.is_valid():
+            pks |= set(
+                membres_filtres(NATIONAL, form.cleaned_data, timezone.localdate()).values_list(
+                    "pk", flat=True
+                )
+            )
+    return vivants.filter(pk__in=pks)
 
 
 def concerne_membre(cs: CotisationSpeciale, membre) -> bool:
     return cs.ouverte and membres_concernes(cs).filter(pk=membre.pk).exists()
 
 
-def concerne_unite(cs: CotisationSpeciale, unite: Unite) -> bool:
-    return cs.ouverte and unite.niveau in (cs.pour_bureaux or [])
+def concerne_unite(cs: CotisationSpeciale, unite: Unite, type_payeur: str = "bureau") -> bool:
+    cibles = cs.pour_unites if type_payeur == "unite" else cs.pour_bureaux
+    return cs.ouverte and unite.niveau in (cibles or [])
 
 
 def deja_paye(cs: CotisationSpeciale, *, membre=None, unite_cle: str = "") -> int:
@@ -193,17 +273,22 @@ def speciales_du_membre(membre) -> list[dict]:
 
 
 def speciales_du_bureau(unite: Unite) -> list[dict]:
+    """Cotisations demandées à l'unité (qui paie ensemble) et à son bureau."""
     lignes = []
-    for cs in CotisationSpeciale.objects.filter(ouverte=True):
-        if concerne_unite(cs, unite):
-            lignes.append(
-                {
-                    "cs": cs,
-                    "paye": deja_paye(cs, unite_cle=unite.cle),
-                    "reste": reste_a_payer(cs, unite_cle=unite.cle),
-                    "reglee": est_reglee(cs, unite_cle=unite.cle),
-                }
-            )
+    for cs in CotisationSpeciale.objects.filter(ouverte=True, sanction__isnull=True):
+        for type_payeur in TYPES_PAYEUR:
+            if concerne_unite(cs, unite, type_payeur):
+                cle = cle_payeur(type_payeur, unite)
+                lignes.append(
+                    {
+                        "cs": cs,
+                        "type": type_payeur,
+                        "pour": libelle_payeur(type_payeur, unite),
+                        "paye": deja_paye(cs, unite_cle=cle),
+                        "reste": reste_a_payer(cs, unite_cle=cle),
+                        "reglee": est_reglee(cs, unite_cle=cle),
+                    }
+                )
     return lignes
 
 
@@ -265,7 +350,13 @@ def initier_paiement_mensuel(payeur, lignes) -> Paiement:
 
 
 def initier_paiement_special(
-    payeur, cs: CotisationSpeciale, montant: int, *, membre=None, unite: Unite | None = None
+    payeur,
+    cs: CotisationSpeciale,
+    montant: int,
+    *,
+    membre=None,
+    unite: Unite | None = None,
+    type_payeur: str = "bureau",
 ) -> Paiement:
     _verifier_ouvert()
     if not cs.ouverte:
@@ -274,11 +365,15 @@ def initier_paiement_special(
         raise TresorerieRefusee("Paiement pour un membre ou au nom d'un bureau.")
     if membre is not None and not concerne_membre(cs, membre):
         raise TresorerieRefusee("Cette cotisation spéciale ne concerne pas ce membre.")
-    if unite is not None and not concerne_unite(cs, unite):
-        raise TresorerieRefusee("Cette cotisation spéciale ne concerne pas ce bureau.")
+    if type_payeur not in TYPES_PAYEUR:
+        raise TresorerieRefusee("Choix inconnu.")
+    if unite is not None and not concerne_unite(cs, unite, type_payeur):
+        raise TresorerieRefusee(
+            "Cette cotisation spéciale ne concerne pas ce bureau ou cette unité."
+        )
     if not montant or montant <= 0:
         raise TresorerieRefusee("Le montant doit être positif.")
-    cle = unite.cle if unite else ""
+    cle = cle_payeur(type_payeur, unite) if unite else ""
     reste = reste_a_payer(cs, membre=membre, unite_cle=cle)
     if reste is not None:
         reste = max(0, reste - _en_cours_special(cs, membre=membre, unite_cle=cle))
@@ -287,9 +382,13 @@ def initier_paiement_special(
     objet = (
         {"membre": membre.pk, "matricule": membre.matricule}
         if membre
-        else {"unite": cle, "libelle": unite.libelle}
+        else {
+            "unite": unite.cle,
+            "type": type_payeur,
+            "libelle": libelle_payeur(type_payeur, unite),
+        }
     )
-    pour = membre.matricule if membre else unite.libelle
+    pour = membre.matricule if membre else objet["libelle"]
     return Paiement.objects.create(
         reference=_reference(),
         payeur=payeur,
@@ -329,8 +428,11 @@ def _en_cours_special(cs, membre=None, unite_cle: str = "") -> int:
     for objet, montant in (
         _en_cours().filter(cotisation_speciale=cs).values_list("objet", "montant")
     ):
+        cle_objet = objet.get("unite", "")
+        if objet.get("type") == "unite":
+            cle_objet = f"unite:{cle_objet}"
         if (membre is not None and objet.get("membre") == membre.pk) or (
-            unite_cle and objet.get("unite") == unite_cle
+            unite_cle and cle_objet == unite_cle
         ):
             total += montant
     return total
@@ -429,7 +531,8 @@ def _appliquer_special(p, payeur):
     unite = unite_par_cle(p.objet.get("unite", "")) if not membre else None
     if membre is None and unite is None:
         raise TresorerieRefusee("Bénéficiaire du paiement introuvable.")
-    cle = unite.cle if unite else ""
+    type_payeur = p.objet.get("type", "bureau")
+    cle = cle_payeur(type_payeur, unite) if unite else ""
     reste = reste_a_payer(cs, membre=membre, unite_cle=cle)
     if cs.type_montant == TypeMontant.FIXE and p.montant > reste:
         raise TresorerieRefusee(f"Le montant dépasse ce qu'il reste à payer ({reste} F).")
@@ -440,8 +543,8 @@ def _appliquer_special(p, payeur):
     c = Contribution.objects.create(
         cotisation=cs,
         membre=membre,
-        unite_cle=unite.cle if unite else "",
-        unite_libelle=unite.libelle if unite else "",
+        unite_cle=cle,
+        unite_libelle=libelle_payeur(type_payeur, unite) if unite else "",
         montant=p.montant,
         quittance=_numero_quittance(timezone.localdate()),
         paiement=p,

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titre %}{{ s }} — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'grades:bn_sessions' %}">← Sessions</a></p>
+  <h1>{{ s.get_type_display }} du {{ s.date|date:"d/m/Y" }}</h1>
+  <p>Grade visé : <strong>{{ s.get_grade_vise_display }}</strong>{% if s.lieu %} · {{ s.lieu }}{% endif %}</p>
+  {% if s.acte %}<p><a class="bouton bouton--secondaire" href="{% url 'grades:acte_pdf' s.acte.pk %}">{{ s.acte }} — acte (PDF)</a></p>{% endif %}
+
+  <h2>3. Résultats</h2>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="resultats">
+    <div class="tableau-defilant"><table class="tableau tableau--souple">
+      <thead><tr><th>Candidat</th><th>Matricule</th><th>Résultat</th></tr></thead>
+      <tbody>{% for c in candidats %}<tr><td>{{ c.membre.nom_complet }}{% if c.promu %} <span class="pastille">promu</span>{% endif %}</td><td>{{ c.membre.matricule }}</td>
+        <td>{% if c.promu %}{{ c.get_resultat_display }}{% else %}<select name="r{{ c.membre_id }}" aria-label="Résultat de {{ c.membre.nom_complet }}">
+          {% for v, l in resultats %}<option value="{{ v }}"{% if v == c.resultat %} selected{% endif %}>{{ l }}</option>{% endfor %}</select>{% endif %}</td></tr>
+      {% endfor %}</tbody></table></div>
+    <button type="submit" class="bouton bouton--secondaire">Enregistrer les résultats</button>
+  </form>
+
+  <h2>4. Promouvoir les admis</h2>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="promouvoir">
+    <ul class="propositions">{% for c in candidats %}{% if c.resultat == "admis" and not c.promu %}
+      <li><label><input type="checkbox" name="admis" value="{{ c.membre_id }}" checked> <span>{{ c.membre.nom_complet }} <small class="aide">{{ c.membre.matricule }}</small></span></label></li>
+    {% endif %}{% empty %}{% endfor %}</ul>
+    <div class="date-heure">
+      <label class="champ champ--requis"><span>Numéro de la décision</span><input name="numero" required maxlength="50" placeholder="Ex. 6"></label>
+      <label class="champ champ--requis"><span>Date de la décision</span><input type="date" name="date_decision" required value="{{ aujourdhui|date:'Y-m-d' }}"></label>
+    </div>
+    <label class="champ"><span>Date d'effet</span><input type="date" name="date_effet" value="{{ aujourdhui|date:'Y-m-d' }}"></label>
+    <p class="aide">L'acte de promotion est généré : « Décision n° … du … portant promotion après le {{ s.get_type_display|lower }} du {{ s.date|date:"d/m/Y" }} », signé par le Président.</p>
+    <button type="submit" class="bouton" onclick="return confirm('Promouvoir les admis cochés ?');">Promouvoir les admis cochés</button>
+  </form>
+</section>
+{% endblock %}

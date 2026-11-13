@@ -26,7 +26,7 @@
     <div class="tableau-defilant"><table class="tableau">
       <thead><tr><th>Membre</th><th>Matricule</th><th>Rôle</th><th>Présence</th><th></th></tr></thead>
       <tbody>{% for c in g.convocations %}
-        <tr><td>{{ c.membre.nom_complet }}</td><td>{{ c.membre.matricule }}</td><td>{{ c.get_role_display }}{% if c.bureau_libelle %}<br><small class="aide">{{ c.bureau_libelle }}</small>{% endif %}</td><td>{{ c.get_presence_display|default:"Non pointé" }}</td>
+        <tr><td>{{ c.membre.nom_complet }}</td><td>{{ c.membre.matricule }}</td><td>{{ c.libelle_role }}{% if c.bureau_libelle %}<br><small class="aide">{{ c.bureau_libelle }}</small>{% endif %}</td><td>{{ c.get_presence_display|default:"Non pointé" }}</td>
           <td>{% if not ev.annule %}<form method="post" class="en-ligne" onsubmit="return confirm('Retirer cette convocation ?');">{% csrf_token %}
             <input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}">
             <input name="motif" placeholder="Motif du retrait" required maxlength="300" aria-label="Motif du retrait">

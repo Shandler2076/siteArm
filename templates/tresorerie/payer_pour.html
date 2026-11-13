@@ -15,7 +15,7 @@
       <input type="hidden" name="matricule" value="{{ beneficiaire.matricule }}"><input type="hidden" name="confirmer" value="1">
       <label class="champ"><span>Que payez-vous ?</span><select name="speciale" id="choix-paiement">
         <option value="">Cotisation mensuelle</option>
-        {% for cs in speciales %}<option value="{{ cs.pk }}">{{ cs.libelle }}</option>{% endfor %}</select></label>
+        {% for cs in speciales %}<option value="{{ cs.pk }}">{% if cs.sanction_id %}Amende — {{ cs.montant }} F{% else %}{{ cs.libelle }}{% endif %}</option>{% endfor %}</select></label>
       <label class="champ" id="bloc-nombre"><span>Nombre de mois</span><select name="nombre">{% for n in "123456"|make_list %}<option value="{{ n }}">{{ n }} mois</option>{% endfor %}</select></label>
       <label class="champ" id="bloc-montant" hidden><span>Montant (F CFA)</span><input type="number" name="montant" min="1"></label>
       <button type="submit" class="bouton">Payer par mobile money</button>

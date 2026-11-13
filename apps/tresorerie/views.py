@@ -6,7 +6,6 @@ Droits : le gardien des périmètres (`unites_tresorerie`, `est_tresorier_nation
 
 import datetime
 
-from django import forms
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -140,7 +139,7 @@ def payer_pour(request):
     speciales = [
         x["cs"]
         for x in (s.speciales_du_membre(beneficiaire) if beneficiaire else [])
-        if x["cs"].pour_membres == PourMembres.TOUS
+        if x["cs"].pour_membres == PourMembres.TOUS or (x["cs"].sanction_id and not x["reglee"])
     ]
     return render(
         request,
@@ -160,17 +159,26 @@ def payer_speciale(request, pk):
     """Payer une cotisation spéciale pour soi, ou au nom d'un bureau (Trésorier)."""
     cs = get_object_or_404(CotisationSpeciale, pk=pk, ouverte=True)
     cle = request.GET.get("bureau") or request.POST.get("bureau") or ""
+    type_payeur = request.GET.get("type") or request.POST.get("type") or "bureau"
+    if type_payeur not in s.TYPES_PAYEUR:
+        raise Http404
     unite = s.unite_par_cle(cle) if cle else None
     if unite is not None and not peut_agir_tresorerie(request.user, unite):
         raise PermissionDenied
     membre = None if unite else _membre(request.user)
     if unite is None and membre is None:
         raise Http404
-    reste = s.reste_a_payer(cs, membre=membre, unite_cle=unite.cle if unite else "")
+    cle_p = s.cle_payeur(type_payeur, unite) if unite else ""
+    reste = s.reste_a_payer(cs, membre=membre, unite_cle=cle_p)
     if request.method == "POST":
         try:
             p = s.initier_paiement_special(
-                request.user, cs, _entier(request.POST.get("montant")), membre=membre, unite=unite
+                request.user,
+                cs,
+                _entier(request.POST.get("montant")),
+                membre=membre,
+                unite=unite,
+                type_payeur=type_payeur,
             )
         except s.TresorerieRefusee as e:
             messages.error(request, str(e))
@@ -179,7 +187,14 @@ def payer_speciale(request, pk):
     return render(
         request,
         "tresorerie/payer_speciale.html",
-        {"cs": cs, "unite": unite, "reste": reste, "TypeMontant": TypeMontant},
+        {
+            "cs": cs,
+            "unite": unite,
+            "type_payeur": type_payeur,
+            "pour": s.libelle_payeur(type_payeur, unite) if unite else "",
+            "reste": reste,
+            "TypeMontant": TypeMontant,
+        },
     )
 
 
@@ -227,7 +242,7 @@ def quittance(request, pk):
 
 
 def _peut_voir_cle(user, cle) -> bool:
-    unite = s.unite_par_cle(cle)
+    unite = s.unite_par_cle((cle or "").removeprefix("unite:"))
     return unite is not None and peut_voir_tresorerie(user, unite)
 
 
@@ -267,9 +282,9 @@ def espace(request, cle):
             "versements": versements,
             "reversements": Reversement.objects.filter(cle=unite.cle).order_by("-mois")[:24],
             "speciales": s.speciales_du_bureau(unite),
-            "contributions": Contribution.objects.filter(unite_cle=unite.cle).select_related(
-                "cotisation"
-            )[:50],
+            "contributions": Contribution.objects.filter(
+                unite_cle__in=[unite.cle, s.cle_payeur("unite", unite)]
+            ).select_related("cotisation")[:50],
             "numero": NumeroMobileMoney.objects.filter(cle=unite.cle).first(),
         },
     )
@@ -300,44 +315,7 @@ def payer_membres(request, cle):
 # --- Bureau national ----------------------------------------------------------------------------
 
 
-class CotisationSpecialeForm(forms.Form):
-    libelle = forms.CharField(label="Libellé", max_length=200)
-    description = forms.CharField(
-        label="Description", required=False, widget=forms.Textarea(attrs={"rows": 3})
-    )
-    echeance = forms.DateField(
-        label="Échéance (facultatif)",
-        required=False,
-        widget=forms.DateInput(attrs={"type": "date"}),
-    )
-    type_montant = forms.ChoiceField(
-        label="Type de montant",
-        choices=TypeMontant.choices,
-        widget=forms.RadioSelect,
-        initial=TypeMontant.FIXE,
-    )
-    montant = forms.IntegerField(
-        label="Montant (F CFA)",
-        required=False,
-        min_value=1,
-        help_text="Fixe ou minimum ; vide pour un montant libre.",
-    )
-    pour_membres = forms.ChoiceField(
-        label="Membres concernés",
-        choices=PourMembres.choices,
-        widget=forms.RadioSelect,
-        initial=PourMembres.TOUS,
-    )
-    pour_bureaux = forms.MultipleChoiceField(
-        label="Bureaux concernés",
-        choices=s.NIVEAUX_BUREAUX,
-        required=False,
-        widget=forms.CheckboxSelectMultiple,
-    )
-
-
 CRITERES = (
-    "statut",
     "sexe",
     "categorie",
     "grade",
@@ -351,37 +329,62 @@ CRITERES = (
 )
 
 
+def _entier_ou_none(valeur):
+    n = _entier(valeur)
+    return n if n > 0 else None
+
+
 @login_required
 def bn_speciales(request):
+    """Créer une cotisation spéciale (13/11/2026) : montant juste devant son type ; cibles
+    combinables (tous, certains membres, unités, bureaux)."""
     if not _bn(request.user):
         raise PermissionDenied
     from apps.listes.filtres import FiltreListeForm
 
-    form = CotisationSpecialeForm(request.POST or None)
     filtres = FiltreListeForm(s.NATIONAL, request.POST if request.method == "POST" else None)
-    if request.method == "POST" and form.is_valid():
-        d = form.cleaned_data
+    erreur = ""
+    if request.method == "POST":
+        p = request.POST
+        type_montant = p.get("type_montant", TypeMontant.FIXE)
+        montant = {
+            TypeMontant.FIXE: _entier_ou_none(p.get("montant_fixe")),
+            TypeMontant.MINIMUM: _entier_ou_none(p.get("montant_minimum")),
+        }.get(type_montant)
         criteres = {}
-        for cle in CRITERES:
-            valeurs = [v for v in request.POST.getlist(cle) if v]
-            if valeurs:
-                criteres[cle] = (
-                    valeurs if len(valeurs) > 1 or cle in ("statut", "grade") else valeurs[0]
-                )
+        if p.get("certains") and p.get("par_criteres"):
+            for cle in CRITERES:
+                valeurs = [v for v in p.getlist(cle) if v]
+                if valeurs:
+                    criteres[cle] = valeurs if cle == "grade" else valeurs[0]
+        pour_membres = (
+            PourMembres.TOUS
+            if p.get("tous")
+            else PourMembres.CERTAINS
+            if p.get("certains")
+            else PourMembres.AUCUN
+        )
         try:
+            echeance = (
+                datetime.date.fromisoformat(p.get("echeance", "")) if p.get("echeance") else None
+            )
             cs = s.creer_cotisation_speciale(
-                libelle=d["libelle"],
-                description=d["description"],
-                echeance=d["echeance"],
-                type_montant=d["type_montant"],
-                montant=d["montant"],
-                pour_membres=d["pour_membres"],
+                libelle=p.get("libelle", ""),
+                description=p.get("description", ""),
+                echeance=echeance,
+                type_montant=type_montant,
+                montant=montant,
+                montant_suggere=_entier_ou_none(p.get("montant_suggere")),
+                pour_membres=pour_membres,
                 criteres=criteres,
-                pour_bureaux=d["pour_bureaux"],
+                membres_des_bureaux=p.getlist("membres_des_bureaux") if p.get("certains") else [],
+                membres_designes=p.getlist("membres") if p.get("certains") else [],
+                pour_unites=p.getlist("unites"),
+                pour_bureaux=p.getlist("bureaux"),
                 par=request.user,
             )
-        except s.TresorerieRefusee as e:
-            form.add_error(None, str(e))
+        except (s.TresorerieRefusee, ValueError) as e:
+            erreur = str(e) if isinstance(e, s.TresorerieRefusee) else "Date d'échéance invalide."
         else:
             messages.success(
                 request,
@@ -392,9 +395,18 @@ def bn_speciales(request):
         request,
         "tresorerie/bn_speciales.html",
         {
-            "form": form,
-            "filtres": [filtres[n] for n in CRITERES if n in filtres.fields and n != "statut"],
-            "liste": CotisationSpeciale.objects.all(),
+            "erreur": erreur,
+            "donnees": request.POST if request.method == "POST" else {},
+            "filtres": [filtres[n] for n in CRITERES if n in filtres.fields],
+            "liste": CotisationSpeciale.objects.filter(sanction__isnull=True),
+            "TypeMontant": TypeMontant,
+            "niveaux": s.NIVEAUX_BUREAUX,
+            "niveaux_mandats": [
+                ("paroisse", "Bureaux d'unité paroissiale"),
+                ("circuit", "Bureaux de section circuit"),
+                ("region", "Bureaux d'unité régionale de coordination"),
+                ("national", "Bureau national"),
+            ],
         },
     )
 
@@ -499,7 +511,30 @@ def bn_reversements(request):
         except s.TresorerieRefusee as e:
             messages.error(request, str(e))
         return redirect(f"{request.path}?mois={mois:%Y-%m}")
-    reversements = list(Reversement.objects.filter(mois=mois))
+    reversements = list(Reversement.objects.filter(mois=mois, montant__gt=0))
+    apercu = s.parts_du_mois(mois)
+    for cle, ligne in apercu.items():
+        ligne["numero"] = s.numero_de(cle)
+    etats = {r.etat for r in reversements}
+    termine = mois < timezone.localdate().replace(day=1)
+    if not termine:
+        etape, message = (
+            0,
+            "Ce mois n'est pas encore terminé : on prépare les reversements d'un mois fini.",
+        )
+    elif not apercu and not reversements:
+        etape, message = (
+            0,
+            "Rien à reverser pour ce mois : aucune cotisation payée par mobile money.",
+        )
+    elif not reversements:
+        etape, message = 1, "En attente de préparation par le Trésorier national."
+    elif EtatReversement.PREPARE in etats:
+        etape, message = 2, "En attente de validation par le Président ou le Secrétaire national."
+    elif EtatReversement.VALIDE in etats:
+        etape, message = 3, "Validé : envois à faire par le Trésorier national."
+    else:
+        etape, message = 4, "Tous les reversements de ce mois sont envoyés."
     return render(
         request,
         "tresorerie/bn_reversements.html",
@@ -507,7 +542,12 @@ def bn_reversements(request):
             "mois": mois,
             "reversements": reversements,
             "total": sum(r.montant for r in reversements),
-            "a_preparer": s.parts_du_mois(mois),
+            "apercu": apercu,
+            "total_apercu": sum(x["montant"] for x in apercu.values()),
+            "termine": termine,
+            "etape": etape,
+            "message": message,
+            "a_preparer": apercu,
             "tresorier": tresorier,
             "validateur": validateur,
             "Etat": EtatReversement,

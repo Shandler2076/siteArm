@@ -15,12 +15,14 @@ def test_boutons_selon_niveau(client, monde):
     m1 = monde["m1"]
     client.force_login(monde["sec_p1"].compte)
     html = client.get(_fiche(monde, "paroisse", "P1", m1)).content.decode()
-    for t in ("deces", "demission", "categorie"):
+    for t in ("deces", "demission"):
         assert f"signaler/{t}/" in html
     assert "signaler/rehabilitation/" not in html
+    # Plus de changement de catégorie demandé par un bureau (décision du 13/11/2026).
+    assert "signaler/categorie/" not in html
     client.force_login(monde["chef"].compte)
     html = client.get(_fiche(monde, "circuit", "Ekpe A", m1)).content.decode()
-    assert "signaler/categorie/" in html and "signaler/deces/" not in html
+    assert "signaler/categorie/" not in html and "signaler/deces/" not in html
 
 
 def test_signaler_deces(client, monde):
@@ -84,10 +86,8 @@ def test_erreurs_formulaire(client, monde):
     assert not Signalement.objects.exists()
 
 
-def test_categorie_choix_sans_actuelle(client, monde):
+def test_categorie_ne_se_signale_plus(client, monde):
     client.force_login(monde["chef"].compte)
     url = _fiche(monde, "circuit", "Ekpe A", monde["m1"]) + "signaler/categorie/"
-    html = client.get(url).content.decode()
-    assert 'value="honneur"' in html and 'value="actif"' not in html
-    r = client.post(url, {"nouvelle_categorie": "honneur"})
-    assert r.status_code == 302 and Signalement.objects.get().nouvelle_categorie == "honneur"
+    client.post(url, {"nouvelle_categorie": "honneur"})
+    assert not Signalement.objects.exists()

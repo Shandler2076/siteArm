@@ -14,7 +14,7 @@ Le menu est rangé par **thèmes**. Chacun ne voit que les groupes de ses droits
 | **Mon espace** | Accueil, ma fiche, ma photo, mes coordonnées, mes cotisations, payer (mobile money), mes événements, notifications, protection des données |
 | **Gestion des membres (BN)** ou **Mon bureau** | Membres, anciens membres, demandes, vérifier un membre ; pour le BN : enregistrer, lots, photos à valider, décisions |
 | **Listes et statistiques** | Listes, statistiques, tranches d'âge |
-| **Grades** | Éligibles au grade suivant, promotions en série (BN) |
+| **Grades** | Éligibles au grade visé ; pour le BN : promotion après test ou examen, promotions spéciales, actes de promotion |
 | **Cotisations mensuelles** | Tableau de bord, parts reçues, réglages (BN) |
 | **Trésorerie** | Trésorerie du bureau ; pour le BN : cotisations spéciales, numéros des trésoriers, reversements mensuels |
 | **Événements** | Événements nationaux (BN) |

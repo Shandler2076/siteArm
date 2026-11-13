@@ -118,3 +118,233 @@ def bn_serie(request):
             "coches": coches,
         },
     )
+
+
+# --- Éligibles au grade visé, sessions de test ou d'examen, promotions spéciales, actes ---------
+
+
+def _date(valeur):
+    import datetime
+
+    try:
+        return datetime.date.fromisoformat(valeur or "")
+    except ValueError:
+        return None
+
+
+def _grade_param(valeur):
+    try:
+        g = int(valeur)
+        Grade(g)
+    except (TypeError, ValueError):
+        return None
+    return g if g > Grade.CAMARADE else None
+
+
+@login_required
+@gerer_membres
+def bn_eligibles(request):
+    """Éligibles au grade VISÉ (ex. Capitaine → les Sous-Capitaines remplissant les conditions) ;
+    on en fait une session de test ou d'examen."""
+    from apps.grades.models import TypeEpreuve
+    from apps.grades.services import creer_session, eligibles_au_grade
+
+    grade = _grade_param(request.GET.get("grade") or request.POST.get("grade"))
+    eligibles = list(eligibles_au_grade(grade, timezone.localdate())) if grade else []
+    if request.method == "POST" and grade:
+        pks = {int(x) for x in request.POST.getlist("membres") if x.isdigit()}
+        try:
+            s = creer_session(
+                type_epreuve=request.POST.get("type", ""),
+                date=_date(request.POST.get("date")) or timezone.localdate(),
+                lieu=request.POST.get("lieu", ""),
+                grade_vise=grade,
+                membres=[m for m in eligibles if m.pk in pks],
+                par=request.user,
+            )
+        except GradeRefuse as e:
+            messages.error(request, str(e))
+        else:
+            messages.success(request, "Session créée ; les candidats sont notifiés.")
+            return redirect("grades:bn_session", pk=s.pk)
+    return render(
+        request,
+        "grades/eligibles.html",
+        {
+            "grade": grade,
+            "grades": [(v, lib) for v, lib in Grade.choices if v > Grade.CAMARADE],
+            "eligibles": eligibles,
+            "par_nomination": grade is not None and grade >= PAR_NOMINATION,
+            "types": TypeEpreuve.choices,
+            "aujourdhui": timezone.localdate(),
+        },
+    )
+
+
+@login_required
+@gerer_membres
+def bn_sessions(request):
+    from apps.grades.models import SessionEpreuve
+
+    return render(
+        request,
+        "grades/sessions.html",
+        {"sessions": SessionEpreuve.objects.prefetch_related("candidats").select_related("acte")},
+    )
+
+
+@login_required
+@gerer_membres
+def bn_session(request, pk):
+    from apps.grades.models import Resultat, SessionEpreuve
+    from apps.grades.services import promouvoir_admis, saisir_resultats
+
+    s = get_object_or_404(SessionEpreuve, pk=pk)
+    if request.method == "POST":
+        action = request.POST.get("action")
+        try:
+            if action == "resultats":
+                resultats = {
+                    int(k[1:]): v
+                    for k, v in request.POST.items()
+                    if k.startswith("r") and k[1:].isdigit()
+                }
+                n = saisir_resultats(s, resultats, par=request.user)
+                messages.success(request, f"{n} résultat(s) enregistré(s).")
+            elif action == "promouvoir":
+                pks = {int(x) for x in request.POST.getlist("admis") if x.isdigit()}
+                acte = promouvoir_admis(
+                    s,
+                    Membre.objects.filter(pk__in=pks),
+                    numero=request.POST.get("numero", ""),
+                    date_decision=_date(request.POST.get("date_decision")),
+                    date_effet=_date(request.POST.get("date_effet")) or timezone.localdate(),
+                    par=request.user,
+                )
+                messages.success(request, f"Promotions enregistrées : {acte}.")
+        except GradeRefuse as e:
+            messages.error(request, str(e))
+        return redirect("grades:bn_session", pk=s.pk)
+    return render(
+        request,
+        "grades/session.html",
+        {
+            "s": s,
+            "candidats": s.candidats.select_related("membre"),
+            "resultats": Resultat.choices,
+            "aujourdhui": timezone.localdate(),
+        },
+    )
+
+
+@login_required
+@gerer_membres
+def bn_speciales(request):
+    """Promotion spéciale (art. 84) : un ou plusieurs membres, n'importe quel grade supérieur."""
+    from apps.grades.models import ActePromotion, NatureActe
+    from apps.grades.services import promotion_speciale
+
+    if request.method == "POST":
+        pks = {int(x) for x in request.POST.getlist("membres") if x.isdigit()}
+        grade = _grade_param(request.POST.get("grade"))
+        try:
+            if grade is None:
+                raise GradeRefuse("Choisissez le grade accordé.")
+            acte = promotion_speciale(
+                Membre.objects.filter(pk__in=pks),
+                grade=grade,
+                date_effet=_date(request.POST.get("date_effet")) or timezone.localdate(),
+                numero=request.POST.get("numero", ""),
+                date_decision=_date(request.POST.get("date_decision")),
+                motif=request.POST.get("motif", ""),
+                par=request.user,
+            )
+        except GradeRefuse as e:
+            messages.error(request, str(e))
+        else:
+            messages.success(request, f"Promotion spéciale enregistrée : {acte}.")
+            return redirect("grades:bn_speciales")
+    return render(
+        request,
+        "grades/speciales.html",
+        {
+            "grades": [(v, lib) for v, lib in Grade.choices if v > Grade.CAMARADE],
+            "actes": ActePromotion.objects.filter(nature=NatureActe.SPECIALE),
+            "aujourdhui": timezone.localdate(),
+        },
+    )
+
+
+@login_required
+@gerer_membres
+def recherche(request):
+    """Recherche d'un membre (matricule ou nom), réponse JSON, BN seulement."""
+    from django.http import JsonResponse
+
+    from apps.evenements.services import rechercher_membres
+
+    return JsonResponse(
+        {
+            "resultats": [
+                {
+                    "pk": m.pk,
+                    "nom": m.nom_complet,
+                    "matricule": m.matricule,
+                    "paroisse": m.affectation_actuelle.paroisse.nom
+                    if m.affectation_actuelle
+                    else "",
+                }
+                for m in rechercher_membres(request.GET.get("q", ""))
+            ]
+        }
+    )
+
+
+@login_required
+@gerer_membres
+def bn_actes(request):
+    from apps.grades.models import ActePromotion
+
+    return render(
+        request,
+        "grades/actes.html",
+        {"actes": ActePromotion.objects.prefetch_related("promotions").select_related("session")},
+    )
+
+
+def _pdf(contenu: bytes, nom: str):
+    from django.http import HttpResponse
+
+    r = HttpResponse(contenu, content_type="application/pdf")
+    r["Content-Disposition"] = f'inline; filename="{nom}"'
+    r["Cache-Control"] = "private, no-store"
+    return r
+
+
+@login_required
+@gerer_membres
+def acte_pdf_vue(request, pk):
+    from apps.grades.models import ActePromotion
+    from apps.grades.pdf import acte_pdf
+
+    acte = get_object_or_404(ActePromotion, pk=pk)
+    return _pdf(acte_pdf(acte), f"decision-{acte.pk}.pdf")
+
+
+@login_required
+def extrait_pdf(request, pk):
+    """Extrait de l'acte pour un promu : le membre lui-même ou le BN."""
+    from django.http import Http404
+
+    from apps.grades.models import ActePromotion
+    from apps.grades.pdf import acte_pdf
+
+    acte = get_object_or_404(ActePromotion, pk=pk)
+    matricule = request.GET.get("matricule", "")
+    membre = Membre.objects.filter(matricule=matricule).first()
+    if membre is None or not acte.promotions.filter(membre=membre).exists():
+        raise Http404
+    soi = membre.compte_id == request.user.pk
+    if not (soi or request.user.has_perm("membres.gerer_membres")):
+        raise Http404
+    return _pdf(acte_pdf(acte, seulement=membre), f"extrait-{membre.matricule}.pdf")

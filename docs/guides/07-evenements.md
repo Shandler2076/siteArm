@@ -13,18 +13,25 @@
    début et la durée de validité de l'autorisation (6 h à 7 jours).
 
 ## Convoquer
+La page a deux colonnes : **à gauche** on cherche, **à droite** les **membres sélectionnés**, qui
+restent toujours visibles. Sur téléphone, une **barre en bas de l'écran** (« N membres sélectionnés —
+Voir / Convoquer ») ouvre la sélection.
 1. Sur l'événement : **Convoquer**.
-2. **Rechercher un membre** par matricule ou par nom. Touchez le membre trouvé : il s'ajoute coché.
-   Vous pouvez aussi afficher des membres par filtres (Région → Circuit → Paroisse en cascade,
-   Grade, Statut ; le reste sous « Plus de filtres »). « Tout cocher » coche toute la liste.
+2. **Rechercher un membre** par matricule ou par nom : touchez-le, il passe à droite. Ou bien
+   **affichez des membres par filtres** (Région → Circuit → Paroisse en cascade, Grade, Statut…), puis
+   cochez-les ou utilisez « Tout cocher » : ils passent à droite. Le bouton ✕ retire un membre.
 3. **Leur rôle**, « Invité(e) en tant que » :
-   - **travailleur** d'une section ;
-   - **superviseur** d'une section ;
-   - **bureau** (sans section ; le bureau représenté est repris de ses mandats).
+   - **Travailleur** ;
+   - **Superviseur** ;
+   - **Bureau d'organisation** ;
+   - **Officiel** ;
+   - **Autre**, écrit à la main (ex. « Protocole »). Les rôles déjà écrits pour l'événement vous sont
+     proposés à nouveau.
+   Une **section** peut être choisie pour chaque rôle.
 4. **Formule de l'autorisation** : « est autorisé(e) **à travailler** » (par défaut pour un
-   travailleur) ou « **à participer** » (par défaut pour un superviseur ou un bureau). Vous pouvez
-   choisir une autre formule.
-5. **Convoquer les membres cochés** : chacun reçoit une notification qui le mène à « Mes
+   travailleur) ou « **à participer** » (par défaut pour les autres rôles). Vous pouvez choisir une
+   autre formule.
+5. **Convoquer les membres sélectionnés** : chacun reçoit une notification qui le mène à « Mes
    événements ».
 
 ## Le jour J

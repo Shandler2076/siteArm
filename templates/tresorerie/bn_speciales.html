@@ -6,20 +6,100 @@
   <ul class="fonctions">{% for cs in liste %}
     <li><a href="{% url 'tresorerie:bn_speciale' cs.pk %}"><strong>{{ cs.libelle }}</strong></a> — {{ cs.get_type_montant_display }}{% if cs.montant %} : {{ cs.montant }} F{% endif %}{% if not cs.ouverte %} · <span class="pastille">close</span>{% endif %}</li>
   {% empty %}<li class="aide">Aucune cotisation spéciale.</li>{% endfor %}</ul>
+  <p class="aide">Les amendes (sanctions à payer en numéraire) s'inscrivent avec la sanction, sur la fiche du membre ; par discrétion, elles ne figurent pas ici.</p>
+
   <h2>Créer une cotisation spéciale</h2>
-  <form method="post">{% csrf_token %}
-    {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
-    {% include "evenements/_champ.html" with champ=form.libelle %}
-    {% include "evenements/_champ.html" with champ=form.description %}
-    {% include "evenements/_champ.html" with champ=form.echeance %}
-    <div class="champ"><span>{{ form.type_montant.label }}</span>{{ form.type_montant }}</div>
-    {% include "evenements/_champ.html" with champ=form.montant %}
-    <div class="champ"><span>{{ form.pour_membres.label }}</span>{{ form.pour_membres }}</div>
-    <details class="plus-filtres"><summary>Critères (si « certains membres »)</summary>
-      <div class="grille-filtres">{% for champ in filtres %}{% include "listes/_filtre.html" %}{% endfor %}</div>
-    </details>
-    <div class="champ"><span>{{ form.pour_bureaux.label }}</span>{{ form.pour_bureaux }}<small class="aide">Cochez pour demander la cotisation aux bureaux eux-mêmes (payée par leur Trésorier, au nom du bureau).</small></div>
-    <button type="submit" class="bouton">Créer</button>
+  {% if erreur %}<p class="message message--error">{{ erreur }}</p>{% endif %}
+  <form method="post" id="form-speciale">{% csrf_token %}
+    <label class="champ champ--requis"><span>Libellé</span><input name="libelle" required maxlength="200" value="{{ donnees.libelle|default:'' }}"></label>
+    <label class="champ"><span>Description</span><textarea name="description" rows="3">{{ donnees.description|default:'' }}</textarea></label>
+    <label class="champ"><span>Échéance (facultatif)</span><input type="date" name="echeance" value="{{ donnees.echeance|default:'' }}"></label>
+
+    <fieldset class="groupe-choix"><legend>Type de montant</legend>
+      <div class="choix-montant">
+        <label><input type="radio" name="type_montant" value="fixe" data-montant="m-fixe"{% if donnees.type_montant|default:"fixe" == "fixe" %} checked{% endif %}> Montant fixe</label>
+        <input type="number" min="1" name="montant_fixe" id="m-fixe" placeholder="Montant (F CFA)" value="{{ donnees.montant_fixe|default:'' }}" aria-label="Montant fixe en F CFA">
+      </div>
+      <div class="choix-montant">
+        <label><input type="radio" name="type_montant" value="minimum" data-montant="m-min"{% if donnees.type_montant == "minimum" %} checked{% endif %}> Montant minimum (on peut payer plus)</label>
+        <input type="number" min="1" name="montant_minimum" id="m-min" placeholder="Minimum (F CFA)" value="{{ donnees.montant_minimum|default:'' }}" aria-label="Montant minimum en F CFA">
+      </div>
+      <div class="choix-montant">
+        <label><input type="radio" name="type_montant" value="libre" data-montant="m-libre"{% if donnees.type_montant == "libre" %} checked{% endif %}> Montant libre (comme un don)</label>
+        <input type="number" min="1" name="montant_suggere" id="m-libre" placeholder="Montant suggéré (facultatif)" value="{{ donnees.montant_suggere|default:'' }}" aria-label="Montant suggéré en F CFA">
+      </div>
+    </fieldset>
+
+    <fieldset class="groupe-choix"><legend>À qui s'adresse la cotisation ? (plusieurs choix possibles)</legend>
+      <label class="option-ligne"><input type="checkbox" name="tous" value="1"{% if donnees.tous %} checked{% endif %}> <strong>Tous les membres</strong></label>
+
+      <label class="option-ligne"><input type="checkbox" name="certains" value="1" data-montre="bloc-certains"{% if donnees.certains %} checked{% endif %}> <strong>Certains membres</strong></label>
+      <div class="option-bloc" id="bloc-certains">
+        <p class="aide">Trois façons de choisir, combinables :</p>
+        <p><strong>1. Les membres des bureaux</strong> (chacun paie pour lui-même)</p>
+        {% for v, l in niveaux_mandats %}<label class="option-ligne"><input type="checkbox" name="membres_des_bureaux" value="{{ v }}"> {{ l }}</label>{% endfor %}
+        <p><label class="option-ligne"><input type="checkbox" name="par_criteres" value="1" data-montre="bloc-criteres"> <strong>2. Par critères</strong> (grade, région, catégorie, âge…)</label></p>
+        <div class="option-bloc" id="bloc-criteres"><div class="grille-filtres">{% for champ in filtres %}{% include "listes/_filtre.html" %}{% endfor %}</div></div>
+        <p><strong>3. Membres désignés</strong> (une ou plusieurs personnes)</p>
+        <div class="recherche-membre">
+          <input type="search" id="recherche" autocomplete="off" data-url="{% url 'grades:recherche' %}" placeholder="Rechercher par nom ou matricule" aria-label="Rechercher un membre">
+          <ul id="resultats" hidden></ul>
+        </div>
+        <ul id="selection" class="selection"></ul>
+      </div>
+
+      <p><strong>Unités</strong> (toute l'unité paie ensemble, par son Trésorier)</p>
+      <label class="option-ligne"><input type="checkbox" name="unites" value="paroisse"> Unités paroissiales</label>
+      <label class="option-ligne"><input type="checkbox" name="unites" value="circuit"> Unités de section circuit</label>
+      <label class="option-ligne"><input type="checkbox" name="unites" value="region"> Unités régionales de coordination</label>
+      <p><strong>Bureaux</strong> (le bureau de l'unité paie, par son Trésorier)</p>
+      <label class="option-ligne"><input type="checkbox" name="bureaux" value="paroisse"> Bureaux d'unité paroissiale</label>
+      <label class="option-ligne"><input type="checkbox" name="bureaux" value="circuit"> Bureaux de section circuit</label>
+      <label class="option-ligne"><input type="checkbox" name="bureaux" value="region"> Bureaux d'unité régionale de coordination</label>
+    </fieldset>
+    <button type="submit" class="bouton">Créer la cotisation spéciale</button>
   </form>
 </section>
+<script>
+  (function () {
+    /* Le montant s'ouvre juste devant le type choisi. */
+    var radios = document.querySelectorAll('input[name=type_montant]');
+    function majMontant() {
+      radios.forEach(function (r) {
+        var champ = document.getElementById(r.dataset.montant);
+        champ.hidden = !r.checked; champ.required = r.checked && r.value !== 'libre';
+      });
+    }
+    radios.forEach(function (r) { r.addEventListener('change', majMontant); }); majMontant();
+    document.querySelectorAll('input[data-montre]').forEach(function (c) {
+      var bloc = document.getElementById(c.dataset.montre);
+      function maj() { bloc.hidden = !c.checked; } c.addEventListener('change', maj); maj();
+    });
+    var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), sel = document.getElementById('selection'), t;
+    function txt(s) { return document.createTextNode(s); }
+    function ajouter(m) {
+      if (document.getElementById('sel' + m.pk)) return;
+      var li = document.createElement('li'); li.id = 'sel' + m.pk;
+      var h = document.createElement('input'); h.type = 'hidden'; h.name = 'membres'; h.value = m.pk; li.appendChild(h);
+      var s = document.createElement('span'); s.appendChild(txt(m.nom + ' — ' + m.matricule)); li.appendChild(s);
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'retirer'; b.textContent = '✕'; b.setAttribute('aria-label', 'Retirer');
+      b.addEventListener('click', function () { li.remove(); }); li.appendChild(b); sel.appendChild(li);
+    }
+    champ.addEventListener('input', function () {
+      clearTimeout(t); var q = champ.value.trim();
+      if (q.length < 2) { liste.hidden = true; return; }
+      t = setTimeout(function () {
+        fetch(champ.dataset.url + '?q=' + encodeURIComponent(q), {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (d) {
+          liste.innerHTML = '';
+          d.resultats.forEach(function (m) {
+            var li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
+            b.appendChild(txt(m.nom + ' ')); var s = document.createElement('small'); s.appendChild(txt(m.matricule)); b.appendChild(s);
+            b.addEventListener('click', function () { ajouter(m); liste.hidden = true; champ.value = ''; }); li.appendChild(b); liste.appendChild(li);
+          });
+          liste.hidden = !d.resultats.length;
+        });
+      }, 250);
+    });
+  })();
+</script>
 {% endblock %}

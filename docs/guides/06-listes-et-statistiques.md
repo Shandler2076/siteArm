@@ -24,5 +24,13 @@
   avez donné un âge, la paroisse si vous avez choisi une paroisse.
 - Pour en savoir plus sur une personne, ouvrez sa fiche.
 
+Dans toute liste, **touchez le matricule** pour ouvrir la fiche complète du membre (dans l'espace de
+votre bureau).
+
+## Éligibles au grade visé
+Dans les filtres, **« Éligibles au grade de »** : choisissez le grade **visé** (ex. Capitaine) ; la
+liste montre les membres du grade juste en dessous qui remplissent les conditions (art. 78). Le
+filtre « Grade actuel » reste le grade que le membre a aujourd'hui.
+
 Chaque chiffre est exactement le nombre de lignes de la liste qu'il ouvre. Les listes se
 téléchargent en PDF ou en Excel. On n'y voit jamais le NPI ni la photo du CIP.

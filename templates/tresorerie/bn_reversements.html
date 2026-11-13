@@ -3,14 +3,31 @@
 {% block contenu %}
 <section class="carte">
   <h1>Reversements mensuels</h1>
-  <p class="aide">Parts des cotisations payées par mobile money : 30 % à la paroisse, 20 % au circuit, 20 % à la région. Le Trésorier national prépare l'état, le Président (ou le Secrétaire national) le valide, puis le Trésorier national envoie et enregistre chaque envoi.</p>
-  <form method="get" class="recherche"><input type="month" name="mois" value="{{ mois|date:'Y-m' }}" aria-label="Mois"><button class="bouton bouton--secondaire">Afficher</button></form>
+  <p class="aide">Parts des cotisations mensuelles payées par mobile money : 30 % à la paroisse, 20 % au circuit, 20 % à la région (le BN garde 30 %).</p>
+  <ol class="etapes">
+    <li class="{% if etape == 1 %}etape--courante{% elif etape > 1 %}etape--faite{% endif %}"><strong>1. Préparer</strong><br><small>Trésorier national</small></li>
+    <li class="{% if etape == 2 %}etape--courante{% elif etape > 2 %}etape--faite{% endif %}"><strong>2. Valider</strong><br><small>Président ou Secrétaire national</small></li>
+    <li class="{% if etape == 3 %}etape--courante{% elif etape > 3 %}etape--faite{% endif %}"><strong>3. Envoyer</strong><br><small>Trésorier national</small></li>
+  </ol>
+  <form method="get" class="recherche"><input type="month" name="mois" value="{{ mois|date:'Y-m' }}" aria-label="Mois"><button class="bouton bouton--secondaire">Afficher le mois</button></form>
   <h2>{{ mois|date:"F Y"|capfirst }}</h2>
-  {% if tresorier %}<form method="post">{% csrf_token %}<input type="hidden" name="mois" value="{{ mois|date:'Y-m' }}">
-    <button name="action" value="preparer" class="bouton bouton--secondaire">Préparer l'état des reversements ({{ a_preparer|length }} bureau(x))</button></form>{% endif %}
-  {% if validateur %}<form method="post">{% csrf_token %}<input type="hidden" name="mois" value="{{ mois|date:'Y-m' }}">
+  <p class="alerte">{{ message }}</p>
+
+  {% if not reversements and apercu %}
+    <h3>Aperçu des parts dues (avant préparation)</h3>
+    <div class="tableau-defilant"><table class="tableau tableau--souple">
+      <thead><tr><th>Bureau</th><th>Montant</th><th>Numéro du Trésorier</th></tr></thead>
+      <tbody>{% for cle, l in apercu.items %}<tr><td>{{ l.libelle }}</td><td>{{ l.montant }} F</td><td>{{ l.numero|default:"— à enregistrer" }}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    <p><strong>Total : {{ total_apercu }} F</strong></p>
+  {% endif %}
+  {% if tresorier and termine and apercu and etape <= 2 %}<form method="post">{% csrf_token %}<input type="hidden" name="mois" value="{{ mois|date:'Y-m' }}">
+    <button name="action" value="preparer" class="bouton{% if etape == 2 %} bouton--secondaire{% endif %}">{% if etape == 2 %}Recalculer l'état préparé{% else %}Préparer l'état des reversements{% endif %}</button></form>{% endif %}
+  {% if validateur and etape == 2 %}<form method="post">{% csrf_token %}<input type="hidden" name="mois" value="{{ mois|date:'Y-m' }}">
     <button name="action" value="valider" class="bouton">Valider l'état préparé</button></form>{% endif %}
-  <p><strong>Total : {{ total }} F</strong></p>
+
+  {% if reversements %}
+  <h3>État des reversements</h3>
   <div class="tableau-defilant"><table class="tableau tableau--souple">
     <thead><tr><th>Bureau</th><th>Montant</th><th>Numéro</th><th>État</th><th></th></tr></thead>
     <tbody>{% for r in reversements %}
@@ -18,6 +35,8 @@
         <td>{% if tresorier and r.etat == "valide" %}<form method="post" class="en-ligne">{% csrf_token %}<input type="hidden" name="mois" value="{{ mois|date:'Y-m' }}">
           <input type="hidden" name="reversement" value="{{ r.pk }}"><input name="reference" placeholder="Référence de l'envoi" required aria-label="Référence de l'envoi">
           <button name="action" value="envoye" class="bouton bouton--secondaire">Envoyé</button></form>{% endif %}</td></tr>
-    {% empty %}<tr><td colspan="5" class="aide">Aucun reversement préparé pour ce mois.</td></tr>{% endfor %}</tbody></table></div>
+    {% endfor %}</tbody></table></div>
+  <p><strong>Total : {{ total }} F</strong></p>
+  {% endif %}
 </section>
 {% endblock %}

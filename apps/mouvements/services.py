@@ -343,6 +343,11 @@ def signaler(
     jour: datetime.date | None = None,
 ) -> Signalement:
     jour = jour or timezone.localdate()
+    if type == TypeSignalement.CATEGORIE:
+        raise MouvementRefuse(
+            "Procédure supprimée : la catégorie est fixée par le Bureau national (seul passage "
+            "possible : sympathisant → membre actif, par décision du BNC)."
+        )
     _verifier(type, membre, date_effet, reference, nouvelle_categorie, jour)
     deja = "Un signalement de ce type est déjà en attente."
     if membre.signalements.filter(type=type, etat=EtatDemande.BN).exists():

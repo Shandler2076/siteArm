@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block titre %}Promotions spéciales — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Promotions spéciales</h1>
+  <p class="aide">Article 84 : mérites particuliers, services remarquables, responsabilités assumées ou circonstances particulières. N'importe quel grade supérieur, sans condition de durée.</p>
+  <form method="post" id="form-speciale">{% csrf_token %}
+    <div class="recherche-membre">
+      <label class="champ"><span>Rechercher un membre (matricule ou nom)</span>
+        <input type="search" id="recherche" autocomplete="off" data-url="{% url 'grades:recherche' %}" placeholder="Ex. 2015-01AS-0157 ou ADJOVI"></label>
+      <ul id="resultats" hidden></ul>
+    </div>
+    <h2>Membres choisis</h2>
+    <ul id="selection" class="selection"></ul>
+    <label class="champ champ--requis"><span>Grade accordé</span><select name="grade" required><option value="">— Choisir —</option>
+      {% for v, lib in grades %}<option value="{{ v }}">{{ lib }}</option>{% endfor %}</select></label>
+    <div class="date-heure">
+      <label class="champ champ--requis"><span>Numéro de la décision</span><input name="numero" required maxlength="50"></label>
+      <label class="champ champ--requis"><span>Date de la décision</span><input type="date" name="date_decision" required value="{{ aujourdhui|date:'Y-m-d' }}"></label>
+    </div>
+    <label class="champ"><span>Date d'effet</span><input type="date" name="date_effet" value="{{ aujourdhui|date:'Y-m-d' }}"></label>
+    <label class="champ champ--requis"><span>Motif</span><textarea name="motif" rows="3" required></textarea></label>
+    <button type="submit" class="bouton" onclick="return confirm('Enregistrer cette promotion spéciale ?');">Enregistrer la promotion spéciale</button>
+  </form>
+  <h2>Promotions spéciales accordées</h2>
+  <ul class="fonctions">{% for a in actes %}
+    <li><a href="{% url 'grades:acte_pdf' a.pk %}">{{ a }}</a> — {{ a.promotions.count }} membre(s)<br><small class="aide">{{ a.motif|truncatechars:120 }}</small></li>
+  {% empty %}<li class="aide">Aucune.</li>{% endfor %}</ul>
+</section>
+<script>
+  (function () {
+    var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), sel = document.getElementById('selection'), t;
+    function txt(s) { return document.createTextNode(s); }
+    function ajouter(m) {
+      if (document.getElementById('sel' + m.pk)) return;
+      var li = document.createElement('li'); li.id = 'sel' + m.pk;
+      var h = document.createElement('input'); h.type = 'hidden'; h.name = 'membres'; h.value = m.pk; li.appendChild(h);
+      var s = document.createElement('span'); s.appendChild(txt(m.nom + ' — ' + m.matricule)); li.appendChild(s);
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'retirer'; b.textContent = '✕'; b.setAttribute('aria-label', 'Retirer');
+      b.addEventListener('click', function () { li.remove(); }); li.appendChild(b); sel.appendChild(li);
+    }
+    champ.addEventListener('input', function () {
+      clearTimeout(t); var q = champ.value.trim();
+      if (q.length < 2) { liste.hidden = true; return; }
+      t = setTimeout(function () {
+        fetch(champ.dataset.url + '?q=' + encodeURIComponent(q), {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (d) {
+          liste.innerHTML = '';
+          d.resultats.forEach(function (m) {
+            var li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
+            b.appendChild(txt(m.nom + ' ')); var s = document.createElement('small'); s.appendChild(txt(m.matricule + (m.paroisse ? ' — ' + m.paroisse : ''))); b.appendChild(s);
+            b.addEventListener('click', function () { ajouter(m); liste.hidden = true; champ.value = ''; }); li.appendChild(b); liste.appendChild(li);
+          });
+          liste.hidden = !d.resultats.length;
+        });
+      }, 250);
+    });
+  })();
+</script>
+{% endblock %}

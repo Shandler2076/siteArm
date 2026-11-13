@@ -72,9 +72,8 @@ def test_bn_cree_une_cotisation_et_bureau_paie_en_son_nom(tresoriers, client_tec
         {
             "libelle": "Contribution des paroisses",
             "type_montant": "fixe",
-            "montant": "5000",
-            "pour_membres": "aucun",
-            "pour_bureaux": ["paroisse"],
+            "montant_fixe": "5000",
+            "bureaux": ["paroisse"],
         },
     )
     assert r.status_code == 302
@@ -82,7 +81,9 @@ def test_bn_cree_une_cotisation_et_bureau_paie_en_son_nom(tresoriers, client_tec
     c = _c(tresoriers["tresorier"])
     cle = f"paroisse-{tresoriers['P1'].pk}"
     assert "Payer au nom de" in _h(c.get(f"/tresorerie/{cle}/"))
-    r = c.post(f"/tresorerie/speciale/{cs.pk}/payer/", {"bureau": cle, "montant": "5000"})
+    r = c.post(
+        f"/tresorerie/speciale/{cs.pk}/payer/", {"bureau": cle, "type": "bureau", "montant": "5000"}
+    )
     p = Paiement.objects.get()
     c.post(f"/tresorerie/paiement/{p.reference}/", {"action": "confirmer"})
     q = Contribution.objects.get()
@@ -106,12 +107,25 @@ def test_pages_bn_reservees(tresoriers, qui):
         assert c.get(url).status_code == 403, url
 
 
-def test_reversements_roles(tresoriers):
-    assert (
-        _c(tresoriers["tresorier_national"]).get("/tresorerie/bn/reversements/").status_code == 200
-    )
-    html = _h(_c(tresoriers["president"]).get("/tresorerie/bn/reversements/"))
+def test_reversements_roles(tresoriers, ouvert):
+    import datetime
+
+    from django.utils import timezone
+
+    t = tresoriers
+    s.confirmer_paiement(s.initier_paiement_mensuel(t["m1"].compte, [(t["m1"], 1)]))
+    mois_dernier = (timezone.localdate().replace(day=1) - datetime.timedelta(days=1)).replace(day=1)
+    Versement.objects.update(date_versement=mois_dernier + datetime.timedelta(days=3))
+    url = f"/tresorerie/bn/reversements/?mois={mois_dernier:%Y-%m}"
+    html = _h(_c(t["tresorier_national"]).get(url))
+    assert "Aperçu des parts dues" in html and "Préparer l'état des reversements" in html
+    assert "En attente de préparation par le Trésorier national" in html
+    _c(t["tresorier_national"]).post(url, {"action": "preparer", "mois": f"{mois_dernier:%Y-%m}"})
+    html = _h(_c(t["president"]).get(url))
     assert "Valider l'état préparé" in html and "Préparer l'état" not in html
+    assert "En attente de validation" in html
+    html = _h(_c(t["president"]).get("/tresorerie/bn/reversements/?mois=2020-01"))
+    assert "Rien à reverser pour ce mois" in html
 
 
 def test_payer_pour_ne_revele_pas_les_cotisations_ciblees(tresoriers, compte_technique):
@@ -129,3 +143,90 @@ def test_payer_pour_ne_revele_pas_les_cotisations_ciblees(tresoriers, compte_tec
     )
     html = _h(_c(m2).get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
     assert "Pour tous" in html and "Réservée aux Capitaines" not in html and "reste" not in html
+
+
+def test_formulaire_bn_montant_devant_son_type_et_cibles(tresoriers, client_technique):
+    html = _h(client_technique.get("/tresorerie/bn/speciales/"))
+    for nom in ("montant_fixe", "montant_minimum", "montant_suggere", "unites", "bureaux"):
+        assert f'name="{nom}"' in html
+    assert "Membres désignés" in html and "Unités paroissiales" in html
+    client_technique.post(
+        "/tresorerie/bn/speciales/",
+        {
+            "libelle": "Pour une personne",
+            "type_montant": "libre",
+            "montant_suggere": "1000",
+            "certains": "1",
+            "membres": [str(tresoriers["m4"].pk)],
+        },
+    )
+    cs = s.CotisationSpeciale.objects.get(libelle="Pour une personne")
+    assert cs.membres_designes == [tresoriers["m4"].pk] and cs.montant_suggere == 1000
+    assert s.concerne_membre(cs, tresoriers["m4"]) and not s.concerne_membre(cs, tresoriers["m1"])
+
+
+# --- Corrections de la relecture (13/11/2026) ------------------------------------------------
+
+
+def test_paiement_d_unite_visible_et_quittance_ouverte(tresoriers, compte_technique, donner_mandat):
+    from apps.bureaux.perimetre import Unite
+
+    cs = s.creer_cotisation_speciale(
+        libelle="Unités",
+        type_montant="fixe",
+        montant=5000,
+        pour_membres="aucun",
+        pour_unites=["paroisse"],
+        par=compte_technique,
+    )
+    p1 = Unite("paroisse", tresoriers["P1"])
+    tres = tresoriers["tresorier"]
+    s.confirmer_paiement(
+        s.initier_paiement_special(tres.compte, cs, 5000, unite=p1, type_payeur="unite")
+    )
+    q = Contribution.objects.get()
+    html = _h(_c(tresoriers["sec_p1"]).get(f"/tresorerie/{p1.cle}/"))
+    assert q.quittance in html
+    assert _c(tresoriers["sec_p1"]).get(f"/tresorerie/quittance/{q.pk}.pdf").status_code == 200
+
+
+def test_amende_neutre_pour_un_tiers(tresoriers, compte_technique):
+    from apps.mouvements.sanctions import enregistrer_sanction
+
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    import datetime as _d
+
+    enregistrer_sanction(
+        membre=m1,
+        degre=1,
+        type="amende",
+        date_debut=_d.date(2026, 11, 1),
+        motif="Faute X",
+        reference="BNC-9",
+        par=compte_technique,
+        amende=2000,
+    )
+    amende = s.CotisationSpeciale.objects.get(sanction__isnull=False)
+    p = s.initier_paiement_special(m2.compte, amende, 2000, membre=m1)
+    assert "01/11/2026" not in p.description and "Faute" not in p.description
+
+
+def test_pas_d_amende_avec_une_exclusion(tresoriers, compte_technique):
+    import datetime as _d
+
+    import pytest as _pytest
+
+    from apps.mouvements.sanctions import MouvementRefuse, enregistrer_sanction
+
+    with _pytest.raises(MouvementRefuse):
+        enregistrer_sanction(
+            membre=tresoriers["m1"],
+            degre=3,
+            type="exclusion_definitive",
+            date_debut=_d.date(2026, 11, 1),
+            motif="Faute",
+            reference="BNC-10",
+            par=compte_technique,
+            amende=1000,
+        )
+    assert not s.CotisationSpeciale.objects.exists()

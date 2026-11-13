@@ -186,12 +186,22 @@ def test_convoquer_superviseur_et_bureau(monde, ev, client_technique, donner_man
     assert c.role == Role.SUPERVISEUR and c.session == culte
     assert c.texte_formule == "Est autorisé(e) à participer"
     assert c.texte_role == "Invité(e) en tant que superviseur — Session Culte"
-    # Bureau : jamais de section, le bureau représenté vient de ses mandats.
-    client_technique.post(
-        url, {"membres": [monde["sec_p1"].pk], "session": culte.pk, "role": "bureau"}
-    )
+    # Rôles du 13/11/2026 : bureau d'organisation, officiel, autre écrit à la main.
+    client_technique.post(url, {"membres": [monde["sec_p1"].pk], "role": "bureau_organisation"})
     b = Convocation.objects.get(membre=monde["sec_p1"])
-    assert b.role == Role.BUREAU and b.session is None and "P1" in b.bureau_libelle
+    assert b.role == Role.BUREAU_ORGANISATION and b.session is None
+    assert b.texte_role == "Invité(e) en tant que bureau d'organisation"
+    assert b.texte_formule == "Est autorisé(e) à participer"
+    client_technique.post(url, {"membres": [monde["m3"].pk], "role": "officiel"})
+    assert Convocation.objects.get(membre=monde["m3"]).libelle_role == "Officiel"
+    # « Autre » : le rôle est obligatoire, écrit à la main.
+    client_technique.post(url, {"membres": [monde["m4"].pk], "role": "autre"})
+    assert not Convocation.objects.filter(membre=monde["m4"]).exists()
+    client_technique.post(
+        url, {"membres": [monde["m4"].pk], "role": "autre", "role_autre": "Protocole"}
+    )
+    p = Convocation.objects.get(membre=monde["m4"])
+    assert p.texte_role == "Invité(e) en tant que protocole" and p.libelle_role == "Protocole"
     # Formule choisie : elle l'emporte sur celle du rôle.
     client_technique.post(
         url, {"membres": [monde["m2"].pk], "role": "superviseur", "formule": "travailler"}

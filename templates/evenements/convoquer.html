@@ -1,79 +1,113 @@
 {% extends "base.html" %}
 {% block titre %}Convoquer — {{ ev.nom }}{% endblock %}
 {% block contenu %}
-<section class="carte">
+<section class="carte carte--large">
   <p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>
   <h1>Convoquer des membres</h1>
+  <div class="convocation-grille">
+    <div class="convocation-gauche">
+      <h2>Trouver des membres</h2>
+      <div class="recherche-membre">
+        <label class="champ"><span>Rechercher un membre (matricule ou nom)</span>
+          <input type="search" id="recherche" autocomplete="off" placeholder="Ex. 2015-01AS-0157 ou ADJOVI"
+            data-url="{% url 'evenements:recherche_membres' ev.pk %}"></label>
+        <ul id="resultats" hidden></ul>
+      </div>
+      <p class="aide">Touchez un membre trouvé : il passe dans « Membres sélectionnés ».</p>
 
-  <form method="post" id="form-convocation">{% csrf_token %}
-    <h2>1. Les membres</h2>
-    <div class="recherche-membre">
-      <label class="champ"><span>Rechercher un membre (matricule ou nom)</span>
-        <input type="search" id="recherche" autocomplete="off" placeholder="Ex. 2015-01AS-0157 ou ADJOVI"
-          data-url="{% url 'evenements:recherche_membres' ev.pk %}"></label>
-      <ul id="resultats" hidden></ul>
-    </div>
-    <p class="aide">Cliquez sur un membre trouvé : il s'ajoute ci-dessous, coché. Vous pouvez aussi afficher des membres par filtres plus bas.</p>
-    <p><label><input type="checkbox" id="tout-cocher"> Tout cocher</label></p>
-    <div class="tableau-defilant"><table class="tableau tableau--souple">
-      <thead><tr><th></th><th>Membre</th><th>Matricule</th><th>Paroisse</th></tr></thead>
-      <tbody id="selection">{% for m in proposes %}
-        <tr><td><input type="checkbox" name="membres" value="{{ m.pk }}" id="m{{ m.pk }}"></td>
-          <td><label for="m{{ m.pk }}">{{ m.nom_complet }}</label>{% if m.pk in deja %} <small class="aide">(déjà convoqué)</small>{% endif %}</td>
-          <td>{{ m.matricule }}</td><td>{{ m.affectation_actuelle.paroisse.nom|default:"—" }}</td></tr>
-      {% endfor %}</tbody>
-    </table></div>
-    {% if trop %}<p class="message message--error">Plus de 500 membres : affinez les filtres. Seuls les 500 premiers sont affichés.</p>{% endif %}
-    {% if request.GET.envoye and not proposes %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
+      <form method="get" class="filtres">
+        <input type="hidden" name="envoye" value="1">
+        <details class="plus-filtres"{% if not proposes %} open{% endif %}><summary>Afficher des membres par filtres</summary>
+          <div class="grille-filtres">{% for champ in principaux %}{% include "listes/_filtre.html" %}{% endfor %}</div>
+          <details class="plus-filtres"><summary>Plus de filtres</summary>
+            <div class="grille-filtres">{% for champ in autres %}{% include "listes/_filtre.html" %}{% endfor %}</div>
+          </details>
+          <button type="submit" class="bouton bouton--secondaire">Afficher les membres</button>
+        </details>
+      </form>
 
-    <h2>2. Leur rôle</h2>
-    <div class="grille-filtres">
-      <label class="champ"><span>Invité(e) en tant que</span><select name="role" id="role">
-        {% for v, l in roles %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></label>
-      {% if ev.avec_sections %}
-      <label class="champ" id="champ-section"><span>Section</span><select name="session"><option value="">Sans section</option>
-        {% for s in ev.sessions.all %}<option value="{{ s.pk }}">{{ s.nom }}</option>{% endfor %}</select></label>
-      {% endif %}
-      {% if ev.avec_autorisation %}
-      <label class="champ"><span>Formule de l'autorisation</span><select name="formule">
-        <option value="">Selon le rôle</option>
-        {% for v, l in formules %}<option value="{{ v }}">{{ l|capfirst }}</option>{% endfor %}</select></label>
-      {% endif %}
+      {% if proposes %}
+        <h2>Résultats ({{ proposes|length }})</h2>
+        {% if trop %}<p class="message message--error">Plus de 500 membres : affinez les filtres. Seuls les 500 premiers sont affichés.</p>{% endif %}
+        <p><label class="case"><input type="checkbox" id="tout-cocher"> Tout cocher</label></p>
+        <ul class="propositions">{% for m in proposes %}
+          <li><label><input type="checkbox" class="proposition" name="membres" form="form-convocation" value="{{ m.pk }}"
+            data-nom="{{ m.nom_complet }}" data-matricule="{{ m.matricule }}" data-paroisse="{{ m.affectation_actuelle.paroisse.nom|default:'' }}" data-deja="{% if m.pk in deja %}1{% endif %}">
+            <span>{{ m.nom_complet }}<br><small class="aide">{{ m.matricule }} — {{ m.affectation_actuelle.paroisse.nom|default:"—" }}{% if m.pk in deja %} · déjà convoqué{% endif %}</small></span></label></li>
+        {% endfor %}</ul>
+      {% elif request.GET.envoye %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
     </div>
-    <p class="aide">Travailleur : « est autorisé(e) à travailler » ; superviseur et bureau : « est autorisé(e) à participer », sauf autre choix. Un bureau n'a pas de section.</p>
-    <button type="submit" class="bouton">Convoquer les membres cochés</button>
-  </form>
 
-  <h2>Ou : afficher des membres par filtres</h2>
-  <form method="get" class="filtres">
-    <input type="hidden" name="envoye" value="1">
-    <div class="grille-filtres">
-      {% for champ in principaux %}{% include "listes/_filtre.html" %}{% endfor %}
-    </div>
-    <details class="plus-filtres"><summary>Plus de filtres</summary>
-      <div class="grille-filtres">{% for champ in autres %}{% include "listes/_filtre.html" %}{% endfor %}</div>
-    </details>
-    <button type="submit" class="bouton bouton--secondaire">Afficher les membres</button>
-  </form>
+    <aside class="panneau-selection" id="panneau">
+      <button type="button" class="panneau-selection__barre" id="barre-selection" aria-expanded="false">
+        <span><strong id="compte-selection">0</strong> membre(s) sélectionné(s)</span><span>Voir / Convoquer</span></button>
+      <form method="post" id="form-convocation" class="panneau-selection__contenu">{% csrf_token %}
+        <h2>Membres sélectionnés (<span id="compte-selection-2">0</span>)</h2>
+        <ul id="selection" class="selection"></ul>
+        <p class="aide" id="selection-vide">Aucun membre sélectionné pour l'instant.</p>
+        <label class="champ"><span>Invité(e) en tant que</span><select name="role" id="role">
+          {% for v, l in roles %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></label>
+        <label class="champ" id="champ-autre" hidden><span>Rôle (écrit à la main)</span>
+          <input name="role_autre" maxlength="100" list="roles-autres" placeholder="Ex. Protocole, Chorale">
+          <datalist id="roles-autres">{% for r in roles_autres %}<option value="{{ r }}">{% endfor %}</datalist></label>
+        {% if ev.avec_sections %}
+        <label class="champ"><span>Section</span><select name="session"><option value="">Sans section</option>
+          {% for s in ev.sessions.all %}<option value="{{ s.pk }}">{{ s.nom }}</option>{% endfor %}</select></label>
+        {% endif %}
+        {% if ev.avec_autorisation %}
+        <label class="champ"><span>Formule de l'autorisation</span><select name="formule">
+          <option value="">Selon le rôle</option>
+          {% for v, l in formules %}<option value="{{ v }}">{{ l|capfirst }}</option>{% endfor %}</select></label>
+        <p class="aide">Travailleur : « à travailler » ; les autres rôles : « à participer », sauf autre choix.</p>
+        {% endif %}
+        <button type="submit" class="bouton">Convoquer les membres sélectionnés</button>
+      </form>
+    </aside>
+  </div>
 </section>
 <script>
   (function () {
-    var champ = document.getElementById('recherche'), liste = document.getElementById('resultats');
-    var selection = document.getElementById('selection'), minuterie;
+    var selection = document.getElementById('selection'), vide = document.getElementById('selection-vide');
+    var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), minuterie;
     function texte(t) { return document.createTextNode(t); }
-    function ajouter(m) {
-      var existant = document.getElementById('m' + m.pk);
-      if (existant) { existant.checked = true; liste.hidden = true; champ.value = ''; return; }
-      var tr = document.createElement('tr'), td = function () { return tr.appendChild(document.createElement('td')); };
-      var c = document.createElement('input'); c.type = 'checkbox'; c.name = 'membres'; c.value = m.pk; c.id = 'm' + m.pk; c.checked = true;
-      td().appendChild(c);
-      var lab = document.createElement('label'); lab.htmlFor = c.id; lab.appendChild(texte(m.nom));
-      var cel = td(); cel.appendChild(lab);
-      if (m.deja) { var s = document.createElement('small'); s.className = 'aide'; s.appendChild(texte(' (déjà convoqué)')); cel.appendChild(s); }
-      td().appendChild(texte(m.matricule)); td().appendChild(texte(m.paroisse || '—'));
-      selection.insertBefore(tr, selection.firstChild);
-      liste.hidden = true; champ.value = '';
+    function compter() {
+      var n = selection.children.length;
+      document.getElementById('compte-selection').textContent = n;
+      document.getElementById('compte-selection-2').textContent = n;
+      vide.hidden = n > 0;
     }
+    function proposition(pk) { return document.querySelector('input.proposition[value="' + pk + '"]'); }
+    function ajouter(m) {
+      if (document.getElementById('sel' + m.pk)) return;
+      var li = document.createElement('li'); li.id = 'sel' + m.pk;
+      var h = document.createElement('input'); h.type = 'hidden'; h.name = 'membres'; h.value = m.pk; li.appendChild(h);
+      var t = document.createElement('span'); t.appendChild(texte(m.nom + ' '));
+      var s = document.createElement('small'); s.className = 'aide';
+      s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.deja ? ' · déjà convoqué' : '')));
+      t.appendChild(s); li.appendChild(t);
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'retirer'; b.setAttribute('aria-label', 'Retirer ' + m.nom); b.textContent = '✕';
+      b.addEventListener('click', function () { retirer(m.pk); });
+      li.appendChild(b); selection.appendChild(li);
+      var p = proposition(m.pk); if (p) p.checked = true;
+      compter();
+    }
+    function retirer(pk) {
+      var li = document.getElementById('sel' + pk); if (li) li.remove();
+      var p = proposition(pk); if (p) p.checked = false;
+      compter();
+    }
+    function depuis(c) { return {pk: c.value, nom: c.dataset.nom, matricule: c.dataset.matricule, paroisse: c.dataset.paroisse, deja: !!c.dataset.deja}; }
+    /* Avec le script, le panneau de droite est la seule source : les cases de gauche ne sont plus envoyées. */
+    document.querySelectorAll('input.proposition').forEach(function (c) {
+      c.removeAttribute('name'); c.removeAttribute('form');
+      c.addEventListener('change', function () { if (c.checked) { ajouter(depuis(c)); } else { retirer(c.value); } });
+    });
+    var tout = document.getElementById('tout-cocher');
+    if (tout) tout.addEventListener('change', function () {
+      document.querySelectorAll('input.proposition').forEach(function (c) {
+        if (tout.checked) { ajouter(depuis(c)); } else { retirer(c.value); }
+      });
+    });
     champ.addEventListener('input', function () {
       clearTimeout(minuterie);
       var q = champ.value.trim();
@@ -88,19 +122,22 @@
               var li = document.createElement('li'), b = document.createElement('button');
               b.type = 'button'; b.appendChild(texte(m.nom + ' '));
               var s = document.createElement('small'); s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.deja ? ' (déjà convoqué)' : '')));
-              b.appendChild(s); b.addEventListener('click', function () { ajouter(m); });
+              b.appendChild(s); b.addEventListener('click', function () { ajouter(m); liste.hidden = true; champ.value = ''; });
               li.appendChild(b); liste.appendChild(li);
             });
             liste.hidden = false;
           });
       }, 250);
     });
-    document.getElementById('tout-cocher').addEventListener('change', function () {
-      var v = this.checked;
-      document.querySelectorAll('input[name=membres]').forEach(function (c) { c.checked = v; });
+    var role = document.getElementById('role'), autre = document.getElementById('champ-autre');
+    function majRole() { autre.hidden = role.value !== 'autre'; autre.querySelector('input').required = role.value === 'autre'; }
+    role.addEventListener('change', majRole); majRole();
+    /* Téléphone : la barre du bas ouvre et ferme le panneau. */
+    var barre = document.getElementById('barre-selection'), panneau = document.getElementById('panneau');
+    barre.addEventListener('click', function () {
+      var o = panneau.classList.toggle('panneau-selection--ouvert'); barre.setAttribute('aria-expanded', o);
     });
-    var role = document.getElementById('role'), section = document.getElementById('champ-section');
-    if (section) { var maj = function () { section.hidden = role.value === 'bureau'; }; role.addEventListener('change', maj); maj(); }
+    compter();
   })();
 </script>
 {% endblock %}

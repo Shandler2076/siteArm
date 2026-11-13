@@ -16,6 +16,7 @@ Commandement. Version du 13 novembre 2026.
 | 09 | [Payer par mobile money](09-payer-par-mobile-money.md) | Membres, trésoriers |
 | 10 | [Les cotisations spéciales](10-cotisations-speciales.md) | Bureau national, membres, trésoriers |
 | 11 | [La trésorerie et les reversements mensuels](11-tresorerie-et-reversements.md) | Trésoriers, Bureau national |
+| 12 | [Les grades : éligibles, test ou examen, promotions, actes](12-grades.md) | Bureau national |
 
 > Site d'essai : toutes les données sont **fictives** et le paiement mobile money est **simulé**
 > (aucun argent réel). Les vrais membres ne seront enregistrés qu'après l'autorisation de l'APDP.

@@ -79,3 +79,90 @@ def changer_categorie(
         reference=reference,
         par=par if getattr(par, "is_authenticated", False) else None,
     )
+
+
+# --- Catégories (décision du 13/11/2026) ----------------------------------------------------------
+
+
+class CategorieRefusee(Exception):
+    """Changement de catégorie refusé ; le message s'affiche tel quel."""
+
+
+def admettre_comme_actif(
+    membre, *, date_effet: datetime.date, reference: str, motif: str, par
+) -> HistoriqueMembre:
+    """Seul passage prévu : sympathisant → membre actif, par décision du BNC."""
+    from django.db import transaction
+
+    from apps.journal.models import CATEGORIE as J_CATEGORIE
+    from apps.journal.services import journaliser
+    from apps.membres.models import Categorie, Membre
+    from apps.notifications.services import notifier
+
+    reference = (reference or "").strip()
+    if not reference:
+        raise CategorieRefusee("La référence de la décision du BNC est obligatoire.")
+    with transaction.atomic():
+        m = Membre.objects.select_for_update(of=("self",)).get(pk=membre.pk)
+        if m.categorie != Categorie.SYMPATHISANT:
+            raise CategorieRefusee(
+                "Seul un membre sympathisant peut être admis comme membre actif."
+            )
+        h = changer_categorie(
+            m,
+            Categorie.ACTIF,
+            par=par,
+            date_effet=date_effet,
+            motif=(motif or "").strip() or "Admission comme membre actif (décision du BNC)",
+            reference=reference,
+        )
+        journaliser(
+            par,
+            J_CATEGORIE,
+            unite="national",
+            membre=m.matricule,
+            ancien="sympathisant",
+            nouveau="actif",
+            reference=reference,
+        )
+        compte = m.compte
+        texte = (
+            f"Décision du BNC ({reference}) : vous êtes admis(e) comme membre actif "
+            f"à compter du {date_effet:%d/%m/%Y}."
+        )
+        transaction.on_commit(lambda: notifier([compte], texte, "/membres/ma-fiche/"))
+    return h
+
+
+def corriger_categorie(membre, *, nouvelle: str, motif: str, par) -> HistoriqueMembre:
+    """Erreur de saisie : correction par le BN seulement, motif obligatoire, journalisée."""
+    from django.db import transaction
+    from django.utils import timezone
+
+    from apps.journal.models import CATEGORIE as J_CATEGORIE
+    from apps.journal.services import journaliser
+    from apps.membres.models import Categorie, Membre
+
+    motif = (motif or "").strip()
+    if not motif:
+        raise CategorieRefusee("Le motif de la correction est obligatoire.")
+    if nouvelle not in Categorie.values:
+        raise CategorieRefusee("Catégorie inconnue.")
+    with transaction.atomic():
+        m = Membre.objects.select_for_update(of=("self",)).get(pk=membre.pk)
+        if m.categorie == nouvelle:
+            raise CategorieRefusee("C'est déjà la catégorie du membre.")
+        ancienne = m.categorie
+        h = changer_categorie(
+            m, nouvelle, par=par, date_effet=timezone.localdate(), motif=f"Correction : {motif}"
+        )
+        journaliser(
+            par,
+            J_CATEGORIE,
+            unite="national",
+            membre=m.matricule,
+            ancien=ancienne,
+            nouveau=nouvelle,
+            correction=True,
+        )
+    return h
