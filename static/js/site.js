@@ -45,8 +45,16 @@
   /* Recherche dans une longue liste à cocher. */
   function filtreListe(champ) {
     var cible = document.getElementById(champ.dataset.filtre);
+    if (!cible) return;
     champ.addEventListener("input", function () {
       var t = champ.value.trim().toLowerCase();
+      if (cible.tagName === "SELECT") {
+        Array.prototype.forEach.call(cible.options, function (o) {
+          if (!o.value || o.disabled) return;
+          o.hidden = t && o.textContent.toLowerCase().indexOf(t) === -1;
+        });
+        return;
+      }
       cible.querySelectorAll("label").forEach(function (l) {
         var ligne = l.closest("div") || l;
         ligne.hidden = t && l.textContent.toLowerCase().indexOf(t) === -1;

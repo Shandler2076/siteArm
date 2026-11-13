@@ -5,58 +5,34 @@
   {% include "bureaux/_entete_unite.html" %}
   <form method="get" class="filtres">
     <input type="hidden" name="envoye" value="1">
-    <div class="champ choix choix--grille">
-      <span>Statuts comptés</span>
-      <div>
-        {% for valeur, libelle in choix_statuts %}
-          <div><label><input type="checkbox" name="statut" value="{{ valeur }}"{% if valeur in statuts %} checked{% endif %}> {{ libelle }}</label></div>
-        {% endfor %}
-      </div>
-      <small class="aide">Aucune case cochée : tous les statuts.</small>
+    <h2>Paramètres de la statistique</h2>
+    <p class="aide">Choisissez seulement ce qui vous intéresse (ex. une région et un grade) : le site croise vos choix.</p>
+    {{ form.non_field_errors }}
+    <div class="grille-filtres">
+      {% for champ in principaux %}
+        {% if champ.name == "age_x" %}<label class="champ"><span>Âge de début</span>{{ champ }}{% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
+        {% elif champ.name == "age_y" %}<label class="champ"><span>Âge de fin</span>{{ champ }}{% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
+        {% else %}{% include "listes/_filtre.html" %}{% endif %}
+      {% endfor %}
     </div>
-    <details{% if resume or form.errors %} open{% endif %}>
-      <summary>Filtrer les statistiques (grade, âge, région, circuit…)</summary>
-      {{ form.non_field_errors }}
-      <div class="grille-filtres">
-        {% for champ in form %}{% if champ.name != "envoye" and champ.name != "colonnes" and champ.name != "statut" %}
-          <div class="champ{% if champ.name == 'grade' %} choix choix--grille{% endif %}">
-            <span>{{ champ.label }}</span>
-            {{ champ }}
-            {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}
-          </div>
-        {% endif %}{% endfor %}
-      </div>
+    <details class="plus-filtres"{% if form.errors %} open{% endif %}><summary>Plus de paramètres</summary>
+      <div class="grille-filtres">{% for champ in autres %}{% include "listes/_filtre.html" %}{% endfor %}</div>
     </details>
-    <button type="submit" class="bouton">Mettre à jour</button>
+    <button type="submit" class="bouton">Générer la statistique</button>
   </form>
   {% if resume %}<div class="resume">{% for r in resume %}<span class="pastille">{{ r }}</span>{% endfor %}</div>{% endif %}
-  <p class="aide">Touchez un chiffre pour ouvrir la liste correspondante (exportable en PDF ou Excel).</p>
-  <div class="grille-stats">
-    {% for section in sections %}
-      <div class="stat">
-        <h2>{{ section.titre }}</h2>
-        <ul>
-          {% for c in section.cellules %}
-            <li><span>{{ c.libelle }}</span> <a href="{{ c.lien }}" class="nombre">{{ c.nombre }}</a></li>
-          {% endfor %}
-        </ul>
-      </div>
-    {% endfor %}
-  </div>
-  {% for t in tableaux %}
-    <h2>{{ t.titre }}</h2>
-    {% if t.lignes %}
-    <div class="tableau-defilant">
-      <table class="croise">
-        <thead><tr><th>Grade</th>{% for col in t.colonnes %}<th>{{ col }}</th>{% endfor %}</tr></thead>
-        <tbody>
-        {% for libelle, cellules in t.lignes %}
-          <tr><th scope="row">{{ libelle }}</th>{% for c in cellules %}<td><a href="{{ c.lien }}" class="nombre">{{ c.nombre }}</a></td>{% endfor %}</tr>
+  <a class="resultat" href="{{ total.lien }}"><span class="resultat__nombre">{{ total.nombre }}</span>
+    <span>membre{{ total.nombre|pluralize }} correspond{{ total.nombre|pluralize:"ent" }} à ces paramètres — voir la liste</span></a>
+  <p class="aide">Touchez une répartition pour la déplier, puis un chiffre pour ouvrir la liste correspondante (exportable en PDF ou Excel).</p>
+  {% for section in sections %}
+    <details class="repartition">
+      <summary>{{ section.titre }}</summary>
+      <ul>
+        {% for c in section.cellules %}
+          <li><span>{{ c.libelle }}</span> <a href="{{ c.lien }}" class="nombre">{{ c.nombre }}</a></li>
         {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% else %}<p class="aide">Aucun membre.</p>{% endif %}
+      </ul>
+    </details>
   {% endfor %}
   <div class="actions">
     <a class="bouton bouton--secondaire" href="{% url 'listes:statistiques_pdf' unite.cle %}?{{ requete }}">Télécharger en PDF</a>

@@ -4,6 +4,11 @@
   {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</div>
 {% elif champ.field.widget.input_type == "checkbox" %}
 <label class="case">{{ champ }} {{ champ.label }}</label>
+{% elif champ.name == "paroisse" or champ.name == "circuit" %}
+<label class="champ"><span>{{ champ.label }}</span>
+  <input type="search" class="recherche-liste" data-filtre="{{ champ.id_for_label }}" placeholder="Rechercher…" aria-label="Rechercher {{ champ.label|lower }}">
+  {{ champ }}
+  {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>
 {% else %}
 <label class="champ"><span>{{ champ.label }}</span>{{ champ }}
   {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</label>

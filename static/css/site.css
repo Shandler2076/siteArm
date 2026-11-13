@@ -261,3 +261,16 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .carte-identite__sans-photo { display: flex; align-items: center; justify-content: center; background: #EEF1F6; color: var(--gris); text-align: center; font-size: .85rem; }
 .carte-identite h2 { margin: 4px 0 8px; }
 @media (max-width: 480px) { .carte-identite { grid-template-columns: 1fr; } }
+/* Statistiques à paramètres (13/11/2026). */
+.resultat { display: flex; gap: 14px; align-items: center; margin: 16px 0 8px; padding: 14px 16px;
+  border-radius: 12px; background: var(--marine); color: #fff; text-decoration: none; }
+.resultat__nombre { font-size: 2rem; font-weight: 800; color: var(--or); }
+.repartition { border: 1px solid #DDE3EE; border-radius: 10px; margin: 8px 0; background: #fff; }
+.repartition > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; color: var(--marine);
+  list-style: none; display: flex; justify-content: space-between; }
+.repartition > summary::-webkit-details-marker { display: none; }
+.repartition > summary::after { content: "▸"; transition: transform .15s; }
+.repartition[open] > summary::after { transform: rotate(90deg); }
+.repartition ul { list-style: none; margin: 0; padding: 0 14px 10px; }
+.repartition li { display: flex; justify-content: space-between; padding: 6px 0; border-top: 1px solid #EEF1F6; }
+.recherche-liste { width: 100%; margin-bottom: 4px; padding: 8px; border: 1px solid #C9D1DE; border-radius: 8px; font-size: .9rem; }

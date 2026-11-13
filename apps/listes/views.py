@@ -19,13 +19,28 @@ from apps.listes.filtres import FiltreListeForm, membres_filtres, resume_filtres
 from apps.listes.forms import BornesForm
 from apps.listes.models import ReglageStatistiques
 from apps.listes.statistiques import (
+    ages_debut_fin,
     base_depuis_requete,
     calculer_statistiques,
-    calculer_tableaux,
+    colonnes_pour,
 )
 from apps.membres.models import Statut
 
 PAR_PAGE = 100
+
+
+# Paramètres visibles d'emblée sur la page Statistiques ; les autres sous « Plus de paramètres ».
+PARAMETRES_PRINCIPAUX = [
+    "statut",
+    "sexe",
+    "categorie",
+    "grade",
+    "region",
+    "circuit",
+    "paroisse",
+    "age_x",
+    "age_y",
+]
 
 
 def _sans_page(request) -> str:
@@ -62,37 +77,41 @@ def _statuts(request) -> list[str]:
 
 
 def _sections(request, unite):
-    """Statuts, sections, tableaux croisés et formulaire des filtres de page."""
+    """Statuts, résultat, répartitions et formulaire des paramètres de la statistique."""
     statuts = _statuts(request)
-    form = FiltreListeForm(unite, request.GET)
+    donnees = ages_debut_fin(request.GET)
+    form = FiltreListeForm(unite, donnees)
     valide = form.is_valid()
-    base = base_depuis_requete(request.GET) if valide else {}
+    base = base_depuis_requete(donnees) if valide else {}
     jour = timezone.localdate()
     sections = calculer_statistiques(unite, statuts, jour, base)
-    tableaux = calculer_tableaux(unite, statuts, jour, base)
     lien = reverse("listes:liste", args=[unite.cle]) + "?"
     for section in sections:
         for c in section.cellules:
-            c.lien = lien + urlencode(c.filtres, doseq=True)
-    for t in tableaux:
-        for _libelle, cellules in t.lignes:
-            for c in cellules:
-                c.lien = lien + urlencode(c.filtres, doseq=True)
+            filtres = {**c.filtres, "colonnes": colonnes_pour(c.filtres)}
+            c.lien = lien + urlencode(filtres, doseq=True)
     resume = [r for r in resume_filtres(form) if r != "Aucun filtre"] if valide and base else []
-    return statuts, sections, tableaux, form, resume
+    return statuts, sections, (), form, resume
 
 
 @login_required
 def statistiques(request, cle):
     unite = unite_depuis_cle(request.user, cle)
-    statuts, sections, tableaux, form, resume = _sections(request, unite)
+    statuts, sections, _tableaux, form, resume = _sections(request, unite)
+    principaux = [n for n in PARAMETRES_PRINCIPAUX if n in form.fields]
     return render(
         request,
         "listes/statistiques.html",
         {
             "unite": unite,
-            "sections": sections,
-            "tableaux": tableaux,
+            "total": sections[0].cellules[0],
+            "sections": sections[1:],
+            "principaux": [form[n] for n in principaux],
+            "autres": [
+                form[n]
+                for n in form.fields
+                if n not in principaux and n not in ("envoye", "colonnes", "statut", "age")
+            ],
             "form": form,
             "resume": resume,
             "statuts": statuts,

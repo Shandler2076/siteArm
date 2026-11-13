@@ -65,6 +65,45 @@ CLES_BASE = (
 )
 
 
+# Colonnes de la liste ouverte depuis une statistique (décision du 13/11/2026) : toujours ces
+# cinq-là, puis seulement celles des paramètres choisis.
+COLONNES_TOUJOURS = ["matricule", "nom", "prenoms", "sexe", "telephone"]
+COLONNES_DES_PARAMETRES = [
+    (("age", "age_x", "age_y"), "age"),
+    (("grade", "grade_min", "eligible"), "grade"),
+    (("categorie",), "categorie"),
+    (("circuit",), "circuit"),
+    (("paroisse",), "paroisse"),
+    (("cotisation", "retard_min"), "reste_du"),
+    (("fonction",), "fonctions"),
+]
+
+
+def colonnes_pour(filtres: dict) -> list[str]:
+    """Colonnes de la liste : les cinq de base, puis une par paramètre choisi."""
+    colonnes = list(COLONNES_TOUJOURS)
+    for cles, colonne in COLONNES_DES_PARAMETRES:
+        if any(filtres.get(c) not in (None, "", []) for c in cles) and colonne not in colonnes:
+            colonnes.append(colonne)
+    statuts = filtres.get("statut") or []
+    if statuts != ["actif"] and "statut" not in colonnes:
+        colonnes.append("statut")
+    return colonnes
+
+
+def ages_debut_fin(donnees):
+    """« Âge de début » / « âge de fin » (champs X et Y) sans choix d'âge : tranche « entre »."""
+    if donnees.get("age") or not (donnees.get("age_x") or donnees.get("age_y")):
+        return donnees
+    donnees = donnees.copy()
+    donnees["age"] = "entre"
+    if not donnees.get("age_x"):
+        donnees["age_x"] = "0"
+    if not donnees.get("age_y"):
+        donnees["age_y"] = "130"
+    return donnees
+
+
 def base_depuis_requete(donnees) -> dict:
     """Filtres de page (clés d'URL) d'une requête GET, sans statut ni colonnes."""
     base = {}
