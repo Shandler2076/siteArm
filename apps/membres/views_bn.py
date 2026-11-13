@@ -49,6 +49,7 @@ def enregistrer(request):
                 res = enregistrer_membre(
                     donnees=form.donnees_membre(),
                     paroisse_integration=cd["paroisse_integration"],
+                    paroisse_actuelle=cd.get("paroisse_actuelle"),
                     annee_integration=cd["annee_integration"],
                     par=request.user,
                     **form.parametres_grade(),

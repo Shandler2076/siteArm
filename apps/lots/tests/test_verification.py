@@ -32,7 +32,7 @@ def lot(territoire, compte_technique):
 
 
 def _ligne(lot, **remplacements):
-    brutes = dict(zip([c.entete for c in COLONNES], LIGNE_OK + ["", ""], strict=True))
+    brutes = dict(zip([c.entete for c in COLONNES], LIGNE_OK + ["", "", ""], strict=True))
     brutes.update(remplacements)
     n = lot.lignes.count() + 2
     return LigneLot.objects.create(lot=lot, numero=n, brutes=brutes)

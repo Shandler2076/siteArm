@@ -30,7 +30,7 @@ LIGNE_OK = [
 
 
 def _brutes(**remplacements):
-    b = dict(zip([c.entete for c in COLONNES], LIGNE_OK + ["", ""], strict=True))
+    b = dict(zip([c.entete for c in COLONNES], LIGNE_OK + ["", "", ""], strict=True))
     b.update(remplacements)
     return b
 

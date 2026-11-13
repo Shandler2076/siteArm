@@ -95,6 +95,11 @@ def lire(entrees) -> list[Ligne]:
         d, a = e.details, e.action
         m = qui(d.get("membre"))
         if a == j.ENREGISTREMENT:
+            if d.get("paroisse_actuelle"):
+                return (
+                    f"A enregistré le membre {m}, actuellement à la paroisse "
+                    f"{d['paroisse_actuelle']}."
+                )
             return f"A enregistré le membre {m}."
         if a == j.GRADE_PROMOTION:
             mode = modes.get(d.get("mode"), d.get("mode", "")).lower()

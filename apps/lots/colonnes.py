@@ -33,6 +33,7 @@ COLONNES = [
     Colonne("Catégorie", "categorie", False),
     Colonne("Grade", "grade", False, entete_facultative=True),
     Colonne("Date du grade", "date_grade", False, entete_facultative=True),
+    Colonne("Paroisse actuelle", "paroisse_actuelle", False, entete_facultative=True),
 ]
 
 PAR_CHAMP = {c.champ: c for c in COLONNES}

@@ -47,6 +47,7 @@
     <fieldset><legend>Armée du Salut</legend>
       {% include "membres/_champ.html" with champ=form.annee_integration %}
       {% include "membres/_champ.html" with champ=form.paroisse_integration %}
+      {% include "membres/_champ.html" with champ=form.paroisse_actuelle %}
       <div class="champ champ--requis"><span>{{ form.categorie.label }}</span>
         <div class="choix">{{ form.categorie }}</div>
         {% for e in form.categorie.errors %}<small class="erreur">{{ e }}</small>{% endfor %}

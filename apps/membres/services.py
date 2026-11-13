@@ -92,6 +92,7 @@ def enregistrer_membre(
     paroisse_integration: Paroisse,
     annee_integration: int,
     par: Compte,
+    paroisse_actuelle: Paroisse | None = None,
     date_integration: datetime.date | None = None,
     notifier: bool = True,
     avec_mot_de_passe: bool = True,
@@ -104,6 +105,8 @@ def enregistrer_membre(
     En cas d'échec, rien n'est créé, y compris le fichier de la photo du CIP éventuelle.
     Grade : Camarade par défaut ; un grade donné (`regularisation`) est daté de `date_grade`,
     sinon de la date d'intégration.
+    Paroisse actuelle (si différente de la paroisse d'intégration) : le membre y est affecté à
+    partir du jour de son inscription sur le site ; le matricule garde la région d'intégration.
     """
     from apps.grades.services import attribuer_grade_initial
 
@@ -129,14 +132,27 @@ def enregistrer_membre(
             )
             membre.save()
             debut = date_integration or datetime.date(annee_integration, 1, 1)
+            if paroisse_actuelle == paroisse_integration:
+                paroisse_actuelle = None
+            jour = max(timezone.localdate(), debut)
             Affectation.objects.create(
                 membre=membre,
                 paroisse=paroisse_integration,
                 circuit_a_date=paroisse_integration.circuit,
                 region_a_date=region,
                 date_debut=debut,
+                date_fin=jour if paroisse_actuelle else None,
                 motif="Intégration",
             )
+            if paroisse_actuelle:
+                Affectation.objects.create(
+                    membre=membre,
+                    paroisse=paroisse_actuelle,
+                    circuit_a_date=paroisse_actuelle.circuit,
+                    region_a_date=paroisse_actuelle.circuit.region,
+                    date_debut=jour,
+                    motif=MOTIF_PAROISSE_ACTUELLE,
+                )
             attribuer_grade_initial(
                 membre,
                 grade=grade,
@@ -147,9 +163,13 @@ def enregistrer_membre(
         from apps.journal.models import ENREGISTREMENT
         from apps.journal.services import journaliser
 
-        journaliser(par, ENREGISTREMENT, membre=membre.matricule)
+        details = {"membre": membre.matricule}
+        if paroisse_actuelle:
+            details["paroisse_actuelle"] = paroisse_actuelle.nom
+        journaliser(par, ENREGISTREMENT, **details)
         if notifier:  # les lots envoient une notification groupée à la place
-            transaction.on_commit(lambda: _notifier_nouveau_membre(membre))
+            paroisse_avis = paroisse_actuelle or paroisse_integration
+            transaction.on_commit(lambda: _notifier_nouveau_membre(membre, paroisse_avis))
     except Exception:
         cip = membre.photo_cip
         if cip and getattr(cip, "_committed", False) and cip.name:
@@ -158,11 +178,15 @@ def enregistrer_membre(
     return ResultatEnregistrement(membre=membre, mot_de_passe=mot_de_passe)
 
 
-def _notifier_nouveau_membre(membre: Membre) -> None:
+MOTIF_PAROISSE_ACTUELLE = "Paroisse actuelle à l'inscription sur le site"
+
+
+def _notifier_nouveau_membre(membre: Membre, paroisse: Paroisse | None = None) -> None:
+    """Avis aux bureaux de la paroisse actuelle du membre (et de son circuit, de sa région)."""
     from apps.bureaux.perimetre import Unite
     from apps.notifications.services import notifier_unite
 
-    paroisse = membre.paroisse_integration
+    paroisse = paroisse or membre.paroisse_integration
     message = f"Nouveau membre dans votre périmètre : {membre.matricule} — {membre.nom_complet}"
     for unite in (
         Unite("paroisse", paroisse),
