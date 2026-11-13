@@ -191,4 +191,27 @@ grade d'après.
 - Dans les filtres ordinaires des listes, le libellé devient « Grade actuel », pour éviter la
   confusion.
 
+## 11. Promotions spéciales (consécrations spéciales) dans le groupe « Grades »
+
+Besoin : le BNC peut décider de grader quelqu'un hors du parcours normal, par exemple un Soldat de
+1ʳᵉ classe directement Capitaine. C'est une **promotion spéciale**, ou consécration spéciale.
+
+État actuel (vérifié le 13/11/2026) : le site le permet déjà (art. 84, promotion exceptionnelle). Il
+accepte n'importe quel grade, sans condition de durée, avec un motif obligatoire, et l'inscrit à
+l'historique et au journal. Mais la fonction est **cachée** : il faut ouvrir la fiche du membre →
+« Promouvoir » → cocher « Promotion exceptionnelle ».
+
+À réaliser :
+- Une sous-rubrique **« Promotions spéciales »** dans le groupe **Grades** du menu (BN seulement).
+- La page permet de :
+  - rechercher le membre par nom ou matricule ;
+  - choisir le **grade accordé** (n'importe lequel au-dessus du grade actuel) ;
+  - indiquer la **date d'effet** et la **référence de la décision du BNC** ;
+  - saisir le **motif** (mérites, services remarquables, responsabilités, circonstances : art. 84).
+- On peut traiter **plusieurs membres** dans la même décision (liste, comme les promotions en série).
+- L'historique du grade porte la mention « Promotion spéciale (art. 84) ». Le membre et sa paroisse
+  sont notifiés, et l'action est inscrite au journal.
+- Une liste des **promotions spéciales accordées** (date, membre, ancien → nouveau grade,
+  référence), consultable par le BN.
+
 *(À compléter au fil des remarques du mainteneur.)*
