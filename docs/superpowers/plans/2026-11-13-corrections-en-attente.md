@@ -210,6 +210,28 @@ Deux façons de payer coexistent :
     site de savoir sûrement pour quels membres il a été fait.
 - **Numéro mobile money du trésorier de chaque unité : enregistré par le BN seulement.**
 
+### H.6 Payer pour un autre membre (sans téléphone, âgé, sans Internet)
+- Un membre peut **se faire aider** : le paiement est fait depuis le compte d'un autre membre ou
+  d'un bureau.
+- Le payeur choisit sur le site « **Payer pour un autre membre** » et saisit le **matricule** du
+  bénéficiaire, puis ce qu'il paie : les mois de cotisation mensuelle ou une cotisation spéciale.
+- Le paiement est **enregistré au nom du bénéficiaire** (son matricule) :
+  - c'est lui qui reçoit la **notification** et le **reçu** (ou la quittance) dans son espace ;
+  - le bureau de sa paroisse est aussi averti, pour pouvoir lui remettre le reçu imprimé s'il n'a
+    pas de téléphone.
+- Le payeur reçoit seulement une confirmation : « paiement fait pour le matricule … ».
+- **Protection des données** (règle : un membre simple ne voit jamais un autre membre) :
+  - le payeur ne voit **pas** la fiche ni la situation du bénéficiaire ;
+  - avant de confirmer, il voit seulement une **confirmation réduite**, pour éviter une erreur de
+    matricule. Proposition : grade, prénoms et initiale du nom (ex. « Soldat Albert A. »), et la
+    paroisse ;
+  - les mois payés sont les **plus anciens mois dus** du bénéficiaire, sans les afficher au payeur.
+    Le payeur choisit seulement le **nombre de mois**.
+- Questions :
+  - Qui peut payer pour un autre : **tout membre**, ou seulement les bureaux et des proches ?
+    Proposition : tout membre, puisque le paiement ne révèle rien.
+  - La confirmation réduite proposée convient-elle ?
+
 ## I. Guides d'utilisation (à préparer le moment venu)
 
 Une fois les fonctions réalisées, préparer un **guide d'utilisation** pour chaque partie décrite, en
@@ -226,7 +248,7 @@ Markdown et en PDF, dans `docs/guides/`.
 | Événements | BN | Créer, sections, convoquer (recherche), rôles, autorisations, pointage |
 | Mes événements et mon autorisation | Membres, paroisses | Imprimer, QR code |
 | Cotisations mensuelles | Paroisse, circuit, région, BN | Espèces, grille, validation, parts, reversements |
-| **Payer par mobile money** | Membres, paroisses | Payer ses mois, payer pour plusieurs membres, reçu |
+| **Payer par mobile money** | Membres, paroisses | Payer ses mois, payer pour un autre membre, payer pour plusieurs membres, reçu |
 | **Cotisations spéciales** | BN, membres | Créer (montant fixe / minimum / libre, cible), payer, quittance |
 | **Reversements mensuels** | BN, trésoriers | État des reversements, numéros des trésoriers, suivi |
 | Notifications | Tous | Cliquer pour aller à la bonne page |
