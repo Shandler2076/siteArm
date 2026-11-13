@@ -120,6 +120,30 @@
    de chaque liste, pour trouver et cocher sans tout faire défiler. Cela vaut pour les statistiques,
    les listes et la convocation.
 
+## G. Consulter l'identité d'un membre hors de son périmètre (« Vérifier un membre »)
+
+Besoin : un membre d'une autre paroisse arrive chez nous, ou commet une faute, et le bureau doit
+savoir qui il est. Décisions du mainteneur (13/11/2026) :
+
+1. **Qui** : seulement le **Chef** et le **Secrétaire** de chaque bureau (paroisse, circuit, région).
+   Pas les autres responsables, pas les trésoriers, pas les membres simples. Le BN voit déjà tout.
+2. **Comment on retrouve la personne** : par son **matricule exact** (ex. 2015-01AS-0157), que la
+   personne donne ou qui figure sur sa fiche. **Pas de recherche par nom** : on ne doit pas pouvoir
+   parcourir les membres des autres paroisses.
+3. **Ce qu'on voit**, une **carte d'identité** seulement :
+   - la photo d'identité validée, le grade, les prénoms et le NOM, le matricule ;
+   - le statut (actif, sanctionné, exclu…) et la catégorie ;
+   - la paroisse, le circuit et la région actuels ;
+   - les coordonnées de **sa paroisse**, pour la contacter.
+   On ne voit **pas** son téléphone ni son adresse, et **jamais** le NPI ni la photo du CIP.
+4. **Contrôle** : un **motif obligatoire** avant d'afficher la carte (ex. « membre en visite dans
+   notre paroisse », « faute commise », ou un motif écrit). Le motif, l'auteur, le bureau et la date
+   sont inscrits au **journal** du BN, comme toute action sensible (règle du site).
+5. Pour un membre de son propre périmètre, rien ne change : le bureau voit déjà sa fiche.
+6. **Protection des données** : cette nouvelle finalité doit être reportée sur la page « Protection
+   de vos données » et dans le dossier APDP. Dans la règle du gardien des périmètres, c'est une
+   exception encadrée : carte réduite, matricule exact, motif, journal.
+
 ## C. Remarques précédentes déjà réalisées (PR #14, à mettre en ligne plus tard)
 
 - Le menu par thèmes, repliable, avec la rubrique active mise en évidence.
@@ -137,6 +161,9 @@
 - Filtres de convocation : lesquels garder visibles par défaut ? Proposition :
   - visibles : recherche, Région / Circuit / Paroisse, Grade, Statut ;
   - repliés sous « Plus de filtres » : le reste.
+- Vérifier un membre : où placer la rubrique dans le menu ? Proposition : « Mon bureau → Vérifier un
+  membre ». Les coordonnées de la paroisse : lesquelles existent sur le site (téléphone du secrétaire
+  paroissial ?) — à confirmer.
 - Date passée : simple avertissement (on peut confirmer, ex. pour saisir un événement déjà tenu), ou
   refus ?
 
