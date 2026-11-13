@@ -158,9 +158,8 @@ savoir qui il est. Décisions du mainteneur (13/11/2026) :
 - Une **quittance** PDF numérotée atteste le paiement.
 
 ### H.3 Cotisations mensuelles (partage 30 / 20 / 20 / 30) : proposition
-Deux façons de payer coexistent :
-1. **En espèces à la paroisse** : rien ne change. La paroisse saisit, le circuit valide, et chaque
-   niveau reçoit sa part de la main à la main, comme aujourd'hui.
+*(Proposition initiale ; elle a été remplacée par le chemin unique décrit en H.8.)*
+1. ~~En espèces à la paroisse, saisie et validation par le circuit~~ : abandonné.
 2. **Par mobile money au BN** (par le membre lui-même, ou par la paroisse pour plusieurs membres) :
    - le BN reçoit 100 % ;
    - le site marque les mois payés aussitôt (sans validation du circuit) ;
@@ -263,9 +262,18 @@ Deux façons de payer coexistent :
     (date, montant, référence).
 - **Poste de Trésorier vacant** : le **Chef du bureau** assure l'intérim (trésorerie, paiement au
   nom du bureau, numéro qui reçoit les reversements, enregistré par le BN).
-- Question restante : au **circuit**, qui valide les versements en espèces des paroisses ? Aujourd'hui
-  c'est le bureau du circuit. Proposition : le **Trésorier du circuit**, et le Chef en cas de poste
-  vacant, avec la règle actuelle maintenue (celui qui saisit ne valide jamais).
+- **Chemin unique des cotisations mensuelles (confirmé le 13/11/2026)** :
+  1. le membre paie lui-même par mobile money depuis le site ;
+  2. ou il remet ses espèces au **Trésorier de sa paroisse**, qui coche sur le site les membres et
+     les mois concernés, puis paie le tout par mobile money au numéro du BN ;
+  3. la plateforme confirme et les mois sont **marqués payés automatiquement** : **personne ne
+     valide**, ni le circuit, ni la région ;
+  4. chaque mois, le BN reverse les parts (paroisse 30 %, circuit 20 %, région 20 %).
+  - **Plus aucune espèce ne circule entre la paroisse et le circuit**, ni vers la région. Les espèces
+    ne passent qu'entre le membre et le Trésorier de sa paroisse.
+  - La saisie actuelle (paroisse) avec validation par le circuit sera **remplacée** par ce chemin
+    unique quand le mobile money sera en place. D'ici là, le fonctionnement actuel reste pour les
+    essais.
 
 ## I. Guides d'utilisation (à préparer le moment venu)
 
