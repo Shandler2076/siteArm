@@ -1,5 +1,6 @@
 from django.utils.functional import SimpleLazyObject
 
+from apps.bureaux.menu import construire_menu
 from apps.bureaux.perimetre import est_bn, unites_cotisations, unites_gerees
 
 
@@ -15,6 +16,7 @@ def bureaux(request):
         "espace_national": SimpleLazyObject(lambda: est_bn(user)),
         "nb_decisions": SimpleLazyObject(lambda: _nb_decisions(user)),
         "mes_fonctions": SimpleLazyObject(lambda: _fonctions(user)),
+        "menu": SimpleLazyObject(lambda: construire_menu(request)),
     }
 
 

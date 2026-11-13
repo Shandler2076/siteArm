@@ -123,15 +123,21 @@ def _obstacle(membre, grade, date_effet, aujourdhui, exceptionnelle, motif) -> t
 
 def _notifier(membre, h):
     from apps.bureaux.perimetre import Unite
-    from apps.notifications.services import notifier, notifier_unite
+    from apps.notifications.services import lien_membre, notifier, notifier_unite
 
     libelle = h.get_grade_display()
     ref = f" (décision {h.reference})" if h.reference else ""
-    notifier([membre.compte], f"Votre grade : {libelle} à compter du {h.date_effet:%d/%m/%Y}{ref}.")
+    notifier(
+        [membre.compte],
+        f"Votre grade : {libelle} à compter du {h.date_effet:%d/%m/%Y}{ref}.",
+        "/membres/ma-fiche/",
+    )
     a = membre.affectation_actuelle
     if a:
         notifier_unite(
-            Unite("paroisse", a.paroisse), f"{membre.nom_complet} : nouveau grade {libelle}."
+            Unite("paroisse", a.paroisse),
+            f"{membre.nom_complet} : nouveau grade {libelle}.",
+            lien_membre(membre),
         )
 
 

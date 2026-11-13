@@ -11,7 +11,7 @@ from django.utils import timezone
 from apps.bureaux.models import Niveau
 from apps.bureaux.perimetre import Unite
 from apps.evenements.forms import EvenementForm
-from apps.evenements.models import Convocation, Evenement, Presence, Session
+from apps.evenements.models import Convocation, Evenement, Formule, Presence, Role, Session
 from apps.evenements.services import (
     EvenementRefuse,
     annuler_evenement,
@@ -19,6 +19,7 @@ from apps.evenements.services import (
     creer_evenement,
     modifier_evenement,
     pointer,
+    rechercher_membres,
     retirer,
 )
 from apps.listes.filtres import FiltreListeForm, membres_filtres
@@ -26,6 +27,8 @@ from apps.listes.filtres import FiltreListeForm, membres_filtres
 bn = permission_required("membres.gerer_membres", raise_exception=True)
 NATIONAL = Unite(Niveau.NATIONAL, None)
 MAX_PROPOSES = 500
+# Filtres visibles d'emblée sur la page « Convoquer » ; les autres sont sous « Plus de filtres ».
+FILTRES_PRINCIPAUX = ["region", "circuit", "paroisse", "grade", "statut"]
 
 
 def _pk(valeur) -> int:
@@ -53,24 +56,28 @@ def liste(request):
     )
 
 
+def _champs(d) -> dict:
+    return {
+        "nom": d["nom"],
+        "debut": d["debut"],
+        "fin": d["fin"],
+        "lieu": d["lieu"],
+        "description": d["description"],
+        "avec_autorisation": d["avec_autorisation"],
+        "avec_sections": d["avec_sections"],
+        "validite_debut": d["validite_debut"],
+        "validite_heures": d["validite_heures"],
+    }
+
+
 @login_required
 @bn
 def nouveau(request):
     form = EvenementForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
-        d = form.cleaned_data
         try:
             ev = creer_evenement(
-                nom=d["nom"],
-                debut=d["debut"],
-                fin=d["fin"],
-                lieu=d["lieu"],
-                description=d["description"],
-                avec_autorisation=d["avec_autorisation"],
-                sessions=form.liste_sessions(),
-                validite_debut=d["validite_debut"],
-                validite_heures=d["validite_heures"],
-                par=request.user,
+                **_champs(form.cleaned_data), sessions=form.liste_sessions(), par=request.user
             )
         except EvenementRefuse as e:
             form.add_error(None, str(e))
@@ -86,29 +93,13 @@ def nouveau(request):
 @bn
 def modifier(request, pk):
     ev = get_object_or_404(Evenement, pk=pk)
-    initial = {
-        "nom": ev.nom,
-        "debut": timezone.localtime(ev.debut),
-        "fin": timezone.localtime(ev.fin) if ev.fin else None,
-        "lieu": ev.lieu,
-        "description": ev.description,
-        "avec_autorisation": ev.avec_autorisation,
-        "validite_debut": timezone.localtime(ev.validite_debut) if ev.validite_debut else None,
-        "validite_heures": ev.validite_heures,
-        "sessions": "\n".join(ev.sessions.values_list("nom", flat=True)),
-    }
-    form = EvenementForm(request.POST or None, initial=initial)
+    form = EvenementForm(
+        request.POST or None, initial=EvenementForm.initial_depuis(ev), deja_cree=True
+    )
     if request.method == "POST" and form.is_valid():
-        d = form.cleaned_data
         try:
             modifier_evenement(
-                ev,
-                par=request.user,
-                sessions=form.liste_sessions(),
-                **{
-                    k: d[k]
-                    for k in ("nom", "debut", "fin", "lieu", "description", "avec_autorisation")
-                },
+                ev, par=request.user, sessions=form.liste_sessions(), **_champs(form.cleaned_data)
             )
         except EvenementRefuse as e:
             form.add_error(None, str(e))
@@ -182,7 +173,13 @@ def convoquer_vue(request, pk):
             if not membres:
                 raise EvenementRefuse("Cochez au moins un membre.")
             faites = convoquer(
-                ev, membres, session=session, sans_session=session is None, par=request.user
+                ev,
+                membres,
+                session=session,
+                sans_session=session is None,
+                role=request.POST.get("role", Role.TRAVAILLEUR),
+                formule=request.POST.get("formule", ""),
+                par=request.user,
             )
         except EvenementRefuse as e:
             messages.error(request, str(e))
@@ -197,11 +194,49 @@ def convoquer_vue(request, pk):
         trop = len(proposes) > MAX_PROPOSES
         proposes = proposes[:MAX_PROPOSES]
     deja = set(ev.convocations.filter(active=True).values_list("membre_id", flat=True))
+    principaux = [n for n in FILTRES_PRINCIPAUX if n in form.fields]
     return render(
         request,
         "evenements/convoquer.html",
-        {"ev": ev, "form": form, "proposes": proposes, "trop": trop, "deja": deja},
+        {
+            "ev": ev,
+            "form": form,
+            "principaux": [form[n] for n in principaux],
+            "autres": [
+                form[n]
+                for n in form.fields
+                if n not in principaux and n not in ("envoye", "colonnes")
+            ],
+            "proposes": proposes,
+            "trop": trop,
+            "deja": deja,
+            "roles": Role.choices,
+            "formules": Formule.choices,
+        },
     )
+
+
+@login_required
+@bn
+def recherche_membres(request, pk):
+    """Recherche d'un membre à convoquer, par matricule ou par nom (réponse JSON, BN seulement)."""
+    from django.http import JsonResponse
+
+    ev = get_object_or_404(Evenement, pk=pk)
+    deja = set(ev.convocations.filter(active=True).values_list("membre_id", flat=True))
+    resultats = []
+    for m in rechercher_membres(request.GET.get("q", "")):
+        a = m.affectation_actuelle
+        resultats.append(
+            {
+                "pk": m.pk,
+                "nom": m.nom_complet,
+                "matricule": m.matricule,
+                "paroisse": a.paroisse.nom if a else "",
+                "deja": m.pk in deja,
+            }
+        )
+    return JsonResponse({"resultats": resultats})
 
 
 @login_required
@@ -240,12 +275,13 @@ def _lignes(ev):
             m.get_grade_display() if m.grade is not None else "",
             m.nom.upper(),
             m.prenoms,
+            c.get_role_display(),
             c.session.nom if c.session else "",
             c.get_presence_display() if c.presence else "Non pointé",
         ]
 
 
-ENTETES = ["Matricule", "Grade", "Nom", "Prénoms", "Session", "Présence"]
+ENTETES = ["Matricule", "Grade", "Nom", "Prénoms", "Rôle", "Section", "Présence"]
 
 
 @login_required
@@ -291,7 +327,7 @@ def export_pdf(request, pk):
     c = canvas.Canvas(tampon, pagesize=A4)
     debut = timezone.localtime(ev.debut)
     sous = [f"{debut:%d/%m/%Y à %H:%M}" + (f" — {ev.lieu}" if ev.lieu else "")]
-    largeurs = [30, 32, 34, 40, 30, 22]
+    largeurs = [27, 27, 30, 34, 20, 26, 20]
     numero = 1
 
     def entete():

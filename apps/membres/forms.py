@@ -39,6 +39,14 @@ class FormulaireEnregistrement(forms.ModelForm):
         queryset=Paroisse.objects.filter(active=True).select_related("circuit__region"),
         label="Paroisse d'intégration",
     )
+    paroisse_actuelle = ChoixParoisse(
+        queryset=Paroisse.objects.filter(active=True).select_related("circuit__region"),
+        label="Paroisse actuelle (si différente de la paroisse d'intégration)",
+        required=False,
+        help_text="Laisser vide si le membre est toujours dans sa paroisse d'intégration. "
+        "Il sera affecté à cette paroisse à partir d'aujourd'hui (inscription sur le site) ; "
+        "le matricule garde la région d'intégration.",
+    )
     categorie = forms.ChoiceField(
         label="Catégorie",
         choices=Categorie.choices,
@@ -91,6 +99,7 @@ class FormulaireEnregistrement(forms.ModelForm):
         exclus = {
             "annee_integration",
             "paroisse_integration",
+            "paroisse_actuelle",
             "confirmer_malgre_doublon",
             "grade",
             "date_grade",

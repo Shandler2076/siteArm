@@ -88,7 +88,7 @@ def normaliser_ligne(
                 erreur(champ, VIDE)
             elif champ == "categorie":
                 donnees[champ] = Categorie.ACTIF
-            elif champ in ("date_naissance", "grade", "date_grade"):
+            elif champ in ("date_naissance", "grade", "date_grade", "paroisse_actuelle"):
                 donnees[champ] = None
             else:
                 donnees[champ] = ""
@@ -115,7 +115,7 @@ def normaliser_ligne(
                 donnees[champ] = _par_libelle(SituationMatrimoniale.choices, texte)
             elif champ == "categorie":
                 donnees[champ] = _par_libelle(Categorie.choices, texte)
-            elif champ == "paroisse_integration":
+            elif champ in ("paroisse_integration", "paroisse_actuelle"):
                 trouvee = paroisses.get(cle_nom(texte))
                 if trouvee is None:
                     erreur(champ, f"« {texte} » n'existe pas dans la région {region.nom}")
@@ -139,7 +139,13 @@ def normaliser_ligne(
 
 def _hors_membre(donnees: dict) -> dict:
     """Champs propres à l'enregistrement, qui ne passent pas par le modèle `Membre`."""
-    exclus = ("paroisse_integration", "annee_integration", "grade", "date_grade")
+    exclus = (
+        "paroisse_integration",
+        "paroisse_actuelle",
+        "annee_integration",
+        "grade",
+        "date_grade",
+    )
     return {k: v for k, v in donnees.items() if k not in exclus}
 
 
@@ -153,6 +159,14 @@ def grade_de_la_ligne(donnees: dict) -> dict:
         "date_grade": datetime.date.fromisoformat(date_grade) if date_grade else None,
         "regularisation": True,
     }
+
+
+def paroisse_actuelle_de(donnees: dict) -> Paroisse | None:
+    """Paroisse actuelle de la ligne (colonne facultative), si elle est indiquée."""
+    pk = donnees.get("paroisse_actuelle")
+    if not pk:
+        return None
+    return Paroisse.objects.filter(pk=pk, active=True).select_related("circuit__region").first()
 
 
 def donnees_pour_membre(donnees: dict) -> tuple[dict, Paroisse | None, int | None]:

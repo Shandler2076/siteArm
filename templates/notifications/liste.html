@@ -3,11 +3,14 @@
 {% block contenu %}
 <section class="carte">
   <h1>Notifications</h1>
+  <p class="aide">Cliquez sur une notification pour ouvrir la page concernée ; elle est alors marquée comme lue.</p>
+  {% if notifications %}<form method="post" action="{% url 'notifications:tout_lu' %}">{% csrf_token %}
+    <button type="submit" class="bouton bouton--secondaire">Tout marquer comme lu</button></form>{% endif %}
   <ul class="notifications">
     {% for n in notifications %}
       <li class="{% if not n.lue %}non-lue{% endif %}">
-        {% if n.lien %}<a href="{{ n.lien }}">{{ n.message }}</a>{% else %}{{ n.message }}{% endif %}
-        <small>{{ n.date|date:"d/m/Y à H:i" }}</small>
+        <a href="{% url 'notifications:ouvrir' n.pk %}">{{ n.message }}</a>
+        <small>{{ n.date|date:"d/m/Y à H:i" }}{% if not n.lue %} · non lue{% endif %}</small>
       </li>
     {% empty %}
       <li class="aide">Aucune notification.</li>

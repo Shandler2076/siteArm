@@ -83,11 +83,12 @@ def test_page_et_pdf_statistiques(monde, client):
     base = f"/bureau/circuit-{monde['Ekpe A'].pk}/statistiques/"
     r = client.get(base + "?envoye=1&statut=actif&grade_min=5")
     html = r.content.decode()
-    assert r.status_code == 200 and "Par grade" in html and "Grade × sexe" in html
+    # Décision du 13/11/2026 : plus de tableaux croisés, des répartitions dépliables.
+    assert r.status_code == 200 and "Par grade" in html and "Grade × sexe" not in html
     assert "grade_min=5" in html  # les liens des chiffres gardent les filtres de page
     r = client.get(base + "pdf/?envoye=1&statut=actif")
     texte = "".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
-    assert "Par grade" in texte and "Grade × paroisse" in texte and "Capitaine" in texte
+    assert "Par grade" in texte and "Capitaine" in texte
 
 
 def test_dimension_fixee_par_la_page_n_est_pas_redetaillee(monde):

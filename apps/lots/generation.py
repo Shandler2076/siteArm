@@ -6,7 +6,12 @@ from django.core.exceptions import ValidationError
 from django.db import transaction
 from django.utils import timezone
 
-from apps.lots.controle import controler_lot, donnees_pour_membre, grade_de_la_ligne
+from apps.lots.controle import (
+    controler_lot,
+    donnees_pour_membre,
+    grade_de_la_ligne,
+    paroisse_actuelle_de,
+)
 from apps.lots.models import A_CREER, EtatLot, Lot
 from apps.membres.models import Membre
 from apps.membres.services import enregistrer_membre
@@ -51,6 +56,7 @@ def valider_lot(lot: Lot, par) -> list[Membre]:
                     membre = enregistrer_membre(
                         donnees=champs,
                         paroisse_integration=paroisse,
+                        paroisse_actuelle=paroisse_actuelle_de(ligne.donnees),
                         annee_integration=annee,
                         par=par,
                         notifier=False,
@@ -83,10 +89,14 @@ def _notifier_bureaux(membres: list[Membre], numero_lot: int) -> None:
 
     compte = Counter()
     for m in membres:
-        p = m.paroisse_integration
+        p = m.affectation_actuelle.paroisse  # paroisse actuelle (colonne facultative)
         compte[Unite("paroisse", p)] += 1
         compte[Unite("circuit", p.circuit)] += 1
         compte[Unite("region", p.circuit.region)] += 1
     for unite, n in compte.items():
         texte = "1 nouveau membre" if n == 1 else f"{n} nouveaux membres"
-        notifier_unite(unite, f"{texte} dans votre périmètre (lot n° {numero_lot}).")
+        notifier_unite(
+            unite,
+            f"{texte} dans votre périmètre (lot n° {numero_lot}).",
+            f"/bureau/{unite.cle}/membres/",
+        )

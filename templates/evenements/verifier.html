@@ -16,7 +16,8 @@
     {% if etat == "valable" or etat == "pas_encore" %}
       <p class="matricule">{{ c.membre.matricule }}</p>
       <p><strong>{{ c.evenement.nom }}</strong><br>{{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %} — {{ c.evenement.lieu }}{% endif %}</p>
-      <p>Est autorisé(e) à travailler{% if c.session %} — <strong>{{ c.session.nom }}</strong>{% endif %}.</p>
+      <p>{{ c.texte_formule }}.</p>
+      <p><strong>{{ c.texte_role }}</strong></p>
     {% else %}
       <p>{{ c.evenement.nom }}</p>
     {% endif %}

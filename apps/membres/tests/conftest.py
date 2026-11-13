@@ -71,4 +71,9 @@ def client_membre(client, membre_enregistre):
     return client
 
 
-from apps.bureaux.tests.conftest import territoire  # noqa: E402,F401
+from apps.bureaux.tests.conftest import (  # noqa: E402,F401
+    compte_technique,
+    donner_mandat,
+    nouveau_membre,
+    territoire,
+)

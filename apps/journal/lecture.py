@@ -95,6 +95,11 @@ def lire(entrees) -> list[Ligne]:
         d, a = e.details, e.action
         m = qui(d.get("membre"))
         if a == j.ENREGISTREMENT:
+            if d.get("paroisse_actuelle"):
+                return (
+                    f"A enregistré le membre {m}, actuellement à la paroisse "
+                    f"{d['paroisse_actuelle']}."
+                )
             return f"A enregistré le membre {m}."
         if a == j.GRADE_PROMOTION:
             mode = modes.get(d.get("mode"), d.get("mode", "")).lower()
@@ -105,6 +110,14 @@ def lire(entrees) -> list[Ligne]:
             return f"A attribué le grade {d.get('grade')} à {m}."
         if a == j.CONSULTATION_FICHE:
             return f"A consulté la fiche de {m}."
+        if a == j.VERIFICATION_MEMBRE:
+            from apps.membres.verification import MOTIFS
+
+            motif = dict(MOTIFS).get(d.get("motif"), d.get("motif", ""))
+            precision = f" : {d['precision']}" if d.get("precision") else ""
+            if not d.get("membre"):
+                return f"A cherché à vérifier le matricule « {d.get('saisi', '')} » (introuvable)."
+            return f"A vérifié l'identité de {m} (motif : {motif}{precision})."
         if a == j.PHOTO_DECISION:
             if d.get("decision") == "accepter":
                 return f"A accepté la photo d'identité de {m}."
@@ -174,6 +187,32 @@ def lire(entrees) -> list[Ligne]:
             mois = [datetime.date.fromisoformat(x) for x in d.get("mois", [])]
             quand = periode_mois(mois)
             return f"A enregistré un versement de {d.get('montant')} F pour {m} ({quand})."
+        if a == j.VERSEMENT_MOBILE_MONEY:
+            return (
+                f"A payé par mobile money {d.get('montant')} F de cotisation pour {m} "
+                f"(reçu {d.get('recu')})."
+            )
+        if a == j.COTISATION_SPECIALE:
+            return f"A créé la cotisation spéciale « {d.get('libelle')} »."
+        if a == j.CONTRIBUTION:
+            pour = d.get("unite_libelle") or m
+            return (
+                f"A payé {d.get('montant')} F à la cotisation spéciale « {d.get('libelle')} » "
+                f"pour {pour} (quittance {d.get('quittance')})."
+            )
+        if a == j.PAIEMENT_ECHOUE:
+            return f"Paiement mobile money {d.get('reference')} non abouti."
+        if a == j.NUMERO_TRESORIER:
+            return f"A enregistré le numéro mobile money de {d.get('unite_libelle')}."
+        if a == j.REVERSEMENTS_PREPARES:
+            return f"A préparé l'état des reversements de {d.get('mois')} ({d.get('total')} F)."
+        if a == j.REVERSEMENTS_VALIDES:
+            return f"A validé l'état des reversements de {d.get('mois')} ({d.get('total')} F)."
+        if a == j.REVERSEMENT_ENVOYE:
+            return (
+                f"A envoyé {d.get('montant')} F à {d.get('unite_libelle')} "
+                f"(reversement de {d.get('mois')}, référence {d.get('reference')})."
+            )
         if a == j.VERSEMENT_VALIDE:
             return f"A validé le versement de {d.get('montant')} F de {m} (reçu {d.get('recu')})."
         if a == j.VERSEMENT_REFUSE:
@@ -219,9 +258,9 @@ def lire(entrees) -> list[Ligne]:
         if a == j.EVENEMENT_ANNULE:
             return f"A annulé l'événement « {d.get('nom')} » (motif : {d.get('motif', '')})."
         if a == j.CONVOCATION and "ancienne_session" in d:
-            avant = d.get("ancienne_session") or "sans session"
-            apres = d.get("session") or "sans session"
-            return f"A changé la session de {m} à « {d.get('nom')} » : {avant} → {apres}."
+            avant = d.get("ancienne_session") or "sans section"
+            apres = d.get("session") or "sans section"
+            return f"A changé la section de {m} à « {d.get('nom')} » : {avant} → {apres}."
         if a == j.CONVOCATION:
             session = f", {d['session']}" if d.get("session") else ""
             return f"A convoqué {m} à « {d.get('nom')} »{session}."

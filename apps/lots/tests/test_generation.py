@@ -1,4 +1,5 @@
 import datetime
+import io
 
 import pytest
 
@@ -132,3 +133,37 @@ def test_enregistrement_individuel_notifie_toujours(
     with django_capture_on_commit_callbacks(execute=True):
         nouveau_membre(territoire["P1"], "Seul")
     assert Notification.objects.filter(destinataire=secretaire_p1.compte).count() == 1
+
+
+def test_lot_colonne_paroisse_actuelle(territoire, compte_technique, classeur):
+    """Colonne facultative « Paroisse actuelle » (paroisse de la même région)."""
+    ligne_actuelle = _l("Agbo") + ["", "", "P3"]  # Grade, Date du grade, Paroisse actuelle
+    ligne_inconnue = _l("Bio") + ["", "", "Inconnue"]
+    lot = creer_lot(
+        region=territoire["HOULENOU"],
+        par=compte_technique,
+        fichier=classeur([ligne_actuelle, _l("Chabi")]),
+    )
+    valider_lot(lot, par=compte_technique)
+    agbo = Membre.objects.get(nom__iexact="Agbo")
+    assert agbo.paroisse_integration == territoire["P1"]
+    assert agbo.affectation_actuelle.paroisse == territoire["P3"]
+    assert Membre.objects.get(nom__iexact="Chabi").affectations.count() == 1
+    lot2 = creer_lot(
+        region=territoire["HOULENOU"],
+        par=compte_technique,
+        fichier=classeur([ligne_inconnue], nom="lot2.xlsx"),
+    )
+    ligne = lot2.lignes.get()
+    assert ligne.etat == EtatLigne.ERREUR
+    assert any("Paroisse actuelle" in e for e in ligne.erreurs)
+
+
+def test_modele_excel_a_la_colonne_paroisse_actuelle(territoire):
+    from openpyxl import load_workbook
+
+    from apps.lots.modele_excel import modele_pour_region
+
+    wb = load_workbook(io.BytesIO(modele_pour_region(territoire["HOULENOU"])))
+    entetes = [c.value for c in wb["Membres"][1]]
+    assert entetes[-1] == "Paroisse actuelle"

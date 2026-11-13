@@ -283,19 +283,30 @@ mandat et une mention « **droit de gérer le site** » :
 ### 9.1 Enregistrement individuel (BNC)
 
 1. Le BNC saisit la fiche : identité, contact, année, paroisse et région d'intégration, catégorie.
+   Si le membre n'est plus dans sa paroisse d'intégration, le BNC indique sa **paroisse actuelle**
+   (champ facultatif) : le membre y est affecté **à partir du jour de son inscription sur le site**
+   (on ne retrace pas les étapes antérieures ; le suivi des mutations commence ensuite). Le matricule
+   garde l'année et la région d'intégration (décision du 13 novembre 2026).
 2. Le site **signale les doublons possibles** (même nom et même date de naissance, ou même NPI) ; le
    BNC décide de poursuivre ou non.
 3. Le site attribue le **matricule**, crée le **compte** avec un mot de passe provisoire et ouvre
-   l'affectation dans la paroisse d'intégration.
+   l'affectation dans la paroisse d'intégration (puis, le cas échéant, dans la paroisse actuelle).
 4. Il produit la **fiche d'identification PDF** (nom, matricule, paroisse, circuit, région,
-   identifiants de connexion), à imprimer ou à transmettre par WhatsApp.
-5. Les bureaux de la paroisse, du circuit et de la région sont **notifiés**.
+   identifiants de connexion), à imprimer ou à transmettre par WhatsApp. Tant que le membre ne s'est
+   jamais connecté, sa fiche affiche en haut un encadré **« Identifiants à remettre »** avec le bouton
+   d'impression.
+5. Les bureaux de la paroisse **actuelle**, de son circuit et de sa région sont **notifiés**. Le membre
+   reçoit un message de **bienvenue** (sur le site et par e-mail s'il en a un) : son identifiant est son
+   matricule, sa paroisse lui remettra son mot de passe provisoire. **Le mot de passe n'est jamais
+   envoyé par e-mail.**
 6. À sa première connexion, le membre doit **choisir son propre mot de passe**.
 
 ### 9.2 Enregistrement par lots (fichier Excel)
 
 1. Le site fournit un **modèle Excel officiel** par région : colonnes fixes, listes déroulantes
-   (sexe, situation matrimoniale, paroisses de la région, catégorie) et consignes de saisie.
+   (sexe, situation matrimoniale, paroisses de la région, catégorie) et consignes de saisie. Une
+   colonne facultative **« Paroisse actuelle »** (paroisse de la même région) a le même effet que dans
+   l'enregistrement individuel ; pour une autre région, on fait ensuite une mutation.
 2. Chaque région remplit le modèle et l'envoie au Secrétaire national.
 3. Le Secrétaire national **dépose le fichier** sur le site : un **lot** est créé.
 4. **Écran de contrôle.** Le site lit le fichier **sans rien créer** et affiche chaque ligne telle
@@ -558,6 +569,14 @@ Le BNC le consulte depuis son espace, avec des filtres par action, auteur, texte
   ses logos (Armée du Salut ; Congrégation).
 - Fiches et listes PDF avec **en-tête officiel**, date et heure de génération.
 - Le site pourra être ajouté à l'écran d'accueil du téléphone comme une application.
+- **Menu** organisé par thèmes, chaque fonction une seule fois (décision du 13 novembre 2026) : Mon
+  espace ; Gestion des membres (BN) ou Mon bureau ; Listes et statistiques ; Grades ; Cotisations
+  mensuelles ; Événements ; Bureaux et droits ; Contrôle. Chacun ne voit que les groupes de ses droits.
+  Les groupes sont **repliés** et s'ouvrent d'un clic ; celui de la page ouverte est déplié. La
+  rubrique ouverte est **mise en évidence** (fond bleu marine, barre dorée), y compris sur ses
+  sous-pages, et le menu se place dessus à chaque page.
+- Fiche d'un membre en **rubriques** (onglets) : Profil, Cotisation mensuelle (grille par année, avec
+  un bouton par année), Participation aux événements (BN seulement).
 
 ---
 
@@ -891,6 +910,91 @@ Seulement pour les événements où l'option « Générer une autorisation » es
    paroisse** (et lui seul, pas le circuit ni la région) peut aussi l'imprimer pour l'aider : il ne
    voit alors que les autorisations valables de ses membres, sans les autres informations de
    l'événement.
+
+## 17 bis. Évolutions décidées le 13 novembre 2026
+
+Décisions du mainteneur après la visite du site d'essai. Le détail est dans
+`docs/superpowers/plans/2026-11-13-corrections-en-attente.md`, et les guides d'utilisation sont dans
+`docs/guides/`.
+
+### 17 bis.1 Événements
+- Date (jj/mm/aaaa) et heure dans deux champs séparés. Une date passée est signalée (« Revérifiez
+  votre date ») ; on la confirme pour un événement déjà tenu.
+- **Sections** (et non « sessions ») : option à part, à activer seulement si nécessaire. Les noms
+  s'écrivent à la main (ex. Section Mer, Section Culte, Section Fruits).
+- « Générer une autorisation pour les convoqués » : un gros bouton-option. La validité s'affiche
+  dessous.
+- « Invité(e) en tant que » :
+  - **travailleur** ou **superviseur** d'une section ;
+  - ou **bureau** (sans section ; le bureau représenté est repris des mandats).
+- Formule « autorisé(e) à travailler » ou « à participer » : déduite du rôle, modifiable.
+- Convocation :
+  - recherche par matricule ou par nom, et un clic ajoute le membre ;
+  - Grade et Statut en listes déroulantes ;
+  - Région → Circuit → Paroisse en cascade ;
+  - les autres filtres sous « Plus de filtres ».
+
+### 17 bis.2 Notifications
+- Un clic sur une notification la marque comme lue et ouvre la page concernée.
+- Un lien vers un membre s'ouvre selon les droits de la personne qui clique : sa propre fiche, la
+  fiche BN ou la fiche dans l'espace du bureau.
+
+### 17 bis.3 Statistiques à paramètres
+- On choisit des paramètres (statut, sexe, catégorie, grade, région / circuit / paroisse, âge de
+  début et de fin…) et le site les croise.
+- Les répartitions sont des sous-cases dépliables. Il n'y a plus de tableaux croisés.
+- Colonnes de la liste ouverte :
+  - toujours le matricule, le nom, les prénoms, le sexe et le téléphone ;
+  - puis une colonne par paramètre choisi.
+- Une recherche est proposée au-dessus des longues listes.
+
+### 17 bis.4 Vérifier un membre hors de son périmètre
+- **Qui** : le Chef et le Secrétaire des bureaux de paroisse, de circuit et de région.
+- **Comment** : par le matricule exact, jamais par le nom. Un motif est obligatoire et la
+  vérification est inscrite au journal.
+- **Ce qu'on voit**, une carte réduite :
+  - photo, grade, nom, matricule ;
+  - statut et catégorie ;
+  - paroisse, circuit et région ;
+  - contact du Secrétaire paroissial.
+- Jamais le téléphone, l'adresse, le NPI ni la photo du CIP.
+
+### 17 bis.5 Trésorerie, mobile money, cotisations spéciales
+- **Un seul numéro** mobile money, au nom du BN.
+- **Le paiement part toujours du site**, par une plateforme de paiement. Le site d'essai utilise une
+  plateforme **simulée** ; la vraie plateforme sera choisie plus tard.
+- **Frais à la charge du BN.**
+- **Cotisations mensuelles, chemin unique** :
+  - le membre paie lui-même, ou remet ses espèces au **Trésorier de sa paroisse**, qui paie depuis
+    le site pour les membres et les mois cochés ;
+  - le paiement est **validé d'office** : personne ne valide ;
+  - aucune espèce ne circule entre la paroisse et le circuit ;
+  - la saisie en espèces avec validation par le circuit reste en service pour les essais, jusqu'à la
+    mise en place du mobile money.
+- **Payer pour un autre membre** :
+  - tout membre peut le faire, par le matricule ;
+  - avant de payer, il voit une confirmation réduite : grade, prénom, initiale du nom, paroisse ;
+  - le membre aidé reçoit le reçu, et sa paroisse est avertie.
+- **Cotisations spéciales**, créées par le BN :
+  - montant fixe, minimum ou libre ;
+  - pour tous les membres, certains membres (critères) ou aucun membre ;
+  - et/ou pour les bureaux de paroisse, de circuit ou de région ;
+  - payées à 100 % au BN, en une ou plusieurs fois, avec une quittance numérotée ;
+  - au nom d'un bureau, le paiement est fait par son Trésorier, sans rien taper.
+- **Espace de trésorerie** de chaque bureau :
+  - le Trésorier agit (le Chef assure l'intérim si le poste est vacant) ;
+  - le Chef et le Secrétaire consultent en lecture seule ;
+  - le numéro mobile money du bureau est celui du Trésorier, enregistré par le BN seulement.
+- **Reversements mensuels** des parts (paroisse 30 %, circuit 20 %, région 20 %) :
+  1. le Trésorier national prépare l'état ;
+  2. le Président (ou le Secrétaire national) le valide ;
+  3. le Trésorier national envoie et enregistre chaque envoi.
+
+### 17 bis.6 Enregistrement et navigation (rappel, réalisés le 13/11/2026)
+- **Paroisse actuelle** à l'inscription.
+- Encadré « Identifiants à remettre ».
+- Message de bienvenue sans mot de passe.
+- Menu par thèmes, repliable, avec la rubrique active mise en évidence.
 
 ## 18. Module 4 — Communication
 

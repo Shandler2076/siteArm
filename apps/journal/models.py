@@ -15,6 +15,7 @@ SIGNALEMENT_DECIDE = "signalement_decide"
 CONNEXION = "connexion"
 CONNEXION_ECHOUEE = "connexion_echouee"
 CONSULTATION_FICHE = "consultation_fiche"
+VERIFICATION_MEMBRE = "verification_membre"
 REINITIALISATION = "reinitialisation"
 PHOTO_DECISION = "photo_decision"
 ENREGISTREMENT = "enregistrement"
@@ -41,8 +42,24 @@ EVENEMENT_ANNULE = "evenement_annule"
 CONVOCATION = "convocation"
 CONVOCATION_RETIREE = "convocation_retiree"
 PRESENCE = "presence"
+VERSEMENT_MOBILE_MONEY = "versement_mobile_money"
+COTISATION_SPECIALE = "cotisation_speciale"
+CONTRIBUTION = "contribution"
+PAIEMENT_ECHOUE = "paiement_echoue"
+NUMERO_TRESORIER = "numero_tresorier"
+REVERSEMENTS_PREPARES = "reversements_prepares"
+REVERSEMENTS_VALIDES = "reversements_valides"
+REVERSEMENT_ENVOYE = "reversement_envoye"
 
 LIBELLES = {
+    VERSEMENT_MOBILE_MONEY: "Cotisation payée par mobile money",
+    COTISATION_SPECIALE: "Cotisation spéciale créée",
+    CONTRIBUTION: "Cotisation spéciale payée",
+    PAIEMENT_ECHOUE: "Paiement mobile money échoué",
+    NUMERO_TRESORIER: "Numéro mobile money d'un bureau",
+    REVERSEMENTS_PREPARES: "Reversements préparés",
+    REVERSEMENTS_VALIDES: "Reversements validés",
+    REVERSEMENT_ENVOYE: "Reversement envoyé",
     LISTE_PDF: "Liste téléchargée (PDF)",
     LISTE_EXCEL: "Liste téléchargée (Excel)",
     STATISTIQUES_PDF: "Statistiques téléchargées (PDF)",
@@ -55,6 +72,7 @@ LIBELLES = {
     CONNEXION: "Connexion",
     CONNEXION_ECHOUEE: "Connexion échouée",
     CONSULTATION_FICHE: "Consultation d'une fiche",
+    VERIFICATION_MEMBRE: "Vérification d'un membre (hors périmètre)",
     REINITIALISATION: "Mot de passe réinitialisé",
     PHOTO_DECISION: "Décision sur une photo",
     ENREGISTREMENT: "Membre enregistré",

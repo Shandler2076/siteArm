@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Payer pour des membres — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'tresorerie:espace' unite.cle %}">← Trésorerie</a></p>
+  <h1>Payer pour des membres</h1>
+  <p class="aide">Les membres vous ont remis leurs espèces : indiquez pour chacun le nombre de mois payés, puis payez le tout par mobile money au numéro du Bureau national. Les plus anciens mois dus de chacun sont payés ; chacun reçoit son reçu.</p>
+  <form method="post">{% csrf_token %}
+    <input type="search" class="recherche-liste" data-filtre="liste-membres" placeholder="Rechercher un membre…">
+    <div id="liste-membres">
+      {% for m in membres %}<div class="ligne-paiement"><label for="n{{ m.pk }}">{{ m.nom_complet }} <small class="aide">{{ m.matricule }}</small></label>
+        <input type="number" id="n{{ m.pk }}" name="n{{ m.pk }}" min="0" max="12" value="0" aria-label="Nombre de mois"></div>
+      {% empty %}<p class="aide">Aucun membre.</p>{% endfor %}
+    </div>
+    <button type="submit" class="bouton">Payer par mobile money</button>
+  </form>
+</section>
+{% endblock %}

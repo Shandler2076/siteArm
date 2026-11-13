@@ -79,12 +79,13 @@ Chaque dossier de `apps/` est une partie du site, avec ses propres tests (`tests
 |---|---|---|
 | `organisation` | Régions, circuits, paroisses ; fermeture et réouverture | Region, Circuit, Paroisse |
 | `comptes` | Comptes de connexion, page d'accueil, mot de passe, page « Protection de vos données » | Compte |
-| `membres` | Fiche, matricule, affectations, photos, fiche PDF, correction exceptionnelle | Membre, CompteurMatricule, Affectation, PhotoIdentite |
-| `bureaux` | Fonctions, mandats, installation des bureaux, **gardien des périmètres** (`perimetre.py`) | Fonction, Mandat |
+| `membres` | Fiche (en rubriques), matricule, affectations (dont paroisse actuelle à l'inscription), photos, fiche PDF, correction exceptionnelle | Membre, CompteurMatricule, Affectation, PhotoIdentite |
+| `bureaux` | Fonctions, mandats, installation des bureaux, **gardien des périmètres** (`perimetre.py`), **menu** (`menu.py`) | Fonction, Mandat |
 | `lots` | Enregistrement par fichier Excel | Lot, LigneLot |
 | `listes` | Listes filtrées, statistiques, exports PDF et Excel, tranches d'âge | ReglageStatistiques |
 | `mouvements` | Mutations, signalements, statuts, catégories, sanctions | HistoriqueMembre, Mutation, AvisMutation, Signalement, Sanction |
-| `notifications` | Notifications internes et e-mails | Notification |
+| `notifications` | Notifications internes et e-mails, liens vers la bonne page | Notification |
+| `tresorerie` | Mobile money (simulé), cotisations spéciales, quittances, reversements mensuels | NumeroMobileMoney, CotisationSpeciale, Paiement, Contribution, Reversement |
 | `journal` | Journal des opérations sensibles, non modifiable | EntreeJournal |
 | `securite` | Double vérification (codes à 6 chiffres) | DoubleVerification |
 
@@ -175,6 +176,9 @@ et la phrase de passe des sauvegardes.
 | Modification des coordonnées d'un membre par le bureau de sa paroisse ; alerte si le site est inaccessible | Mainteneur | Prévu |
 | Vraie mise en ligne (base neuve, `DJANGO_SITE_DEMO=False`, domaine `.bj`, e-mails) | Mainteneur | Après l'autorisation de l'APDP |
 | **Événements nationaux** (convocations notifiées, sessions, autorisation avec QR code, pointage, historique) | Mainteneur | **Réalisé le 12 novembre** ; à essayer sur le site d'essai |
+| **Corrections du 13 novembre** : menu repliable, paroisse actuelle, identifiants, événements (sections, rôles, formule, recherche), notifications reliées, vérifier un membre, statistiques à paramètres | Mainteneur | **Réalisé le 13 novembre** ; à essayer sur le site d'essai |
+| **Trésorerie** : mobile money (plateforme simulée), payer pour un autre, cotisations spéciales, quittances, espace du Trésorier, reversements mensuels | Mainteneur | **Réalisé le 13 novembre** (simulation) ; choix de la plateforme réelle et ouverture du compte : BNC |
+| Guides d'utilisation (`docs/guides/`, 11 guides) | Mainteneur | **Rédigés le 13 novembre** ; captures d'écran à ajouter après essai |
 | Modules 4 et 5 : communication, médias | — | À concevoir |
 
 ## 8. Comment une modification est faite

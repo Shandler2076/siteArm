@@ -1,3 +1,4 @@
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -12,7 +13,9 @@ from apps.bureaux.perimetre import (
     membres_visibles,
     unite_depuis_cle,
     unites_gerees,
+    unites_verification,
 )
+from apps.membres.verification import MOTIFS, carte_de
 
 
 @login_required
@@ -90,3 +93,47 @@ def reinitialiser(request, cle, matricule):
     if unite.niveau != "paroisse" and not est_bn(request.user):
         raise PermissionDenied
     return _reponse_pdf(reinitialiser_mot_de_passe(cible=membre, par=request.user), matricule)
+
+
+class VerifierForm(forms.Form):
+    matricule = forms.CharField(
+        label="Matricule exact", max_length=20, help_text="Ex. 2015-01AS-0157 (pas de nom)."
+    )
+    motif = forms.ChoiceField(
+        label="Motif de la vérification", choices=[("", "— Choisir —"), *MOTIFS]
+    )
+    precision = forms.CharField(label="Précision du motif", max_length=200, required=False)
+
+    def clean(self):
+        d = super().clean()
+        if d.get("motif") == "autre" and not d.get("precision", "").strip():
+            self.add_error("precision", "Précisez le motif.")
+        return d
+
+
+@login_required
+def verifier(request):
+    """Carte d'identité réduite d'un membre, par matricule exact et avec motif (journalisé)."""
+    unites = unites_verification(request.user)
+    if not unites:
+        raise PermissionDenied
+    form = VerifierForm(request.POST or None)
+    carte, introuvable = None, False
+    if request.method == "POST" and form.is_valid():
+        from apps.journal.models import VERIFICATION_MEMBRE
+        from apps.journal.services import journaliser
+
+        d = form.cleaned_data
+        carte = carte_de(d["matricule"])
+        details = {"motif": d["motif"], "precision": d.get("precision", "").strip()}
+        if carte is None:
+            introuvable = True
+            details["saisi"] = d["matricule"][:20]
+        else:
+            details["membre"] = carte.matricule
+        journaliser(request.user, VERIFICATION_MEMBRE, unite=unites[0].cle, **details)
+    return render(
+        request,
+        "bureaux/verifier.html",
+        {"form": form, "carte": carte, "introuvable": introuvable},
+    )

@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "apps.grades",
     "apps.cotisations",
     "apps.evenements",
+    "apps.tresorerie",
     "axes",
 ]
 
@@ -209,6 +210,9 @@ DOUBLE_VERIFICATION_BN = os.environ.get("DJANGO_DOUBLE_VERIFICATION_BN", "True")
 
 # Site d'essai : bandeau « données fictives » et commande peupler_demo autorisée.
 SITE_DEMO = _bool("DJANGO_SITE_DEMO", False)
+# Paiement mobile money SIMULÉ (aucun argent réel) : seulement sur le site d'essai ou en
+# développement. Sur le vrai site, il reste fermé tant qu'aucune plateforme réelle n'est branchée.
+PAIEMENT_SIMULE = _bool("DJANGO_PAIEMENT_SIMULE", SITE_DEMO or DEBUG)
 
 # Contact pour les questions sur les données personnelles (page « Protection de vos données »).
 CONTACT_DONNEES = os.environ.get("DJANGO_CONTACT_DONNEES", "")

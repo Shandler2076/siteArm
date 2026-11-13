@@ -41,7 +41,7 @@ def test_nb_par_etat(lot):
 
 
 def test_colonnes_ordre_et_obligatoires():
-    assert len(COLONNES) == 20
+    assert len(COLONNES) == 21
     assert [c.entete for c in COLONNES if c.obligatoire] == [
         "Nom*",
         "Prénoms*",
@@ -51,10 +51,11 @@ def test_colonnes_ordre_et_obligatoires():
         "Paroisse d'intégration*",
     ]
     assert COLONNES[0].champ == "nom" and COLONNES[17].champ == "categorie"
-    # Colonnes du grade ajoutées à la fin : les anciens fichiers restent acceptés.
+    # Colonnes ajoutées à la fin (grade, paroisse actuelle) : les anciens fichiers restent acceptés.
     assert [(c.champ, c.entete_facultative) for c in COLONNES[18:]] == [
         ("grade", True),
         ("date_grade", True),
+        ("paroisse_actuelle", True),
     ]
 
 

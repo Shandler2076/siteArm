@@ -1,4 +1,7 @@
-"""Événements nationaux, sessions, convocations et présences (cahier des charges § 17).
+"""Événements nationaux, sections, convocations et présences (cahier des charges § 17).
+
+Le modèle `Session` porte les **sections** d'un événement (décision du 13/11/2026 : le mot
+affiché est « section »).
 
 Seul `apps/evenements/services.py` écrit dans ces tables. Rien ne s'efface.
 """
@@ -34,6 +37,7 @@ class Evenement(models.Model):
     fin = models.DateTimeField("fin", null=True, blank=True)
     lieu = models.CharField("lieu", max_length=200, blank=True)
     description = models.TextField("description", blank=True)
+    avec_sections = models.BooleanField("organiser en sections", default=False)
     avec_autorisation = models.BooleanField("générer une autorisation", default=False)
     validite_debut = models.DateTimeField("autorisation valable à partir du", null=True, blank=True)
     validite_heures = models.PositiveSmallIntegerField(
@@ -70,11 +74,14 @@ class Evenement(models.Model):
 
 
 class Session(models.Model):
+    """Section d'un événement (ex. « Section Mer », « Section Culte »), créée à la main."""
+
     evenement = models.ForeignKey(Evenement, on_delete=models.PROTECT, related_name="sessions")
     nom = models.CharField("nom", max_length=120)
     ordre = models.PositiveSmallIntegerField("ordre", default=0)
 
     class Meta:
+        verbose_name = "section"
         ordering = ["ordre", "pk"]
         constraints = [models.UniqueConstraint(fields=["evenement", "nom"], name="session_unique")]
 
@@ -89,6 +96,23 @@ class Presence(models.TextChoices):
     EXCUSE = "excuse", "Excusé"
 
 
+class Role(models.TextChoices):
+    """« Invité(e) en tant que » (décision du 13/11/2026)."""
+
+    TRAVAILLEUR = "travailleur", "Travailleur"
+    SUPERVISEUR = "superviseur", "Superviseur"
+    BUREAU = "bureau", "Bureau"
+
+
+class Formule(models.TextChoices):
+    TRAVAILLER = "travailler", "est autorisé(e) à travailler"
+    PARTICIPER = "participer", "est autorisé(e) à participer"
+
+
+def formule_par_defaut(role: str) -> str:
+    return Formule.TRAVAILLER if role == Role.TRAVAILLEUR else Formule.PARTICIPER
+
+
 def nouveau_jeton() -> str:
     return secrets.token_urlsafe(24)  # 32 caractères, impossible à deviner
 
@@ -99,8 +123,20 @@ class Convocation(models.Model):
         "membres.Membre", on_delete=models.PROTECT, related_name="convocations"
     )
     session = models.ForeignKey(
-        Session, on_delete=models.PROTECT, null=True, blank=True, related_name="convocations"
+        Session,
+        on_delete=models.PROTECT,
+        null=True,
+        blank=True,
+        related_name="convocations",
+        verbose_name="section",
     )
+    role = models.CharField(
+        "invité(e) en tant que", max_length=12, choices=Role.choices, default=Role.TRAVAILLEUR
+    )
+    formule = models.CharField(
+        "formule de l'autorisation", max_length=12, choices=Formule.choices, blank=True
+    )
+    bureau_libelle = models.CharField("bureau représenté", max_length=200, blank=True)
     active = models.BooleanField("active", default=True)
     jeton = models.CharField("jeton de vérification", max_length=64, unique=True)
     presence = models.CharField(
@@ -132,3 +168,23 @@ class Convocation(models.Model):
 
     def delete(self, *args, **kwargs):
         raise PermissionDenied("Une convocation ne se supprime pas : elle se retire.")
+
+    @property
+    def formule_effective(self) -> str:
+        return self.formule or formule_par_defaut(self.role)
+
+    @property
+    def texte_formule(self) -> str:
+        """« Est autorisé(e) à travailler » ou « Est autorisé(e) à participer »."""
+        return (
+            Formule(self.formule_effective).label[0].upper()
+            + Formule(self.formule_effective).label[1:]
+        )
+
+    @property
+    def texte_role(self) -> str:
+        """« Invité(e) en tant que superviseur — Section Mer », « … bureau — Région WEME »."""
+        texte = f"Invité(e) en tant que {self.get_role_display().lower()}"
+        if self.role == Role.BUREAU:
+            return f"{texte} — {self.bureau_libelle}" if self.bureau_libelle else texte
+        return f"{texte} — {self.session.nom}" if self.session_id else texte

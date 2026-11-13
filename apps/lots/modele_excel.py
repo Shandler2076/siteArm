@@ -29,7 +29,10 @@ CONSIGNES = [
     "colonnes sont au format Texte pour garder le 0 initial (ex. 0197000000).",
     "9. Grade : laissé vide = Camarade (nouveau membre). Pour un membre déjà gradé, choisissez son "
     "grade dans la liste et indiquez la date à laquelle il l'a reçu (Date du grade).",
-    "10. Envoyez le fichier rempli au Secrétaire national, qui le déposera sur le site.",
+    "10. Paroisse actuelle : seulement si le membre n'est plus dans sa paroisse d'intégration "
+    "(paroisse de votre région). Il y sera affecté à la date de son inscription sur le site ; "
+    "pour une paroisse d'une autre région, faites ensuite une mutation.",
+    "11. Envoyez le fichier rempli au Secrétaire national, qui le déposera sur le site.",
 ]
 
 
@@ -83,7 +86,9 @@ def modele_pour_region(region: Region) -> bytes:
         .order_by("nom")
         .values_list("nom", flat=True)
     )
-    _validation(ws, "paroisse_integration", _liste(listes, 1, paroisses))
+    formule_paroisses = _liste(listes, 1, paroisses)
+    _validation(ws, "paroisse_integration", formule_paroisses)
+    _validation(ws, "paroisse_actuelle", formule_paroisses)
     _validation(ws, "categorie", _liste(listes, 2, [lib for _, lib in Categorie.choices]))
     situations = [lib for _, lib in SituationMatrimoniale.choices]
     _validation(ws, "situation_matrimoniale", _liste(listes, 3, situations))

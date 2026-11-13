@@ -6,6 +6,7 @@ app_name = "bureaux"
 
 urlpatterns = [
     path("", views.accueil, name="accueil"),
+    path("verifier/", views.verifier, name="verifier"),
     path("bn/installer/", views_bn.installer, name="bn_installer"),
     path("bn/fonctions/", views_bn.fonctions, name="bn_fonctions"),
     path("bn/echeances/", views_bn.echeances, name="bn_echeances"),

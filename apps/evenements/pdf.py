@@ -1,4 +1,4 @@
-"""Autorisation (carte de petit format) : photo, nom, événement, session, QR de vérification."""
+"""Autorisation (carte de petit format) : photo, nom, événement, rôle, section, QR code."""
 
 import io
 
@@ -114,19 +114,17 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
         ),
     )
     # Mention
-    session = f" — {convocation.session.nom}" if convocation.session else ""
+    role = convocation.texte_role.removeprefix("Invité(e) en tant que ")
     c.setFillColor(MARINE)
     c.roundRect(x + 4 * mm, y + 6 * mm, LARGEUR - 8 * mm, 14 * mm, 2 * mm, stroke=0, fill=1)
     c.setFillColorRGB(1, 1, 1)
     c.setFont("Sans-Gras", 8.5)
-    c.drawCentredString(x + LARGEUR / 2, y + 14.5 * mm, "Est autorisé(e) à travailler")
+    c.drawCentredString(x + LARGEUR / 2, y + 14.5 * mm, convocation.texte_formule)
     c.setFont("Sans", 8)
     c.drawCentredString(
         x + LARGEUR / 2,
         y + 9.5 * mm,
-        _ajuste(
-            session.removeprefix(" — ") or "Toutes sessions", "Sans", 8, largeur_texte - 4 * mm
-        ),
+        _ajuste(f"En tant que {role}", "Sans", 8, largeur_texte - 4 * mm),
     )
 
 

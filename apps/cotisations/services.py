@@ -13,6 +13,7 @@ from django.utils import timezone
 
 from apps.cotisations.models import (
     EtatVersement,
+    ModeVersement,
     MoisCotise,
     NiveauPart,
     ParametresCotisations,
@@ -68,11 +69,11 @@ def _cle_paroisse(paroisse) -> str:
     return f"paroisse-{paroisse.pk}"
 
 
-def _notifier_unite(unite, message):
+def _notifier_unite(unite, message, lien=""):
     from apps.bureaux.perimetre import titulaires_cotisations
     from apps.notifications.services import notifier
 
-    transaction.on_commit(lambda: notifier(titulaires_cotisations(unite), message))
+    transaction.on_commit(lambda: notifier(titulaires_cotisations(unite), message, lien))
 
 
 def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.date, int]]:
@@ -110,12 +111,7 @@ def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.da
                 f"({sum(x for _m, x in couverts)} F)."
             )
         return couverts
-    candidats = [m for m in s.dus if m not in occupes]
-    m = mois_suivant(courant) if avance_permise else mois_suivant(fin_annee)
-    while m <= fin_annee:  # paiement d'avance : mois suivants de l'année en cours
-        if m not in occupes:
-            candidats.append(m)
-        m = mois_suivant(m)
+    candidats = _candidats(s, courant, fin_annee, occupes, avance_permise)
     couverts, reste = [], montant
     for m in candidats:
         prix = tarif_parmi(liste, m).montant
@@ -130,6 +126,96 @@ def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.da
             f"({prix} F par mois), dans la limite des mois payables jusqu'en décembre."
         )
     return couverts
+
+
+def _candidats(s, courant, fin_annee, occupes, avance_permise) -> list[datetime.date]:
+    """Mois payables dans l'ordre : les mois dus non payés, puis l'avance jusqu'en décembre."""
+    candidats = [m for m in s.dus if m not in occupes]
+    m = mois_suivant(courant) if avance_permise else mois_suivant(fin_annee)
+    while m <= fin_annee:  # paiement d'avance : mois suivants de l'année en cours
+        if m not in occupes:
+            candidats.append(m)
+        m = mois_suivant(m)
+    return candidats
+
+
+def prochains_mois(membre, nombre: int, jour: datetime.date | None = None, exclus=()):
+    """[(mois, prix)] des `nombre` plus anciens mois payables du membre (paiement mobile money).
+
+    Lève CotisationRefusee si les cotisations ne sont pas ouvertes ou s'il n'y a pas assez de
+    mois payables jusqu'en décembre."""
+    if ParametresCotisations.courant().mois_depart is None:
+        raise CotisationRefusee(
+            "Les cotisations ne sont pas encore ouvertes : le BNC doit fixer le mois de départ."
+        )
+    if nombre is None or nombre < 1:
+        raise CotisationRefusee("Choisissez au moins un mois.")
+    courant = premier_du_mois(jour or aujourdhui())
+    s = situation(membre, courant)
+    occupes = s.payes | s.en_attente | set(exclus)  # exclus : mois d'un paiement en cours
+    candidats = _candidats(
+        s, courant, courant.replace(month=12), occupes, membre.statut not in HORS_MOUVEMENT
+    )
+    if len(candidats) < nombre:
+        raise CotisationRefusee(
+            f"Seulement {len(candidats)} mois payable(s) jusqu'en décembre pour ce membre."
+        )
+    liste = tarifs()
+    return [(m, tarif_parmi(liste, m).montant) for m in candidats[:nombre]]
+
+
+def enregistrer_mobile_money(membre, *, mois: list, reference: str, par) -> Versement:
+    """Paiement mobile money confirmé par la plateforme : versement VALIDÉ d'office (chemin unique
+    décidé le 13/11/2026 : personne ne valide), reçu, parts calculées pour les reversements."""
+    from apps.notifications.services import notifier
+
+    with transaction.atomic():
+        ParametresCotisations.objects.select_for_update().get(pk=ParametresCotisations.courant().pk)
+        m = _verrouiller(membre)
+        affectation = m.affectation_actuelle
+        if affectation is None:
+            raise CotisationRefusee(f"{m.nom_complet} n'est rattaché à aucune paroisse.")
+        liste = tarifs()
+        mois = sorted({premier_du_mois(x) for x in mois})
+        montant = sum(tarif_parmi(liste, x).montant for x in mois)
+        couverts = _choisir_mois(m, montant, mois, aujourdhui())
+        maintenant = timezone.now()
+        v = Versement.objects.create(
+            membre=m,
+            paroisse=affectation.paroisse,
+            montant=montant,
+            date_versement=timezone.localdate(maintenant),
+            etat=EtatVersement.VALIDE,
+            saisi_par=par,
+            date_validation=maintenant,
+            mode=ModeVersement.MOBILE_MONEY,
+            reference_paiement=reference,
+        )
+        try:
+            with transaction.atomic():
+                MoisCotise.objects.bulk_create(
+                    MoisCotise(versement=v, membre=m, mois=x, montant=prix) for x, prix in couverts
+                )
+        except IntegrityError as e:
+            raise CotisationRefusee("Un de ces mois vient d'être payé par ailleurs.") from e
+        v.numero_recu = _numero_recu(timezone.localdate(maintenant))
+        v.parts = _parts(v, liste)
+        v.save(update_fields=["numero_recu", "parts"])
+        _journal(
+            par,
+            "versement_mobile_money",
+            unite=_cle_paroisse(affectation.paroisse),
+            membre=m.matricule,
+            montant=montant,
+            recu=v.numero_recu,
+            reference=reference,
+        )
+        texte = (
+            f"Votre cotisation de {montant} F ({periode(mois)}) est payée par mobile money "
+            f"(reçu {v.numero_recu})."
+        )
+        transaction.on_commit(lambda: notifier([m.compte], texte, "/cotisations/moi/"))
+    return v
 
 
 def _saisir(membre, montant, date_versement, par, mois=None) -> Versement:
@@ -177,6 +263,7 @@ def saisir_versement(
         _notifier_unite(
             Unite("circuit", v.paroisse.circuit),
             f"Cotisation à valider : {v.montant} F de {m.nom_complet} ({v.paroisse.nom}).",
+            f"/cotisations/circuit-{v.paroisse.circuit_id}/a-valider/",
         )
     return v
 
@@ -213,6 +300,7 @@ def saisir_collecte(
         _notifier_unite(
             Unite("circuit", paroisse.circuit),
             f"Cotisations à valider : {len(faits)} versement(s), {total} F ({paroisse.nom}).",
+            f"/cotisations/circuit-{paroisse.circuit_id}/a-valider/",
         )
     return faits
 
@@ -286,7 +374,7 @@ def valider(versements, *, par) -> list[Versement]:
                     f"(reçu {v.numero_recu})."
                 ),
             )
-            transaction.on_commit(lambda c=compte, t=texte: notifier([c], t))
+            transaction.on_commit(lambda c=compte, t=texte: notifier([c], t, "/cotisations/moi/"))
             faits.append(v)
     return faits
 
@@ -329,6 +417,7 @@ def refuser(versement, *, motif: str, par) -> Versement:
             Unite("paroisse", v.paroisse),
             f"Versement refusé par le circuit : {v.montant} F de {v.membre.nom_complet} "
             f"(motif : {motif}).",
+            f"/cotisations/paroisse-{v.paroisse_id}/",
         )
     return v
 
@@ -363,12 +452,18 @@ def part_due(niveau: str, paroisse, mois_validation: datetime.date) -> int:
     debut = premier_du_mois(mois_validation)
     fin = mois_suivant(debut)
     total = 0
-    for parts in Versement.objects.filter(
-        paroisse=paroisse,
-        etat=EtatVersement.VALIDE,
-        date_validation__date__gte=debut,
-        date_validation__date__lt=fin,
-    ).values_list("parts", flat=True):
+    # Les paiements mobile money vont à 100 % au BN, qui reverse lui-même les parts (trésorerie) :
+    # la paroisse ne doit rien à ce titre.
+    for parts in (
+        Versement.objects.filter(
+            paroisse=paroisse,
+            etat=EtatVersement.VALIDE,
+            date_validation__date__gte=debut,
+            date_validation__date__lt=fin,
+        )
+        .exclude(mode=ModeVersement.MOBILE_MONEY)
+        .values_list("parts", flat=True)
+    ):
         total += int(parts.get(niveau, 0))
     return total
 
@@ -470,7 +565,8 @@ def rappeler_en_attente(jour: datetime.date, forcer: bool = False) -> int:
             f"Rappel du samedi : {len(liste)} versement(s) de cotisation attendent votre "
             f"validation depuis plus de {DELAI_RAPPEL_JOURS} jours ({unite.libelle})."
         )
-        transaction.on_commit(lambda d=destinataires, t=texte: notifier(d, t))
+        lien = f"/cotisations/{unite.cle}/a-valider/"
+        transaction.on_commit(lambda d=destinataires, t=texte, x=lien: notifier(d, t, x))
     return sum(len(x) for x in par_circuit.values())
 
 

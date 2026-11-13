@@ -81,6 +81,7 @@ def installer_bureau(
                 notifier(
                     [m.membre.compte],
                     f"Votre mandat de {m.fonction.nom} ({unite.libelle}) a pris fin le {date_txt}.",
+                    "/membres/ma-fiche/",
                 )
             for m in nouveaux:
                 notifier(

@@ -116,6 +116,7 @@ class Command(BaseCommand):
             comptes.append(("Membre simple", simple.matricule, mot))
         self._cotisations(hasard, crees, par)
         self._evenements(hasard, crees, par)
+        self._tresorerie(hasard, crees, par)
         self._mouvements(hasard, crees, par)
         self.stdout.write(self.style.SUCCESS(f"{Membre.objects.count()} membres fictifs créés."))
         self.stdout.write("\nComptes de démonstration (à noter, ils ne seront plus affichés) :")
@@ -257,6 +258,43 @@ class Command(BaseCommand):
                     niveau=niveau, paroisse=v.paroisse, mois_validation=mois, par=validateur
                 )
 
+    def _tresorerie(self, hasard, membres, par):
+        """Trésorerie fictive : une cotisation spéciale, quelques paiements simulés, des numéros."""
+        from apps.bureaux.perimetre import Unite
+        from apps.tresorerie import services as t
+
+        cs = t.creer_cotisation_speciale(
+            libelle="Construction du siège national (fictif)",
+            description="Démonstration : contribution de chaque membre, payable en plusieurs fois.",
+            type_montant="minimum",
+            montant=2000,
+            par=par,
+        )
+        t.creer_cotisation_speciale(
+            libelle="Contribution des paroisses au pèlerinage (fictif)",
+            type_montant="fixe",
+            montant=10000,
+            pour_membres="aucun",
+            pour_bureaux=["paroisse"],
+            par=par,
+        )
+        payeurs = [m for m in membres if m.compte_id and m.statut == "actif"][:8]
+        for m in payeurs:
+            p = t.initier_paiement_special(
+                m.compte, cs, hasard.choice([1000, 2000, 2500]), membre=m
+            )
+            t.confirmer_paiement(p)
+        for m in membres[:20]:
+            a = m.affectation_actuelle
+            if a is None:
+                continue
+            for unite in (Unite("paroisse", a.paroisse), Unite("circuit", a.paroisse.circuit)):
+                if not t.NumeroMobileMoney.objects.filter(cle=unite.cle).exists():
+                    numero = "01" + "".join(hasard.choice("0123456789") for _ in range(8))
+                    t.enregistrer_numero(
+                        unite, numero=numero, titulaire="Trésorier (fictif)", par=par
+                    )
+
     def _evenements(self, hasard, membres, par):
         """Un pèlerinage à venir (avec autorisations) et un conclave passé (présences pointées)."""
         from django.utils import timezone
@@ -272,15 +310,19 @@ class Command(BaseCommand):
             nom=f"Pèlerinage de la Nativité {annee}",
             debut=timezone.make_aware(datetime.datetime(annee, 12, 24, 7, 0)),
             lieu="Porto-Novo",
-            description="Fictif (démonstration). Équipes de travail par session.",
+            description="Fictif (démonstration). Équipes de travail par section.",
             avec_autorisation=True,
-            sessions=["Session Mère", "Session Culte", "Session Fruits"],
+            avec_sections=True,
+            sessions=["Section Mer", "Section Culte", "Section Fruits"],
             par=par,
         )
-        choisis = hasard.sample(membres, min(30, len(membres)))
+        choisis = hasard.sample(membres, min(33, len(membres)))
         sessions = list(nativite.sessions.all())
         for i, session in enumerate(sessions):
-            convoquer(nativite, choisis[i::3], session=session, par=par)
+            groupe = choisis[i:30:3]
+            convoquer(nativite, groupe[:1], session=session, role="superviseur", par=par)
+            convoquer(nativite, groupe[1:], session=session, par=par)
+        convoquer(nativite, choisis[30:], role="bureau", par=par)
         conclave = creer_evenement(
             nom="Conclave du Bureau national",
             debut=maintenant - datetime.timedelta(days=20),

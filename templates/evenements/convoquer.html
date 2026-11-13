@@ -4,35 +4,103 @@
 <section class="carte">
   <p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>
   <h1>Convoquer des membres</h1>
-  <p class="aide">Filtrez les membres (région, grade, fonction…), cochez ceux à convoquer et choisissez leur session. Chacun reçoit une notification du Bureau national.</p>
-  <form method="get" class="filtres">
-    <details{% if not proposes %} open{% endif %}><summary>Filtres</summary>
-      <input type="hidden" name="envoye" value="1">
-      <div class="grille-filtres">
-        {% for champ in form %}{% if champ.name != "envoye" and champ.name != "colonnes" %}
-          <div class="champ{% if champ.name == 'statut' or champ.name == 'grade' %} choix choix--grille{% endif %}"><span>{{ champ.label }}</span>{{ champ }}
-            {% for e in champ.errors %}<small class="erreur">{{ e }}</small>{% endfor %}</div>
-        {% endif %}{% endfor %}
-      </div>
-    </details>
-    <button type="submit" class="bouton bouton--secondaire">Afficher les membres</button>
-  </form>
-  {% if proposes %}
-  <form method="post">{% csrf_token %}
-    {% if trop %}<p class="message message--error">Plus de 500 membres : affinez les filtres. Seuls les 500 premiers sont affichés.</p>{% endif %}
-    <label class="champ"><span>Session</span><select name="session"><option value="">Sans session</option>
-      {% for s in ev.sessions.all %}<option value="{{ s.pk }}">{{ s.nom }}</option>{% endfor %}</select></label>
-    <p><label><input type="checkbox" onclick="document.querySelectorAll('input[name=membres]').forEach(function(c){if(!c.disabled){c.checked=this.checked}}, this)"> Tout cocher</label></p>
-    <div class="tableau-defilant"><table class="tableau">
+
+  <form method="post" id="form-convocation">{% csrf_token %}
+    <h2>1. Les membres</h2>
+    <div class="recherche-membre">
+      <label class="champ"><span>Rechercher un membre (matricule ou nom)</span>
+        <input type="search" id="recherche" autocomplete="off" placeholder="Ex. 2015-01AS-0157 ou ADJOVI"
+          data-url="{% url 'evenements:recherche_membres' ev.pk %}"></label>
+      <ul id="resultats" hidden></ul>
+    </div>
+    <p class="aide">Cliquez sur un membre trouvé : il s'ajoute ci-dessous, coché. Vous pouvez aussi afficher des membres par filtres plus bas.</p>
+    <p><label><input type="checkbox" id="tout-cocher"> Tout cocher</label></p>
+    <div class="tableau-defilant"><table class="tableau tableau--souple">
       <thead><tr><th></th><th>Membre</th><th>Matricule</th><th>Paroisse</th></tr></thead>
-      <tbody>{% for m in proposes %}
+      <tbody id="selection">{% for m in proposes %}
         <tr><td><input type="checkbox" name="membres" value="{{ m.pk }}" id="m{{ m.pk }}"></td>
-          <td><label for="m{{ m.pk }}">{{ m.nom_complet }}</label>{% if m.pk in deja %} <small class="aide">(déjà convoqué : changer de session)</small>{% endif %}</td>
+          <td><label for="m{{ m.pk }}">{{ m.nom_complet }}</label>{% if m.pk in deja %} <small class="aide">(déjà convoqué)</small>{% endif %}</td>
           <td>{{ m.matricule }}</td><td>{{ m.affectation_actuelle.paroisse.nom|default:"—" }}</td></tr>
       {% endfor %}</tbody>
     </table></div>
+    {% if trop %}<p class="message message--error">Plus de 500 membres : affinez les filtres. Seuls les 500 premiers sont affichés.</p>{% endif %}
+    {% if request.GET.envoye and not proposes %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
+
+    <h2>2. Leur rôle</h2>
+    <div class="grille-filtres">
+      <label class="champ"><span>Invité(e) en tant que</span><select name="role" id="role">
+        {% for v, l in roles %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></label>
+      {% if ev.avec_sections %}
+      <label class="champ" id="champ-section"><span>Section</span><select name="session"><option value="">Sans section</option>
+        {% for s in ev.sessions.all %}<option value="{{ s.pk }}">{{ s.nom }}</option>{% endfor %}</select></label>
+      {% endif %}
+      {% if ev.avec_autorisation %}
+      <label class="champ"><span>Formule de l'autorisation</span><select name="formule">
+        <option value="">Selon le rôle</option>
+        {% for v, l in formules %}<option value="{{ v }}">{{ l|capfirst }}</option>{% endfor %}</select></label>
+      {% endif %}
+    </div>
+    <p class="aide">Travailleur : « est autorisé(e) à travailler » ; superviseur et bureau : « est autorisé(e) à participer », sauf autre choix. Un bureau n'a pas de section.</p>
     <button type="submit" class="bouton">Convoquer les membres cochés</button>
   </form>
-  {% elif request.GET.envoye %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
+
+  <h2>Ou : afficher des membres par filtres</h2>
+  <form method="get" class="filtres">
+    <input type="hidden" name="envoye" value="1">
+    <div class="grille-filtres">
+      {% for champ in principaux %}{% include "listes/_filtre.html" %}{% endfor %}
+    </div>
+    <details class="plus-filtres"><summary>Plus de filtres</summary>
+      <div class="grille-filtres">{% for champ in autres %}{% include "listes/_filtre.html" %}{% endfor %}</div>
+    </details>
+    <button type="submit" class="bouton bouton--secondaire">Afficher les membres</button>
+  </form>
 </section>
+<script>
+  (function () {
+    var champ = document.getElementById('recherche'), liste = document.getElementById('resultats');
+    var selection = document.getElementById('selection'), minuterie;
+    function texte(t) { return document.createTextNode(t); }
+    function ajouter(m) {
+      var existant = document.getElementById('m' + m.pk);
+      if (existant) { existant.checked = true; liste.hidden = true; champ.value = ''; return; }
+      var tr = document.createElement('tr'), td = function () { return tr.appendChild(document.createElement('td')); };
+      var c = document.createElement('input'); c.type = 'checkbox'; c.name = 'membres'; c.value = m.pk; c.id = 'm' + m.pk; c.checked = true;
+      td().appendChild(c);
+      var lab = document.createElement('label'); lab.htmlFor = c.id; lab.appendChild(texte(m.nom));
+      var cel = td(); cel.appendChild(lab);
+      if (m.deja) { var s = document.createElement('small'); s.className = 'aide'; s.appendChild(texte(' (déjà convoqué)')); cel.appendChild(s); }
+      td().appendChild(texte(m.matricule)); td().appendChild(texte(m.paroisse || '—'));
+      selection.insertBefore(tr, selection.firstChild);
+      liste.hidden = true; champ.value = '';
+    }
+    champ.addEventListener('input', function () {
+      clearTimeout(minuterie);
+      var q = champ.value.trim();
+      if (q.length < 2) { liste.hidden = true; return; }
+      minuterie = setTimeout(function () {
+        fetch(champ.dataset.url + '?q=' + encodeURIComponent(q), {credentials: 'same-origin'})
+          .then(function (r) { return r.json(); })
+          .then(function (d) {
+            liste.innerHTML = '';
+            if (!d.resultats.length) { var li = document.createElement('li'); li.className = 'aide'; li.style.padding = '10px'; li.appendChild(texte('Aucun membre trouvé.')); liste.appendChild(li); }
+            d.resultats.forEach(function (m) {
+              var li = document.createElement('li'), b = document.createElement('button');
+              b.type = 'button'; b.appendChild(texte(m.nom + ' '));
+              var s = document.createElement('small'); s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.deja ? ' (déjà convoqué)' : '')));
+              b.appendChild(s); b.addEventListener('click', function () { ajouter(m); });
+              li.appendChild(b); liste.appendChild(li);
+            });
+            liste.hidden = false;
+          });
+      }, 250);
+    });
+    document.getElementById('tout-cocher').addEventListener('change', function () {
+      var v = this.checked;
+      document.querySelectorAll('input[name=membres]').forEach(function (c) { c.checked = v; });
+    });
+    var role = document.getElementById('role'), section = document.getElementById('champ-section');
+    if (section) { var maj = function () { section.hidden = role.value === 'bureau'; }; role.addEventListener('change', maj); maj(); }
+  })();
+</script>
 {% endblock %}
