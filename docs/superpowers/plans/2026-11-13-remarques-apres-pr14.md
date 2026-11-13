@@ -170,4 +170,25 @@ mensuelle, Participation aux événements (BN seulement).
 - Chaque ouverture de fiche reste inscrite au journal, comme aujourd'hui.
 - Les exports PDF et Excel ne changent pas.
 
+## 10. « Éligibles au grade suivant » : choisir le grade VISÉ
+
+Constat du mainteneur : en choisissant « Capitaine » avec « Éligibles », la liste montre des
+Capitaines. Il attendait les **Sous-Capitaines éligibles à devenir Capitaine**.
+
+Explication : aujourd'hui, le filtre « Grade » désigne le grade **actuel**, et « Éligibles » veut dire
+« éligible au grade suivant le sien ». Capitaine + Éligibles donne donc les Capitaines éligibles au
+grade d'après.
+
+À réaliser :
+- Sur la page « Éligibles au grade suivant », un choix clair **« Éligibles au grade de : … »** (le
+  grade visé).
+- La liste montre les membres **du grade juste en dessous** qui remplissent les conditions pour le
+  grade visé. Exemple : « Capitaine » → les Sous-Capitaines ayant la durée minimale (art. 78).
+- Si aucun grade n'est choisi : tous les éligibles, chacun avec une colonne « Grade visé ».
+- Pour les grades **par nomination** (Commandant et au-dessus), le site ne peut pas dire qui est
+  « éligible » : il montre les membres du grade inférieur avec la durée passée dans leur grade, et la
+  mention « par nomination ».
+- Dans les filtres ordinaires des listes, le libellé devient « Grade actuel », pour éviter la
+  confusion.
+
 *(À compléter au fil des remarques du mainteneur.)*
