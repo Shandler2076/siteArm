@@ -41,4 +41,17 @@ Questions à poser au mainteneur avant de réaliser :
   déjà écrits pour l'événement afin de les proposer à nouveau ?
 - Pour les membres déjà convoqués « en tant que bureau » : les passer en « Bureau d'organisation » ?
 
+## 3. Cases à cocher mal alignées (page « Cotisations spéciales » du BN)
+
+Constat (capture du 13/11/2026) : dans « Type de montant », les ronds à cocher ne sont pas sur la
+même ligne que leur texte (Montant fixe, Montant minimum, Montant libre) : ils sont décalés au-dessus
+et à droite.
+
+À corriger :
+- chaque rond ou case **sur la même ligne, à gauche de son texte**, et toute la ligne cliquable ;
+- même correction pour les autres choix de la page : « Membres concernés » (ronds) et « Bureaux
+  concernés » (cases) ;
+- vérifier tous les autres formulaires du site qui ont des ronds ou des cases (une règle de style
+  commune).
+
 *(À compléter au fil des remarques du mainteneur.)*
