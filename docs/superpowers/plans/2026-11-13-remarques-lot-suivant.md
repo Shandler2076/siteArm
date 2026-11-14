@@ -58,6 +58,24 @@ Réponses complémentaires du mainteneur (14/11/2026) :
   façon de faire, et la question des signatures, sont à décider ensemble (voir la proposition faite
   au mainteneur le 14/11/2026).
 
+Décisions du 14/11/2026 sur la rédaction et la signature :
+- **Deux façons d'envoyer un courrier, toutes deux sur le site** :
+  1. **rédiger sur le site** ;
+  2. **importer un courrier déjà rédigé** (photo, scan ou PDF, par exemple en langue locale).
+  Dans les deux cas, le site complète la mise en forme : en-tête, numéro d'ordre, date, objet,
+  destinataires, signature et validation.
+- **Signature par validation** : le Secrétaire prépare ; le **Président** (ou le **Chef** pour un
+  bureau local) valide avec **son propre compte** (double vérification pour le BN). Le courrier ne
+  part qu'après cette validation.
+- **Signature personnelle déposée** : chaque signataire dépose **l'image de sa signature dans son
+  propre compte**. Elle apparaît sur le courrier **seulement quand lui-même valide**, avec un
+  **QR code** de vérification (le courrier est authentique, signé par telle personne, telle date).
+  Garde-fous :
+  - l'image est rangée dans le stockage privé ;
+  - personne d'autre ne peut l'utiliser, pas même le BN ;
+  - son dépôt ou son remplacement est inscrit au journal ;
+  - à la fin du mandat, elle ne peut plus servir.
+
 Questions à préparer pour la séance de lundi :
 - Exemplaires de courriers et de communiqués : en-tête exact, mentions, place du numéro, de la date,
   de l'objet et de la signature.
