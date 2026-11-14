@@ -188,17 +188,23 @@
   et de paroisses qui reviennent). Les photos des clients sont effacées une fois la commande
   livrée.
 
+### Échange 13 (14/11/2026) — recueil français
+- **[décidé]** Le recueil **français n'est pas disponible** pour l'instant. On se concentre sur
+  les recueils **Goun et Yoruba**, disponibles partout (applications, papier).
+- Si un chant en français est nécessaire, il est inséré comme un **chant spécial** (photo ou
+  texte), comme les autres chants hors recueil.
+- **[décidé]** Notation `G12` (Goun) / `Y45` (Yoruba). La lettre `F` est réservée au recueil français
+  pour plus tard.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
-- Notation `G12` / `Y45` / `F230` : à confirmer.
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
-- Notation `G12` / `Y45` / `F230` : à confirmer.
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
@@ -217,6 +223,5 @@
    trouvez ratées).
 4. Le **format imprimé** habituel : feuille simple, livret plié A4 → A5, nombre de pages.
 5. Le **calendrier des lectures 2026** (pamphlet du 25 décembre 2025), pour voir sa forme.
-6. Si déjà disponible : un **échantillon** des textes des cantiques (quelques chants Goun, Yoruba,
-   français) dans leur forme numérique, pour voir comment ils sont écrits (strophes, refrain,
+6. Si déjà disponible : un **échantillon** des textes des cantiques (quelques chants Goun et Yoruba) dans leur forme numérique, pour voir comment ils sont écrits (strophes, refrain,
    accents).
