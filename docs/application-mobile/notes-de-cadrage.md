@@ -108,16 +108,28 @@
 - **[proposition]** Les exemplaires servent à apprendre **quels chants vont à quelle place** et
   pour quel culte. Chaque cantique reçoit des étiquettes (places possibles, thèmes, fêtes).
 
+### Échange 7 (14/11/2026) — calendrier des lectures ; PC ou mobile
+- L'Église du mainteneur a un **calendrier des lectures** couvrant toute l'année, du 1er janvier au
+  31 décembre. Il est donné par le **pamphlet du 25 décembre**, qui fixe les lectures de l'année
+  suivante.
+  - **[proposition]** Chaque année, on saisit ou on importe ce calendrier dans l'application. Le mode
+    automatique part alors de la date pour connaître les lectures. Les autres Églises auront
+    leur propre calendrier, ou pas de calendrier du tout (saisie manuelle des lectures).
+- **Nouvelle idée du mainteneur :** une application **installée sur son PC**. C'est lui qui produit
+  les programmes et les pamphlets pour les clients, en association avec un imprimeur.
+- Il garde aussi l'option d'une **application mobile à vendre**. → Analyse des deux possibilités
+  demandée (voir réponse de Claude, échange 7).
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
-- Existe-t-il un **calendrier des lectures** (lectionnaire) ou un thème fixé pour chaque dimanche ?
+- PC d'abord (service), mobile d'abord (vente), ou les deux ? (analyse en cours)
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
-- Existe-t-il un **calendrier des lectures** (lectionnaire) ou un thème fixé pour chaque dimanche ?
+- PC d'abord (service), mobile d'abord (vente), ou les deux ? (analyse en cours)
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
 ## 3. Décisions
