@@ -42,11 +42,22 @@
 - Tout enregistrer au fur et à mesure ; travailler **dans l'ordre**, tout mettre en place avant
   de commencer à coder.
 
+### Échange 2 (14/11/2026)
+- Pour l'instant, **c'est l'application personnelle du mainteneur**. Elle n'a **aucun lien avec le site des membres**.
+- Plus tard : **vente** de l'application, avec un **code par acheteur** pour empêcher le partage
+  (modalités à décider ; pas prioritaire).
+- **Textes des cantiques** (Goun et Yoruba) : le mainteneur les fournira lui-même **en version
+  numérique**, le moment venu. Claude ne les saisit pas.
+
 ## 2. Questions ouvertes
-- Qui fabrique les programmes ? Lien avec le site des membres ?
-- D'où viendront les textes des cantiques (format numérique existant ? droits ?)
+- Les formats de culte sont-ils fixes (ceux de l'Armée du Salut) ou modifiables par
+  l'utilisateur (autres paroisses, autres Églises, si l'application est vendue) ?
+- Droits sur les textes des recueils si l'application est vendue (à vérifier auprès des éditeurs).
+- Où ranger le code de l'application : un dépôt séparé du site des membres ? **[proposition : oui,
+  puisqu'elle est indépendante et destinée à la vente ; les notes restent ici en attendant]**
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
 ## 3. Décisions
-_(aucune pour l'instant)_
+- **[décidé]** Application indépendante du site des membres, propriété du mainteneur.
+- **[décidé]** Textes des cantiques fournis par le mainteneur sous forme numérique.
