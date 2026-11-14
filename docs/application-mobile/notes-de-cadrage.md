@@ -135,17 +135,29 @@
 - **[proposition]** Deux sorties PDF par document : une **légère pour WhatsApp** (lecture sur
   téléphone) et une **prête à imprimer** (format et pliage à préciser avec les exemplaires).
 
+### Échange 9 (14/11/2026) — ce que le client envoie
+- Le client peut préparer son programme sur une feuille. Ce qu'il envoie se résume à :
+  - les **numéros des cantiques**, en précisant **Goun ou Yoruba** ;
+  - la **liste des officiants**.
+- **Concurrence actuelle :** les **centres de saisie**, où quelqu'un tape tout un par un. L'avantage
+  du mainteneur est la **rapidité** : l'application sort le document en très peu de temps.
+- **[proposition] Saisie rapide :** coller ou taper d'un coup une liste du genre
+  `G12, G45, Y230, G7`. L'application retrouve chaque cantique, l'affiche avec son titre et
+  son texte, et le place dans l'ordre des rubriques du culte. Les officiants se collent de la
+  même façon, un par ligne.
+- **[proposition]** La lecture automatique d'une **photo écrite à la main** n'est pas
+  prévue au départ : elle n'est pas assez fiable. Elle reste prévue pour les **textes
+  imprimés** (chants spéciaux).
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
-- Que contient la demande d'un client sur WhatsApp ? (liste tapée, photo, message vocal…)
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
-- Que contient la demande d'un client sur WhatsApp ? (liste tapée, photo, message vocal…)
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
