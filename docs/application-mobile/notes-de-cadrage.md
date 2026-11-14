@@ -178,20 +178,26 @@
   photos et textes (plusieurs mises en page et couleurs). On les envoie au client sur WhatsApp
   sous forme d'**images d'aperçu côte à côte**, et il répond « le 2 ».
 
+### Échange 12 (14/11/2026) — clients ponctuels
+- Les clients sont surtout des **demandes ponctuelles** : des familles et des parents, à
+  l'occasion de **fêtes ou de cérémonies**.
+- **[décidé]** **Pas de fiche client.** Les photos ne sont **pas gardées** après la commande.
+- Les photos, la couverture et les logos sont nécessaires pour les **obsèques** et pour les
+  **pamphlets de fêtes**.
+- **[proposition]** On garde seulement une petite **bibliothèque de logos** (logos d'Églises
+  et de paroisses qui reviennent). Les photos des clients sont effacées une fois la commande
+  livrée.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
-- Clients réguliers (même paroisse chaque semaine) ou surtout ponctuels ? (→ fiche client
-  avec logo, nom de paroisse, photo du chargé, recueil par défaut)
 - Notation `G12` / `Y45` / `F230` : à confirmer.
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
-- Clients réguliers (même paroisse chaque semaine) ou surtout ponctuels ? (→ fiche client
-  avec logo, nom de paroisse, photo du chargé, recueil par défaut)
 - Notation `G12` / `Y45` / `F230` : à confirmer.
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
@@ -202,3 +208,15 @@
 - **[décidé]** Application pour l'Église en général ; code dans un dépôt séparé.
 - **[décidé]** Formats de culte intégrés et paramétrés par type de culte (modification
   ultérieure ou export Word : à discuter).
+
+## 4. À apporter lundi 16/11/2026
+1. La **liste des types de culte** (dominical, veillée, fêtes, obsèques…).
+2. Pour chacun, un ou plusieurs **exemplaires réels** de programme et de pamphlet (photo ou PDF),
+   avec un **mini-programme** et un **mini-pamphlet** si possible.
+3. Pour les obsèques et les fêtes, des **couvertures** que vous trouvez réussies (et d'autres que vous
+   trouvez ratées).
+4. Le **format imprimé** habituel : feuille simple, livret plié A4 → A5, nombre de pages.
+5. Le **calendrier des lectures 2026** (pamphlet du 25 décembre 2025), pour voir sa forme.
+6. Si déjà disponible : un **échantillon** des textes des cantiques (quelques chants Goun, Yoruba,
+   français) dans leur forme numérique, pour voir comment ils sont écrits (strophes, refrain,
+   accents).
