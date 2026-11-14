@@ -166,15 +166,33 @@
   **rarement** dans le pamphlet. **[proposition]** Pour les fêtes, le champ « lectures » est
   facultatif et saisi à la main.
 
+### Échange 11 (14/11/2026) — obsèques et pages de couverture
+- Mariages : rare. **Obsèques : fréquent** (cultes d'enterrement).
+- Les pamphlets ont souvent besoin d'une **page de couverture en couleur, soignée**, avec :
+  - des **photos** : défunt, chargé de paroisse, chorale… ;
+  - des **logos** sur la première page.
+- **[décidé]** L'application génère **plusieurs modèles de couverture**. Le mainteneur les
+  **soumet au client**, qui choisit rapidement.
+- Le client envoie les **photos à insérer** (chorale, etc.).
+- **[proposition]** Les modèles de couverture sont produits automatiquement à partir des mêmes
+  photos et textes (plusieurs mises en page et couleurs). On les envoie au client sur WhatsApp
+  sous forme d'**images d'aperçu côte à côte**, et il répond « le 2 ».
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
+- Clients réguliers (même paroisse chaque semaine) ou surtout ponctuels ? (→ fiche client
+  avec logo, nom de paroisse, photo du chargé, recueil par défaut)
+- Notation `G12` / `Y45` / `F230` : à confirmer.
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
+- Clients réguliers (même paroisse chaque semaine) ou surtout ponctuels ? (→ fiche client
+  avec logo, nom de paroisse, photo du chargé, recueil par défaut)
+- Notation `G12` / `Y45` / `F230` : à confirmer.
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
