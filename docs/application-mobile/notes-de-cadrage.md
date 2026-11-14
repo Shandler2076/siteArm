@@ -49,15 +49,28 @@
 - **Textes des cantiques** (Goun et Yoruba) : le mainteneur les fournira lui-même **en version
   numérique**, le moment venu. Claude ne les saisit pas.
 
+### Échange 3 (14/11/2026)
+- **Droits sur les textes :** le mainteneur **a le droit** d'utiliser et d'inclure les textes des
+  cantiques, y compris dans une version vendue.
+- L'application est **pour l'Église en général, pas seulement pour l'Armée du Salut**. Elle est
+  **complètement indépendante** du site des membres : on ne mélange pas.
+- **Formats :** chaque culte a son format. Ces formats sont **intégrés et paramétrés** dans
+  l'application. On pourra peut-être les **modifier ensuite**, ou exporter le programme en **Word**
+  pour le retoucher. Ce point sera discuté plus tard.
+
 ## 2. Questions ouvertes
-- Les formats de culte sont-ils fixes (ceux de l'Armée du Salut) ou modifiables par
-  l'utilisateur (autres paroisses, autres Églises, si l'application est vendue) ?
-- Droits sur les textes des recueils si l'application est vendue (à vérifier auprès des éditeurs).
-- Où ranger le code de l'application : un dépôt séparé du site des membres ? **[proposition : oui,
-  puisqu'elle est indépendante et destinée à la vente ; les notes restent ici en attendant]**
+- Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
+  (photo ou PDF).
+- Modification des formats dans l'application ou export Word (à discuter).
+- Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
+- **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
+  y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
 ## 3. Décisions
 - **[décidé]** Application indépendante du site des membres, propriété du mainteneur.
-- **[décidé]** Textes des cantiques fournis par le mainteneur sous forme numérique.
+- **[décidé]** Textes des cantiques fournis par le mainteneur sous forme numérique ; droits acquis.
+- **[décidé]** Application pour l'Église en général ; code dans un dépôt séparé.
+- **[décidé]** Formats de culte intégrés et paramétrés par type de culte (modification
+  ultérieure ou export Word : à discuter).
