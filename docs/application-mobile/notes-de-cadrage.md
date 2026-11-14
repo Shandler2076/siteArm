@@ -58,6 +58,30 @@
   l'application. On pourra peut-être les **modifier ensuite**, ou exporter le programme en **Word**
   pour le retoucher. Ce point sera discuté plus tard.
 
+### Échange 4 (14/11/2026) — gagner de l'argent
+- Les modèles réels arrivent **la semaine prochaine** (rappel programmé le lundi 16/11/2026).
+- Le mainteneur constate que les applications de cantiques existantes servent **seulement à lire**.
+  Aucune ne **produit de programmes ni de pamphlets**. C'est la différence de son application.
+- Les textes des cantiques sont publics.
+- **Idée du mainteneur :** ouvrir un **centre d'impression**. Il produit le programme ou le pamphlet
+  puis l'imprime : un prix pour la production, un prix pour l'impression.
+
+### Pistes de revenus **[propositions de Claude, à discuter]**
+1. **Imprimerie (idée du mainteneur)** : commencer par un **partenariat avec des imprimeurs
+   existants** (commission) avant d'acheter du matériel. Cela permet de tester la demande sans
+   risque.
+2. **Cérémonies familiales** : obsèques, mariages, baptêmes, actions de grâce. Les familles paient
+   déjà pour des programmes imprimés, souvent avec photo. C'est sans doute le marché le plus
+   rentable, à l'unité.
+3. **Formule gratuite + formule payante** : lecture des cantiques et mini-pamphlet gratuits (avec la
+   mention de l'application). Programme complet, logo de la paroisse, sans mention et export Word
+   payants. Paiement **mobile money**.
+4. **Abonnement par paroisse** (mois ou année) pour le secrétariat ou la chorale.
+5. **Plusieurs Églises et plusieurs recueils** : les Églises qui chantent en Goun et en Yoruba sont
+   nombreuses. Chaque nouveau recueil élargit le marché.
+6. **Revendeurs** : secrétaires de paroisse ou imprimeurs qui vendent des codes contre commission.
+7. **Projection** : afficher les chants sur un écran ou un vidéoprojecteur pendant le culte.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
