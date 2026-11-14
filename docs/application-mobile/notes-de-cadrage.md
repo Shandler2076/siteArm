@@ -120,16 +120,33 @@
 - Il garde aussi l'option d'une **application mobile à vendre**. → Analyse des deux possibilités
   demandée (voir réponse de Claude, échange 7).
 
+### Échange 8 (14/11/2026) — option A retenue
+- **[décidé] Option A d'abord** : application **sur le PC du mainteneur**. Il produit lui-même
+  les programmes et les pamphlets pour ses clients. La version mobile à vendre (option B) viendra
+  plus tard, sur le même cœur.
+- **[proposition]** Technique : un même code pour Windows maintenant et Android plus tard
+  (par exemple Flutter).
+- **Déroulement d'une commande :**
+  1. Le client, qui peut être n'importe qui, en ligne, envoie sa demande **par WhatsApp**.
+  2. Le mainteneur conçoit le programme ou le pamphlet en **5 minutes environ**.
+  3. Il envoie le **PDF** au client.
+  4. Ensuite, au choix : le client **imprime lui-même**, ou le mainteneur **imprime** (avec
+     l'imprimeur partenaire) **et livre**.
+- **[proposition]** Deux sorties PDF par document : une **légère pour WhatsApp** (lecture sur
+  téléphone) et une **prête à imprimer** (format et pliage à préciser avec les exemplaires).
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
-- PC d'abord (service), mobile d'abord (vente), ou les deux ? (analyse en cours)
+- Que contient la demande d'un client sur WhatsApp ? (liste tapée, photo, message vocal…)
+- Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
-- PC d'abord (service), mobile d'abord (vente), ou les deux ? (analyse en cours)
+- Que contient la demande d'un client sur WhatsApp ? (liste tapée, photo, message vocal…)
+- Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
 ## 3. Décisions
