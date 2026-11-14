@@ -47,6 +47,17 @@ Décisions du mainteneur (13/11/2026) :
 - **Les bureaux de région, de circuit et de paroisse peuvent aussi écrire** : au Bureau national, ou
   à un niveau inférieur.
 
+Réponses complémentaires du mainteneur (14/11/2026) :
+- **Courrier d'un bureau local : signé par son Chef** (Chef d'unité paroissiale ; au circuit et à la
+  région, leur Chef respectif).
+- **Chaque bureau a sa propre suite de numéros d'ordre** : chaque paroisse, chaque circuit, chaque
+  région, et le national.
+- **Répondre** : les accusés, plus un bouton **« Courrier reçu »** sur lequel le responsable clique.
+- **Pièces jointes autorisées.**
+- **Courriers en langue locale** (à tous les niveaux) : les taper sur le site peut être difficile. La
+  façon de faire, et la question des signatures, sont à décider ensemble (voir la proposition faite
+  au mainteneur le 14/11/2026).
+
 Questions à préparer pour la séance de lundi :
 - Exemplaires de courriers et de communiqués : en-tête exact, mentions, place du numéro, de la date,
   de l'objet et de la signature.
