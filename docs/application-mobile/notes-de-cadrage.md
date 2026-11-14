@@ -149,6 +149,23 @@
   prévue au départ : elle n'est pas assez fiable. Elle reste prévue pour les **textes
   imprimés** (chants spéciaux).
 
+### Échange 10 (14/11/2026) — photos, mélange des recueils, lectures
+- Si le client envoie une **photo**, le mainteneur la transforme lui-même en texte avec une
+  **application externe**, ou relit simplement les informations. **[décidé]** Pas de lecture
+  de photo dans notre application pour les demandes des clients.
+- Le mainteneur n'a besoin **que des numéros**. L'application a tous les cantiques en mémoire :
+  on tape un numéro et elle sort **le titre et le texte complet**.
+- **Mélange des recueils dans un même culte : Goun, Yoruba et français.** → Le recueil **français**
+  entre aussi dans le projet (texte à fournir).
+  - **[proposition]** Une lettre devant le numéro pour éviter toute confusion : `G` = Goun,
+    `Y` = Yoruba, `F` = français (ex. `G12`, `Y45`, `F230`), avec un recueil par défaut quand
+    on tape le numéro seul.
+- Les **noms des officiants** sont tapés rapidement par le mainteneur.
+- **Lectures :** le calendrier sert **uniquement aux cultes dominicaux**. Pour les **fêtes**, les
+  lectures sont choisies par les devanciers ou les chargés de paroisse, et elles figurent
+  **rarement** dans le pamphlet. **[proposition]** Pour les fêtes, le champ « lectures » est
+  facultatif et saisi à la main.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
