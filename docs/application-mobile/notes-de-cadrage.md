@@ -93,14 +93,31 @@
   doit être la meilleure (recherche instantanée, changement et déplacement d'un chant en un
   geste), avant même les officiants.
 
+### Échange 6 (14/11/2026) — ce qui guide le choix des chants
+- Le choix dépend :
+  - du **type de culte** (dominical, fête…) ;
+  - des **textes** (lectures bibliques) ;
+  - de la **place dans le culte** : certains chants ne servent qu'à ouvrir le culte, d'autres vont
+    avant la 1re lecture, après la 2e lecture, etc.
+- Le mainteneur fournira **beaucoup d'exemplaires** de programmes réels.
+- **Deux modes [décidé] :**
+  1. **Automatique** : l'application génère seule un programme complet.
+  2. **Manuel** : le maître de chœur choisit lui-même chaque chant à chaque place.
+- **[proposition]** Le mode automatique produit une *proposition* que le maître de chœur ajuste
+  ensuite sur le même écran (remplacer, déplacer). Les deux modes n'en font qu'un en pratique.
+- **[proposition]** Les exemplaires servent à apprendre **quels chants vont à quelle place** et
+  pour quel culte. Chaque cantique reçoit des étiquettes (places possibles, thèmes, fêtes).
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
+- Existe-t-il un **calendrier des lectures** (lectionnaire) ou un thème fixé pour chaque dimanche ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
+- Existe-t-il un **calendrier des lectures** (lectionnaire) ou un thème fixé pour chaque dimanche ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
 ## 3. Décisions
