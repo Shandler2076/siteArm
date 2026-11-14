@@ -82,6 +82,17 @@
 6. **Revendeurs** : secrétaires de paroisse ou imprimeurs qui vendent des codes contre commission.
 7. **Projection** : afficher les chants sur un écran ou un vidéoprojecteur pendant le culte.
 
+### Échange 5 (14/11/2026) — comment on fait aujourd'hui
+- Dans la paroisse du mainteneur, le programme se fait **sur papier, dans un cahier**.
+- C'est souvent le **maître de chœur** qui le prépare. Il passe du temps à **fouiller** dans les
+  applications de cantiques ou dans les recueils papier, puis à **choisir, aligner et changer** les
+  chants. Il réfléchit aussi aux officiants si besoin.
+- C'est pareil pour les cérémonies (obsèques, mariages…).
+- **Conclusion [proposition] :** l'utilisateur principal est le **maître de chœur**. La difficulté
+  principale, c'est de **trouver et d'arranger les chants**. C'est sur ce point que l'application
+  doit être la meilleure (recherche instantanée, changement et déplacement d'un chant en un
+  geste), avant même les officiants.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
