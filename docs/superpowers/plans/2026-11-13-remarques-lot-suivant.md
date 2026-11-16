@@ -112,9 +112,15 @@ Séance du lundi 16/11/2026 : format des courriers (modèle fourni par le mainte
 - **Communiqué** : même en-tête et même numéro d'ordre, avec le titre « **COMMUNIQUÉ** » centré.
   Pas de destinataire nominatif (« À l'attention de tous les bureaux »), puis l'objet et le texte.
 
-Questions restantes :
-- Sigles exacts des bureaux locaux pour le numéro (UP = unité paroissiale ; circuit : « SC » ?
-  région : « URC » ?) et dernier sigle (« S » pour le secrétariat ?).
+Précisions du mainteneur (16/11/2026) :
+- **Pied de page** : **retirer l'adresse e-mail**, qui n'est plus valable. Garder le siège social,
+  la boîte postale et les téléphones.
+- **Sigles des bureaux locaux** dans le numéro d'ordre :
+  - **UP** : unité paroissiale (ex. « 007-2026/CCOSECS-CNC/AS/UP-GBOA/S ») ;
+  - **SC** : section circuit ;
+  - **BRC** : **bureau régional de coordination** (c'est la dénomination exacte au niveau régional).
+- Dernier sigle, celui qui établit le courrier : « S » (Secrétaire) par défaut, comme « SN » au
+  national (à confirmer à l'usage).
 
 Questions préparées avant la séance (réponses ci-dessus) :
 - Exemplaires de courriers et de communiqués : en-tête exact, mentions, place du numéro, de la date,
