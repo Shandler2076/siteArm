@@ -132,4 +132,17 @@ Questions préparées avant la séance (réponses ci-dessus) :
 - « Répondre » : seulement les accusés, ou aussi une réponse écrite rattachée au courrier ?
 - Pièces jointes (PDF, photos) : autorisées ?
 
+## 2. Dénominations au niveau régional (16/11/2026)
+
+- **Unité régionale de coordination** : l'**ensemble des membres** de la région.
+- **Bureau régional de coordination (BRC)** : le **bureau** de la région.
+- Au prochain lot, harmoniser tout le site :
+  - le libellé du payeur « Bureau de l'unité régionale de coordination de … » devient
+    « **Bureau régional de coordination de …** » (`apps/tresorerie/services.py::libelle_payeur`) ;
+  - même correction dans la page de création des cotisations spéciales (« Bureaux d'unité
+    régionale de coordination » devient « Bureaux régionaux de coordination ») et dans les guides ;
+  - l'en-tête des courriers de région porte « BUREAU RÉGIONAL DE COORDINATION — … » ;
+  - « Unité régionale de coordination » reste employé quand il s'agit de tous les membres de la
+    région (ex. une cotisation demandée à l'unité, qui paie ensemble).
+
 *(À compléter au fil des remarques du mainteneur.)*
