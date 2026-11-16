@@ -76,7 +76,47 @@ Décisions du 14/11/2026 sur la rédaction et la signature :
   - son dépôt ou son remplacement est inscrit au journal ;
   - à la fin du mandat, elle ne peut plus servir.
 
-Questions à préparer pour la séance de lundi :
+Séance du lundi 16/11/2026 : format des courriers (modèle fourni par le mainteneur :
+`docs/donnees/modeles/format-courrier-national.docx`, aperçu `format-courrier-national.png`).
+
+**Mise en page du modèle national** :
+- **Bandeau d'en-tête** bleu marine, avec un filet jaune or en dessous :
+  - logo de la Congrégation à gauche, logo de l'Armée du Salut à droite ;
+  - au centre, sur cinq lignes : « CONGREGATION CHRETIENNE DE L'ORDRE SACRE ETERNEL », « DES
+    CHERUBINS ET SERAPHINS ‘’MONT SION’’ », « DU BENIN », « COMITE NATIONAL DE COORDINATION »,
+    « BUREAU NATIONAL DE COMMANDEMENT » (la dernière ligne en jaune or, plus grande).
+- **Sous le bandeau** :
+  - à gauche, le **numéro** « Numéro d'ordre-Année/CCOSECS-CNC/AS/BNC/SN », et en dessous
+    « *Bureau National de Commandement* » en italique gras ;
+  - à droite, « **Porto-Novo, le** … ».
+- Plus bas : **« Objet : »** (souligné) à gauche, **« Destinataire »** à droite, puis le **texte**.
+- **Signataire** en bas à droite.
+- **Pied de page**, après un filet bordeaux : « SIEGE SOCIAL : C/N°135 TOKPOTA DAVO — BP : 800
+  PORTO-NOVO — Email : … — Tél : … ».
+
+**Décisions de la séance** :
+- **Numéro d'ordre** : exemple « 012-2026/CCOSECS-CNC/AS/BNC/SN ».
+  - Il **repart à 001 chaque année**.
+  - Le site propose le numéro suivant ; il reste modifiable.
+  - « SN » est fixe pour le Bureau national.
+- **Signature** : le **Président** signe ; le **Secrétaire national peut signer « Pour ordre »**
+  (mention « P.O. le Secrétaire national »), avec sa propre signature déposée. Même règle au niveau
+  local : le **Chef** signe, ou le Secrétaire P.O.
+  *(Cela précise la décision « Président seul » du 13/11/2026.)*
+- **Bureau local** (paroisse, circuit, région) : même bandeau.
+  - La dernière ligne devient le nom du bureau (ex. « UNITÉ PAROISSIALE DE GBOA — RÉGION OUÉMÉ »).
+  - Numéro : par exemple « 007-2026/CCOSECS-CNC/AS/UP-GBOA/S », avec une suite propre à chaque
+    bureau.
+  - Le lieu est la ville de l'unité.
+  - Le pied de page reste l'adresse du siège national.
+- **Communiqué** : même en-tête et même numéro d'ordre, avec le titre « **COMMUNIQUÉ** » centré.
+  Pas de destinataire nominatif (« À l'attention de tous les bureaux »), puis l'objet et le texte.
+
+Questions restantes :
+- Sigles exacts des bureaux locaux pour le numéro (UP = unité paroissiale ; circuit : « SC » ?
+  région : « URC » ?) et dernier sigle (« S » pour le secrétariat ?).
+
+Questions préparées avant la séance (réponses ci-dessus) :
 - Exemplaires de courriers et de communiqués : en-tête exact, mentions, place du numéro, de la date,
   de l'objet et de la signature.
 - Format du numéro d'ordre : numéro, sigle du bureau, sigle du signataire, année ? Remise à zéro
