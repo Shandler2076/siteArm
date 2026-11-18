@@ -211,7 +211,7 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
 | f | **Sinsẹn Ọṣio didi tọn** | **Culte d'enterrement** : le culte qui précède l'inhumation, le samedi matin. |
 | g | **Gbigbọ de jẹte** (point sous le premier e seulement) | **Sortie de transe**. |
 
-- **Isọji en série :** un programme par séance (« séance 3/7 ») ou un seul pour toute la série ? → à préciser.
+- **[décidé] Isọji :** pas de notion de série. On génère **un programme à chaque séance**, au besoin, comme pour les autres cultes.
 - **Obsèques** = type **f** (culte d'enterrement) + type **b** (veillée d'enterrement).
 - **[proposition] Conséquence technique :** l'application, ses écrans et ses PDF doivent afficher
   correctement les lettres Goun et Yoruba à point souscrit (ẹ, ọ, ṣ…) et les accents. La recherche
