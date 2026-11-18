@@ -659,7 +659,7 @@ def purger_abandonnes(jours: int = DUREE_ABANDON_JOURS) -> int:
         try:
             with transaction.atomic():
                 c = (
-                    Courrier.objects.select_for_update()
+                    Courrier.objects.select_for_update(of=("self",))
                     .select_related("prepare_par")
                     .filter(pk=pk, etat=Etat.ANNULE, date_abandon__lt=limite)
                     .first()
