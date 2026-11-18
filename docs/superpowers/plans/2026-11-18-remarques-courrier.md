@@ -104,3 +104,13 @@ Constat général : la rubrique est « un peu mélangée ». Points relevés apr
 
 ## 10. En-tête
 - Le **logo de gauche** (Congrégation) va changer : le mainteneur proposera bientôt le nouveau logo.
+
+## 11. Signature mal centrée sur le PDF (18/11/2026)
+- Constat : l'image de la signature est **décalée vers la gauche** ; elle doit être exactement
+  sous le titre (« Le Président », « P.O. le … ») et au-dessus du nom.
+- Cause : dans le bloc de signature du PDF (`apps/courrier/pdf.py::_bloc_signature`), le titre et
+  le nom sont des paragraphes centrés, mais l'image suit l'alignement de la case du tableau, qui
+  est à gauche par défaut. De plus, la photo de signature garde ses marges blanches, ce qui peut
+  encore la décaler.
+- Correction prévue : centrer la colonne de signature, et **recadrer automatiquement** l'image
+  sur le trait de signature (retrait des marges blanches) au dépôt.
