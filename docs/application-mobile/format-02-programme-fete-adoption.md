@@ -4,7 +4,7 @@ Document reçu : `documents-recus/02-programme-fete-adoption.jpg` (programme ré
 Église : Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins (Mont-Sion).
 
 > Confirmé : fête d'adoption (cumulée avec une action de grâce). **Ce format vaut pour toutes les
-> fêtes** (adoption, action de grâce, fêtes ordinaires). `CGN` = Cantique Goun ; `596(A)` = version A
+> fêtes** (adoption, action de grâce, fêtes ordinaires). `CGN` = Cantique Goun (dans nos documents : **`CANT. GUN`** / **`CANT. YOR`**) ; `596(A)` = version A
 > du cantique 596 (versions A, B, C). En-tête et intitulé : proposés, toujours modifiables.
 
 ## 1. En-tête (haut de page)
@@ -42,7 +42,7 @@ Chaque ligne suit le même modèle :
 ## 5. Conséquences pour l'application **[propositions]**
 - Un **en-tête de paroisse** réutilisable (logo, textes du siège, région, circuit, photo du fondateur).
 - Une **liste de titres abrégés** (Spl Apt, Snr Surt Apt…) proposée à la saisie des officiants.
-- Le code de recueil utilisé sur le terrain est **`CGN`** (cantique Goun ?) : à reprendre tel quel
-  plutôt que `G`.
+- Codes affichés : **`CANT. GUN`** et **`CANT. YOR`** (décidé).
+- Les 24 rubriques sont proposées d'office ; on peut les modifier ou les déplacer (décidé).
 - Mise en page : points de suite automatiques entre le libellé et le responsable, tout tenir sur
   **une page A4**.

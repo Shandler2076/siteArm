@@ -193,8 +193,7 @@
   les recueils **Goun et Yoruba**, disponibles partout (applications, papier).
 - Si un chant en français est nécessaire, il est inséré comme un **chant spécial** (photo ou
   texte), comme les autres chants hors recueil.
-- **[décidé]** Notation `G12` (Goun) / `Y45` (Yoruba). La lettre `F` est réservée au recueil français
-  pour plus tard.
+- ~~Notation `G12` / `Y45`~~ → remplacée à l'échange 17 (affichage `CANT. GUN` / `CANT. YOR`).
 
 ### Échange 14 (18/11/2026) — liste des types de culte
 Document reçu : `documents-recus/01-liste-types-de-culte.jpg` (liste manuscrite).
@@ -228,26 +227,33 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
   fêtes** (adoption, action de grâce, fêtes ordinaires) ont **le même format de programme**.
 - **[décidé]** L'**en-tête et l'intitulé** sont **proposés** par l'application mais **toujours modifiables**
   par celui qui remplit (ex. « culte d'Action de grâce et de reconnaissance à Dieu »).
-- **[décidé]** `CGN` = **Cantique Goun**. On reprend ce code.
+- `CGN` = **Cantique Goun** (code utilisé dans l'exemplaire, mais de façon incohérente : CGN, CN…).
 - `(PM)` : particularité du recueil, à comprendre quand le recueil sera fourni.
 - **[décidé]** Un même numéro peut avoir **plusieurs versions : A, B, C** (ex. `596(A)`). Un cantique
   s'identifie donc par **numéro + lettre facultative**.
 - Le dépôt `siteArm` **n'est pas public** : les exemplaires peuvent y rester.
 - **[décidé]** Les **noms et titres (grades)** des officiants sont **saisis à la main**.
 
+### Échange 17 (18/11/2026) — rubriques et codes des recueils
+- **[décidé]** Pour une fête, la liste est **toujours (presque) la même** : les **24 rubriques classiques**.
+  L'application les propose d'office. Celui qui remplit **peut modifier, ajouter, retirer ou déplacer**
+  une rubrique si nécessaire. La numérotation se refait automatiquement.
+- **[décidé] Codes des recueils affichés dans les documents :**
+  - **`CANT. GUN`** = Cantique Goun ;
+  - **`CANT. YOR`** = Cantique Yoruba.
+  (On n'imite pas les codes incohérents des programmes actuels : CGN, CN…)
+- **[proposition]** Pour taper vite, des raccourcis de saisie : `G596A` → affiché
+  « CANT. GUN N° 596(A) », `Y45` → « CANT. YOR N° 45 ».
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
-- Code du recueil Yoruba (équivalent de `CGN`) ?
-- Liste des rubriques du format « fêtes » : fixe, ou modifiable à chaque programme ?
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
-- Code du recueil Yoruba (équivalent de `CGN`) ?
-- Liste des rubriques du format « fêtes » : fixe, ou modifiable à chaque programme ?
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
