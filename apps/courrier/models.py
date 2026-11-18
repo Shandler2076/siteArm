@@ -41,9 +41,29 @@ class Mode(models.TextChoices):
 
 class Etat(models.TextChoices):
     A_SIGNER = "a_signer", "En attente de signature"
-    A_CORRIGER = "a_corriger", "Renvoyé pour correction"
+    A_CORRIGER = "a_corriger", "En correction"
     ENVOYE = "envoye", "Envoyé"
     ANNULE = "annule", "Abandonné"
+
+
+class Langue(models.TextChoices):
+    FRANCAIS = "fr", "Français"
+    GOUN = "gun", "Goun"
+
+
+class Police(models.TextChoices):
+    """Polices du courrier (décision du 18/11/2026) ; fichiers dans static/fonts/courrier/."""
+
+    LIBERATION_SERIF = "liberation_serif", "Liberation Serif (type Times New Roman)"
+    LIBERATION_SANS = "liberation_sans", "Liberation Sans (type Arial)"
+    CHARIS = "charis", "Charis SIL (langues africaines, Bibles)"
+    GENTIUM = "gentium", "Gentium Plus"
+    NOTO_SERIF = "noto_serif", "Noto Serif"
+
+
+POLICE_PAR_LANGUE = {Langue.FRANCAIS: Police.LIBERATION_SERIF, Langue.GOUN: Police.CHARIS}
+TAILLES = (10, 11, 12, 13)
+TAILLE_MIN_UNE_PAGE = 9
 
 
 class Qualite(models.TextChoices):
@@ -87,6 +107,15 @@ class Courrier(models.Model):
     numero_ordre = models.PositiveIntegerField("numéro d'ordre")
     numero = models.CharField("numéro complet", max_length=120, blank=True)
     lieu = models.CharField("lieu", max_length=100)
+    langue = models.CharField(
+        "langue", max_length=3, choices=Langue.choices, default=Langue.FRANCAIS
+    )
+    adresse = models.TextField("ligne d'adresse", blank=True)
+    police = models.CharField(
+        "police", max_length=20, choices=Police.choices, default=Police.LIBERATION_SERIF
+    )
+    taille = models.PositiveSmallIntegerField("taille du texte", default=12)
+    une_page = models.BooleanField("tenir sur une page", default=False)
     objet = models.CharField("objet", max_length=250)
     texte = models.TextField("texte", blank=True)
     fichier = models.FileField(
@@ -104,6 +133,7 @@ class Courrier(models.Model):
         SignatureDeposee, on_delete=models.PROTECT, null=True, blank=True, related_name="+"
     )
     date_envoi = models.DateTimeField("envoyé le", null=True, blank=True)
+    date_abandon = models.DateTimeField("abandonné le", null=True, blank=True)
     version = models.PositiveIntegerField("version", default=1)
     jeton = models.CharField("jeton de vérification", max_length=64, unique=True, default=_jeton)
 

@@ -21,5 +21,7 @@ urlpatterns = [
     path("<str:cle>/recus/", views.recus, name="recus"),
     path("<str:cle>/envoyes/", views.envoyes, name="envoyes"),
     path("<str:cle>/nouveau/", views.nouveau, name="nouveau"),
+    path("<str:cle>/en-correction/", views.en_correction, name="en_correction"),
+    path("<str:cle>/abandonnes/", views.abandonnes, name="abandonnes"),
     path("<str:cle>/recherche/", views.recherche, name="recherche"),
 ]

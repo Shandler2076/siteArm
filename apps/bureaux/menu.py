@@ -207,12 +207,19 @@ def construire_menu(request) -> list[Groupe]:
     for u in u_cour:
         s = f" — {u.libelle}" if len(u_cour) > 1 else ""
         courrier += [
+            Lien(f"Nouveau courrier{s}", reverse("courrier:nouveau", args=[u.cle])),
             Lien(f"Courrier reçu{s}", reverse("courrier:recus", args=[u.cle])),
             Lien(
                 f"Courriers envoyés{s}",
                 reverse("courrier:envoyes", args=[u.cle]),
                 prefixes=(f"/courrier/{u.cle}/",),
             ),
+            Lien(
+                f"En correction{s}",
+                reverse("courrier:en_correction", args=[u.cle]),
+                compteur=_nb_courriers(u.cle, "a_corriger"),
+            ),
+            Lien(f"Courriers abandonnés{s}", reverse("courrier:abandonnes", args=[u.cle])),
         ]
     if peut_deposer_signature(user):
         courrier += [
@@ -243,7 +250,7 @@ def construire_menu(request) -> list[Groupe]:
             controle.append(Lien("Administration technique", "/gestion/"))
         groupes.append(Groupe("Contrôle", controle))
 
-    _marquer_actif(groupes, request.path, request.GET)
+    _marquer_actif(groupes, request.path, request.GET, getattr(request, "rubrique_menu", None))
     return groupes
 
 
@@ -272,6 +279,12 @@ def _mon_espace(user) -> list[Lien]:
     return liens
 
 
+def _nb_courriers(cle: str, etat: str) -> int:
+    from apps.courrier.models import Courrier
+
+    return Courrier.objects.filter(expediteur_cle=cle, etat=etat).count()
+
+
 def _nb_a_signer(user) -> int:
     from apps.courrier.services import courriers_a_signer
 
@@ -287,7 +300,14 @@ def _nb_decisions() -> int:
     )
 
 
-def _marquer_actif(groupes: list[Groupe], chemin: str, parametres) -> None:
+def _marquer_actif(groupes: list[Groupe], chemin: str, parametres, rubrique=None) -> None:
+    """`rubrique` : adresse imposée par la page (ex. un courrier rattaché à « En correction »)."""
+    if rubrique:
+        for g in groupes:
+            for lien in g.liens:
+                if lien.url == rubrique:
+                    g.ouvert = lien.actif = True
+                    return
     meilleur, choix = 0, None
     for g in groupes:
         for lien in g.liens:

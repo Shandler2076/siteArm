@@ -18,27 +18,52 @@ Rubrique **« Courrier »** du menu (et « Mes courriers » dans « Mon espace �
 ## 2. Déposer sa signature (signataires, une seule fois)
 
 1. Signez sur une feuille blanche, photographiez ou scannez la signature.
-2. Menu « Courrier » → **Ma signature** → choisissez l'image → **Enregistrer ma signature**.
+2. Menu « Courrier » → **Ma signature** → choisissez l'image → **Enregistrer ma signature**. Le site
+   la recadre sur le trait ; sur le courrier, elle est centrée sous votre titre, au-dessus de votre
+   nom.
+3. Pour la **changer** : **Ma signature** → **Changer ma signature** ; votre mot de passe (et le
+   code à 6 chiffres si votre double vérification est active) est demandé.
 
 L'image est rangée à l'abri : vous seul la voyez, elle n'apparaît que sur les courriers que **vous**
 signez, et plus du tout après la fin de votre mandat. Chaque dépôt est inscrit au journal.
 
 ## 3. Préparer un courrier
 
-Menu « Courrier » → **Courriers envoyés** → **Nouveau courrier**.
+Menu « Courrier » → **Nouveau courrier**.
 
-1. **Nature** : courrier, ou communiqué (titre « COMMUNIQUÉ », « À l'attention de tous les
-   bureaux »).
-2. **Numéro d'ordre** : le site propose le suivant (suite propre à votre bureau, 001 chaque année).
-   Vous pouvez le changer ; il devient définitif à la signature.
+1. **Nature** : courrier, ou communiqué (titre « COMMUNIQUÉ »).
+2. **Numéro d'ordre** : rien à saisir. Le site l'attribue automatiquement à la signature (le suivant
+   de votre bureau, 001 chaque année) : deux courriers ne peuvent jamais avoir le même numéro. La
+   date imprimée est celle de la signature.
 3. **Lieu** (Porto-Novo au national) et **objet**.
 4. **Destinataires** : cochez des bureaux (recherche par nom), des niveaux entiers (tous les bureaux
    de région, de circuit, de paroisse), et/ou ajoutez des membres (recherche par nom ou matricule).
    Un bureau local écrit au Bureau national ou aux bureaux placés en dessous de lui.
-5. **Contenu** : rédigez le texte (une ligne vide entre deux paragraphes), **ou** importez un
+5. **Présentation** :
+   - **langue** : français ou goun (le clavier goun n'apparaît qu'en goun) ;
+   - **ligne d'adresse** : en français, laissez vide et le site écrit « À Monsieur le … »,
+     « Au Capitaine … » ou « À la Capitaine … » (vous pourrez la corriger) ; en goun, elle commence
+     par « Hlan » : écrivez la suite (une personne, un bureau, une région, toute la communauté…) ;
+   - **police** (Charis SIL, Gentium Plus, Liberation Serif, Liberation Sans, Noto Serif) et
+     **taille** (10 à 13 points) : le texte s'affiche aussitôt dans la police choisie ;
+   - **Tenir sur une page** : le site resserre le texte (jusqu'à 9 points).
+6. **Contenu** : rédigez le texte (une ligne vide entre deux paragraphes), **ou** importez un
    courrier déjà écrit (photo, scan ou PDF, 10 Mo au plus).
-6. **Pièces jointes** : 5 au plus (PDF, JPEG, PNG).
-7. **Préparer le courrier** : il attend la signature ; le signataire est prévenu.
+7. **Pièces jointes** : 5 au plus (PDF, JPEG, PNG).
+8. **Préparer le courrier** : il attend la signature ; le signataire est prévenu. Ouvrez **Voir le
+   projet en PDF** pour le voir exactement comme il sera imprimé.
+
+### Modifier un courrier qui attend la signature
+
+Ouvrez le courrier → **Modifier**. Il passe **en correction** (menu « En correction ») : le
+signataire est prévenu et ne peut plus le signer. Corrigez, puis cliquez sur **Enregistrer et
+soumettre à la signature** (ou sur **Soumettre de nouveau à la signature** depuis le courrier).
+
+### Abandonner, reprendre, supprimer
+
+**Abandonner ce courrier** : il n'est jamais envoyé et va dans **Courriers abandonnés**. De là, vous
+pouvez le **reprendre** (il repasse en correction) ou le **supprimer**. Sans reprise, il est effacé
+automatiquement un mois après l'abandon. Un courrier envoyé, lui, ne se supprime jamais.
 
 ### Le clavier goun
 
@@ -47,9 +72,9 @@ Sous le texte, touchez une **lettre goun** (ẹ, ọ, ṣ) : elle s'écrit à l'
 ## 4. Signer
 
 Menu « Courrier » → **Courriers à signer** → ouvrez le courrier → **Voir le projet en PDF** si besoin
-→ **Signer et envoyer** (ou **Signer pour ordre et envoyer**). Ou bien **Renvoyer pour correction**
-en disant ce qu'il faut corriger : le préparateur le modifie, puis le courrier revient à la
-signature.
+→ **Signer et envoyer** (ou **Signer pour ordre et envoyer**). Ou bien **Demander une correction au
+secrétaire**, avec votre message : le courrier n'est pas signé, il passe en correction, et il vous
+revient quand le secrétaire le soumet de nouveau.
 
 À l'envoi : numéro définitif, votre signature et un **QR code** sur le PDF ; notification (et
 e-mail) aux destinataires. Un courrier envoyé ne se modifie plus.

@@ -4,18 +4,24 @@
 <section class="carte">
   <p><a href="{% url 'courrier:detail' c.pk %}">← Le courrier</a></p>
   <h1>Modifier le courrier</h1>
-  {% if c.motif_renvoi %}<p class="message message--error">À corriger : {{ c.motif_renvoi }}</p>{% endif %}
+  <p class="message">Ce courrier est <strong>en correction</strong> : le signataire ne peut pas le signer tant que vous ne l'avez pas soumis de nouveau.</p>
+  {% if c.motif_renvoi %}<p class="message message--error">Correction demandée par le signataire : {{ c.motif_renvoi }}</p>{% endif %}
   <form method="post" enctype="multipart/form-data">{% csrf_token %}
     <div class="date-heure">
-      <label class="champ champ--requis"><span>Numéro d'ordre</span><input type="number" name="numero_ordre" min="1" max="99999" required value="{{ c.numero_ordre }}"></label>
+      <p class="champ"><span>Numéro d'ordre</span><strong>Attribué à la signature</strong></p>
       <label class="champ champ--requis"><span>Lieu</span><input name="lieu" maxlength="100" required value="{{ c.lieu }}"></label>
     </div>
     <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ c.objet }}" data-clavier></label>
+    {% include "courrier/_presentation.html" with v=c %}
     {% if c.mode == "importe" %}<label class="champ"><span>Remplacer le courrier importé (facultatif)</span><input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png"></label>{% endif %}
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ c.texte }}</textarea></label>
     {% include "courrier/_clavier.html" %}
     <p class="aide">Les destinataires et les pièces jointes ne changent pas. Pour les changer, abandonnez ce courrier et préparez-en un nouveau.</p>
-    <button type="submit" class="bouton">Enregistrer (le courrier attend la signature)</button>
+    <div class="boutons-courrier">
+      <button type="submit" name="soumettre" value="1" class="bouton">Enregistrer et soumettre à la signature</button>
+      <button type="submit" class="bouton bouton--secondaire">Enregistrer (reste en correction)</button>
+    </div>
+    <p class="aide"><a href="{% url 'courrier:pdf' c.pk %}">Voir le projet en PDF</a> (enregistrez d'abord vos modifications).</p>
   </form>
 </section>
 {% endblock %}

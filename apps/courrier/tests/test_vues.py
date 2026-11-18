@@ -52,7 +52,6 @@ def test_parcours_complet_par_les_pages(bn):
         {
             "nature": "lettre",
             "mode": "redige",
-            "numero_ordre": "12",
             "lieu": "Porto-Novo",
             "objet": "Réunion du bureau",
             "texte": "Texte du courrier.",
@@ -61,13 +60,13 @@ def test_parcours_complet_par_les_pages(bn):
         },
     )
     c = Courrier.objects.get()
-    assert r.status_code == 302 and c.numero_ordre == 12 and c.destinataires.count() == 2
+    assert r.status_code == 302 and c.destinataires.count() == 2
     pres = _client(bn["president"])
     assert c.objet in _html(pres.get("/courrier/a-signer/"))
     pres.post("/courrier/ma-signature/", {"image": image_signature()})
     pres.post(f"/courrier/c/{c.pk}/action/", {"action": "valider", "version": c.version})
     c.refresh_from_db()
-    assert c.etat == Etat.ENVOYE and c.numero == "012-2026/CCOSECS-CNC/AS/BNC/SN"
+    assert c.etat == Etat.ENVOYE and c.numero == "001-2026/CCOSECS-CNC/AS/BNC/SN"
     # Le Secrétaire de P1 reçoit, ouvre, confirme.
     sec = _client(bn["sec_p1"])
     assert "Réunion du bureau" in _html(sec.get(f"/courrier/paroisse-{bn['P1'].pk}/recus/"))

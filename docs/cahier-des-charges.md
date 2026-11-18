@@ -1048,15 +1048,33 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   du bureau : « BUREAU NATIONAL DE COMMANDEMENT », « UNITÉ PAROISSIALE DE … — RÉGION … »,
   « SECTION CIRCUIT DE … », « BUREAU RÉGIONAL DE COORDINATION — … ») ; pied de page au siège
   national, **sans e-mail**.
-- **Numéro d'ordre** propre à chaque bureau, de 001 chaque année, proposé et modifiable, définitif à
-  la signature : « 012-2026/CCOSECS-CNC/AS/BNC/SN », « 007-2026/CCOSECS-CNC/AS/UP-GBOA/S »
-  (sigles UP, SC, BRC).
+- **Numéro d'ordre** propre à chaque bureau, de 001 chaque année, **automatique et non modifiable**
+  (18/11/2026) : attribué à la signature, dans l'ordre des signatures, donc jamais deux fois le même
+  et sans trou si un courrier est abandonné : « 012-2026/CCOSECS-CNC/AS/BNC/SN »,
+  « 007-2026/CCOSECS-CNC/AS/UP-GBOA/S » (sigles UP, SC, BRC). La **date** est celle de la signature.
+- **Langue** (18/11/2026) : français ou goun, choisie avant la rédaction ; le clavier goun n'apparaît
+  qu'en goun.
+- **Ligne d'adresse** à la place du mot « Destinataire » : en français, « À Monsieur le … »,
+  « Au Capitaine … », « À la Capitaine … » (proposée par le site, corrigeable) ; en goun, « Hlan »
+  suivi de ce que le rédacteur écrit (une personne, un bureau, une région, toute la communauté…).
+- **Police et taille** (18/11/2026) : Charis SIL (par défaut en goun), Gentium Plus, Liberation
+  Serif (par défaut en français), Liberation Sans, Noto Serif ; 10, 11, 12 ou 13 points, et « Tenir
+  sur une page » (jusqu'à 9 points). Le texte s'affiche dans la police choisie pendant la frappe, et
+  le projet en PDF se voit avant la signature. Texte justifié, aligné sur la marge de l'en-tête.
 - **Signature** : le Secrétaire (ou le Chef) prépare ; le **Président** (ou le **Chef** d'un bureau
   local) signe, ou le Secrétaire **pour ordre** (« P.O. »), avec son propre compte. Chaque
   signataire dépose **l'image de sa signature** dans son compte (stockage privé, visible de lui seul,
   dépôt inscrit au journal, inutilisable hors mandat). Le PDF porte la signature et un **QR code**
-  menant à la page publique de vérification (numéro, date, objet, signataire ; jamais le texte). Le
-  signataire peut **renvoyer** le courrier pour correction.
+  menant à la page publique de vérification (numéro, date, bureau, signataire ; ni l'objet ni le
+  texte). La signature est **centrée** sous le titre et au-dessus du nom ; l'image est recadrée sur le
+  trait au dépôt. **Changer sa signature** demande le mot de passe et, si elle est active, le code de
+  double vérification.
+- **Correction** (18/11/2026) : « Modifier » met le courrier **en correction** ; le signataire est
+  prévenu et ne peut plus signer jusqu'à « Soumettre de nouveau à la signature ». Le signataire peut
+  aussi **demander une correction au secrétaire** (avec un message). Menu : Nouveau courrier, Courrier
+  reçu, Courriers envoyés, En correction, Courriers abandonnés, Courriers à signer, Ma signature.
+- **Courriers abandonnés** : jamais envoyés ; on peut les **reprendre** ou les **supprimer** ; effacés
+  automatiquement **un mois** après l'abandon (tâche quotidienne).
 - **Réception** : dans un bureau, seul le **responsable** (Chef et Secrétaire ; au national, le
   Président et le Secrétaire national) reçoit ; un membre ne reçoit que ce qui lui est adressé. La
   paroisse peut **transmettre** un communiqué à ses membres. **Accusés** de réception et de lecture,
@@ -1066,6 +1084,9 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   BN ne contient que les courriers envoyés par le BN et ceux qui lui sont adressés. **Le BN ne voit
   pas les courriers échangés entre les autres niveaux** ni ceux qu'un bureau adresse à ses membres
   (décision du 18/11/2026). Un courrier envoyé ne se modifie ni ne se supprime.
+- **Logo de gauche** (18/11/2026) : nouveau logo de la Congrégation, triangle et deux anges **sans
+  texte**, dans une case à sa forme. Même logo sur la fiche du membre ; à l'accueil, le nom de la
+  Congrégation est écrit en lignes droites sous le logo.
 
 ### 18.2 Autres évolutions prévues
 

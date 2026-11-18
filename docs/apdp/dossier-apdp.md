@@ -198,6 +198,8 @@ Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
 | Coordonnées, personne à contacter et photo du CIP après la perte de la qualité de membre | Supprimées 5 ans après la perte de la qualité de membre (proposition) |
 | Journal des opérations et des connexions | 5 ans (proposition) |
 | Fichiers Excel déposés pour l'enregistrement par lots | Supprimés 1 an après la validation du lot (proposition) |
+| Courriers abandonnés (jamais envoyés) et leurs pièces jointes | Effacés automatiquement un mois après l'abandon |
+| Courriers envoyés | Conservés au registre du bureau (archives du mouvement) |
 | Sauvegardes | Rotation automatique de l'hébergeur (environ 30 jours) |
 
 ### 3.9 Mesures de sécurité

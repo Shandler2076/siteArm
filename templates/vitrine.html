@@ -4,10 +4,12 @@
 {% block contenu %}
 <section class="vitrine-hero">
   <div class="vitrine-logos">
-    <img src="{% static 'img/logo-congregation.png' %}" alt="Logo de la Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins « Mont Sion » du Bénin">
+    <img class="vitrine-logo-congregation" src="{% static 'img/logo-congregation-sans-texte.png' %}" alt="Logo de la Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins Mont-Sion du Bénin">
     <img src="{% static 'img/logo-armee-du-salut.png' %}" alt="Logo de l'Armée du Salut">
   </div>
-  <p class="vitrine-surtitre">Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins « Mont Sion » du Bénin</p>
+  {# Nom de la Congrégation sous le logo, en lignes droites (décision du 18/11/2026). #}
+  <p class="vitrine-surtitre"><span>Congrégation Chrétienne</span> <span>de l'Ordre Sacré Éternel</span>
+    <span>des Chérubins et Séraphins</span> <span>Mont-Sion du Bénin</span></p>
   <h1>Armée du Salut du Bénin</h1>
   <p class="vitrine-nom">Ọmọ Ogun Igbala</p>
   <p class="vitrine-devise">FOI – AMOUR – JUSTICE</p>

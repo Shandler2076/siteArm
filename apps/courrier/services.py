@@ -6,6 +6,7 @@ part : notification (et e-mail) au responsable de chaque bureau destinataire et 
 désignés. Un courrier envoyé ne se modifie plus.
 """
 
+import datetime
 import io
 import re
 import unicodedata
@@ -29,14 +30,18 @@ from apps.bureaux.perimetre import (
 )
 from apps.comptes.models import Compte
 from apps.courrier.models import (
+    POLICE_PAR_LANGUE,
+    TAILLES,
     Courrier,
     Destinataire,
     Etat,
+    Langue,
     Mode,
     MotClavier,
     Nature,
     OrigineMot,
     PieceJointe,
+    Police,
     Qualite,
     ReglagesClavier,
     SignatureDeposee,
@@ -124,28 +129,12 @@ def unite_expeditrice(courrier: Courrier) -> Unite | None:
 
 # --- Numéro d'ordre ------------------------------------------------------------------------------
 def proposer_numero(unite: Unite, annee: int) -> int:
+    """Numéro suivant du bureau pour l'année (décision du 18/11/2026 : automatique, non
+    modifiable). Il est définitif à la signature : un courrier abandonné ne laisse pas de trou."""
     dernier = Courrier.objects.filter(
         expediteur_cle=unite.cle, annee=annee, etat=Etat.ENVOYE
     ).aggregate(m=Max("numero_ordre"))["m"]
-    en_cours = Courrier.objects.filter(
-        expediteur_cle=unite.cle, annee=annee, etat__in=(Etat.A_SIGNER, Etat.A_CORRIGER)
-    ).aggregate(m=Max("numero_ordre"))["m"]
-    return max(dernier or 0, en_cours or 0) + 1
-
-
-def _verifier_numero(unite: Unite, annee: int, numero_ordre: int, sauf=None) -> None:
-    if not numero_ordre or numero_ordre < 1 or numero_ordre > 99999:
-        raise CourrierRefuse("Le numéro d'ordre doit être un nombre positif.")
-    deja = Courrier.objects.filter(
-        expediteur_cle=unite.cle, annee=annee, numero_ordre=numero_ordre, etat=Etat.ENVOYE
-    )
-    if sauf is not None:
-        deja = deja.exclude(pk=sauf.pk)
-    if deja.exists():
-        raise CourrierRefuse(
-            f"Le numéro {numero_ordre:03d}-{annee} est déjà employé par un courrier envoyé de ce "
-            f"bureau. Numéro proposé : {proposer_numero(unite, annee):03d}."
-        )
+    return (dernier or 0) + 1
 
 
 # --- Fichiers ------------------------------------------------------------------------------------
@@ -307,10 +296,67 @@ def _libelle_bureau(u: Unite) -> str:
     }[u.niveau]
 
 
+# --- Ligne d'adresse (décisions du 18/11/2026) ---------------------------------------------------
+TITRES_RESPONSABLES = {
+    Niveau.NATIONAL: "Monsieur le Président du Bureau National de Commandement",
+    Niveau.PAROISSE: "Monsieur le Chef de l'Unité paroissiale de {nom}",
+    Niveau.CIRCUIT: "Monsieur le Chef de la Section circuit de {nom}",
+    Niveau.REGION: "Monsieur le Coordinateur du Bureau régional de coordination — {nom}",
+}
+COMMUNIQUE_ADRESSE = "À l'attention de tous les bureaux"
+
+
+def _verifier_adresse(langue: str, adresse: str) -> None:
+    """La ligne d'adresse suit la langue : « Hlan … » en goun, pas de « Hlan » en français."""
+    mots = re.findall(r"[^\W\d_]+", (adresse or "").lower())
+    commence_par_hlan = bool(mots) and mots[0] == "hlan"
+    if langue == Langue.GOUN and (not commence_par_hlan or len(mots) < 2):
+        raise CourrierRefuse(
+            "En goun, la ligne d'adresse commence par « Hlan », suivi du destinataire."
+        )
+    if langue == Langue.FRANCAIS and commence_par_hlan:
+        raise CourrierRefuse("En français, la ligne d'adresse ne commence pas par « Hlan ».")
+
+
+def adresse_proposee(nature: str, langue: str, bureaux=(), membres=()) -> str:
+    """Début de la ligne d'adresse ; le rédacteur l'écrit ou la corrige toujours à la main.
+
+    Français : « À Monsieur le … », « Au Capitaine … », « À la Capitaine … ».
+    Goun : « Hlan », suivi de ce que le rédacteur écrit lui-même.
+    """
+    if langue == Langue.GOUN:
+        return "Hlan "
+    if nature == Nature.COMMUNIQUE:
+        return COMMUNIQUE_ADRESSE
+    if len(bureaux) + len(membres) != 1:
+        return "À Mesdames et Messieurs les destinataires"
+    if bureaux:
+        u = bureaux[0]
+        titre = TITRES_RESPONSABLES[u.niveau]
+        return "À " + (titre if u.niveau == Niveau.NATIONAL else titre.format(nom=_nom_propre(u)))
+    m = membres[0]
+    return ("À la " if m.sexe == "F" else "Au ") + m.nom_complet
+
+
 # --- Préparation ---------------------------------------------------------------------------------
 def _controler_preparateur(unite: Unite, par) -> None:
     if unite not in unites_courrier(par):
         raise CourrierRefuse("Vous ne pouvez pas préparer de courrier pour ce bureau.")
+
+
+def _presentation(langue, police, taille, une_page) -> dict:
+    if langue not in Langue.values:
+        raise CourrierRefuse("Langue inconnue.")
+    police = police or POLICE_PAR_LANGUE[langue]
+    if police not in Police.values:
+        raise CourrierRefuse("Police inconnue.")
+    try:
+        taille = int(taille or 12)
+    except (TypeError, ValueError):
+        taille = 12
+    if taille not in TAILLES:
+        raise CourrierRefuse("Taille du texte : 10, 11, 12 ou 13 points.")
+    return {"langue": langue, "police": police, "taille": taille, "une_page": bool(une_page)}
 
 
 def _contenu(mode, texte, fichier, courrier=None) -> tuple[str, str | None]:
@@ -339,7 +385,11 @@ def preparer(
     mode: str = Mode.REDIGE,
     fichier=None,
     lieu: str = "",
-    numero_ordre: int | None = None,
+    langue: str = Langue.FRANCAIS,
+    adresse: str = "",
+    police: str = "",
+    taille: int = 12,
+    une_page: bool = False,
     bureaux=(),
     niveaux=(),
     membres=(),
@@ -356,16 +406,21 @@ def preparer(
     if len(pieces) > PIECES_MAX:
         raise CourrierRefuse(f"{PIECES_MAX} pièces jointes au plus.")
     extensions_pieces = [type_fichier(p) for p in pieces]
+    presentation = _presentation(langue, police, taille, une_page)
+    adresse = (adresse or "").strip()[:500] or adresse_proposee(
+        nature, langue, destinataires_bureaux, destinataires_membres
+    )
+    _verifier_adresse(langue, adresse)
     annee = timezone.localdate().year
-    numero_ordre = numero_ordre or proposer_numero(unite, annee)
-    _verifier_numero(unite, annee, numero_ordre)
     c = Courrier(
+        adresse=adresse,
+        **presentation,
         nature=nature,
         mode=mode,
         expediteur_cle=unite.cle,
         expediteur_libelle=nom_bureau(unite),
         annee=annee,
-        numero_ordre=numero_ordre,
+        numero_ordre=proposer_numero(unite, annee),  # provisoire, définitif à la signature
         lieu=(lieu or "").strip()[:100] or lieu_par_defaut(unite),
         objet=objet[:250],
         texte=texte,
@@ -408,6 +463,41 @@ def _verrouiller(courrier: Courrier) -> Courrier:
     return Courrier.objects.select_for_update().get(pk=courrier.pk)
 
 
+def _preparateur(c: Courrier, par) -> Unite:
+    unite = unite_expeditrice(c)
+    if unite is None:
+        raise CourrierRefuse("Bureau expéditeur introuvable.")
+    _controler_preparateur(unite, par)
+    return unite
+
+
+def _avertir_correction(c: Courrier, unite: Unite) -> None:
+    from apps.bureaux.perimetre import signataires_courrier
+    from apps.notifications.services import notifier
+
+    comptes = [x for x in signataires_courrier(unite) if x.pk != c.prepare_par_id]
+    lien = f"/courrier/c/{c.pk}/"
+    message = f"Courrier en correction (ne pas signer pour l'instant) : « {c.objet} »."
+    transaction.on_commit(lambda: notifier(comptes, message, lien))
+
+
+@transaction.atomic
+def mettre_en_correction(courrier: Courrier, *, par) -> Courrier:
+    """Le préparateur clique sur « Modifier » : le signataire ne peut plus signer (18/11/2026)."""
+    c = _verrouiller(courrier)
+    unite = _preparateur(c, par)
+    if c.etat == Etat.A_CORRIGER:
+        return c
+    if c.etat != Etat.A_SIGNER:
+        raise CourrierRefuse("Ce courrier n'est plus modifiable.")
+    c.etat = Etat.A_CORRIGER
+    c.version += 1
+    c.save(update_fields=["etat", "version"])
+    _journal(par, "courrier_en_correction", unite=unite.cle, courrier=c.pk, objet=c.objet)
+    _avertir_correction(c, unite)
+    return c
+
+
 @transaction.atomic
 def modifier(
     courrier: Courrier,
@@ -417,39 +507,76 @@ def modifier(
     texte: str = "",
     fichier=None,
     lieu: str | None = None,
-    numero_ordre: int | None = None,
+    adresse: str | None = None,
+    langue: str | None = None,
+    police: str | None = None,
+    taille: int | None = None,
+    une_page: bool | None = None,
+    soumettre: bool = False,
 ) -> Courrier:
-    """Le préparateur reprend un courrier pas encore envoyé (en attente ou renvoyé)."""
+    """Le préparateur corrige un courrier en correction ; `soumettre` le renvoie à la signature."""
     c = _verrouiller(courrier)
-    unite = unite_expeditrice(c)
-    if unite is None:
-        raise CourrierRefuse("Bureau expéditeur introuvable.")
-    _controler_preparateur(unite, par)
-    if c.etat not in (Etat.A_SIGNER, Etat.A_CORRIGER):
-        raise CourrierRefuse("Ce courrier n'est plus modifiable.")
+    unite = _preparateur(c, par)
+    if c.etat != Etat.A_CORRIGER:
+        raise CourrierRefuse("Cliquez d'abord sur « Modifier » : le courrier passe en correction.")
     objet = (objet or "").strip()
     if not objet:
         raise CourrierRefuse("L'objet du courrier est obligatoire.")
     texte, extension = _contenu(c.mode, texte, fichier, courrier=c)
-    if numero_ordre:
-        _verifier_numero(unite, c.annee, numero_ordre, sauf=c)
-        c.numero_ordre = numero_ordre
+    presentation = _presentation(
+        langue or c.langue,
+        police or c.police,
+        taille if taille is not None else c.taille,
+        c.une_page if une_page is None else une_page,
+    )
+    for champ, valeur in presentation.items():
+        setattr(c, champ, valeur)
     c.objet, c.texte = objet[:250], texte
     if lieu is not None and lieu.strip():
         c.lieu = lieu.strip()[:100]
+    if adresse is not None:
+        c.adresse = adresse.strip()[:500]
+    if not c.adresse:  # vidée : le site propose de nouveau (français) ou demande « Hlan … »
+        bureaux = [
+            u
+            for u in (
+                unite_par_cle(d.unite_cle)
+                for d in c.destinataires.filter(type=TypeDestinataire.BUREAU, transmis_par="")
+            )
+            if u is not None
+        ]
+        membres = [
+            d.membre
+            for d in c.destinataires.filter(
+                type=TypeDestinataire.MEMBRE, transmis_par=""
+            ).select_related("membre")
+        ]
+        c.adresse = adresse_proposee(c.nature, c.langue, bureaux, membres).strip()
+    _verifier_adresse(c.langue, c.adresse)
     if extension:
         c.fichier.save(
             _nom_de_fichier(fichier.name, extension),
             _contenu_nettoye(fichier, extension),
             save=False,
         )
-    revenu = c.etat == Etat.A_CORRIGER
-    c.etat, c.motif_renvoi = Etat.A_SIGNER, ""
     c.version += 1  # le signataire doit relire la nouvelle version
     c.save()
     _journal(par, "courrier_modifie", unite=unite.cle, courrier=c.pk, objet=c.objet)
-    if revenu:
-        _avertir_signataires(c, unite)
+    if soumettre:
+        return soumettre_a_la_signature(c, par=par)
+    return c
+
+
+@transaction.atomic
+def soumettre_a_la_signature(courrier: Courrier, *, par) -> Courrier:
+    c = _verrouiller(courrier)
+    unite = _preparateur(c, par)
+    if c.etat != Etat.A_CORRIGER:
+        raise CourrierRefuse("Ce courrier n'est pas en correction.")
+    c.etat, c.motif_renvoi = Etat.A_SIGNER, ""
+    c.save(update_fields=["etat", "motif_renvoi"])
+    _journal(par, "courrier_soumis", unite=unite.cle, courrier=c.pk, objet=c.objet)
+    _avertir_signataires(c, unite)
     return c
 
 
@@ -461,10 +588,92 @@ def annuler(courrier: Courrier, *, par) -> Courrier:
         raise CourrierRefuse("Vous ne pouvez pas abandonner ce courrier.")
     if c.etat not in (Etat.A_SIGNER, Etat.A_CORRIGER):
         raise CourrierRefuse("Un courrier envoyé ne s'abandonne pas.")
-    c.etat = Etat.ANNULE
-    c.save(update_fields=["etat"])
+    c.etat, c.date_abandon = Etat.ANNULE, timezone.now()
+    c.save(update_fields=["etat", "date_abandon"])
     _journal(par, "courrier_abandonne", unite=unite.cle, courrier=c.pk, objet=c.objet)
     return c
+
+
+@transaction.atomic
+def reprendre(courrier: Courrier, *, par) -> Courrier:
+    """Un courrier abandonné revient en correction (à modifier, puis soumettre)."""
+    c = _verrouiller(courrier)
+    unite = _preparateur(c, par)
+    if c.etat != Etat.ANNULE:
+        raise CourrierRefuse("Seul un courrier abandonné se reprend.")
+    c.etat, c.date_abandon, c.motif_renvoi = Etat.A_CORRIGER, None, ""
+    c.save(update_fields=["etat", "date_abandon", "motif_renvoi"])
+    _journal(par, "courrier_repris", unite=unite.cle, courrier=c.pk, objet=c.objet)
+    return c
+
+
+def _effacer(c: Courrier) -> None:
+    """Efface un courrier jamais envoyé, ses destinataires et ses fichiers."""
+    fichiers = [p.fichier for p in c.pieces.all()] + ([c.fichier] if c.fichier else [])
+    PieceJointe.objects.filter(courrier=c).delete()
+    Destinataire.objects.filter(courrier=c).delete()
+    Courrier.objects.filter(pk=c.pk, etat=Etat.ANNULE).delete()
+    noms = [(f.storage, f.name) for f in fichiers]
+
+    def effacer_fichiers():
+        for stockage, nom in noms:
+            try:
+                stockage.delete(nom)
+            except OSError:  # un fichier déjà absent n'arrête pas les autres
+                pass
+
+    transaction.on_commit(effacer_fichiers)
+
+
+def _trace(c: Courrier) -> dict:
+    return {
+        "courrier": c.pk,
+        "objet": c.objet,
+        "expediteur": c.expediteur_cle,
+        "prepare_par": getattr(c.prepare_par, "identifiant", ""),
+    }
+
+
+@transaction.atomic
+def supprimer(courrier: Courrier, *, par) -> None:
+    """Supprimer soi-même un courrier abandonné (jamais un courrier envoyé)."""
+    c = _verrouiller(courrier)
+    unite = _preparateur(c, par)
+    if c.etat != Etat.ANNULE:
+        raise CourrierRefuse("Seul un courrier abandonné se supprime.")
+    _journal(par, "courrier_supprime", unite=unite.cle, **_trace(c))
+    _effacer(c)
+
+
+DUREE_ABANDON_JOURS = 30  # décision du 18/11/2026 : un mois
+
+
+def purger_abandonnes(jours: int = DUREE_ABANDON_JOURS) -> int:
+    """Tâche quotidienne : efface les courriers abandonnés depuis plus d'un mois (une entrée de
+    journal par courrier, dans le journal de son bureau)."""
+    limite = timezone.now() - datetime.timedelta(days=jours)
+    effaces = 0
+    for pk in Courrier.objects.filter(etat=Etat.ANNULE, date_abandon__lt=limite).values_list(
+        "pk", flat=True
+    ):
+        try:
+            with transaction.atomic():
+                c = (
+                    Courrier.objects.select_for_update(of=("self",))
+                    .select_related("prepare_par")
+                    .filter(pk=pk, etat=Etat.ANNULE, date_abandon__lt=limite)
+                    .first()
+                )
+                if c is None:
+                    continue
+                _journal(None, "courriers_purges", unite=c.expediteur_cle, **_trace(c))
+                _effacer(c)
+                effaces += 1
+        except Exception:  # noqa: BLE001 — un courrier en échec n'empêche pas les autres
+            import logging
+
+            logging.getLogger(__name__).exception("Effacement du courrier %s impossible", pk)
+    return effaces
 
 
 # --- Signature -----------------------------------------------------------------------------------
@@ -479,25 +688,46 @@ def _image_signature(fichier) -> ContentFile:
     r, g, b, a = image.split()
     clair = ImageChops.darker(ImageChops.darker(r, g), b).point(lambda v: 0 if v > 225 else 255)
     image.putalpha(ImageChops.multiply(a, clair))
+    cadre = image.getchannel("A").getbbox()  # recadrage sur le trait (marges blanches retirées)
+    if cadre:
+        g, h, d, b = cadre
+        image = image.crop(
+            (max(0, g - 6), max(0, h - 6), min(image.width, d + 6), min(image.height, b + 6))
+        )
     sortie = io.BytesIO()
     image.save(sortie, "PNG")
     return ContentFile(sortie.getvalue(), name="signature.png")
 
 
-@transaction.atomic
-def deposer_signature(compte, fichier) -> SignatureDeposee:
-    """Le signataire dépose lui-même l'image de sa signature (personne d'autre ne le peut)."""
+def deposer_signature(
+    compte, fichier, *, mot_de_passe: str = "", code: str = ""
+) -> SignatureDeposee:
+    """Le signataire dépose lui-même l'image de sa signature (personne d'autre ne le peut).
+
+    Pour la **changer**, il confirme son identité : mot de passe, plus le code à 6 chiffres si sa
+    double vérification est active (décision du 18/11/2026)."""
     if not peut_deposer_signature(compte):
         raise CourrierRefuse(
             "Seuls le Président, les Chefs et les Secrétaires en fonction déposent une signature."
         )
-    contenu = _image_signature(fichier)
-    Compte.objects.select_for_update().filter(pk=compte.pk).first()  # dépôts simultanés
-    remplacee = SignatureDeposee.objects.filter(compte=compte, active=True).update(active=False)
-    sig = SignatureDeposee(compte=compte)
-    sig.image.save(f"signature-{compte.pk}.png", contenu, save=True)
-    _journal(compte, "signature_deposee", remplacement=bool(remplacee))
-    return sig
+    contenu = _image_signature(fichier)  # l'image d'abord : un code n'est pas gaspillé
+    remplacement = signature_active(compte) is not None
+    if remplacement:
+        from apps.securite.services import confirmer_identite
+
+        erreur = confirmer_identite(compte, mot_de_passe, code)
+        if erreur:
+            raise CourrierRefuse(erreur)
+    with transaction.atomic():
+        Compte.objects.select_for_update().filter(pk=compte.pk).first()  # dépôts simultanés
+        actives = SignatureDeposee.objects.filter(compte=compte, active=True)
+        if actives.exists() and not remplacement:  # dépôt simultané : on recommence, confirmé
+            raise CourrierRefuse("Une signature vient d'être déposée : rechargez la page.")
+        remplacee = actives.update(active=False)
+        sig = SignatureDeposee(compte=compte)
+        sig.image.save(f"signature-{compte.pk}.png", contenu, save=True)
+        _journal(compte, "signature_deposee", remplacement=bool(remplacee))
+        return sig
 
 
 def signature_active(compte) -> SignatureDeposee | None:
@@ -519,6 +749,8 @@ def valider(courrier: Courrier, *, par, version: int | None = None) -> Courrier:
         raise CourrierRefuse(
             "Seul le signataire du bureau (Président ou Chef ; le Secrétaire pour ordre) valide."
         )
+    if c.etat == Etat.A_CORRIGER:
+        raise CourrierRefuse("Ce courrier est en correction : il sera signé une fois corrigé.")
     if c.etat != Etat.A_SIGNER:
         raise CourrierRefuse("Ce courrier n'attend pas de signature.")
     sig = signature_active(par)
@@ -526,24 +758,22 @@ def valider(courrier: Courrier, *, par, version: int | None = None) -> Courrier:
         raise CourrierRefuse(
             "Déposez d'abord l'image de votre signature (rubrique « Ma signature »)."
         )
+    visibles = membres_visibles(unite)
+    for d in c.destinataires.filter(type=TypeDestinataire.MEMBRE, transmis_par="").select_related(
+        "membre"
+    ):
+        if d.membre.statut in SORTIS or not visibles.filter(pk=d.membre_id).exists():
+            raise CourrierRefuse(
+                f"{d.libelle} ne peut plus recevoir ce courrier (sorti du bureau ou du "
+                "mouvement) : demandez une correction au secrétaire."
+            )
     if version is not None and version != c.version:
         raise CourrierRefuse(
             "Le courrier a été modifié depuis que vous l'avez ouvert : relisez-le avant de signer."
         )
-    annee = timezone.localdate().year
-    if c.annee != annee:  # préparé en décembre, signé en janvier : numéro de la nouvelle année
-        c.annee, c.numero_ordre = annee, proposer_numero(unite, annee)
-    elif (
-        Courrier.objects.filter(
-            expediteur_cle=c.expediteur_cle,
-            annee=c.annee,
-            numero_ordre=c.numero_ordre,
-            etat=Etat.ENVOYE,
-        )
-        .exclude(pk=c.pk)
-        .exists()
-    ):
-        c.numero_ordre = proposer_numero(unite, annee)  # numéro pris entre-temps : le suivant
+    # Numéro définitif : le suivant de l'année de la signature (jamais deux fois le même).
+    c.annee = timezone.localdate().year
+    c.numero_ordre = proposer_numero(unite, c.annee)
     membre = getattr(par, "membre", None)
     c.etat = Etat.ENVOYE
     c.numero = numero_complet(unite, c.numero_ordre, c.annee)
@@ -558,11 +788,13 @@ def valider(courrier: Courrier, *, par, version: int | None = None) -> Courrier:
             c.save()
     except IntegrityError as e:
         raise CourrierRefuse(
-            "Un autre courrier vient de prendre ce numéro : cliquez de nouveau sur « Signer »."
+            "Un autre courrier vient d'être signé au même moment : cliquez de nouveau "
+            "sur « Signer »."
         ) from e
     _journal(par, "courrier_envoye", unite=unite.cle, courrier=c.pk, numero=c.numero, objet=c.objet)
     texte, pk = c.texte, c.pk
-    transaction.on_commit(lambda: _apprendre_mots(texte))
+    if c.langue == Langue.GOUN:  # le lexique goun n'apprend que des courriers en goun
+        transaction.on_commit(lambda: _apprendre_mots(texte))
     transaction.on_commit(lambda: _prevenir_destinataires(Courrier.objects.get(pk=pk)))
     return c
 

@@ -63,6 +63,11 @@ COURRIER_ACCUSE = "courrier_accuse"
 COURRIER_TRANSMIS = "courrier_transmis"
 SIGNATURE_DEPOSEE = "signature_deposee"
 CLAVIER_MODIFIE = "clavier_modifie"
+COURRIER_EN_CORRECTION = "courrier_en_correction"
+COURRIER_SOUMIS = "courrier_soumis"
+COURRIER_REPRIS = "courrier_repris"
+COURRIER_SUPPRIME = "courrier_supprime"
+COURRIERS_PURGES = "courriers_purges"
 
 LIBELLES = {
     COURRIER_PREPARE: "Courrier préparé",
@@ -74,6 +79,11 @@ LIBELLES = {
     COURRIER_TRANSMIS: "Communiqué transmis aux membres",
     SIGNATURE_DEPOSEE: "Signature déposée",
     CLAVIER_MODIFIE: "Clavier goun modifié",
+    COURRIER_EN_CORRECTION: "Courrier mis en correction",
+    COURRIER_SOUMIS: "Courrier soumis à la signature",
+    COURRIER_REPRIS: "Courrier abandonné repris",
+    COURRIER_SUPPRIME: "Courrier abandonné supprimé",
+    COURRIERS_PURGES: "Courriers abandonnés effacés (après un mois)",
     CATEGORIE: "Catégorie d'un membre",
     SESSION_EPREUVE: "Session de test ou d'examen créée",
     RESULTATS_EPREUVE: "Résultats d'un test ou examen",

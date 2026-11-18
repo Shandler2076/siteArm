@@ -3,12 +3,24 @@
 {% block contenu %}
 <section class="carte">
   <h1>Ma signature</h1>
-  <p class="aide">Signez sur une feuille blanche, photographiez ou scannez la signature, puis déposez l'image ici (JPEG ou PNG). Elle est rangée à l'abri et n'apparaît que sur les courriers que <strong>vous-même</strong> signez sur le site, avec un QR code de vérification. Personne d'autre ne peut l'utiliser, pas même le Bureau national. À la fin de votre mandat, elle ne peut plus servir. Chaque dépôt est inscrit au journal.</p>
-  {% if signature %}<p>Signature actuelle (déposée le {{ signature.deposee_le|date:"d/m/Y" }}) :</p>
-    <img class="signature-apercu" src="{% url 'courrier:ma_signature_image' %}" alt="Votre signature">{% endif %}
-  <form method="post" enctype="multipart/form-data">{% csrf_token %}
-    <label class="champ champ--requis"><span>{% if signature %}Remplacer par une nouvelle image{% else %}Image de ma signature{% endif %}</span><input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required></label>
-    <button type="submit" class="bouton">Enregistrer ma signature</button>
-  </form>
+  <p class="aide">Signez sur une feuille blanche, photographiez ou scannez la signature, puis déposez l'image ici (JPEG ou PNG). Le site la recadre sur le trait. Elle est rangée à l'abri et n'apparaît que sur les courriers que <strong>vous-même</strong> signez sur le site, avec un QR code de vérification. Personne d'autre ne peut l'utiliser, pas même le Bureau national. À la fin de votre mandat, elle ne peut plus servir. Chaque dépôt est inscrit au journal.</p>
+  {% if signature %}
+    <p>Signature actuelle (déposée le {{ signature.deposee_le|date:"d/m/Y" }}) :</p>
+    <img class="signature-apercu" src="{% url 'courrier:ma_signature_image' %}" alt="Votre signature">
+    <details class="encadre" {% if messages %}open{% endif %}><summary class="bouton bouton--secondaire">Changer ma signature</summary>
+      <p class="aide">Pour être sûr que c'est bien vous : votre mot de passe{% if avec_code %} et le code à 6 chiffres de votre application de double vérification{% endif %}.</p>
+      <form method="post" enctype="multipart/form-data">{% csrf_token %}
+        <label class="champ champ--requis"><span>Nouvelle image de ma signature</span><input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required></label>
+        <label class="champ champ--requis"><span>Mon mot de passe</span><input type="password" name="mot_de_passe" autocomplete="current-password" required></label>
+        {% if avec_code %}<label class="champ champ--requis"><span>Code de double vérification (6 chiffres)</span><input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="6" required></label>{% endif %}
+        <button type="submit" class="bouton">Changer ma signature</button>
+      </form>
+    </details>
+  {% else %}
+    <form method="post" enctype="multipart/form-data">{% csrf_token %}
+      <label class="champ champ--requis"><span>Image de ma signature</span><input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required></label>
+      <button type="submit" class="bouton">Enregistrer ma signature</button>
+    </form>
+  {% endif %}
 </section>
 {% endblock %}

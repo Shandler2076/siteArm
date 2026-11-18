@@ -1,8 +1,9 @@
 """PDF d'un courrier ou d'un communiqué, au format du modèle national (séance du 16/11/2026).
 
 Bandeau bleu marine avec filet or (logos, cinq lignes, la dernière au nom du bureau) ; numéro
-d'ordre et lieu-date ; objet et destinataire ; texte ; signataire avec sa signature déposée et un
-QR code de vérification ; pied de page au siège national (sans e-mail).
+d'ordre et lieu-date ; objet et ligne d'adresse (« À Monsieur le … », « Hlan … ») ; texte dans la
+police et la taille choisies ; signataire avec sa signature déposée, centrée, et un QR code de
+vérification ; pied de page au siège national (sans e-mail).
 """
 
 import io
@@ -18,7 +19,9 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
+from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.pdfmetrics import registerFontFamily
+from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.platypus import (
     BaseDocTemplate,
     Frame,
@@ -32,7 +35,47 @@ from reportlab.platypus import (
 )
 
 from apps.courrier import services
-from apps.membres.pdf import LOGO_AS, LOGO_CONGREGATION, MARINE, OR, _polices
+from apps.courrier.models import TAILLE_MIN_UNE_PAGE
+from apps.membres.pdf import (
+    LOGO_AS,
+    LOGO_CONGREGATION_SANS_TEXTE,
+    MARINE,
+    OR,
+    STATIQUE,
+    _polices,
+)
+
+LOGO_EN_TETE = LOGO_CONGREGATION_SANS_TEXTE  # triangle et deux anges, sans texte (18/11/2026)
+
+# Polices des courriers (décision du 18/11/2026) : (fichier normal, fichier gras).
+FICHIERS_POLICES = {
+    "liberation_serif": ("LiberationSerif-Regular.ttf", "LiberationSerif-Bold.ttf"),
+    "liberation_sans": ("LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf"),
+    "charis": ("CharisSIL-Regular.ttf", "CharisSIL-Bold.ttf"),
+    "gentium": ("GentiumPlus-Regular.ttf", "GentiumPlus-Bold.ttf"),
+    "noto_serif": ("NotoSerif-Regular.ttf", "NotoSerif-Bold.ttf"),
+}
+_polices_courrier: set[str] = set()
+
+
+def police_courrier(cle: str) -> str:
+    """Nom ReportLab de la police (enregistrée une seule fois) ; DejaVu si fichier absent."""
+    if cle not in FICHIERS_POLICES:
+        return "Sans"
+    nom = f"Courrier-{cle}"
+    if cle not in _polices_courrier:
+        dossier = STATIQUE / "fonts" / "courrier"
+        normal, gras = FICHIERS_POLICES[cle]
+        if not (dossier / normal).exists():
+            return "Sans"
+        pdfmetrics.registerFont(TTFont(nom, str(dossier / normal)))
+        pdfmetrics.registerFont(TTFont(f"{nom}-Gras", str(dossier / gras)))
+        registerFontFamily(
+            nom, normal=nom, bold=f"{nom}-Gras", italic=nom, boldItalic=f"{nom}-Gras"
+        )
+        _polices_courrier.add(cle)
+    return nom
+
 
 JAUNE = colors.HexColor("#F7D417")
 ORANGE = colors.HexColor("#F29A1F")
@@ -70,42 +113,56 @@ def _oblique(c, x, y, texte, police, taille, couleur, centre=True):
 
 
 def _bandeau(c, larg, haut, derniere_ligne):
+    """Bandeau d'en-tête : à gauche, le logo de la Congrégation (triangle et deux anges, sans
+    texte) dans une case à sa forme ; à droite, le logo de l'Armée du Salut ; au centre, les
+    cinq lignes."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
     y0 = haut - 8 * mm - HAUT_BANDEAU
     c.setFillColor(MARINE)
     c.rect(8 * mm, y0, larg - 16 * mm, HAUT_BANDEAU, stroke=0, fill=1)
     c.setFillColor(OR)
     c.rect(8 * mm, y0 - 2 * mm, larg - 16 * mm, 2 * mm, stroke=0, fill=1)
     cote = HAUT_BANDEAU - 6 * mm
-    for logo, x in ((LOGO_CONGREGATION, 11 * mm), (LOGO_AS, larg - 11 * mm - cote)):
+    # Case de gauche élargie à la forme du logo (option choisie par le mainteneur).
+    largeur_gauche = cote
+    if LOGO_EN_TETE.exists():
+        iw, ih = ImageReader(str(LOGO_EN_TETE)).getSize()
+        largeur_gauche = min(cote * iw / ih + 2 * mm, 2.2 * cote)
+    x_droite = larg - 11 * mm - cote
+    for logo, x, largeur in (
+        (LOGO_EN_TETE, 11 * mm, largeur_gauche),
+        (LOGO_AS, x_droite, cote),
+    ):
         c.setFillColor(colors.white)
-        c.rect(x, y0 + 3 * mm, cote, cote, stroke=0, fill=1)
+        c.rect(x, y0 + 3 * mm, largeur, cote, stroke=0, fill=1)
         if logo.exists():
             c.drawImage(
                 ImageReader(str(logo)),
                 x + 1 * mm,
                 y0 + 4 * mm,
-                cote - 2 * mm,
+                largeur - 2 * mm,
                 cote - 2 * mm,
                 mask="auto",
                 preserveAspectRatio=True,
             )
-    centre = larg / 2
+    gauche, droite = 11 * mm + largeur_gauche + 3 * mm, x_droite - 3 * mm
+    centre, largeur_max = (gauche + droite) / 2, droite - gauche
     y = haut - 8 * mm - 6 * mm
     styles = [
-        (colors.white, "Sans-Gras", 8.5),
-        (JAUNE, "Sans-Gras", 8.5),
-        (JAUNE, "Sans-Gras", 8.5),
-        (ORANGE, "Sans-Gras", 7),
+        (colors.white, 8.5),
+        (JAUNE, 8.5),
+        (JAUNE, 8.5),
+        (ORANGE, 7),
     ]
-    for texte, (couleur, police, taille) in zip(LIGNES_FIXES, styles, strict=True):
-        _oblique(c, centre, y, texte, police, taille, couleur)
+    for texte, (couleur, taille) in zip(LIGNES_FIXES, styles, strict=True):
+        while taille > 6 and stringWidth(texte, "Sans-Gras", taille) > largeur_max:
+            taille -= 0.25
+        _oblique(c, centre, y, texte, "Sans-Gras", taille, couleur)
         y -= 4.6 * mm
-    largeur_max = larg - 2 * (11 * mm + cote + 3 * mm)
     taille = 11
-    from reportlab.pdfbase.pdfmetrics import stringWidth
-
-    while taille > 7 and stringWidth(derniere_ligne, "Sans-Gras", taille) > largeur_max:
-        taille -= 0.5
+    while taille > 6.5 and stringWidth(derniere_ligne, "Sans-Gras", taille) > largeur_max:
+        taille -= 0.25
     c.setFillColor(OR)
     c.setFont("Sans-Gras", taille)
     c.drawCentredString(centre, y - 1 * mm, derniere_ligne)
@@ -124,20 +181,23 @@ def _pied(c, larg, numero_page):
     c.drawRightString(larg - MARGE, 6 * mm, f"Page {numero_page}")
 
 
-def _styles():
-    base = ParagraphStyle("base", fontName="Sans", fontSize=10.5, leading=15)
+def _styles(police: str = "Sans", taille: float = 10.5):
+    base = ParagraphStyle("base", fontName=police, fontSize=taille, leading=round(taille * 1.4, 1))
+    petit = max(7.5, taille - 1.5)
     return {
-        "texte": ParagraphStyle("texte", parent=base, alignment=TA_JUSTIFY, spaceAfter=6),
-        "petit": ParagraphStyle("petit", parent=base, fontSize=9, leading=12),
+        "texte": ParagraphStyle(
+            "texte", parent=base, alignment=TA_JUSTIFY, spaceAfter=round(taille * 0.6, 1)
+        ),
+        "petit": ParagraphStyle("petit", parent=base, fontSize=petit, leading=petit * 1.35),
         "gauche": ParagraphStyle("gauche", parent=base, alignment=TA_LEFT),
         "droite": ParagraphStyle("droite", parent=base, alignment=TA_RIGHT),
         "centre": ParagraphStyle("centre", parent=base, alignment=TA_CENTER),
         "titre": ParagraphStyle(
             "titre",
             parent=base,
-            fontName="Sans-Gras",
-            fontSize=16,
-            leading=20,
+            fontName=f"{police}-Gras" if police != "Sans" else "Sans-Gras",
+            fontSize=taille + 5,
+            leading=taille + 9,
             alignment=TA_CENTER,
             textColor=MARINE,
             spaceBefore=4,
@@ -145,6 +205,15 @@ def _styles():
         ),
         "signature": ParagraphStyle("signature", parent=base, alignment=TA_CENTER),
     }
+
+
+# Tableaux de mise en page sans marge intérieure : tout s'aligne sur la marge du texte.
+SANS_MARGE = [
+    ("LEFTPADDING", (0, 0), (-1, -1), 0),
+    ("RIGHTPADDING", (0, 0), (-1, -1), 0),
+    ("TOPPADDING", (0, 0), (-1, -1), 0),
+    ("BOTTOMPADDING", (0, 0), (-1, -1), 0),
+]
 
 
 def _date_fr(courrier) -> str:
@@ -181,9 +250,13 @@ def _signature_reduite(fichier, largeur, hauteur) -> Image:
         image.load()
     finally:
         fichier.close()
+    image = image.convert("RGBA")
+    cadre = image.getchannel("A").getbbox()  # recadrée sur le trait : vraiment centrée
+    if cadre:
+        image = image.crop(cadre)
     image.thumbnail((320, 130))
     fond = PilImage.new("RGB", image.size, "white")
-    fond.paste(image.convert("RGBA"), mask=image.convert("RGBA").split()[3])
+    fond.paste(image, mask=image.getchannel("A"))
     sortie = io.BytesIO()
     fond.save(sortie, "JPEG", quality=70)
     sortie.seek(0)
@@ -227,19 +300,22 @@ def _bloc_signature(courrier, st) -> list:
         droite.append(Paragraph("<i>(en attente de signature)</i>", st["signature"]))
         gauche = [Paragraph("<b>PROJET — non signé, non envoyé.</b>", st["petit"])]
     largeur = A4[0] - 2 * MARGE
-    t = Table([[gauche, droite]], colWidths=[largeur * 0.4, largeur * 0.6])
-    t.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "BOTTOM")]))
+    t = Table([[gauche, droite]], colWidths=[largeur * 0.45, largeur * 0.55])
+    t.setStyle(
+        TableStyle(
+            [
+                *SANS_MARGE,
+                ("VALIGN", (0, 0), (-1, -1), "BOTTOM"),
+                ("ALIGN", (1, 0), (1, 0), "CENTER"),  # titre, signature et nom alignés au centre
+            ]
+        )
+    )
     return [Spacer(1, 8 * mm), KeepTogether(t)]
 
 
 def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
     largeur = A4[0] - 2 * MARGE
-    unite = services.unite_expeditrice(courrier)
-    numero = courrier.numero or (
-        services.numero_complet(unite, courrier.numero_ordre, courrier.annee) + " (projet)"
-        if unite
-        else ""
-    )
+    numero = courrier.numero or "Projet — numéro attribué à la signature"
     gauche = [
         Paragraph(escape(numero), st["petit"]),
         Spacer(1, 2 * mm),
@@ -247,26 +323,32 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
     ]
     droite = Paragraph(f"{escape(courrier.lieu)}, le {_date_fr(courrier)}", st["droite"])
     entete = Table([[gauche, droite]], colWidths=[largeur * 0.6, largeur * 0.4])
-    entete.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
+    entete.setStyle(TableStyle([*SANS_MARGE, ("VALIGN", (0, 0), (-1, -1), "TOP")]))
     flux = [entete, Spacer(1, 6 * mm)]
     objet = Paragraph(f"<b><u>Objet</u></b> : {escape(courrier.objet)}", st["gauche"])
+    adresse = escape(courrier.adresse or "").replace("\n", "<br/>")
     if courrier.communique:
         flux += [
             Paragraph("COMMUNIQUÉ", st["titre"]),
-            Paragraph("À l'attention de tous les bureaux", st["centre"]),
+            Paragraph(adresse or services.COMMUNIQUE_ADRESSE, st["centre"]),
             Spacer(1, 5 * mm),
             objet,
         ]
     else:
-        destinataire = Paragraph(
-            "<b>Destinataire</b><br/>"
-            + escape(
-                services.libelle_destinataires(courrier, avec_membres=avec_membres, membre=membre)
-            ),
-            st["gauche"],
+        # Pas de mot « Destinataire » : la formule d'adresse des lettres (18/11/2026).
+        bloc = Table(
+            [[objet, Paragraph(adresse, st["gauche"])]],
+            colWidths=[largeur * 0.52, largeur * 0.48],
         )
-        bloc = Table([[objet, destinataire]], colWidths=[largeur * 0.58, largeur * 0.42])
-        bloc.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "TOP")]))
+        bloc.setStyle(
+            TableStyle(
+                [
+                    *SANS_MARGE,
+                    ("VALIGN", (0, 0), (-1, -1), "TOP"),
+                    ("LEFTPADDING", (1, 0), (1, 0), 12),
+                ]
+            )
+        )
         flux.append(bloc)
     flux.append(Spacer(1, 6 * mm))
     flux += _paragraphes(courrier.texte, st["texte"])
@@ -298,11 +380,7 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
     return flux
 
 
-def courrier_pdf(courrier, avec_membres: bool = True, membre=None) -> bytes:
-    _polices()
-    registerFontFamily(
-        "Sans", normal="Sans", bold="Sans-Gras", italic="Sans", boldItalic="Sans-Gras"
-    )
+def _construire(courrier, st, avec_membres, membre) -> tuple[bytes, int]:
     unite = services.unite_expeditrice(courrier)
     derniere = services.ligne_bureau(unite) if unite else courrier.expediteur_libelle.upper()
     larg, haut = A4
@@ -313,15 +391,40 @@ def courrier_pdf(courrier, avec_membres: bool = True, membre=None) -> bytes:
         title=f"{'Communiqué' if courrier.communique else 'Courrier'} — {courrier.objet}",
         author=courrier.expediteur_libelle,
     )
-    cadre = Frame(MARGE, 20 * mm, larg - 2 * MARGE, haut - 20 * mm - 8 * mm - HAUT_BANDEAU - 8 * mm)
+    cadre = Frame(
+        MARGE,
+        20 * mm,
+        larg - 2 * MARGE,
+        haut - 20 * mm - 8 * mm - HAUT_BANDEAU - 8 * mm,
+        leftPadding=0,
+        rightPadding=0,
+    )
 
     def page(c, d):
         _bandeau(c, larg, haut, derniere)
         _pied(c, larg, d.page)
 
     doc.addPageTemplates([PageTemplate(id="courrier", frames=[cadre], onPage=page)])
-    doc.build(_contenu(courrier, _styles(), avec_membres=avec_membres, membre=membre))
-    contenu = tampon.getvalue()
+    doc.build(_contenu(courrier, st, avec_membres=avec_membres, membre=membre))
+    return tampon.getvalue(), doc.page
+
+
+def courrier_pdf(courrier, avec_membres: bool = True, membre=None) -> bytes:
+    _polices()
+    registerFontFamily(
+        "Sans", normal="Sans", bold="Sans-Gras", italic="Sans", boldItalic="Sans-Gras"
+    )
+    police = police_courrier(courrier.police)
+    taille = float(courrier.taille or 12)
+    # « Tenir sur une page » : le texte se resserre, jusqu'à 9 points au plus petit. La mesure se
+    # fait sans l'annexe des destinataires (que seul l'expéditeur voit) : tout le monde reçoit le
+    # même courrier, dans la même taille.
+    if courrier.une_page and courrier.mode == "redige":
+        _, pages = _construire(courrier, _styles(police, taille), False, None)
+        while pages > 1 and taille > TAILLE_MIN_UNE_PAGE:
+            taille = max(TAILLE_MIN_UNE_PAGE, taille - 0.5)
+            _, pages = _construire(courrier, _styles(police, taille), False, None)
+    contenu, _ = _construire(courrier, _styles(police, taille), avec_membres, membre)
     if courrier.mode == "importe" and courrier.fichier.name.lower().endswith(".pdf"):
         contenu = _ajouter_pdf_importe(contenu, courrier.fichier)
     return contenu

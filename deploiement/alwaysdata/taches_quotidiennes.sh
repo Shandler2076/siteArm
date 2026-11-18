@@ -7,3 +7,4 @@ cd "$DOSSIER"
 "$VENV/bin/python" manage.py verifier_echeances_mandats
 "$VENV/bin/python" manage.py fin_des_sanctions
 "$VENV/bin/python" manage.py rappel_cotisations
+"$VENV/bin/python" manage.py purger_courriers_abandonnes

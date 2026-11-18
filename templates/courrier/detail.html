@@ -5,13 +5,16 @@
   <p class="matricule">{% if c.communique %}Communiqué{% else %}Courrier{% endif %} — {{ c.get_etat_display }}</p>
   <h1>{{ c.objet }}</h1>
   <dl class="fiche">
-    <dt>Numéro</dt><dd>{% if c.numero %}{{ c.numero }}{% else %}{{ c.numero_ordre|stringformat:"03d" }}-{{ c.annee }} (attribué à la signature){% endif %}</dd>
+    <dt>Numéro</dt><dd>{% if c.numero %}{{ c.numero }}{% else %}attribué automatiquement à la signature{% endif %}</dd>
     <dt>Expéditeur</dt><dd>{{ c.expediteur_libelle }}</dd>
     <dt>{{ c.lieu }}, le</dt><dd>{% if c.date_envoi %}{{ c.date_envoi|date:"j F Y à H:i" }}{% else %}— (pas encore envoyé){% endif %}</dd>
-    <dt>Destinataire</dt><dd>{{ destinataire_texte }}</dd>
+    <dt>Adresse</dt><dd>{{ c.adresse|linebreaksbr }}</dd>
+    <dt>Envoyé à</dt><dd>{{ destinataire_texte }}</dd>
+    <dt>Langue</dt><dd>{{ c.get_langue_display }} — {{ c.get_police_display }}, {{ c.taille }} points{% if c.une_page %}, sur une page{% endif %}</dd>
     {% if c.envoye %}<dt>Signé par</dt><dd>{% if c.qualite == "po" %}P.O. le {{ c.fonction_signataire }} : {% else %}{{ c.fonction_signataire }} : {% endif %}{{ c.nom_signataire }}</dd>{% endif %}
   </dl>
-  {% if c.motif_renvoi and not c.envoye %}<p class="message message--error">Renvoyé pour correction : {{ c.motif_renvoi }}</p>{% endif %}
+  {% if c.etat == "a_corriger" %}<p class="message message--error">En correction : le signataire ne peut pas signer pour l'instant.{% if c.motif_renvoi %} Correction demandée : {{ c.motif_renvoi }}{% endif %}</p>{% endif %}
+  {% if c.etat == "annule" %}<p class="message message--error">Courrier abandonné le {{ c.date_abandon|date:"d/m/Y" }} : il sera effacé un mois après, sauf si vous le reprenez.</p>{% endif %}
   <p class="boutons-courrier"><a class="bouton bouton--secondaire" href="{% url 'courrier:pdf' c.pk %}">{% if c.envoye %}Ouvrir le PDF (à imprimer){% else %}Voir le projet en PDF{% endif %}</a>
     {% if c.fichier %}<a class="bouton bouton--secondaire" href="{% url 'courrier:original' c.pk %}">Courrier importé (original)</a>{% endif %}</p>
   {% if c.texte %}<div class="courrier__texte">{{ c.texte|linebreaks }}</div>{% endif %}
@@ -32,20 +35,41 @@
 
   {% if qualite and c.etat == "a_signer" %}
     <div class="encadre">
-      <h2>Signature</h2>
+      <h2>Vous signez ce courrier</h2>
       {% if a_signature %}
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="valider"><input type="hidden" name="version" value="{{ c.version }}">
           <button type="submit" class="bouton" onclick="return confirm('Signer et envoyer ce courrier ? Il ne pourra plus être modifié.');">{% if qualite.0 == "po" %}Signer pour ordre et envoyer{% else %}Signer et envoyer{% endif %}</button></form>
       {% else %}<p class="message message--error">Déposez d'abord l'image de votre signature : <a href="{% url 'courrier:ma_signature' %}">Ma signature</a>.</p>{% endif %}
-      <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="renvoyer">
-        <label class="champ"><span>Renvoyer pour correction : ce qu'il faut corriger</span><input name="motif" maxlength="300" required></label>
-        <button type="submit" class="bouton bouton--secondaire">Renvoyer pour correction</button></form>
+      <details class="demande-correction"><summary>Demander une correction au secrétaire</summary>
+        <p class="aide">Le courrier n'est pas signé : il retourne au secrétaire avec votre message, et passe « en correction ». Vous le signerez quand il vous sera soumis de nouveau.</p>
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="renvoyer">
+          <label class="champ"><span>Votre message au secrétaire (ce qu'il faut corriger)</span><input name="motif" maxlength="300" required></label>
+          <button type="submit" class="bouton bouton--secondaire">Envoyer la demande de correction</button></form>
+      </details>
     </div>
   {% endif %}
-  {% if expediteur and not c.envoye and c.etat != "annule" %}
-    <p class="boutons-courrier"><a class="bouton bouton--secondaire" href="{% url 'courrier:modifier' c.pk %}">Modifier</a></p>
-    <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="abandonner">
-      <button type="submit" class="bouton bouton--discret" onclick="return confirm('Abandonner ce courrier ? Il ne sera jamais envoyé.');">Abandonner ce courrier</button></form>
+  {% if expediteur and not c.envoye %}
+    <div class="encadre">
+      <h2>Vous préparez ce courrier</h2>
+      {% if c.etat == "a_signer" %}
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="corriger">
+          <button type="submit" class="bouton bouton--secondaire">Modifier</button></form>
+        <p class="aide">Le courrier passe « en correction » : le signataire en est prévenu et ne peut plus le signer jusqu'à ce que vous le soumettiez de nouveau.</p>
+      {% elif c.etat == "a_corriger" %}
+        <p class="boutons-courrier"><a class="bouton bouton--secondaire" href="{% url 'courrier:modifier' c.pk %}">Continuer la correction</a></p>
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="soumettre">
+          <button type="submit" class="bouton">Soumettre de nouveau à la signature</button></form>
+      {% elif c.etat == "annule" %}
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="reprendre">
+          <button type="submit" class="bouton">Reprendre ce courrier</button></form>
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="supprimer">
+          <button type="submit" class="bouton bouton--discret" onclick="return confirm('Supprimer définitivement ce courrier abandonné ?');">Supprimer définitivement</button></form>
+      {% endif %}
+      {% if c.etat != "annule" %}
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="abandonner">
+          <button type="submit" class="bouton bouton--discret" onclick="return confirm('Abandonner ce courrier ? Il ne sera pas envoyé (vous pourrez le reprendre pendant un mois).');">Abandonner ce courrier</button></form>
+      {% endif %}
+    </div>
   {% endif %}
 
   {% if suivi %}

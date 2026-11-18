@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Prefetch, Q
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -20,17 +21,21 @@ from apps.bureaux.perimetre import (
 )
 from apps.courrier import services
 from apps.courrier.models import (
+    TAILLES,
     Courrier,
     Destinataire,
     Etat,
+    Langue,
     Mode,
     MotClavier,
     Nature,
     OrigineMot,
     PieceJointe,
+    Police,
     ReglagesClavier,
     TypeDestinataire,
 )
+from apps.securite.services import double_verification_active
 
 NIVEAUX = [
     (Niveau.REGION, "Tous les bureaux régionaux de coordination"),
@@ -83,6 +88,35 @@ def envoyes(request, cle):
     return render(request, "courrier/envoyes.html", {"unite": unite, "courriers": courriers})
 
 
+def _presentation_contexte() -> dict:
+    from apps.courrier.models import POLICE_PAR_LANGUE
+
+    return {
+        "langues": Langue.choices,
+        "polices": Police.choices,
+        "tailles": TAILLES,
+        "police_par_langue": {k: v for k, v in POLICE_PAR_LANGUE.items()},
+    }
+
+
+@login_required
+def en_correction(request, cle):
+    unite = _unite(request, cle)
+    courriers = services.courriers_envoyes(unite).filter(etat=Etat.A_CORRIGER)
+    return render(request, "courrier/en_correction.html", {"unite": unite, "courriers": courriers})
+
+
+@login_required
+def abandonnes(request, cle):
+    unite = _unite(request, cle)
+    courriers = services.courriers_envoyes(unite).filter(etat=Etat.ANNULE)
+    return render(
+        request,
+        "courrier/abandonnes.html",
+        {"unite": unite, "courriers": courriers, "jours": services.DUREE_ABANDON_JOURS},
+    )
+
+
 def _entiers(valeurs) -> list[int]:
     return [int(v) for v in valeurs if str(v).isdigit()]
 
@@ -98,7 +132,6 @@ def nouveau(request, cle):
         membres = list(
             membres_visibles(unite).filter(pk__in=_entiers(request.POST.getlist("membres")))
         )
-        numero = request.POST.get("numero_ordre", "")
         try:
             c = services.preparer(
                 unite=unite,
@@ -108,7 +141,11 @@ def nouveau(request, cle):
                 texte=request.POST.get("texte", ""),
                 fichier=request.FILES.get("fichier"),
                 lieu=request.POST.get("lieu", ""),
-                numero_ordre=int(numero) if numero.isdigit() else None,
+                langue=request.POST.get("langue", Langue.FRANCAIS),
+                adresse=request.POST.get("adresse", ""),
+                police=request.POST.get("police", ""),
+                taille=request.POST.get("taille", 12),
+                une_page=bool(request.POST.get("une_page")),
                 bureaux=request.POST.getlist("bureaux"),
                 niveaux=request.POST.getlist("niveaux"),
                 membres=membres,
@@ -127,7 +164,6 @@ def nouveau(request, cle):
             "unite": unite,
             "proposes": proposes,
             "niveaux": NIVEAUX if unite.niveau != Niveau.PAROISSE else [],
-            "numero": services.proposer_numero(unite, annee),
             "apercu_numero": services.numero_complet(
                 unite, services.proposer_numero(unite, annee), annee
             ),
@@ -138,6 +174,7 @@ def nouveau(request, cle):
             "membres_choisis": membres,
             "clavier": _clavier(),
             "Nature": Nature,
+            **_presentation_contexte(),
         },
     )
 
@@ -180,6 +217,24 @@ def vue_complete(request, c: Courrier) -> bool:
     return unite is not None and unite in unites_courrier(request.user)
 
 
+def _rubrique(request, c: Courrier, mes_lignes=()) -> str | None:
+    """Rubrique du menu à marquer sur les pages d'un courrier (on sait toujours où l'on est)."""
+    unite = services.unite_expeditrice(c)
+    signe = c.etat == Etat.A_SIGNER and services.peut_signer(request.user, c)
+    if signe:
+        return reverse("courrier:a_signer")
+    if unite is not None and unite in unites_courrier(request.user):
+        nom = {
+            Etat.A_CORRIGER: "courrier:en_correction",
+            Etat.ANNULE: "courrier:abandonnes",
+        }.get(c.etat, "courrier:envoyes")
+        return reverse(nom, args=[unite.cle])
+    for d in mes_lignes:
+        if d.type == TypeDestinataire.BUREAU:
+            return reverse("courrier:recus", args=[d.unite_cle])
+    return reverse("courrier:moi") if mes_lignes else None
+
+
 def _courrier_visible(request, pk) -> Courrier:
     c = get_object_or_404(Courrier, pk=pk)
     if not services.peut_voir(request.user, c):
@@ -196,6 +251,7 @@ def detail(request, pk):
     unite = services.unite_expeditrice(c)
     expediteur = unite is not None and unite in unites_courrier(request.user)
     voit_suivi = vue_complete(request, c)
+    request.rubrique_menu = _rubrique(request, c, mes_lignes)
     transmis = (
         c.destinataires.exclude(transmis_par="")
         .values("transmis_par")
@@ -243,7 +299,22 @@ def action(request, pk):
             messages.success(request, "Courrier signé et envoyé.")
         elif quoi == "renvoyer":
             services.renvoyer(c, motif=request.POST.get("motif", ""), par=request.user)
-            messages.success(request, "Courrier renvoyé pour correction.")
+            messages.success(request, "Correction demandée au secrétaire.")
+        elif quoi == "corriger":
+            services.mettre_en_correction(c, par=request.user)
+            return redirect("courrier:modifier", c.pk)
+        elif quoi == "soumettre":
+            services.soumettre_a_la_signature(c, par=request.user)
+            messages.success(request, "Courrier soumis à la signature.")
+        elif quoi == "reprendre":
+            services.reprendre(c, par=request.user)
+            messages.success(request, "Courrier repris : il est en correction.")
+            return redirect("courrier:modifier", c.pk)
+        elif quoi == "supprimer":
+            cle = c.expediteur_cle
+            services.supprimer(c, par=request.user)
+            messages.success(request, "Courrier supprimé.")
+            return redirect("courrier:abandonnes", cle)
         elif quoi == "abandonner":
             services.annuler(c, par=request.user)
             messages.success(request, "Courrier abandonné.")
@@ -270,10 +341,11 @@ def modifier(request, pk):
     unite = services.unite_expeditrice(c)
     if unite is None or unite not in unites_courrier(request.user):
         raise Http404
-    if c.etat not in (Etat.A_SIGNER, Etat.A_CORRIGER):
+    if c.etat != Etat.A_CORRIGER:  # « Modifier » met d'abord le courrier en correction
         return redirect("courrier:detail", c.pk)
+    request.rubrique_menu = reverse("courrier:en_correction", args=[unite.cle])
     if request.method == "POST":
-        numero = request.POST.get("numero_ordre", "")
+        soumettre = "soumettre" in request.POST
         try:
             services.modifier(
                 c,
@@ -281,15 +353,28 @@ def modifier(request, pk):
                 texte=request.POST.get("texte", ""),
                 fichier=request.FILES.get("fichier"),
                 lieu=request.POST.get("lieu", ""),
-                numero_ordre=int(numero) if numero.isdigit() else None,
+                adresse=request.POST.get("adresse", ""),
+                langue=request.POST.get("langue") or None,
+                police=request.POST.get("police") or None,
+                taille=request.POST.get("taille") or None,
+                une_page=bool(request.POST.get("une_page")),
+                soumettre=soumettre,
                 par=request.user,
             )
         except services.CourrierRefuse as e:
             messages.error(request, str(e))
         else:
-            messages.success(request, "Courrier modifié : il attend la signature.")
-            return redirect("courrier:detail", c.pk)
-    return render(request, "courrier/modifier.html", {"c": c, "clavier": _clavier()})
+            if soumettre:
+                messages.success(request, "Courrier corrigé et soumis à la signature.")
+                return redirect("courrier:detail", c.pk)
+            messages.success(request, "Modifications enregistrées (toujours en correction).")
+            return redirect("courrier:modifier", c.pk)
+        c.refresh_from_db()
+    return render(
+        request,
+        "courrier/modifier.html",
+        {"c": c, "clavier": _clavier(), **_presentation_contexte()},
+    )
 
 
 def _fichier(champ, nom):
@@ -361,7 +446,12 @@ def ma_signature(request):
             messages.error(request, "Choisissez l'image de votre signature.")
         else:
             try:
-                services.deposer_signature(request.user, fichier)
+                services.deposer_signature(
+                    request.user,
+                    fichier,
+                    mot_de_passe=request.POST.get("mot_de_passe", ""),
+                    code=request.POST.get("code", ""),
+                )
             except services.CourrierRefuse as e:
                 messages.error(request, str(e))
             else:
@@ -370,7 +460,10 @@ def ma_signature(request):
     return render(
         request,
         "courrier/ma_signature.html",
-        {"signature": services.signature_active(request.user)},
+        {
+            "signature": services.signature_active(request.user),
+            "avec_code": double_verification_active(request.user),
+        },
     )
 
 

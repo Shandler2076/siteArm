@@ -28,6 +28,9 @@ DOUBLE_VERIFICATION = {
     "activation": "A activé sa double vérification.",
     "code_correct": "A saisi un code de double vérification correct.",
     "deconnexion_apres_echecs": "A été déconnecté après trop de codes de double vérification faux.",
+    "confirmation_echouee": (
+        "Confirmation d'identité refusée (mot de passe ou code faux) avant une action sensible."
+    ),
 }
 
 
@@ -291,7 +294,18 @@ def lire(entrees) -> list[Ligne]:
         if a == j.COURRIER_ABANDONNE:
             return f"A abandonné le courrier « {d.get('objet', '')} » (jamais envoyé)."
         if a == j.COURRIER_RENVOYE:
-            return f"A renvoyé un courrier pour correction (motif : {d.get('motif', '')})."
+            return f"A demandé une correction au secrétaire (motif : {d.get('motif', '')})."
+        if a == j.COURRIER_EN_CORRECTION:
+            objet = d.get("objet", "")
+            return f"A mis en correction le courrier « {objet} » (signature suspendue)."
+        if a == j.COURRIER_SOUMIS:
+            return f"A soumis à la signature le courrier « {d.get('objet', '')} »."
+        if a == j.COURRIER_REPRIS:
+            return f"A repris le courrier abandonné « {d.get('objet', '')} »."
+        if a == j.COURRIER_SUPPRIME:
+            return f"A supprimé le courrier abandonné « {d.get('objet', '')} » (jamais envoyé)."
+        if a == j.COURRIERS_PURGES:
+            return f"A effacé {d.get('nombre', 0)} courrier(s) abandonné(s) depuis plus d'un mois."
         if a == j.COURRIER_ENVOYE:
             return f"A signé et envoyé le courrier n° {d.get('numero')} « {d.get('objet', '')} »."
         if a == j.COURRIER_ACCUSE:
