@@ -363,3 +363,18 @@ def test_lettres_du_clavier_modifiables(bn):
 
     assert ReglagesClavier.courant().liste() == ["ẹ", "ọ", "ṣ"]
     assert Courrier.objects.count() == 0
+
+
+def test_clavier_par_defaut_selon_la_liste_du_mainteneur(db):
+    from apps.courrier.models import ReglagesClavier
+
+    lettres = ReglagesClavier.courant().liste()
+    assert lettres[:3] == ["ẹ", "ọ", "ṣ"]
+    assert "◌́" in lettres and "◌̀" in lettres and "◌̃" in lettres
+
+
+def test_ton_seul_enregistre_comme_touche_de_ton(bn):
+    from apps.courrier.models import ReglagesClavier
+
+    s.enregistrer_lettres("ẹ ́ ◌̀", par=bn["sn"].compte)
+    assert ReglagesClavier.courant().liste() == ["ẹ", "◌́", "◌̀"]

@@ -5,7 +5,7 @@
   <h1>Clavier goun</h1>
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="lettres">
     <label class="champ champ--requis"><span>Lettres du clavier (séparées par des espaces)</span><textarea name="lettres" rows="3" required>{{ lettres }}</textarea>
-      <small class="aide">Liste provisoire, à remplacer par la liste exacte des lettres goun.</small></label>
+      <small class="aide">Lettres goun : ẹ ọ ṣ. Les tons (◌́ haut, ◌̀ bas, ◌̃ nasale, ◌̂ circonflexe) se posent sur la lettre déjà tapée. Pour ajouter un ton, écrivez « ◌ » suivi du ton.</small></label>
     <button type="submit" class="bouton">Enregistrer les lettres</button>
   </form>
   <h2>Mots proposés par le Bureau national</h2>

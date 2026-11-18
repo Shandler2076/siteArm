@@ -42,8 +42,7 @@ Menu « Courrier » → **Courriers envoyés** → **Nouveau courrier**.
 
 ### Le clavier goun
 
-Sous le texte, touchez une **lettre spéciale** (ẹ, ọ, ṣ, ɖ, ɛ, ɔ, lettres accentuées…) : elle
-s'écrit à l'endroit du curseur. **⇧ Maj** passe en majuscules. Pendant que vous tapez, des **mots
+Sous le texte, touchez une **lettre goun** (ẹ, ọ, ṣ) : elle s'écrit à l'endroit du curseur. Les **tons** (touches rouges : ´ haut, ` bas, ~ nasale, ^ circonflexe) se posent sur la lettre que vous venez de taper : ẹ puis ´ donne ẹ́. **⇧ Maj** passe en majuscules. Pendant que vous tapez, des **mots
 proposés** apparaissent : touchez-en un pour l'écrire en entier. Les mots viennent de la liste du
 Bureau national et des mots déjà écrits dans les courriers envoyés.
 
@@ -75,5 +74,5 @@ objet, signataire), sans jamais en montrer le texte.
 ## 7. Bureau national
 
 - **Registre des courriers** : tous les courriers envoyés, par bureau et par année.
-- **Clavier goun** : lettres du clavier (liste provisoire à remplacer par la liste définitive), mots
+- **Clavier goun** : lettres et tons du clavier (ẹ ọ ṣ ; tons ´ ` ~ ^ ; écrire « ◌ » suivi du ton pour en ajouter un), mots
   proposés par le BN (un par ligne), mots appris à retirer.

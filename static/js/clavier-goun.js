@@ -40,9 +40,36 @@
       cible.dispatchEvent(new Event("input", { bubbles: true }));
     }
 
+    var TONS = {
+      "\u0301": ["´", "Ton haut"],
+      "\u0300": ["`", "Ton bas"],
+      "\u0303": ["~", "Nasale"],
+      "\u0302": ["^", "Accent circonflexe"],
+      "\u0304": ["¯", "Ton moyen"],
+      "\u030C": ["ˇ", "Ton montant"]
+    };
+
+    /* Un ton se pose sur la lettre qui précède le curseur (ẹ + ´ → ẹ́). */
+    function poserTon(marque) {
+      if (!cible) return;
+      var pos = cible.selectionStart;
+      var avant = (cible.value.slice(0, pos) + marque).normalize("NFC");
+      cible.value = avant + cible.value.slice(cible.selectionEnd);
+      cible.selectionStart = cible.selectionEnd = avant.length;
+      cible.focus();
+      cible.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+
     function dessinerLettres() {
       lettresZone.innerHTML = "";
       donnees.lettres.forEach(function (l) {
+        if (l.charAt(0) === "\u25CC") {
+          var marque = l.slice(1), ton = TONS[marque] || [l, "Ton"];
+          var b = bouton(ton[0], "clavier__touche clavier__touche--ton", function () { poserTon(marque); }, ton[1]);
+          b.title = ton[1] + " : sur la lettre déjà tapée";
+          lettresZone.appendChild(b);
+          return;
+        }
         var t = majuscule ? l.toUpperCase() : l;
         lettresZone.appendChild(bouton(t, "clavier__touche", function () { inserer(t); }, "Lettre " + t));
       });

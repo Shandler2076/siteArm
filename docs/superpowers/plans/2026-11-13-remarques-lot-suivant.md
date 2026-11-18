@@ -6,8 +6,9 @@
 ## 1. Courrier et communiqués (rejoint le module 4 « Communication » du cahier des charges)
 
 > **Réalisé le 18/11/2026** (module `apps/courrier`, cahier des charges § 18.1, guide 13), avec le
-> clavier goun demandé le 18/11/2026. En attente : la **liste exacte des lettres goun** du
-> mainteneur (liste provisoire réglable par le BN en attendant).
+> clavier goun demandé le 18/11/2026. Lettres fournies par le mainteneur le 18/11/2026 (d'après
+> son traducteur, gun de la Bible de 1923) : ẹ ọ ṣ et les tons ´ ` ~ (plus ^), posés sur la
+> lettre tapée ; liste réglable par le BN.
 
 Besoin : le BNC doit pouvoir écrire, depuis le site, sans passer par un événement :
 - à **un bureau particulier** : au sujet de l'un de ses membres, ou d'une affaire qui ne concerne

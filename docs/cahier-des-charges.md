@@ -1039,8 +1039,8 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   en dessous de lui, et aux membres de son périmètre.
 - **Deux façons** : rédiger sur le site, ou **importer** un courrier déjà rédigé (photo, scan ou PDF,
   par exemple en langue locale). Le site ajoute l'en-tête, le numéro, la date et la signature.
-- **Clavier goun** sous le texte : lettres spéciales (liste réglable par le BN, en attente de la liste
-  définitive du mainteneur) et **mots proposés** (liste du BN et mots déjà écrits dans les courriers
+- **Clavier goun** sous le texte : lettres ẹ ọ ṣ et tons ´ ` ~ ^ posés sur la lettre tapée (liste
+  du mainteneur du 18/11/2026, réglable par le BN) et **mots proposés** (liste du BN et mots déjà écrits dans les courriers
   envoyés ; le BN peut retirer un mot).
 - **Format** du modèle national : bandeau marine et filet or, logos, cinq lignes (la dernière au nom
   du bureau : « BUREAU NATIONAL DE COMMANDEMENT », « UNITÉ PAROISSIALE DE … — RÉGION … »,

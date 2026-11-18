@@ -830,7 +830,13 @@ def masquer_mot(mot: str, *, par) -> None:
 
 def enregistrer_lettres(texte: str, *, par) -> ReglagesClavier:
     r = ReglagesClavier.courant()
-    lettres = [unicodedata.normalize("NFC", x) for x in (texte or "").split() if len(x) <= 4]
+    lettres = []
+    for x in (texte or "").split():
+        x = unicodedata.normalize("NFC", x)
+        if unicodedata.category(x[0]) == "Mn":  # ton seul : touche « ◌́ »
+            x = "\u25cc" + x
+        if len(x) <= 4:
+            lettres.append(x)
     if not lettres:
         raise CourrierRefuse("Indiquez au moins une lettre.")
     r.lettres = " ".join(lettres)

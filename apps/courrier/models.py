@@ -194,11 +194,13 @@ class PieceJointe(models.Model):
 
 
 # --- Clavier goun --------------------------------------------------------------------------------
-LETTRES_PAR_DEFAUT = "ẹ ẹ́ ẹ̀ ệ ọ ọ́ ọ̀ ộ ṣ ɖ ɛ ɛ́ ɛ̀ ɔ ɔ́ ɔ̀ à á â è é ê ì í î ò ó ô ù ú û ǹ ń ã ẽ ĩ õ ũ"
+# Liste du mainteneur (18/11/2026, d'après le gun de la Bible de 1923) : lettres à point souscrit,
+# puis les tons, qui se posent sur la lettre déjà tapée (« ◌ » marque une touche de ton).
+LETTRES_PAR_DEFAUT = "ẹ ọ ṣ \u25cc\u0301 \u25cc\u0300 \u25cc\u0303 \u25cc\u0302"
 
 
 class ReglagesClavier(models.Model):
-    """Lettres du clavier goun (liste provisoire, en attente de la liste du mainteneur)."""
+    """Lettres et tons du clavier goun (liste réglable par le Bureau national)."""
 
     lettres = models.TextField("lettres du clavier", default=LETTRES_PAR_DEFAUT)
 

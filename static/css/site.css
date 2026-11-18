@@ -340,6 +340,7 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .clavier__mots { margin-bottom: 8px; }
 .clavier__touche { min-width: 44px; min-height: 44px; font-size: 1.25rem; border: 1px solid #C9D1DE; border-radius: 8px; background: #fff; color: var(--texte); cursor: pointer; }
 .clavier__touche--large { min-width: 72px; font-size: .95rem; font-weight: 700; }
+.clavier__touche--ton { color: var(--rouge); font-weight: 800; }
 .clavier__touche.actif { background: var(--marine); color: #fff; }
 .clavier__mot { min-height: 40px; padding: 4px 12px; border: 1px solid var(--or); border-radius: 20px; background: #FFF8E1; color: var(--marine); font-size: 1rem; cursor: pointer; }
 .clavier__touche:active, .clavier__mot:active { transform: scale(.96); }
