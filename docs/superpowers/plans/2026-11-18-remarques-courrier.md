@@ -117,3 +117,19 @@ Constat général : la rubrique est « un peu mélangée ». Points relevés apr
   encore la décaler.
 - Correction prévue : centrer la colonne de signature, et **recadrer automatiquement** l'image
   sur le trait de signature (retrait des marges blanches) au dépôt.
+
+## 12. Nouveau logo de la Congrégation (18/11/2026)
+Logo fourni : les deux anges et le triangle (« Et ils furent tous remplis de l'Esprit Saint — Actes
+2:4 »), **sans le texte en arc**. Un fichier de meilleure qualité sera envoyé par le mainteneur :
+préparer avec le fichier reçu (1024 × 1024, fond blanc), puis le remplacer.
+
+Décisions :
+- **Page d'accueil** : le nom « Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et
+  Séraphins Mont-Sion du Bénin » passe **sous** le logo, en **lignes droites** centrées, sur autant
+  de lignes que nécessaire, très lisible sur téléphone.
+- **PDF où le texte « CONGRÉGATION… » figure déjà, avec le logo de l'Armée du Salut** : le nouveau
+  logo **sans texte** remplace l'ancien. Aujourd'hui : les **courriers** (bandeau) et la **fiche du
+  membre**. Les autres PDF (listes, statistiques, autorisations d'événement, actes) gardent l'ancien
+  logo avec le texte en arc.
+- **En-tête des courriers** : « le logo en entier, forme carrée, le texte bien arrangé en dessous »
+  — à préciser (voir question posée au mainteneur).
