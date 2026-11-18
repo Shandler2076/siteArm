@@ -1,0 +1,4 @@
+<ul class="liste-membres">{% for c in courriers %}
+  <li><a href="{% url 'courrier:detail' c.pk %}"><strong>{{ c.objet }}</strong>
+    <span>{% if c.communique %}Communiqué{% else %}Courrier{% endif %} — préparé le {{ c.date_preparation|date:"d/m/Y" }}{% if c.date_abandon %} — abandonné le {{ c.date_abandon|date:"d/m/Y" }}{% endif %}{% if c.motif_renvoi %} — correction demandée : {{ c.motif_renvoi }}{% endif %}</span></a></li>
+{% empty %}<li class="aide">Aucun courrier.</li>{% endfor %}</ul>

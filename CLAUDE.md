@@ -98,6 +98,10 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   QR → `/courrier/verifier/<jeton>/`) ; clavier goun `static/js/clavier-goun.js` (lettres
   `ReglagesClavier` : ẹ ọ ṣ + tons ; mots `MotClavier` : liste BN, lexique goun 6 481 mots
   `courrier/data/lexique_gun.json`, mots appris ; `proposer_mots` via `/courrier/mots/?debut=`).
+  Numéro automatique à la signature ; langue fr/goun ; ligne d'adresse (« À Monsieur le … » / « Hlan … ») ;
+  5 polices `static/fonts/courrier/` + taille + « une page » ; états : à signer → en correction
+  (`mettre_en_correction`, `soumettre_a_la_signature`) → envoyé ; abandonné (`reprendre`, `supprimer`,
+  effacé après 30 jours : `purger_courriers_abandonnes`, tâche quotidienne).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 

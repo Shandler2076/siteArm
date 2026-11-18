@@ -1,4 +1,7 @@
-# Remarques du mainteneur sur la rubrique Courrier (18/11/2026) — à compiler, NE PAS exécuter
+# Remarques du mainteneur sur la rubrique Courrier (18/11/2026)
+
+> **Réalisé le 18/11/2026** sur l'ordre du mainteneur (« lance tout »), sauf le § 10 (nouveau logo,
+> en attente du fichier).
 
 > **Règle du mainteneur** : on compile seulement. La réalisation se fera en bloc, sur son ordre
 > (« lance tout » / « on y va »).

@@ -1,0 +1,10 @@
+Polices des courriers (choix du mainteneur, 18/11/2026). Toutes sous licence SIL Open Font
+License 1.1 (OFL), qui permet de les intégrer dans les PDF et de les redistribuer avec le site.
+
+- Charis SIL, Gentium Plus : SIL International (https://software.sil.org/fonts/) — OFL 1.1.
+- Noto Serif : Google / Noto Project Authors — OFL 1.1.
+- Liberation Serif, Liberation Sans (version 2) : Red Hat — OFL 1.1.
+
+Copies obtenues : Charis SIL, Gentium Plus et Noto Serif depuis les paquets Google Fonts
+(@expo-google-fonts) ; Liberation depuis la distribution Debian (fonts-liberation2).
+Texte de la licence : https://openfontlicense.org/open-font-license-official-text/

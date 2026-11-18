@@ -10,8 +10,8 @@
       <label><input type="radio" name="nature" value="communique" {% if d.nature == "communique" %}checked{% endif %}> Communiqué</label>
     </fieldset>
     <div class="date-heure">
-      <label class="champ champ--requis"><span>Numéro d'ordre</span><input type="number" name="numero_ordre" min="1" max="99999" required value="{{ d.numero_ordre|default:numero }}">
-        <small class="aide">Proposé : {{ apercu_numero }}. Modifiable.</small></label>
+      <p class="champ"><span>Numéro d'ordre</span><strong>{{ apercu_numero }}</strong>
+        <small class="aide">Attribué automatiquement ; définitif à la signature (le suivant du bureau ce jour-là).</small></p>
       <label class="champ champ--requis"><span>Lieu</span><input name="lieu" maxlength="100" required value="{{ d.lieu|default:lieu }}"></label>
     </div>
     <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ d.objet|default:'' }}" data-clavier></label>
@@ -28,6 +28,9 @@
     {% include "courrier/_recherche_membres.html" %}
     <p class="aide">Dans un bureau, seul le responsable (Chef, Secrétaire ; au national, le Président et le Secrétaire national) reçoit le courrier. Un membre ne reçoit que ce qui lui est adressé.</p>
 
+    <h2>Présentation</h2>
+    {% include "courrier/_presentation.html" with v=d %}
+
     <h2>Contenu</h2>
     <fieldset class="choix-ligne"><legend>Façon</legend>
       <label><input type="radio" name="mode" value="redige" {% if d.mode != "importe" %}checked{% endif %}> Rédiger sur le site</label>
@@ -37,6 +40,7 @@
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ d.texte|default:'' }}</textarea>
       <small class="aide">Laissez une ligne vide entre deux paragraphes. Pour un courrier importé, le texte est facultatif (mot d'accompagnement).</small></label>
     {% include "courrier/_clavier.html" %}
+    <p class="aide">Après « Préparer », ouvrez « Voir le projet en PDF » pour voir le courrier exactement comme il sera imprimé. Vous pourrez encore le modifier avant la signature.</p>
     <label class="champ"><span>Pièces jointes (5 au plus : PDF, JPEG ou PNG)</span><input type="file" name="pieces" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></label>
     <button type="submit" class="bouton">Préparer le courrier (envoi après signature)</button>
   </form>

@@ -344,3 +344,12 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .clavier__touche.actif { background: var(--marine); color: #fff; }
 .clavier__mot { min-height: 40px; padding: 4px 12px; border: 1px solid var(--or); border-radius: 20px; background: #FFF8E1; color: var(--marine); font-size: 1rem; cursor: pointer; }
 .clavier__touche:active, .clavier__mot:active { transform: scale(.96); }
+/* Polices du courrier : aperçu dans la zone de texte (mêmes fichiers que le PDF). */
+@font-face { font-family: "CourrierLiberationSerif"; src: url("../fonts/courrier/LiberationSerif-Regular.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierLiberationSans"; src: url("../fonts/courrier/LiberationSans-Regular.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierCharis"; src: url("../fonts/courrier/CharisSIL-Regular.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierGentium"; src: url("../fonts/courrier/GentiumPlus-Regular.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierNotoSerif"; src: url("../fonts/courrier/NotoSerif-Regular.ttf"); font-display: swap; }
+.demande-correction { margin-top: 12px; }
+.demande-correction summary, details.encadre > summary { cursor: pointer; font-weight: 700; color: var(--marine); }
+details.encadre > summary.bouton { display: inline-block; width: auto; }

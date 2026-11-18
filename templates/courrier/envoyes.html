@@ -8,7 +8,7 @@
   <div class="tableau-defilant"><table class="tableau">
     <thead><tr><th>Numéro</th><th>Date</th><th>Objet</th><th>Destinataires</th><th>État</th></tr></thead>
     <tbody>{% for c in courriers %}<tr>
-      <td>{% if c.numero %}{{ c.numero }}{% else %}{{ c.numero_ordre|stringformat:"03d" }}-{{ c.annee }}{% endif %}</td>
+      <td>{% if c.numero %}{{ c.numero }}{% else %}—{% endif %}</td>
       <td>{{ c.date_envoi|date:"d/m/Y"|default:"—" }}</td>
       <td><a href="{% url 'courrier:detail' c.pk %}">{{ c.objet }}</a>{% if c.communique %}<small>Communiqué</small>{% endif %}</td>
       <td>{{ c.nb_destinataires }}</td>

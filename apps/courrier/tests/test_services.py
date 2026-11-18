@@ -29,7 +29,9 @@ def _preparer(bn, **kw):
 
 
 def _signer(compte):
-    s.deposer_signature(compte, image_signature())
+    """Dépose la signature si le compte n'en a pas (la changer demande le mot de passe)."""
+    if s.signature_active(compte) is None:
+        s.deposer_signature(compte, image_signature())
 
 
 # --- Numéro d'ordre ------------------------------------------------------------------------------
@@ -54,14 +56,6 @@ def test_numero_propose_suit_chaque_bureau_et_repart_chaque_annee(bn):
     assert s.proposer_numero(_p1(bn), 2026) == 1  # suite propre au bureau
 
 
-def test_numero_deja_employe_refuse(bn):
-    _signer(bn["president"].compte)
-    s.valider(_preparer(bn, numero_ordre=5), par=bn["president"].compte)
-    with pytest.raises(s.CourrierRefuse, match="déjà"):
-        _preparer(bn, numero_ordre=5)
-
-
-# --- Préparation ---------------------------------------------------------------------------------
 def test_preparer_exige_un_destinataire_et_un_texte(bn):
     with pytest.raises(s.CourrierRefuse, match="destinataire"):
         _preparer(bn, bureaux=[])
@@ -123,9 +117,12 @@ def test_import_exige_un_fichier_valide(bn):
 def test_signature_deposee_par_un_signataire_seulement(bn):
     with pytest.raises(s.CourrierRefuse):
         s.deposer_signature(bn["m1"].compte, image_signature())
-    _signer(bn["president"].compte)
-    _signer(bn["president"].compte)  # remplacement
-    sigs = SignatureDeposee.objects.filter(compte=bn["president"].compte)
+    pres = bn["president"].compte
+    pres.set_password("MotDePasse!2026")
+    pres.save()
+    s.deposer_signature(pres, image_signature())
+    s.deposer_signature(pres, image_signature(), mot_de_passe="MotDePasse!2026")  # remplacement
+    sigs = SignatureDeposee.objects.filter(compte=pres)
     assert sigs.count() == 2 and sigs.filter(active=True).count() == 1
     assert EntreeJournal.objects.filter(action="signature_deposee").count() == 2
 
@@ -202,7 +199,7 @@ def test_renvoi_pour_correction_puis_modification(bn):
     assert c.etat == Etat.A_CORRIGER
     with pytest.raises(s.CourrierRefuse):
         s.valider(c, par=bn["president"].compte)
-    s.modifier(c, objet="Nouvel objet", texte="Nouveau texte", par=bn["sn"].compte)
+    s.modifier(c, objet="Nouvel objet", texte="Nouveau texte", soumettre=True, par=bn["sn"].compte)
     c.refresh_from_db()
     assert c.etat == Etat.A_SIGNER and c.objet == "Nouvel objet"
 
@@ -315,13 +312,13 @@ def test_mots_appris_seulement_goun_et_apres_deux_courriers(bn):
     assert "mawu" not in mots and "sanction" not in mots  # français ou sans lettre goun
     assert "kplọ́zẹ" in mots  # écrit en minuscule au moins une fois
     assert "xwẹ̀dọ" not in s.proposer_mots("xwe")  # un seul courrier : pas encore proposé
-    _envoye(bn, texte="xwẹ̀dọ", numero_ordre=2)
+    _envoye(bn, texte="xwẹ̀dọ")
     assert "xwẹ̀dọ" in s.proposer_mots("xwe")
 
 
 def test_nom_propre_jamais_appris(bn):
     _envoye(bn, texte="Hounkpẹ̀ a écrit.")
-    _envoye(bn, texte="Hounkpẹ̀ a écrit.", numero_ordre=2)
+    _envoye(bn, texte="Hounkpẹ̀ a écrit.")
     assert not MotClavier.objects.filter(mot="hounkpẹ̀").exists()
 
 
@@ -337,7 +334,8 @@ def test_signature_refusee_si_le_courrier_a_change(bn):
     c = _preparer(bn)
     _signer(bn["president"].compte)
     lu = c.version
-    s.modifier(c, objet="Autre objet", texte="Autre texte", par=bn["sn"].compte)
+    s.mettre_en_correction(c, par=bn["sn"].compte)
+    s.modifier(c, objet="Autre objet", texte="Autre texte", soumettre=True, par=bn["sn"].compte)
     with pytest.raises(s.CourrierRefuse, match="modifié"):
         s.valider(c, par=bn["president"].compte, version=lu)
     c.refresh_from_db()
@@ -350,16 +348,6 @@ def test_changement_d_annee_entre_preparation_et_signature(bn):
     _signer(bn["president"].compte)
     c = s.valider(c, par=bn["president"].compte)
     assert c.annee == 2026 and c.numero.startswith("001-2026/")
-
-
-def test_numero_pris_entre_temps_remplace_par_le_suivant(bn):
-    a = _preparer(bn, numero_ordre=7)
-    b = _preparer(bn, numero_ordre=8)
-    Courrier.objects.filter(pk=b.pk).update(numero_ordre=7)
-    _signer(bn["president"].compte)
-    s.valider(a, par=bn["president"].compte)
-    b = s.valider(b, par=bn["president"].compte)
-    assert b.numero_ordre == 8
 
 
 def test_noms_des_membres_destinataires_caches_aux_autres(bn):
