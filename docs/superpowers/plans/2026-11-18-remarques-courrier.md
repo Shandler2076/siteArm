@@ -64,3 +64,16 @@ Constat général : la rubrique est « un peu mélangée ». Points relevés apr
   champ « Remplacer par une nouvelle image » sous l'image, peu visible).
 - Le changement doit passer par la **double vérification** (code à 6 chiffres) : toujours la bonne
   personne.
+
+## Décisions du mainteneur (18/11/2026, après propositions)
+- **Date (§ 1)** : on **garde le fonctionnement actuel** : la date se met automatiquement à la
+  signature. Pas de case « Date ».
+- **Menu (§ 2)** : validé — **Nouveau courrier**, **En correction**, **Courriers abandonnés**.
+  « En correction » contient aussi les courriers que le Président (ou le Chef) renvoie pour
+  correction.
+- **Abandonnés (§ 5)** : validé ; effacement automatique au bout d'**un mois** (30 jours).
+- **Polices (§ 7)** : mettre **les cinq polices** sur le site (Charis SIL, Gentium Plus,
+  Liberation Serif, Liberation Sans, Noto Serif) ; le rédacteur choisit et **voit l'aperçu avant
+  d'envoyer**.
+- **Taille (§ 7)** : validé — 10, 11, 12 ou 13 points, plus « Tenir sur une page ».
+- §§ 3, 4, 6 et 8 : propositions présentées, réalisation avec le reste du lot.
