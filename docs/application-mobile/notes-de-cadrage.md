@@ -198,17 +198,23 @@
 
 ### Échange 14 (18/11/2026) — liste des types de culte
 Document reçu : `documents-recus/01-liste-types-de-culte.jpg` (liste manuscrite).
-Lecture de Claude, **orthographe à confirmer** :
+Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le son —
+ọ = « o ouvert », ẹ = « è », ṣ = « ch ») :
 
-| | Type de culte (lecture) | Précision donnée |
+| | Type de culte | Sens / précisions |
 |---|---|---|
-| a | Culte dominical | |
-| b | Aïsun | (veillée de prière ?) |
-| c | Isoji | |
-| d | Sodidovi (?) | Fête d'Adoption |
-| e | Fêtes ordinaires | |
-| f | Sinsen Osio didi ton (?) | |
-| g | Gbigbo de jeté (?) | Sortie de transe |
+| a | **Culte dominical** | Lectures tirées du calendrier annuel. |
+| b | **Aïsun** | **Veillée de prière**, deux sortes : **veillée d'enterrement** (souvent du jeudi soir au vendredi matin) et **veillée simple**. |
+| c | **Isọji** | (sens à préciser) |
+| d | **Sọdodovi** | **Fête d'adoption**. |
+| e | **Fêtes ordinaires** | Actions de grâce, Pâques, fêtes de groupement (femmes…), etc. Tout est regroupé ici. **L'intitulé et les dates sont saisis librement.** Pas de Noël ni d'anniversaire dans la liste. |
+| f | **Sinsẹn Ọṣio didi tọn** | **Culte d'enterrement** : le culte qui précède l'inhumation, le samedi matin. |
+| g | **Gbigbọ de jẹtẹ** (orthographe de « jẹtẹ » à confirmer) | **Sortie de transe**. |
+
+- **Obsèques** = type **f** (culte d'enterrement) + type **b** (veillée d'enterrement).
+- **[proposition] Conséquence technique :** l'application, ses écrans et ses PDF doivent afficher
+  correctement les lettres Goun et Yoruba à point souscrit (ẹ, ọ, ṣ…) et les accents. La recherche
+  doit trouver « Sọdodovi » même si l'on tape « sododovi ».
 
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
