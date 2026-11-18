@@ -306,19 +306,19 @@ def test_mots_proposes_sans_tenir_compte_des_points_ni_des_tons(db):
 def test_mots_appris_seulement_goun_et_apres_deux_courriers(bn):
     assert not MotClavier.objects.filter(mot__in=["kplọ́zẹ", "xwẹ̀dọ"]).exists()
     texte = "Kplọ́zẹ kplọ́zẹ xwẹ̀dọ. Mawu sanction kplọ́zẹ."
-    _envoye(bn, texte=texte)
+    _envoye(bn, texte=texte, langue="gun", adresse="Hlan agun")
     mots = {m.mot: m for m in MotClavier.objects.filter(origine="appris")}
     assert mots["xwẹ̀dọ"].nombre == 1  # une fois par courrier
     assert "mawu" not in mots and "sanction" not in mots  # français ou sans lettre goun
     assert "kplọ́zẹ" in mots  # écrit en minuscule au moins une fois
     assert "xwẹ̀dọ" not in s.proposer_mots("xwe")  # un seul courrier : pas encore proposé
-    _envoye(bn, texte="xwẹ̀dọ")
+    _envoye(bn, texte="xwẹ̀dọ", langue="gun", adresse="Hlan agun")
     assert "xwẹ̀dọ" in s.proposer_mots("xwe")
 
 
 def test_nom_propre_jamais_appris(bn):
-    _envoye(bn, texte="Hounkpẹ̀ a écrit.")
-    _envoye(bn, texte="Hounkpẹ̀ a écrit.")
+    _envoye(bn, texte="Hounkpẹ̀ a écrit.", langue="gun", adresse="Hlan agun")
+    _envoye(bn, texte="Hounkpẹ̀ a écrit.", langue="gun", adresse="Hlan agun")
     assert not MotClavier.objects.filter(mot="hounkpẹ̀").exists()
 
 

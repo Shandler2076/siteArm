@@ -283,3 +283,103 @@ def test_signature_recadree_sur_le_trait(bn):
     with sig.image.open("rb") as f:
         largeur, _ = Image.open(f).size
     assert largeur < 150  # marges blanches retirées : l'image se centre sur le trait
+
+
+# --- Corrections de la relecture ----------------------------------------------------------------
+def test_adresse_coherente_avec_la_langue(bn):
+    with pytest.raises(s.CourrierRefuse, match="Hlan"):
+        _preparer(bn, langue="gun", adresse="Hlan,")
+    with pytest.raises(s.CourrierRefuse, match="français"):
+        _preparer(bn, langue="fr", adresse="Hlan agun lẹpo")
+    c = _preparer(bn, langue="gun", adresse="Hlan agun lẹpo")
+    s.mettre_en_correction(c, par=bn["sn"].compte)
+    with pytest.raises(s.CourrierRefuse):
+        s.modifier(c, objet="o", texte="t", langue="fr", par=bn["sn"].compte)
+    c = s.modifier(c, objet="o", texte="t", langue="fr", adresse="", par=bn["sn"].compte)
+    assert c.adresse.startswith("À Monsieur le Chef")  # vidée : le site propose de nouveau
+
+
+def test_une_page_identique_pour_expediteur_et_destinataires(bn, nouveau_membre):
+    from apps.courrier.pdf import courrier_pdf
+
+    membres = [nouveau_membre(bn["P1"], f"Dest{i}") for i in range(6)]
+    long = "\n\n".join(["Paragraphe assez long pour remplir la page. " * 6] * 7)
+    c = _signer(bn, _preparer(bn, texte=long, membres=membres, une_page=True, taille=12))
+    expediteur = courrier_pdf(c, avec_membres=True)
+    destinataire = courrier_pdf(c, avec_membres=False)
+    assert len(PdfReader(io.BytesIO(destinataire)).pages) == 1
+
+    def tailles(contenu):
+        page = PdfReader(io.BytesIO(contenu)).pages[0]
+        vues = set()
+        page.extract_text(visitor_text=lambda t, cm, tm, f, taille: vues.add(round(taille, 1)))
+        return vues
+
+    assert max(tailles(expediteur)) == max(tailles(destinataire))
+
+
+def test_projet_sans_numero_perime(bn):
+    from apps.courrier.pdf import courrier_pdf
+
+    c = _preparer(bn)
+    assert "numéro attribué à la signature" in " ".join(_texte_pdf(courrier_pdf(c)).split())
+
+
+def test_journal_de_suppression_et_d_effacement(bn):
+    from apps.journal.models import EntreeJournal
+
+    a, b = _preparer(bn, objet="A supprimer"), _preparer(bn, objet="A effacer")
+    s.annuler(a, par=bn["sn"].compte)
+    s.annuler(b, par=bn["sn"].compte)
+    s.supprimer(Courrier.objects.get(pk=a.pk), par=bn["sn"].compte)
+    Courrier.objects.filter(pk=b.pk).update(
+        date_abandon=timezone.now() - datetime.timedelta(days=40)
+    )
+    assert s.purger_abandonnes() == 1
+    sup = EntreeJournal.objects.get(action="courrier_supprime")
+    assert sup.details["courrier"] == a.pk and sup.details["objet"] == "A supprimer"
+    purge = EntreeJournal.objects.get(action="courriers_purges")
+    assert purge.unite == "national" and purge.details["objet"] == "A effacer"
+
+
+def test_seuls_les_courriers_goun_alimentent_le_lexique(bn):
+    from apps.courrier.models import MotClavier
+
+    _signer(bn, _preparer(bn, texte="kplọ́zẹ xwẹ̀dọ"))  # courrier en français
+    assert not MotClavier.objects.filter(mot="xwẹ̀dọ").exists()
+    _signer(bn, _preparer(bn, langue="gun", adresse="Hlan agun", texte="xwẹ̀dọ"))
+    assert MotClavier.objects.filter(mot="xwẹ̀dọ").exists()
+
+
+def test_signature_refusee_si_un_membre_destinataire_est_sorti(bn):
+    from apps.membres.models import Membre
+
+    c = _preparer(bn, membres=[bn["m1"]])
+    Membre.objects.filter(pk=bn["m1"].pk).update(statut="exclu")
+    with pytest.raises(s.CourrierRefuse, match="ne peut plus recevoir"):
+        _signer(bn, c)
+
+
+def test_trop_de_mots_de_passe_faux_bloquent(bn):
+    pres = bn["president"].compte
+    pres.set_password("MotDePasse!2026")
+    pres.save()
+    s.deposer_signature(pres, image_signature())
+    for _ in range(5):
+        with pytest.raises(s.CourrierRefuse, match="Mot de passe"):
+            s.deposer_signature(pres, image_signature(), mot_de_passe="faux")
+    with pytest.raises(s.CourrierRefuse, match="Trop d'essais"):
+        s.deposer_signature(pres, image_signature(), mot_de_passe="MotDePasse!2026")
+
+
+@pytest.mark.parametrize("qui", ["sec_p1", "chef_p1", "m1"])
+@pytest.mark.parametrize("action", ["corriger", "soumettre", "reprendre", "supprimer"])
+def test_actions_du_preparateur_refusees_aux_autres(bn, qui, action):
+    c = _preparer(bn)
+    if action in ("reprendre", "supprimer"):
+        s.annuler(c, par=bn["sn"].compte)
+    elif action == "soumettre":
+        s.mettre_en_correction(c, par=bn["sn"].compte)
+    etat = Courrier.objects.get(pk=c.pk).etat
+    _client(bn[qui]).post(f"/courrier/c/{c.pk}/action/", {"action": action})
+    assert Courrier.objects.filter(pk=c.pk, etat=etat).exists()

@@ -306,6 +306,18 @@ TITRES_RESPONSABLES = {
 COMMUNIQUE_ADRESSE = "À l'attention de tous les bureaux"
 
 
+def _verifier_adresse(langue: str, adresse: str) -> None:
+    """La ligne d'adresse suit la langue : « Hlan … » en goun, pas de « Hlan » en français."""
+    mots = re.findall(r"[^\W\d_]+", (adresse or "").lower())
+    commence_par_hlan = bool(mots) and mots[0] == "hlan"
+    if langue == Langue.GOUN and (not commence_par_hlan or len(mots) < 2):
+        raise CourrierRefuse(
+            "En goun, la ligne d'adresse commence par « Hlan », suivi du destinataire."
+        )
+    if langue == Langue.FRANCAIS and commence_par_hlan:
+        raise CourrierRefuse("En français, la ligne d'adresse ne commence pas par « Hlan ».")
+
+
 def adresse_proposee(nature: str, langue: str, bureaux=(), membres=()) -> str:
     """Début de la ligne d'adresse ; le rédacteur l'écrit ou la corrige toujours à la main.
 
@@ -398,8 +410,7 @@ def preparer(
     adresse = (adresse or "").strip()[:500] or adresse_proposee(
         nature, langue, destinataires_bureaux, destinataires_membres
     )
-    if langue == Langue.GOUN and adresse.strip().lower() in ("", "hlan"):
-        raise CourrierRefuse("Complétez la ligne d'adresse (« Hlan … »).")
+    _verifier_adresse(langue, adresse)
     annee = timezone.localdate().year
     c = Courrier(
         adresse=adresse,
@@ -523,10 +534,25 @@ def modifier(
     c.objet, c.texte = objet[:250], texte
     if lieu is not None and lieu.strip():
         c.lieu = lieu.strip()[:100]
-    if adresse is not None and adresse.strip():
+    if adresse is not None:
         c.adresse = adresse.strip()[:500]
-    if c.langue == Langue.GOUN and c.adresse.strip().lower() in ("", "hlan"):
-        raise CourrierRefuse("Complétez la ligne d'adresse (« Hlan … »).")
+    if not c.adresse:  # vidée : le site propose de nouveau (français) ou demande « Hlan … »
+        bureaux = [
+            u
+            for u in (
+                unite_par_cle(d.unite_cle)
+                for d in c.destinataires.filter(type=TypeDestinataire.BUREAU, transmis_par="")
+            )
+            if u is not None
+        ]
+        membres = [
+            d.membre
+            for d in c.destinataires.filter(
+                type=TypeDestinataire.MEMBRE, transmis_par=""
+            ).select_related("membre")
+        ]
+        c.adresse = adresse_proposee(c.nature, c.langue, bureaux, membres).strip()
+    _verifier_adresse(c.langue, c.adresse)
     if extension:
         c.fichier.save(
             _nom_de_fichier(fichier.name, extension),
@@ -588,7 +614,24 @@ def _effacer(c: Courrier) -> None:
     Destinataire.objects.filter(courrier=c).delete()
     Courrier.objects.filter(pk=c.pk, etat=Etat.ANNULE).delete()
     noms = [(f.storage, f.name) for f in fichiers]
-    transaction.on_commit(lambda: [stockage.delete(nom) for stockage, nom in noms])
+
+    def effacer_fichiers():
+        for stockage, nom in noms:
+            try:
+                stockage.delete(nom)
+            except OSError:  # un fichier déjà absent n'arrête pas les autres
+                pass
+
+    transaction.on_commit(effacer_fichiers)
+
+
+def _trace(c: Courrier) -> dict:
+    return {
+        "courrier": c.pk,
+        "objet": c.objet,
+        "expediteur": c.expediteur_cle,
+        "prepare_par": getattr(c.prepare_par, "identifiant", ""),
+    }
 
 
 @transaction.atomic
@@ -598,25 +641,39 @@ def supprimer(courrier: Courrier, *, par) -> None:
     unite = _preparateur(c, par)
     if c.etat != Etat.ANNULE:
         raise CourrierRefuse("Seul un courrier abandonné se supprime.")
-    _journal(par, "courrier_supprime", unite=unite.cle, objet=c.objet)
+    _journal(par, "courrier_supprime", unite=unite.cle, **_trace(c))
     _effacer(c)
 
 
 DUREE_ABANDON_JOURS = 30  # décision du 18/11/2026 : un mois
 
 
-@transaction.atomic
 def purger_abandonnes(jours: int = DUREE_ABANDON_JOURS) -> int:
-    """Tâche quotidienne : efface les courriers abandonnés depuis plus d'un mois."""
+    """Tâche quotidienne : efface les courriers abandonnés depuis plus d'un mois (une entrée de
+    journal par courrier, dans le journal de son bureau)."""
     limite = timezone.now() - datetime.timedelta(days=jours)
-    vieux = list(
-        Courrier.objects.select_for_update().filter(etat=Etat.ANNULE, date_abandon__lt=limite)
-    )
-    for c in vieux:
-        _effacer(c)
-    if vieux:
-        _journal(None, "courriers_purges", unite="", nombre=len(vieux))
-    return len(vieux)
+    effaces = 0
+    for pk in Courrier.objects.filter(etat=Etat.ANNULE, date_abandon__lt=limite).values_list(
+        "pk", flat=True
+    ):
+        try:
+            with transaction.atomic():
+                c = (
+                    Courrier.objects.select_for_update()
+                    .select_related("prepare_par")
+                    .filter(pk=pk, etat=Etat.ANNULE, date_abandon__lt=limite)
+                    .first()
+                )
+                if c is None:
+                    continue
+                _journal(None, "courriers_purges", unite=c.expediteur_cle, **_trace(c))
+                _effacer(c)
+                effaces += 1
+        except Exception:  # noqa: BLE001 — un courrier en échec n'empêche pas les autres
+            import logging
+
+            logging.getLogger(__name__).exception("Effacement du courrier %s impossible", pk)
+    return effaces
 
 
 # --- Signature -----------------------------------------------------------------------------------
@@ -653,6 +710,7 @@ def deposer_signature(
         raise CourrierRefuse(
             "Seuls le Président, les Chefs et les Secrétaires en fonction déposent une signature."
         )
+    contenu = _image_signature(fichier)  # l'image d'abord : un code n'est pas gaspillé
     remplacement = signature_active(compte) is not None
     if remplacement:
         from apps.securite.services import confirmer_identite
@@ -660,7 +718,6 @@ def deposer_signature(
         erreur = confirmer_identite(compte, mot_de_passe, code)
         if erreur:
             raise CourrierRefuse(erreur)
-    contenu = _image_signature(fichier)
     with transaction.atomic():
         Compte.objects.select_for_update().filter(pk=compte.pk).first()  # dépôts simultanés
         actives = SignatureDeposee.objects.filter(compte=compte, active=True)
@@ -701,6 +758,15 @@ def valider(courrier: Courrier, *, par, version: int | None = None) -> Courrier:
         raise CourrierRefuse(
             "Déposez d'abord l'image de votre signature (rubrique « Ma signature »)."
         )
+    visibles = membres_visibles(unite)
+    for d in c.destinataires.filter(type=TypeDestinataire.MEMBRE, transmis_par="").select_related(
+        "membre"
+    ):
+        if d.membre.statut in SORTIS or not visibles.filter(pk=d.membre_id).exists():
+            raise CourrierRefuse(
+                f"{d.libelle} ne peut plus recevoir ce courrier (sorti du bureau ou du "
+                "mouvement) : demandez une correction au secrétaire."
+            )
     if version is not None and version != c.version:
         raise CourrierRefuse(
             "Le courrier a été modifié depuis que vous l'avez ouvert : relisez-le avant de signer."
@@ -727,7 +793,8 @@ def valider(courrier: Courrier, *, par, version: int | None = None) -> Courrier:
         ) from e
     _journal(par, "courrier_envoye", unite=unite.cle, courrier=c.pk, numero=c.numero, objet=c.objet)
     texte, pk = c.texte, c.pk
-    transaction.on_commit(lambda: _apprendre_mots(texte))
+    if c.langue == Langue.GOUN:  # le lexique goun n'apprend que des courriers en goun
+        transaction.on_commit(lambda: _apprendre_mots(texte))
     transaction.on_commit(lambda: _prevenir_destinataires(Courrier.objects.get(pk=pk)))
     return c
 

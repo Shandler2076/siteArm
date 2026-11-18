@@ -18,7 +18,7 @@
     var parLangue = JSON.parse(document.getElementById('police-par-langue').textContent);
     var police = form.querySelector('#choix-police'), taille = form.querySelector('#choix-taille');
     var adresse = form.querySelector('textarea[name="adresse"]'), texte = form.querySelector('textarea[name="texte"]');
-    var policeChoisie = {% if v.police %}true{% else %}false{% endif %};
+    var policeChoisie = false;  // tant que la police n'est pas changée à la main, elle suit la langue
     var FAMILLES = {liberation_serif: 'CourrierLiberationSerif', liberation_sans: 'CourrierLiberationSans', charis: 'CourrierCharis', gentium: 'CourrierGentium', noto_serif: 'CourrierNotoSerif'};
     function langue() { var r = form.querySelector('input[name="langue"]:checked'); return r ? r.value : 'fr'; }
     function apercu() {
@@ -29,11 +29,12 @@
         z.style.fontSize = (parseInt(taille.value, 10) * 1.33) + 'px';
       });
     }
-    function majLangue() {
+    function majLangue(e) {
       var l = langue();
       var clavier = form.querySelector('.clavier');
       if (clavier) clavier.hidden = l !== 'gun';
-      if (!policeChoisie && parLangue[l]) police.value = parLangue[l];
+      // La police suit la langue quand on change de langue (pas au chargement de la page).
+      if (e && e.type === 'change' && !policeChoisie && parLangue[l]) police.value = parLangue[l];
       if (l === 'gun' && !adresse.value.trim()) adresse.value = 'Hlan ';
       if (l === 'fr' && adresse.value.trim().toLowerCase() === 'hlan') adresse.value = '';
       apercu();
@@ -42,7 +43,7 @@
     taille.addEventListener('change', apercu);
     form.querySelectorAll('input[name="langue"]').forEach(function (r) { r.addEventListener('change', majLangue); });
     // Le clavier goun est plus bas dans la page : on attend qu'elle soit entièrement chargée.
-    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', majLangue);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function () { majLangue(); });
     else majLangue();
   })();
 </script>

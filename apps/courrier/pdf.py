@@ -292,12 +292,7 @@ def _bloc_signature(courrier, st) -> list:
 
 def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
     largeur = A4[0] - 2 * MARGE
-    unite = services.unite_expeditrice(courrier)
-    numero = courrier.numero or (
-        services.numero_complet(unite, courrier.numero_ordre, courrier.annee) + " (projet)"
-        if unite
-        else ""
-    )
+    numero = courrier.numero or "Projet — numéro attribué à la signature"
     gauche = [
         Paragraph(escape(numero), st["petit"]),
         Spacer(1, 2 * mm),
@@ -398,11 +393,15 @@ def courrier_pdf(courrier, avec_membres: bool = True, membre=None) -> bytes:
     )
     police = police_courrier(courrier.police)
     taille = float(courrier.taille or 12)
-    contenu, pages = _construire(courrier, _styles(police, taille), avec_membres, membre)
-    # « Tenir sur une page » : le texte se resserre, jusqu'à 9 points au plus petit.
-    while courrier.une_page and pages > 1 and taille > TAILLE_MIN_UNE_PAGE:
-        taille = max(TAILLE_MIN_UNE_PAGE, taille - 0.5)
-        contenu, pages = _construire(courrier, _styles(police, taille), avec_membres, membre)
+    # « Tenir sur une page » : le texte se resserre, jusqu'à 9 points au plus petit. La mesure se
+    # fait sans l'annexe des destinataires (que seul l'expéditeur voit) : tout le monde reçoit le
+    # même courrier, dans la même taille.
+    if courrier.une_page and courrier.mode == "redige":
+        _, pages = _construire(courrier, _styles(police, taille), False, None)
+        while pages > 1 and taille > TAILLE_MIN_UNE_PAGE:
+            taille = max(TAILLE_MIN_UNE_PAGE, taille - 0.5)
+            _, pages = _construire(courrier, _styles(police, taille), False, None)
+    contenu, _ = _construire(courrier, _styles(police, taille), avec_membres, membre)
     if courrier.mode == "importe" and courrier.fichier.name.lower().endswith(".pdf"):
         contenu = _ajouter_pdf_importe(contenu, courrier.fichier)
     return contenu

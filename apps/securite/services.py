@@ -38,10 +38,22 @@ def confirmer_identite(user, mot_de_passe: str, code: str = "") -> str | None:
     from django.db import transaction
     from django.utils import timezone
 
+    from apps.journal.models import DOUBLE_VERIFICATION, EntreeJournal
+    from apps.journal.services import journaliser
     from apps.securite.models import DoubleVerification
     from apps.securite.totp import verifier
 
+    # Essais erronés comptés dans le journal (commun à tous les processus du site) : 5 en 15 min.
+    recents = EntreeJournal.objects.filter(
+        auteur=user,
+        action=DOUBLE_VERIFICATION,
+        details__evenement="confirmation_echouee",
+        date__gte=timezone.now() - datetime.timedelta(minutes=15),
+    ).count()
+    if recents >= ECHECS_MAX:
+        return "Trop d'essais erronés : réessayez dans 15 minutes."
     if not user.check_password(mot_de_passe or ""):
+        journaliser(user, DOUBLE_VERIFICATION, evenement="confirmation_echouee")
         return "Mot de passe incorrect."
     with transaction.atomic():
         dv = DoubleVerification.objects.select_for_update().filter(compte=user, active=True).first()
@@ -57,6 +69,7 @@ def confirmer_identite(user, mot_de_passe: str, code: str = "") -> str | None:
                 dv.echecs = 0
                 dv.bloque_jusqu_a = maintenant + datetime.timedelta(minutes=15)
             dv.save(update_fields=["echecs", "bloque_jusqu_a"])
+            journaliser(user, DOUBLE_VERIFICATION, evenement="confirmation_echouee")
             return "Code de double vérification incorrect ou déjà utilisé."
         dv.dernier_pas, dv.echecs = pas, 0
         dv.save(update_fields=["dernier_pas", "echecs"])

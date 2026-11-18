@@ -28,6 +28,9 @@ DOUBLE_VERIFICATION = {
     "activation": "A activé sa double vérification.",
     "code_correct": "A saisi un code de double vérification correct.",
     "deconnexion_apres_echecs": "A été déconnecté après trop de codes de double vérification faux.",
+    "confirmation_echouee": (
+        "Confirmation d'identité refusée (mot de passe ou code faux) avant une action sensible."
+    ),
 }
 
 
