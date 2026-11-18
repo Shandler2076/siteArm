@@ -179,8 +179,10 @@ et la phrase de passe des sauvegardes.
 | **Corrections du 13 novembre** : menu repliable, paroisse actuelle, identifiants, événements (sections, rôles, formule, recherche), notifications reliées, vérifier un membre, statistiques à paramètres | Mainteneur | **Réalisé le 13 novembre** ; à essayer sur le site d'essai |
 | **Trésorerie** : mobile money (plateforme simulée), payer pour un autre, cotisations spéciales, quittances, espace du Trésorier, reversements mensuels | Mainteneur | **Réalisé le 13 novembre** (simulation) ; choix de la plateforme réelle et ouverture du compte : BNC |
 | **Remarques après la PR #14** : convocation en deux colonnes et nouveaux rôles, cotisations spéciales (unités, bureaux, membres désignés, amendes), reversements plus clairs, catégories exclusives, éligibles au grade visé, sessions de test ou d'examen, promotions spéciales, actes de promotion, matricule à l'accueil et dans les listes | Mainteneur | **Réalisé le 13 novembre** ; à essayer sur le site d'essai |
-| Guides d'utilisation (`docs/guides/`, 12 guides) | Mainteneur | **Rédigés le 13 novembre** ; captures d'écran à ajouter après essai |
-| Modules 4 et 5 : communication, médias | — | À concevoir |
+| **Courrier et communiqués** (module 4) : rédiger ou importer, clavier goun et mots proposés, numéro d'ordre par bureau, signature déposée et QR code, accusés, transmission aux membres, registre | Mainteneur | **Réalisé le 18 novembre** ; liste exacte des lettres goun à fournir ; à essayer sur le site d'essai |
+| Harmonisation « Bureau régional de coordination (BRC) » dans tout le site | Mainteneur | Prochain lot |
+| Guides d'utilisation (`docs/guides/`, 13 guides) | Mainteneur | **Rédigés le 13 novembre** (guide 13 le 18) ; captures d'écran à ajouter après essai |
+| Suite du module 4 (messages officiels, documents, règlement en ligne) et module 5 (médias) | — | À concevoir |
 
 ## 8. Comment une modification est faite
 

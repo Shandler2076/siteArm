@@ -114,6 +114,10 @@ par identifiant (matricule) et mot de passe personnel.
    inscrit au journal, sur une carte réduite (photo, grade, nom, statut, paroisse). Ni téléphone, ni
    adresse, ni NPI, ni photo du CIP.
 
+9. **Échanger le courrier officiel** entre les bureaux et avec les membres (courriers et
+   communiqués numérotés, signés par le Président ou le Chef, ou pour ordre par le Secrétaire),
+   avec accusés de réception et de lecture.
+
 Évolutions prévues, dans les mêmes finalités : suivi des **grades** et de l'éligibilité aux passages de
 grade, **activités et présences**, **communication** interne (messages officiels, documents). Toute
 évolution qui modifierait les finalités, les données ou les destinataires fera l'objet d'une mise à
@@ -148,6 +152,7 @@ jour auprès de l'APDP.
 | Vie dans le mouvement | Année, paroisse et région d'intégration ; affectations successives ; fonctions et mandats ; catégorie ; statut ; grade et historique des grades (date, mode, référence de la décision) | Obligatoire | BNC et bureaux |
 | Événements nationaux | Convocations (événement, session), présence, autorisation avec code de vérification | Obligatoire pour les convoqués | Bureau national ; le membre ; la paroisse (impression de l'autorisation) ; le contrôleur (vérification : ce qui figure sur la carte — photo, grade, nom, matricule, événement, session) |
 | Cotisations mensuelles | Mois payés, montant, date du versement, paroisse qui a encaissé, validation, numéro de reçu, répartition entre les niveaux | Obligatoire | BNC, bureaux et trésoriers du périmètre ; le membre lui-même |
+| Courrier et communiqués | Courriers adressés au membre ou à son bureau (objet, texte, pièces jointes, courrier importé), dates de réception, d'ouverture et de confirmation ; pour les signataires : **image de leur signature** (stockage privé, visible du seul signataire, utilisée seulement sur les courriers qu'il signe lui-même) | Pour les destinataires et les signataires | Bureaux et BNC ; le signataire lui-même |
 | Discipline interne | Sanctions prévues par le règlement intérieur (type, degré, dates, motif résumé, référence de la décision) | Uniquement si une sanction est prononcée par le BNC | BNC |
 | Données de connexion et journal | Identifiant, date et heure des connexions et des opérations sensibles, actions effectuées | Automatique | Site |
 
@@ -174,6 +179,8 @@ publicitaire ou de mesure d'audience.
 | Hébergeur (sous-traitant) | Stockage technique, sans exploitation des données | Hébergement |
 | Prestataire d'envoi des e-mails de notification (sous-traitant, si utilisé) | Adresse e-mail et texte de la notification | Envoi des notifications |
 | Chef et Secrétaire d'un bureau (vérification hors périmètre) | Carte réduite d'un membre désigné par son matricule exact, avec motif journalisé | Identifier un membre en visite ou mis en cause |
+| Responsables des bureaux destinataires d'un courrier (Chef, Secrétaire ; Président, Secrétaire national) | Courriers adressés à leur bureau, nom du signataire | Correspondance officielle |
+| Toute personne qui scanne le QR code d'un courrier | Numéro, date, objet, bureau expéditeur, fonction et nom du signataire (jamais le texte) | Vérifier l'authenticité d'un courrier |
 | Trésoriers des bureaux | Cotisations et paiements des membres de leur périmètre ; numéro mobile money du bureau | Trésorerie du bureau |
 | Plateforme de paiement mobile money (sous-traitant, à désigner : FedaPay, KkiaPay, CinetPay…) | Numéro de téléphone du payeur, montant, référence du paiement | Encaissement des cotisations au numéro du BN |
 | Opérateurs mobile money (MTN, Moov, Celtiis) | Numéro du payeur, montant | Exécution du paiement |

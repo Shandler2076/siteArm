@@ -1031,6 +1031,40 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
 
 ## 18. Module 4 — Communication
 
+### 18.1 Courrier et communiqués (réalisé le 18/11/2026 ; décisions des 13, 14 et 16/11/2026)
+
+- Rubrique **« Courrier »** du menu. Le BNC écrit à un ou plusieurs bureaux, à des niveaux entiers
+  (tous les bureaux de région, de circuit, de paroisse), à un ou plusieurs membres ; les
+  **communiqués** vont à tous les bureaux choisis. Un bureau local écrit au BN ou aux bureaux placés
+  en dessous de lui, et aux membres de son périmètre.
+- **Deux façons** : rédiger sur le site, ou **importer** un courrier déjà rédigé (photo, scan ou PDF,
+  par exemple en langue locale). Le site ajoute l'en-tête, le numéro, la date et la signature.
+- **Clavier goun** sous le texte : lettres spéciales (liste réglable par le BN, en attente de la liste
+  définitive du mainteneur) et **mots proposés** (liste du BN et mots déjà écrits dans les courriers
+  envoyés ; le BN peut retirer un mot).
+- **Format** du modèle national : bandeau marine et filet or, logos, cinq lignes (la dernière au nom
+  du bureau : « BUREAU NATIONAL DE COMMANDEMENT », « UNITÉ PAROISSIALE DE … — RÉGION … »,
+  « SECTION CIRCUIT DE … », « BUREAU RÉGIONAL DE COORDINATION — … ») ; pied de page au siège
+  national, **sans e-mail**.
+- **Numéro d'ordre** propre à chaque bureau, de 001 chaque année, proposé et modifiable, définitif à
+  la signature : « 012-2026/CCOSECS-CNC/AS/BNC/SN », « 007-2026/CCOSECS-CNC/AS/UP-GBOA/S »
+  (sigles UP, SC, BRC).
+- **Signature** : le Secrétaire (ou le Chef) prépare ; le **Président** (ou le **Chef** d'un bureau
+  local) signe, ou le Secrétaire **pour ordre** (« P.O. »), avec son propre compte. Chaque
+  signataire dépose **l'image de sa signature** dans son compte (stockage privé, visible de lui seul,
+  dépôt inscrit au journal, inutilisable hors mandat). Le PDF porte la signature et un **QR code**
+  menant à la page publique de vérification (numéro, date, objet, signataire ; jamais le texte). Le
+  signataire peut **renvoyer** le courrier pour correction.
+- **Réception** : dans un bureau, seul le **responsable** (Chef et Secrétaire ; au national, le
+  Président et le Secrétaire national) reçoit ; un membre ne reçoit que ce qui lui est adressé. La
+  paroisse peut **transmettre** un communiqué à ses membres. **Accusés** de réception et de lecture,
+  et bouton **« Courrier reçu »** ; l'expéditeur suit chaque destinataire. **Pièces jointes** (5 au
+  plus, PDF/JPEG/PNG, 10 Mo).
+- **Registre** : chaque bureau a le sien (« Courriers envoyés ») ; le BN consulte le registre de tous
+  les courriers envoyés. Un courrier envoyé ne se modifie ni ne se supprime.
+
+### 18.2 Autres évolutions prévues
+
 - **Messages officiels** du BNC aux membres, par périmètre.
 - **Espace documents commun** : circulaires, modèles, comptes rendus.
 - **Règlement intérieur en ligne**, consultable par tous les membres.

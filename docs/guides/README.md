@@ -1,7 +1,7 @@
 # Guides d'utilisation — site de l'Armée du Salut du Bénin
 
 Établis par **KOUDAKPO Thoovi Marc Aurel**, mainteneur du site, pour le Bureau National de
-Commandement. Version du 13 novembre 2026.
+Commandement. Version du 18 novembre 2026.
 
 | N° | Guide | Pour qui |
 |---|---|---|
@@ -17,6 +17,7 @@ Commandement. Version du 13 novembre 2026.
 | 10 | [Les cotisations spéciales](10-cotisations-speciales.md) | Bureau national, membres, trésoriers |
 | 11 | [La trésorerie et les reversements mensuels](11-tresorerie-et-reversements.md) | Trésoriers, Bureau national |
 | 12 | [Les grades : éligibles, test ou examen, promotions, actes](12-grades.md) | Bureau national |
+| 13 | [Le courrier et les communiqués (clavier goun)](13-courrier.md) | Bureaux, signataires, Bureau national, membres |
 
 > Site d'essai : toutes les données sont **fictives** et le paiement mobile money est **simulé**
 > (aucun argent réel). Les vrais membres ne seront enregistrés qu'après l'autorisation de l'APDP.

@@ -54,8 +54,26 @@ SESSION_EPREUVE = "session_epreuve"
 RESULTATS_EPREUVE = "resultats_epreuve"
 ACTE_PROMOTION = "acte_promotion"
 CATEGORIE = "categorie_membre"
+COURRIER_PREPARE = "courrier_prepare"
+COURRIER_MODIFIE = "courrier_modifie"
+COURRIER_ABANDONNE = "courrier_abandonne"
+COURRIER_RENVOYE = "courrier_renvoye"
+COURRIER_ENVOYE = "courrier_envoye"
+COURRIER_ACCUSE = "courrier_accuse"
+COURRIER_TRANSMIS = "courrier_transmis"
+SIGNATURE_DEPOSEE = "signature_deposee"
+CLAVIER_MODIFIE = "clavier_modifie"
 
 LIBELLES = {
+    COURRIER_PREPARE: "Courrier préparé",
+    COURRIER_MODIFIE: "Courrier modifié",
+    COURRIER_ABANDONNE: "Courrier abandonné",
+    COURRIER_RENVOYE: "Courrier renvoyé pour correction",
+    COURRIER_ENVOYE: "Courrier signé et envoyé",
+    COURRIER_ACCUSE: "Courrier reçu (accusé)",
+    COURRIER_TRANSMIS: "Communiqué transmis aux membres",
+    SIGNATURE_DEPOSEE: "Signature déposée",
+    CLAVIER_MODIFIE: "Clavier goun modifié",
     CATEGORIE: "Catégorie d'un membre",
     SESSION_EPREUVE: "Session de test ou d'examen créée",
     RESULTATS_EPREUVE: "Résultats d'un test ou examen",

@@ -8,7 +8,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (BNC). C'est sous ce nom que les documents sont établis (cahier des charges, guides).
 
 ## Documents de référence
-- Cahier des charges général (v2.8, modules 1 à 5 ; module 2 = grades + cotisations mensuelles
+- Cahier des charges général (v2.9, modules 1 à 5 ; module 4 : courrier § 18.1 ; module 2 = grades + cotisations mensuelles
   détaillé § 15-16, décisions du BNC § 15.8 / 16.9 ; nom affiché « Grade Prénoms NOM » ; grade par défaut « Camarade ») : `docs/cahier-des-charges.md` (+ PDF)
 - Cahier des charges du module 1 : `docs/superpowers/specs/2026-11-09-module1-fondations-design.md`
   (version PDF : `docs/cahier-des-charges-module1.pdf`)
@@ -89,6 +89,13 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Grades : `eligibles_au_grade` (grade visé), `SessionEpreuve` / `Candidat` (test ou examen),
   `promouvoir_admis`, `promotion_speciale`, `ActePromotion` (PDF `grades/pdf.py`, signature du
   Président, extrait par promu).
+- Courrier (`apps/courrier`, `services.py` SEUL point d'écriture) : préparer (Secrétaire/Chef) →
+  `valider` par le signataire (`perimetre.qualite_signataire` : Président/Chef, ou Secrétaire P.O.)
+  avec SA `SignatureDeposee` (stockage privé, visible de lui seul) ; numéro par bureau et par année
+  (`numero_complet`, sigles BNC/UP/SC/BRC) ; réception par les responsables (`unites_courrier`),
+  accusés ; transmission d'un communiqué par la paroisse ; PDF `courrier/pdf.py` (modèle national,
+  QR → `/courrier/verifier/<jeton>/`) ; clavier goun `static/js/clavier-goun.js` (lettres
+  `ReglagesClavier`, mots `MotClavier` : liste BN + mots appris).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 

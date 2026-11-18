@@ -1,0 +1,7 @@
+{% load static %}{{ clavier|json_script:"donnees-clavier" }}
+<div class="clavier" data-source="donnees-clavier" role="group" aria-label="Clavier goun">
+  <p class="clavier__titre">Clavier goun <small class="aide">— touchez une lettre ou un mot proposé : il s'écrit à l'endroit du curseur.</small></p>
+  <div class="clavier__mots" aria-label="Mots proposés"></div>
+  <div class="clavier__lettres"></div>
+</div>
+<script src="{% static 'js/clavier-goun.js' %}" defer></script>

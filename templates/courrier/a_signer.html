@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block titre %}Courriers à signer{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Courriers à signer</h1>
+  {% if not a_signature %}<p class="message message--error">Vous n'avez pas encore déposé l'image de votre signature : <a href="{% url 'courrier:ma_signature' %}">Ma signature</a>.</p>{% endif %}
+  <ul class="liste-membres">{% for c in courriers %}
+    <li><a href="{% url 'courrier:detail' c.pk %}"><strong>{{ c.objet }}</strong><span>{{ c.expediteur_libelle }} — préparé le {{ c.date_preparation|date:"d/m/Y" }}</span></a></li>
+  {% empty %}<li class="aide">Aucun courrier n'attend votre signature.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block titre %}Ma signature{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Ma signature</h1>
+  <p class="aide">Signez sur une feuille blanche, photographiez ou scannez la signature, puis déposez l'image ici (JPEG ou PNG). Elle est rangée à l'abri et n'apparaît que sur les courriers que <strong>vous-même</strong> signez sur le site, avec un QR code de vérification. Personne d'autre ne peut l'utiliser, pas même le Bureau national. À la fin de votre mandat, elle ne peut plus servir. Chaque dépôt est inscrit au journal.</p>
+  {% if signature %}<p>Signature actuelle (déposée le {{ signature.deposee_le|date:"d/m/Y" }}) :</p>
+    <img class="signature-apercu" src="{% url 'courrier:ma_signature_image' %}" alt="Votre signature">{% endif %}
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    <label class="champ champ--requis"><span>{% if signature %}Remplacer par une nouvelle image{% else %}Image de ma signature{% endif %}</span><input type="file" name="image" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required></label>
+    <button type="submit" class="bouton">Enregistrer ma signature</button>
+  </form>
+</section>
+{% endblock %}

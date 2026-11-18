@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titre %}Courrier reçu — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Courrier reçu</h1>
+  <p class="aide">{{ unite.libelle }}. Ouvrez chaque courrier puis cliquez sur « Courrier reçu ». Le point ● signale un courrier pas encore ouvert.</p>
+  {% include "courrier/_liste.html" %}
+</section>
+{% endblock %}

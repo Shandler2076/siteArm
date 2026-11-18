@@ -337,3 +337,94 @@ def est_tresorier_national(compte) -> bool:
 def est_validateur_reversements(compte) -> bool:
     """Valide l'état mensuel des reversements : le Président ou le Secrétaire national."""
     return _a_fonction_nationale(compte, ("Président", "Secrétaire national"))
+
+
+# --- Courrier (décisions du mainteneur des 13, 14 et 16/11/2026) --------------------------------
+SIGNATAIRES_TITULAIRES = {
+    Niveau.NATIONAL: "Président",
+    Niveau.PAROISSE: "Chef d'Unité paroissiale",
+    Niveau.CIRCUIT: "Chef de Section de Circuit",
+    Niveau.REGION: "Coordinateur régional",
+}
+SIGNATAIRES_PO = {
+    Niveau.NATIONAL: "Secrétaire national",
+    Niveau.PAROISSE: "Secrétaire paroissial",
+    Niveau.CIRCUIT: "Secrétaire de Circuit",
+    Niveau.REGION: "Secrétaire régional",
+}
+
+
+def unites_courrier(compte, jour: datetime.date | None = None) -> list[Unite]:
+    """Bureaux dont le compte prépare le courrier et lit le courrier reçu : les mandats de
+    gestion (Chef, Secrétaire ; Président, Secrétaire national)."""
+    return unites_gerees(compte, jour)
+
+
+def qualite_signataire(compte, unite: Unite, jour: datetime.date | None = None):
+    """(« titulaire » | « po », nom de la fonction) si le compte signe pour ce bureau, sinon None.
+
+    Le Président (ou le Chef) signe ; le Secrétaire signe « pour ordre ». Pas de raccourci pour
+    le compte technique : seul un vrai mandat en cours permet de signer.
+    """
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return None
+    for qualite, noms in (("titulaire", SIGNATAIRES_TITULAIRES), ("po", SIGNATAIRES_PO)):
+        nom = noms[unite.niveau]
+        if _mandats_unite(unite, (nom,), jour).filter(membre__compte=compte).exists():
+            return qualite, nom
+    return None
+
+
+def signataires_courrier(unite: Unite, jour: datetime.date | None = None) -> QuerySet[Compte]:
+    noms = (SIGNATAIRES_TITULAIRES[unite.niveau], SIGNATAIRES_PO[unite.niveau])
+    mandats = _mandats_unite(unite, noms, jour)
+    return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
+
+
+def peut_deposer_signature(compte, jour: datetime.date | None = None) -> bool:
+    """Seul un signataire possible (Président, Chef, Secrétaire) dépose une signature."""
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return False
+    noms = (*SIGNATAIRES_TITULAIRES.values(), *SIGNATAIRES_PO.values())
+    return (
+        Mandat.objects.en_cours(jour)
+        .filter(membre__compte=compte, membre__statut=Statut.ACTIF, fonction__nom__in=noms)
+        .exists()
+    )
+
+
+def unites_inferieures(unite: Unite, actives: bool = True) -> list[Unite]:
+    """Bureaux placés sous ce bureau (tous les bureaux pour le national)."""
+    regions = Region.objects.all()
+    circuits = Circuit.objects.select_related("region")
+    paroisses = Paroisse.objects.select_related("circuit__region")
+    if actives:
+        regions, circuits, paroisses = (
+            regions.filter(active=True),
+            circuits.filter(active=True),
+            paroisses.filter(active=True),
+        )
+    if unite.niveau == Niveau.PAROISSE:
+        return []
+    if unite.niveau == Niveau.CIRCUIT:
+        return [Unite(Niveau.PAROISSE, p) for p in paroisses.filter(circuit=unite.objet)]
+    if unite.niveau == Niveau.REGION:
+        return [Unite(Niveau.CIRCUIT, c) for c in circuits.filter(region=unite.objet)] + [
+            Unite(Niveau.PAROISSE, p) for p in paroisses.filter(circuit__region=unite.objet)
+        ]
+    return (
+        [Unite(Niveau.REGION, r) for r in regions]
+        + [Unite(Niveau.CIRCUIT, c) for c in circuits]
+        + [Unite(Niveau.PAROISSE, p) for p in paroisses]
+    )
+
+
+def unite_par_cle(cle: str) -> Unite | None:
+    """Unité désignée par sa clé, SANS contrôle de droit (pour les destinataires d'un courrier)."""
+    if cle == "national":
+        return Unite(Niveau.NATIONAL, None)
+    niveau, _, ident = (cle or "").partition("-")
+    if niveau not in MODELES or not ident.isdigit():
+        return None
+    objet = MODELES[niveau].objects.filter(pk=int(ident)).first()
+    return Unite(niveau, objet) if objet is not None else None
