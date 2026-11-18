@@ -253,15 +253,30 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
     le jour.
 - **[décidé]** Les lectures viennent **directement du calendrier annuel**.
 
+### Échange 19 (18/11/2026) — langue des rubriques et clavier Goun
+- L'exemplaire **mélange les langues** dans les libellés (Sanctus, Procession en français ; Ohan tintan
+  en Goun). **[décidé] Pas de mélange :** au début du programme, on choisit la **langue des
+  rubriques**, **français** ou **Goun**, et **toutes** les rubriques (et sous-rubriques) suivent.
+- Les libellés sont proposés dans la langue choisie, mais **toujours modifiables** (ex. les
+  sous-rubriques de la prière n° 11).
+- **[décidé] Clavier Goun à l'écran :** des boutons pour les lettres absentes du clavier AZERTY :
+  ẹ, ọ, ṣ (point souscrit), voyelles avec accent grave, aigu, circonflexe (ì, í, î…), etc.
+- Il faut donc **chaque rubrique en deux versions** (Goun et français) → tableau à compléter :
+  `rubriques-fetes-goun-francais.md`.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
+- Compléter le tableau `rubriques-fetes-goun-francais.md` (libellés Goun et français).
+- Rubriques aussi en **Yoruba** ? Clavier Yoruba (mêmes lettres + ń, ǹ…) ?
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
+- Compléter le tableau `rubriques-fetes-goun-francais.md` (libellés Goun et français).
+- Rubriques aussi en **Yoruba** ? Clavier Yoruba (mêmes lettres + ń, ǹ…) ?
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 
