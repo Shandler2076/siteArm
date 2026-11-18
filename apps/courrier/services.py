@@ -699,8 +699,8 @@ def peut_voir(compte, courrier: Courrier) -> bool:
         return True
     if courrier.etat in (Etat.A_SIGNER, Etat.A_CORRIGER) and peut_signer(compte, courrier):
         return True
-    if courrier.envoye and compte.has_perm("membres.gerer_membres"):
-        return True  # registre du Bureau national
+    # Décision du 18/11/2026 : pas de droit de regard du Bureau national sur les courriers des
+    # autres niveaux ; il ne voit que ce qu'il envoie ou ce qui lui est adressé.
     return bool(destinataires_du_compte(compte, courrier))
 
 

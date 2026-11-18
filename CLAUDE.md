@@ -93,7 +93,8 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   `valider` par le signataire (`perimetre.qualite_signataire` : Président/Chef, ou Secrétaire P.O.)
   avec SA `SignatureDeposee` (stockage privé, visible de lui seul) ; numéro par bureau et par année
   (`numero_complet`, sigles BNC/UP/SC/BRC) ; réception par les responsables (`unites_courrier`),
-  accusés ; transmission d'un communiqué par la paroisse ; PDF `courrier/pdf.py` (modèle national,
+  accusés ; transmission d'un communiqué par la paroisse ; le BN ne voit QUE ses courriers
+  envoyés ou reçus (pas ceux des autres niveaux ; registre BN = national seulement) ; PDF `courrier/pdf.py` (modèle national,
   QR → `/courrier/verifier/<jeton>/`) ; clavier goun `static/js/clavier-goun.js` (lettres
   `ReglagesClavier` : ẹ ọ ṣ + tons ; mots `MotClavier` : liste BN, lexique goun 6 481 mots
   `courrier/data/lexique_gun.json`, mots appris ; `proposer_mots` via `/courrier/mots/?debut=`).

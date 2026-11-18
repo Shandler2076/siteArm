@@ -13,8 +13,8 @@
 >
 > Réponses du 18/11/2026 : le Secrétaire prépare, le Président ou le Chef signe, sinon le
 > Secrétaire pour ordre (fonctionnement actuel, inchangé). Envoi différé des e-mails : plus tard,
-> en option. Question en attente : le BN doit-il lire le contenu des courriers entre bureaux locaux
-> et des courriers adressés aux membres, ou seulement le registre ?
+> en option. Le BN ne voit que les courriers qu'il envoie ou qui lui sont adressés ; chaque bureau a
+> son registre, celui du BN ne contient que le national (décision du 18/11/2026, réalisée).
 
 Besoin : le BNC doit pouvoir écrire, depuis le site, sans passer par un événement :
 - à **un bureau particulier** : au sujet de l'un de ses membres, ou d'une affaire qui ne concerne

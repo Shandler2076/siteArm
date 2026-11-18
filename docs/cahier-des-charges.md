@@ -1062,8 +1062,10 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   paroisse peut **transmettre** un communiqué à ses membres. **Accusés** de réception et de lecture,
   et bouton **« Courrier reçu »** ; l'expéditeur suit chaque destinataire. **Pièces jointes** (5 au
   plus, PDF/JPEG/PNG, 10 Mo).
-- **Registre** : chaque bureau a le sien (« Courriers envoyés ») ; le BN consulte le registre de tous
-  les courriers envoyés. Un courrier envoyé ne se modifie ni ne se supprime.
+- **Registre** : chaque bureau a le sien (« Courriers envoyés », « Courrier reçu ») ; le registre du
+  BN ne contient que les courriers envoyés par le BN et ceux qui lui sont adressés. **Le BN ne voit
+  pas les courriers échangés entre les autres niveaux** ni ceux qu'un bureau adresse à ses membres
+  (décision du 18/11/2026). Un courrier envoyé ne se modifie ni ne se supprime.
 
 ### 18.2 Autres évolutions prévues
 

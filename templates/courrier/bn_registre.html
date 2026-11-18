@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% block titre %}Registre des courriers — Bureau national{% endblock %}
+{% block titre %}Registre du Bureau national{% endblock %}
 {% block contenu %}
 <section class="carte">
-  <h1>Registre des courriers</h1>
-  <p class="aide">Tous les courriers et communiqués envoyés sur le site, par tous les bureaux.</p>
+  <h1>Registre du Bureau national</h1>
+  <p class="aide">Courriers et communiqués envoyés par le Bureau national, et courriers adressés au Bureau national. Les courriers échangés entre les autres niveaux restent dans le registre de leur bureau.</p>
   <form method="get" class="date-heure">
-    <label class="champ"><span>Bureau expéditeur</span><select name="bureau"><option value="">Tous</option>
+    <label class="champ"><span>Courriers</span><select name="bureau"><option value="">Tous</option>
       {% for cle, lib in expediteurs %}<option value="{{ cle }}" {% if cle == bureau %}selected{% endif %}>{{ lib }}</option>{% endfor %}</select></label>
     <label class="champ"><span>Année</span><input type="number" name="annee" value="{{ annee }}" min="2020" max="2100"></label>
     <button type="submit" class="bouton bouton--secondaire">Filtrer</button>
@@ -14,7 +14,7 @@
     <thead><tr><th>Numéro</th><th>Date</th><th>Expéditeur</th><th>Objet</th><th>Destinataires</th><th>Signé par</th></tr></thead>
     <tbody>{% for c in courriers %}<tr><td>{{ c.numero }}</td><td>{{ c.date_envoi|date:"d/m/Y" }}</td><td>{{ c.expediteur_libelle }}</td>
       <td><a href="{% url 'courrier:detail' c.pk %}">{{ c.objet }}</a>{% if c.communique %}<small>Communiqué</small>{% endif %}</td>
-      <td>{% for d in c.destinataires.all %}{% if not d.transmis_par %}{{ d.libelle }}{% if not forloop.last %} ; {% endif %}{% endif %}{% endfor %}</td>
+      <td>{% for d in c.destinataires.all %}{{ d.libelle }}{% if not forloop.last %} ; {% endif %}{% empty %}Membres désignés{% endfor %}</td>
       <td>{% if c.qualite == "po" %}P.O. {% endif %}{{ c.nom_signataire }}</td></tr>
     {% empty %}<tr><td colspan="6" class="aide">Aucun courrier envoyé.</td></tr>{% endfor %}</tbody>
   </table></div>

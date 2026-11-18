@@ -175,11 +175,9 @@ def recherche(request, cle):
 
 
 def vue_complete(request, c: Courrier) -> bool:
-    """L'expéditeur et le Bureau national voient les noms de tous les destinataires."""
+    """Seul l'expéditeur voit les noms de tous les destinataires et leur suivi."""
     unite = services.unite_expeditrice(c)
-    if unite is not None and unite in unites_courrier(request.user):
-        return True
-    return c.envoye and request.user.has_perm("membres.gerer_membres")
+    return unite is not None and unite in unites_courrier(request.user)
 
 
 def _courrier_visible(request, pk) -> Courrier:
@@ -397,21 +395,30 @@ def verifier(request, jeton):
 @login_required
 def bn_registre(request):
     _gerer_membres(request)
-    courriers = Courrier.objects.filter(etat=Etat.ENVOYE).prefetch_related(
-        Prefetch("destinataires", queryset=Destinataire.objects.filter(transmis_par=""))
+    # Registre du national seulement (décision du 18/11/2026) : courriers envoyés par le BN et
+    # courriers adressés au BN. Chaque région, circuit, paroisse tient le sien.
+    national = Q(expediteur_cle="national") | Q(
+        destinataires__type=TypeDestinataire.BUREAU, destinataires__unite_cle="national"
+    )
+    courriers = (
+        Courrier.objects.filter(national, etat=Etat.ENVOYE)
+        .distinct()
+        .prefetch_related(
+            Prefetch(
+                "destinataires",
+                queryset=Destinataire.objects.filter(transmis_par="", type=TypeDestinataire.BUREAU),
+            )
+        )
     )
     bureau = request.GET.get("bureau", "")
-    if bureau:
-        courriers = courriers.filter(expediteur_cle=bureau)
+    if bureau == "envoyes":
+        courriers = courriers.filter(expediteur_cle="national")
+    elif bureau == "recus":
+        courriers = courriers.exclude(expediteur_cle="national")
     annee = request.GET.get("annee", "")
     if annee.isdigit():
         courriers = courriers.filter(annee=int(annee))
-    expediteurs = (
-        Courrier.objects.filter(etat=Etat.ENVOYE)
-        .values_list("expediteur_cle", "expediteur_libelle")
-        .distinct()
-        .order_by("expediteur_libelle")
-    )
+    expediteurs = [("envoyes", "Envoyés par le Bureau national"), ("recus", "Reçus des bureaux")]
     return render(
         request,
         "courrier/bn_registre.html",

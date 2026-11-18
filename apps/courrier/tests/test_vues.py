@@ -314,3 +314,37 @@ def test_mots_proposes_par_le_site(bn):
     assert r.status_code == 200 and r.json()["mots"][0] == "tọn"
     # Un membre simple n'écrit pas de courrier : pas de propositions.
     assert _client(bn["m1"]).get("/courrier/mots/", {"debut": "to"}).status_code == 404
+
+
+def _envoi_local(bn, bureaux, membres=()):
+    """Courrier du circuit Ekpe A (préparé et signé par son Chef)."""
+    circuit = Unite(Niveau.CIRCUIT, bn["Ekpe A"])
+    c = s.preparer(
+        unite=circuit,
+        nature="lettre",
+        objet="Affaire du circuit",
+        texte="Texte interne au circuit.",
+        bureaux=bureaux,
+        membres=list(membres),
+        par=bn["chef"].compte,
+    )
+    s.deposer_signature(bn["chef"].compte, image_signature())
+    return s.valider(c, par=bn["chef"].compte)
+
+
+def test_bn_ne_voit_pas_les_courriers_entre_autres_niveaux(bn, client_technique):
+    """Décision du 18/11/2026 : le BN ne voit que ce qu'il a envoyé ou ce qui lui est adressé."""
+    c = _envoi_local(bn, [f"paroisse-{bn['P1'].pk}"], membres=[bn["m2"]])
+    for client in (_client(bn["president"]), _client(bn["sn"]), client_technique):
+        for url in (f"/courrier/c/{c.pk}/", f"/courrier/c/{c.pk}.pdf"):
+            assert client.get(url).status_code == 404
+        assert "Affaire du circuit" not in _html(client.get("/courrier/bn/registre/"))
+    # Le destinataire, lui, le voit.
+    assert _client(bn["sec_p1"]).get(f"/courrier/c/{c.pk}/").status_code == 200
+
+
+def test_registre_national_courriers_recus_par_le_bn(bn):
+    c = _envoi_local(bn, ["national"])
+    sn = _client(bn["sn"])
+    assert sn.get(f"/courrier/c/{c.pk}/").status_code == 200
+    assert "Affaire du circuit" in _html(sn.get("/courrier/bn/registre/"))

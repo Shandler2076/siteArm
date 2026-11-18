@@ -71,6 +71,8 @@ objet, signataire), sans jamais en montrer le texte.
 
 ## 7. Bureau national
 
-- **Registre des courriers** : tous les courriers envoyés, par bureau et par année.
+- **Registre des courriers** : registre du national seulement (courriers envoyés par le Bureau
+  national et courriers qui lui sont adressés), par année. Les courriers entre les régions, les
+  circuits, les paroisses et leurs membres ne sont pas visibles du Bureau national.
 - **Clavier goun** : lettres et tons du clavier (ẹ ọ ṣ ; tons ´ ` ~ ^ ; écrire « ◌ » suivi du ton pour en ajouter un), mots
   proposés par le BN (un par ligne), mots du lexique ou mots appris à ne plus proposer.
