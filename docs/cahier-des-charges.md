@@ -1084,7 +1084,9 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   BN ne contient que les courriers envoyés par le BN et ceux qui lui sont adressés. **Le BN ne voit
   pas les courriers échangés entre les autres niveaux** ni ceux qu'un bureau adresse à ses membres
   (décision du 18/11/2026). Un courrier envoyé ne se modifie ni ne se supprime.
-- **À venir** : nouveau logo de gauche de l'en-tête (le mainteneur le fournira).
+- **Logo de gauche** (18/11/2026) : nouveau logo de la Congrégation, triangle et deux anges **sans
+  texte**, dans une case à sa forme. Même logo sur la fiche du membre ; à l'accueil, le nom de la
+  Congrégation est écrit en lignes droites sous le logo.
 
 ### 18.2 Autres évolutions prévues
 

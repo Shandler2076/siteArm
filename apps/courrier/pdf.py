@@ -36,7 +36,16 @@ from reportlab.platypus import (
 
 from apps.courrier import services
 from apps.courrier.models import TAILLE_MIN_UNE_PAGE
-from apps.membres.pdf import LOGO_AS, LOGO_CONGREGATION, MARINE, OR, STATIQUE, _polices
+from apps.membres.pdf import (
+    LOGO_AS,
+    LOGO_CONGREGATION_SANS_TEXTE,
+    MARINE,
+    OR,
+    STATIQUE,
+    _polices,
+)
+
+LOGO_EN_TETE = LOGO_CONGREGATION_SANS_TEXTE  # triangle et deux anges, sans texte (18/11/2026)
 
 # Polices des courriers (décision du 18/11/2026) : (fichier normal, fichier gras).
 FICHIERS_POLICES = {
@@ -104,42 +113,56 @@ def _oblique(c, x, y, texte, police, taille, couleur, centre=True):
 
 
 def _bandeau(c, larg, haut, derniere_ligne):
+    """Bandeau d'en-tête : à gauche, le logo de la Congrégation (triangle et deux anges, sans
+    texte) dans une case à sa forme ; à droite, le logo de l'Armée du Salut ; au centre, les
+    cinq lignes."""
+    from reportlab.pdfbase.pdfmetrics import stringWidth
+
     y0 = haut - 8 * mm - HAUT_BANDEAU
     c.setFillColor(MARINE)
     c.rect(8 * mm, y0, larg - 16 * mm, HAUT_BANDEAU, stroke=0, fill=1)
     c.setFillColor(OR)
     c.rect(8 * mm, y0 - 2 * mm, larg - 16 * mm, 2 * mm, stroke=0, fill=1)
     cote = HAUT_BANDEAU - 6 * mm
-    for logo, x in ((LOGO_CONGREGATION, 11 * mm), (LOGO_AS, larg - 11 * mm - cote)):
+    # Case de gauche élargie à la forme du logo (option choisie par le mainteneur).
+    largeur_gauche = cote
+    if LOGO_EN_TETE.exists():
+        iw, ih = ImageReader(str(LOGO_EN_TETE)).getSize()
+        largeur_gauche = min(cote * iw / ih + 2 * mm, 2.2 * cote)
+    x_droite = larg - 11 * mm - cote
+    for logo, x, largeur in (
+        (LOGO_EN_TETE, 11 * mm, largeur_gauche),
+        (LOGO_AS, x_droite, cote),
+    ):
         c.setFillColor(colors.white)
-        c.rect(x, y0 + 3 * mm, cote, cote, stroke=0, fill=1)
+        c.rect(x, y0 + 3 * mm, largeur, cote, stroke=0, fill=1)
         if logo.exists():
             c.drawImage(
                 ImageReader(str(logo)),
                 x + 1 * mm,
                 y0 + 4 * mm,
-                cote - 2 * mm,
+                largeur - 2 * mm,
                 cote - 2 * mm,
                 mask="auto",
                 preserveAspectRatio=True,
             )
-    centre = larg / 2
+    gauche, droite = 11 * mm + largeur_gauche + 3 * mm, x_droite - 3 * mm
+    centre, largeur_max = (gauche + droite) / 2, droite - gauche
     y = haut - 8 * mm - 6 * mm
     styles = [
-        (colors.white, "Sans-Gras", 8.5),
-        (JAUNE, "Sans-Gras", 8.5),
-        (JAUNE, "Sans-Gras", 8.5),
-        (ORANGE, "Sans-Gras", 7),
+        (colors.white, 8.5),
+        (JAUNE, 8.5),
+        (JAUNE, 8.5),
+        (ORANGE, 7),
     ]
-    for texte, (couleur, police, taille) in zip(LIGNES_FIXES, styles, strict=True):
-        _oblique(c, centre, y, texte, police, taille, couleur)
+    for texte, (couleur, taille) in zip(LIGNES_FIXES, styles, strict=True):
+        while taille > 6 and stringWidth(texte, "Sans-Gras", taille) > largeur_max:
+            taille -= 0.25
+        _oblique(c, centre, y, texte, "Sans-Gras", taille, couleur)
         y -= 4.6 * mm
-    largeur_max = larg - 2 * (11 * mm + cote + 3 * mm)
     taille = 11
-    from reportlab.pdfbase.pdfmetrics import stringWidth
-
-    while taille > 7 and stringWidth(derniere_ligne, "Sans-Gras", taille) > largeur_max:
-        taille -= 0.5
+    while taille > 6.5 and stringWidth(derniere_ligne, "Sans-Gras", taille) > largeur_max:
+        taille -= 0.25
     c.setFillColor(OR)
     c.setFont("Sans-Gras", taille)
     c.drawCentredString(centre, y - 1 * mm, derniere_ligne)

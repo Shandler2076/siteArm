@@ -24,6 +24,9 @@ FOND = colors.HexColor("#F4F6FA")
 STATIQUE = Path(settings.BASE_DIR) / "static"
 LOGO_AS = STATIQUE / "img" / "logo-armee-du-salut.png"
 LOGO_CONGREGATION = STATIQUE / "img" / "logo-congregation-pdf.png"
+# Nouveau logo sans texte (18/11/2026) : là où le nom de la Congrégation est déjà écrit
+# (courriers, fiche du membre).
+LOGO_CONGREGATION_SANS_TEXTE = STATIQUE / "img" / "logo-congregation-sans-texte.png"
 
 _polices_ok = False
 
@@ -93,7 +96,7 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
     c.setFillColor(colors.white)
     c.roundRect(marge - 2 * mm, haut - 44 * mm, 48 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
     c.drawImage(
-        ImageReader(str(LOGO_CONGREGATION)),
+        ImageReader(str(LOGO_CONGREGATION_SANS_TEXTE)),
         marge - 1 * mm,
         haut - 41 * mm,
         46 * mm,

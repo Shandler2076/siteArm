@@ -131,5 +131,7 @@ Décisions :
   logo **sans texte** remplace l'ancien. Aujourd'hui : les **courriers** (bandeau) et la **fiche du
   membre**. Les autres PDF (listes, statistiques, autorisations d'événement, actes) gardent l'ancien
   logo avec le texte en arc.
-- **En-tête des courriers** : « le logo en entier, forme carrée, le texte bien arrangé en dessous »
-  — à préciser (voir question posée au mainteneur).
+- **En-tête des courriers** : le logo tel quel (triangle et deux anges, sans texte), dans une case
+  **élargie à sa forme** (option 2, aperçu validé) ; les cinq lignes restent au centre.
+- Fichier définitif reçu (427 × 239, fond transparent) : `static/img/logo-congregation-sans-texte.png`.
+- **Réalisé le 18/11/2026** (« on y va ») : courriers, fiche du membre, page d'accueil.

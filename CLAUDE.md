@@ -102,6 +102,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   5 polices `static/fonts/courrier/` + taille + « une page » ; états : à signer → en correction
   (`mettre_en_correction`, `soumettre_a_la_signature`) → envoyé ; abandonné (`reprendre`, `supprimer`,
   effacé après 30 jours : `purger_courriers_abandonnes`, tâche quotidienne).
+- Logos : `LOGO_CONGREGATION_SANS_TEXTE` (triangle + anges, sans texte) là où le nom de la
+  Congrégation est déjà écrit (courriers, fiche du membre, accueil) ; l'ancien logo avec le texte en
+  arc reste sur les autres PDF (listes, statistiques, autorisations).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 
