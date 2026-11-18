@@ -1,0 +1,8 @@
+{# Police, taille, « Tenir sur une page » (décisions du 18/11/2026). Variable : v. #}
+<div class="date-heure">
+  <label class="champ"><span>Police</span><select name="police" id="choix-police">
+    {% for val, lib in polices %}<option value="{{ val }}" {% if v.police == val %}selected{% endif %}>{{ lib }}</option>{% endfor %}</select></label>
+  <label class="champ"><span>Taille du texte</span><select name="taille" id="choix-taille">
+    {% for t in tailles %}<option value="{{ t }}" {% if v.taille|stringformat:"s" == t|stringformat:"s" or not v.taille and t == 12 %}selected{% endif %}>{{ t }} points</option>{% endfor %}</select></label>
+</div>
+<label class="option-ligne"><input type="checkbox" name="une_page" value="1" {% if v.une_page %}checked{% endif %}> Tenir sur une page (le site resserre le texte, jusqu'à 9 points)</label>

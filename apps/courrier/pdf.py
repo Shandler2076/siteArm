@@ -222,8 +222,9 @@ def _date_fr(courrier) -> str:
 
 
 def _paragraphes(texte: str, style) -> list:
+    """Paragraphes du texte, avec le **gras** et le __souligné__ demandés par le rédacteur."""
     blocs = [b.strip() for b in (texte or "").replace("\r\n", "\n").split("\n\n")]
-    return [Paragraph(escape(b).replace("\n", "<br/>"), style) for b in blocs if b]
+    return [Paragraph(services.mise_en_forme(b).replace("\n", "<br/>"), style) for b in blocs if b]
 
 
 def _image_courrier(fichier, largeur, hauteur) -> Image:
@@ -335,6 +336,8 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
             objet,
         ]
     else:
+        if courrier.nature == "autre" and courrier.titre:  # décision, recommandation… (18/11)
+            flux += [Paragraph(escape(courrier.titre), st["titre"]), Spacer(1, 4 * mm)]
         # Pas de mot « Destinataire » : la formule d'adresse des lettres (18/11/2026).
         bloc = Table(
             [[objet, Paragraph(adresse, st["gauche"])]],
@@ -363,7 +366,7 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
             except (OSError, ValueError):
                 flux.append(Paragraph("<i>Image du courrier illisible.</i>", st["texte"]))
     flux += _bloc_signature(courrier, st)
-    pieces = list(courrier.pieces.all())
+    pieces = list(courrier.pieces.all()) if courrier.pk else []  # aperçu : rien d'enregistré
     if pieces:
         flux.append(Spacer(1, 4 * mm))
         flux.append(
@@ -372,7 +375,11 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
                 st["petit"],
             )
         )
-    directs = list(services.destinataires_directs(courrier)[:2000]) if avec_membres else []
+    directs = (
+        list(services.destinataires_directs(courrier)[:2000])
+        if avec_membres and courrier.pk
+        else []
+    )
     if not courrier.communique and len(directs) > 3:
         flux.append(Spacer(1, 4 * mm))
         flux.append(Paragraph("<b>Annexe — liste des destinataires</b>", st["gauche"]))
@@ -388,7 +395,7 @@ def _construire(courrier, st, avec_membres, membre) -> tuple[bytes, int]:
     doc = BaseDocTemplate(
         tampon,
         pagesize=A4,
-        title=f"{'Communiqué' if courrier.communique else 'Courrier'} — {courrier.objet}",
+        title=f"{courrier.titre or courrier.get_nature_display()} — {courrier.objet}",
         author=courrier.expediteur_libelle,
     )
     cadre = Frame(

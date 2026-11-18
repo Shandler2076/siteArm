@@ -6,9 +6,11 @@
   <p class="aide">Vous préparez le courrier ; il ne part qu'après la signature du {% if unite.niveau == "national" %}Président (ou du Secrétaire national « pour ordre »){% else %}Chef du bureau (ou du Secrétaire « pour ordre »){% endif %}. Le site ajoute l'en-tête, le numéro d'ordre, la date et la signature.</p>
   <form method="post" enctype="multipart/form-data" id="form-courrier">{% csrf_token %}
     <fieldset class="choix-ligne"><legend>Nature</legend>
-      <label><input type="radio" name="nature" value="lettre" {% if d.nature != "communique" %}checked{% endif %}> Courrier</label>
+      <label><input type="radio" name="nature" value="lettre" {% if d.nature != "communique" and d.nature != "autre" %}checked{% endif %}> Courrier</label>
       <label><input type="radio" name="nature" value="communique" {% if d.nature == "communique" %}checked{% endif %}> Communiqué</label>
+      <label><input type="radio" name="nature" value="autre" {% if d.nature == "autre" %}checked{% endif %}> Autre (décision, lettre de recommandation…)</label>
     </fieldset>
+    <label class="champ" id="champ-titre"><span>Titre du document</span><input name="titre" maxlength="120" value="{{ d.titre|default:'' }}" placeholder="Ex. DÉCISION, LETTRE DE RECOMMANDATION"></label>
     <div class="date-heure">
       <p class="champ"><span>Numéro d'ordre</span><strong>{{ apercu_numero }}</strong>
         <small class="aide">Attribué automatiquement ; définitif à la signature (le suivant du bureau ce jour-là).</small></p>
@@ -20,16 +22,12 @@
     {% if niveaux %}<fieldset class="choix-ligne"><legend>Niveaux entiers</legend>
       {% for v, lib in niveaux %}<label><input type="checkbox" name="niveaux" value="{{ v }}" {% if v in niveaux_choisis %}checked{% endif %}> {{ lib }}</label>{% endfor %}
     </fieldset>{% endif %}
-    {% if proposes %}
-    <input type="search" class="recherche-liste" data-filtre="liste-bureaux" placeholder="Rechercher un bureau…" aria-label="Rechercher un bureau">
-    <div id="liste-bureaux" class="liste-cases">
-      {% for u in proposes %}<div><label><input type="checkbox" name="bureaux" value="{{ u.cle }}" {% if u.cle in choisis %}checked{% endif %}> {% if u.niveau == "national" %}Bureau National de Commandement{% else %}{{ u.libelle }}{% endif %}</label></div>{% endfor %}
-    </div>{% endif %}
+    {% if bureaux_proposes %}{% include "courrier/_bureaux.html" %}{% endif %}
     {% include "courrier/_recherche_membres.html" %}
     <p class="aide">Dans un bureau, seul le responsable (Chef, Secrétaire ; au national, le Président et le Secrétaire national) reçoit le courrier. Un membre ne reçoit que ce qui lui est adressé.</p>
 
     <h2>Présentation</h2>
-    {% include "courrier/_presentation.html" with v=d %}
+    {% include "courrier/_mise_en_forme.html" with v=d %}
 
     <h2>Contenu</h2>
     <fieldset class="choix-ligne"><legend>Façon</legend>
@@ -37,19 +35,25 @@
       <label><input type="radio" name="mode" value="importe" {% if d.mode == "importe" %}checked{% endif %}> Importer un courrier déjà rédigé (photo, scan ou PDF)</label>
     </fieldset>
     <label class="champ" id="champ-fichier"><span>Courrier importé (PDF, JPEG ou PNG, 10 Mo au plus)</span><input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></label>
+    {% include "courrier/_langue_adresse.html" with v=d %}
+    {% include "courrier/_outils_texte.html" %}
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ d.texte|default:'' }}</textarea>
       <small class="aide">Laissez une ligne vide entre deux paragraphes. Pour un courrier importé, le texte est facultatif (mot d'accompagnement).</small></label>
     {% include "courrier/_clavier.html" %}
-    <p class="aide">Après « Préparer », ouvrez « Voir le projet en PDF » pour voir le courrier exactement comme il sera imprimé. Vous pourrez encore le modifier avant la signature.</p>
     <label class="champ"><span>Pièces jointes (5 au plus : PDF, JPEG ou PNG)</span><input type="file" name="pieces" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></label>
+    {% include "courrier/_apercu_boutons.html" %}
     <button type="submit" class="bouton">Préparer le courrier (envoi après signature)</button>
   </form>
 </section>
 <script>
   (function () {
     var f = document.getElementById('form-courrier'), champ = document.getElementById('champ-fichier');
-    function maj() { champ.hidden = f.querySelector('input[name="mode"]:checked').value !== 'importe'; }
-    f.querySelectorAll('input[name="mode"]').forEach(function (r) { r.addEventListener('change', maj); });
+    var titre = document.getElementById('champ-titre');
+    function maj() {
+      champ.hidden = f.querySelector('input[name="mode"]:checked').value !== 'importe';
+      titre.hidden = f.querySelector('input[name="nature"]:checked').value !== 'autre';
+    }
+    f.querySelectorAll('input[name="mode"], input[name="nature"]').forEach(function (r) { r.addEventListener('change', maj); });
     maj();
   })();
 </script>

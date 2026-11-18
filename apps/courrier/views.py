@@ -10,6 +10,7 @@ from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.safestring import mark_safe
 from django.views.decorators.http import require_POST
 
 from apps.bureaux.perimetre import (
@@ -121,6 +122,28 @@ def _entiers(valeurs) -> list[int]:
     return [int(v) for v in valeurs if str(v).isdigit()]
 
 
+def _donnees_formulaire(request, unite) -> dict:
+    """Champs du formulaire « Nouveau courrier » (mêmes pour la préparation et l'aperçu)."""
+    return {
+        "nature": request.POST.get("nature", ""),
+        "titre": request.POST.get("titre", ""),
+        "mode": request.POST.get("mode", Mode.REDIGE),
+        "objet": request.POST.get("objet", ""),
+        "texte": request.POST.get("texte", ""),
+        "lieu": request.POST.get("lieu", ""),
+        "langue": request.POST.get("langue", Langue.FRANCAIS),
+        "adresse": request.POST.get("adresse", ""),
+        "police": request.POST.get("police", ""),
+        "taille": request.POST.get("taille", 12),
+        "une_page": bool(request.POST.get("une_page")),
+        "bureaux": request.POST.getlist("bureaux"),
+        "niveaux": request.POST.getlist("niveaux"),
+        "membres": list(
+            membres_visibles(unite).filter(pk__in=_entiers(request.POST.getlist("membres")))
+        ),
+    }
+
+
 @login_required
 def nouveau(request, cle):
     unite = _unite(request, cle)
@@ -129,54 +152,128 @@ def nouveau(request, cle):
     donnees = request.POST if request.method == "POST" else {}
     membres = []
     if request.method == "POST":
-        membres = list(
-            membres_visibles(unite).filter(pk__in=_entiers(request.POST.getlist("membres")))
-        )
+        champs = _donnees_formulaire(request, unite)
+        membres = champs["membres"]
         try:
             c = services.preparer(
                 unite=unite,
-                nature=request.POST.get("nature", ""),
-                mode=request.POST.get("mode", Mode.REDIGE),
-                objet=request.POST.get("objet", ""),
-                texte=request.POST.get("texte", ""),
                 fichier=request.FILES.get("fichier"),
-                lieu=request.POST.get("lieu", ""),
-                langue=request.POST.get("langue", Langue.FRANCAIS),
-                adresse=request.POST.get("adresse", ""),
-                police=request.POST.get("police", ""),
-                taille=request.POST.get("taille", 12),
-                une_page=bool(request.POST.get("une_page")),
-                bureaux=request.POST.getlist("bureaux"),
-                niveaux=request.POST.getlist("niveaux"),
-                membres=membres,
                 pieces=request.FILES.getlist("pieces"),
                 par=request.user,
+                **champs,
             )
         except services.CourrierRefuse as e:
             messages.error(request, str(e))
         else:
             messages.success(request, "Courrier préparé : il attend la signature.")
             return redirect("courrier:detail", c.pk)
+    choisis = set(request.POST.getlist("bureaux")) if donnees else set()
     return render(
         request,
         "courrier/nouveau.html",
         {
             "unite": unite,
-            "proposes": proposes,
+            "bureaux_proposes": [{"cle": u.cle, "libelle": _libelle_choix(u)} for u in proposes],
+            "bureaux_choisis": [
+                {"cle": u.cle, "libelle": _libelle_choix(u)} for u in proposes if u.cle in choisis
+            ],
             "niveaux": NIVEAUX if unite.niveau != Niveau.PAROISSE else [],
             "apercu_numero": services.numero_complet(
                 unite, services.proposer_numero(unite, annee), annee
             ),
             "lieu": services.lieu_par_defaut(unite),
             "d": donnees,
-            "choisis": set(request.POST.getlist("bureaux")) if donnees else set(),
             "niveaux_choisis": set(request.POST.getlist("niveaux")) if donnees else set(),
             "membres_choisis": membres,
             "clavier": _clavier(),
             "Nature": Nature,
+            "url_apercu": reverse("courrier:apercu", args=[unite.cle]),
+            "url_apercu_pdf": reverse("courrier:apercu_pdf", args=[unite.cle]),
             **_presentation_contexte(),
         },
     )
+
+
+def _libelle_choix(u) -> str:
+    return "Bureau National de Commandement" if u.niveau == Niveau.NATIONAL else u.libelle
+
+
+def _rendu_apercu(request, c) -> HttpResponse:
+    from apps.courrier.pdf import LIGNES_FIXES
+
+    unite = services.unite_expeditrice(c)
+    return render(
+        request,
+        "courrier/_apercu.html",
+        {
+            "c": c,
+            "ligne_bureau": services.ligne_bureau(unite) if unite else "",
+            "lignes_fixes": LIGNES_FIXES,
+            "texte": mark_safe(services.texte_html(c.texte)),  # échappé par texte_html
+            "famille": FAMILLES_APERCU.get(c.police, "serif"),
+        },
+    )
+
+
+FAMILLES_APERCU = {
+    "liberation_serif": "CourrierLiberationSerif",
+    "liberation_sans": "CourrierLiberationSans",
+    "charis": "CourrierCharis",
+    "gentium": "CourrierGentium",
+    "noto_serif": "CourrierNotoSerif",
+}
+
+
+def _pdf_apercu(c) -> HttpResponse:
+    from apps.courrier.pdf import courrier_pdf
+
+    r = HttpResponse(courrier_pdf(c, avec_membres=False), content_type="application/pdf")
+    r["Content-Disposition"] = 'inline; filename="apercu-courrier.pdf"'
+    r["Cache-Control"] = "private, no-store"
+    return r
+
+
+def _erreur_apercu(request, message) -> HttpResponse:
+    return render(request, "courrier/_apercu_erreur.html", {"message": message})
+
+
+@login_required
+@require_POST
+def apercu(request, cle, en_pdf=False):
+    """Aperçu du nouveau courrier, sans rien enregistrer (décision du 18/11/2026)."""
+    unite = _unite(request, cle)
+    try:
+        c = services.apercu(unite=unite, par=request.user, **_donnees_formulaire(request, unite))
+    except services.CourrierRefuse as e:
+        return _erreur_apercu(request, str(e))
+    return _pdf_apercu(c) if en_pdf else _rendu_apercu(request, c)
+
+
+@login_required
+@require_POST
+def apercu_modification(request, pk, en_pdf=False):
+    """Aperçu d'un courrier en correction, avec les modifications non encore enregistrées."""
+    c = _courrier_visible(request, pk)
+    unite = services.unite_expeditrice(c)
+    if unite is None or unite not in unites_courrier(request.user):
+        raise Http404
+    try:
+        apercu_c = services.apercu_modification(
+            c,
+            par=request.user,
+            objet=request.POST.get("objet", ""),
+            texte=request.POST.get("texte", ""),
+            lieu=request.POST.get("lieu", ""),
+            adresse=request.POST.get("adresse", ""),
+            titre=request.POST.get("titre"),
+            langue=request.POST.get("langue") or None,
+            police=request.POST.get("police") or None,
+            taille=request.POST.get("taille") or None,
+            une_page=bool(request.POST.get("une_page")),
+        )
+    except services.CourrierRefuse as e:
+        return _erreur_apercu(request, str(e))
+    return _pdf_apercu(apercu_c) if en_pdf else _rendu_apercu(request, apercu_c)
 
 
 @login_required
@@ -280,6 +377,7 @@ def detail(request, pk):
             "qualite": services.peut_signer(request.user, c),
             "a_signature": services.signature_active(request.user) is not None,
             "transmettre": paroisses if c.communique and c.envoye else [],
+            "texte_html": mark_safe(services.texte_html(c.texte)),  # échappé par texte_html
             "destinataire_texte": services.libelle_destinataires(
                 c, avec_membres=voit_suivi, membre=getattr(request.user, "membre", None)
             ),
@@ -354,6 +452,7 @@ def modifier(request, pk):
                 fichier=request.FILES.get("fichier"),
                 lieu=request.POST.get("lieu", ""),
                 adresse=request.POST.get("adresse", ""),
+                titre=request.POST.get("titre"),
                 langue=request.POST.get("langue") or None,
                 police=request.POST.get("police") or None,
                 taille=request.POST.get("taille") or None,
@@ -373,7 +472,13 @@ def modifier(request, pk):
     return render(
         request,
         "courrier/modifier.html",
-        {"c": c, "clavier": _clavier(), **_presentation_contexte()},
+        {
+            "c": c,
+            "clavier": _clavier(),
+            "url_apercu": reverse("courrier:apercu_modification", args=[c.pk]),
+            "url_apercu_pdf": reverse("courrier:apercu_modification_pdf", args=[c.pk]),
+            **_presentation_contexte(),
+        },
     )
 
 

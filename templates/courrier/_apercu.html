@@ -1,0 +1,26 @@
+{% load static %}{# Aperçu du courrier mis en page (rien n'est enregistré). #}
+<div class="apercu-page" style="font-family: {{ famille }}, serif; font-size: {{ c.taille }}pt;">
+  <div class="apercu-bandeau">
+    <img src="{% static 'img/logo-congregation-sans-texte.png' %}" alt="" class="apercu-logo apercu-logo--large">
+    <div class="apercu-lignes">
+      {% for l in lignes_fixes %}<em class="apercu-ligne-{{ forloop.counter }}">{{ l }}</em>{% endfor %}
+      <strong>{{ ligne_bureau }}</strong>
+    </div>
+    <img src="{% static 'img/logo-armee-du-salut.png' %}" alt="" class="apercu-logo">
+  </div>
+  <div class="apercu-filet"></div>
+  <div class="apercu-ligne-haut">
+    <div><small>Projet — numéro attribué à la signature</small><br><b>{{ c.expediteur_libelle }}</b></div>
+    <div>{{ c.lieu }}, le … <small>(date de la signature)</small></div>
+  </div>
+  {% if c.communique %}<p class="apercu-titre">COMMUNIQUÉ</p><p class="apercu-centre">{{ c.adresse|linebreaksbr }}</p>
+  {% elif c.nature == "autre" and c.titre %}<p class="apercu-titre">{{ c.titre }}</p>{% endif %}
+  <div class="apercu-objet-adresse">
+    <p><b><u>Objet</u></b> : {{ c.objet }}</p>
+    {% if not c.communique %}<p>{{ c.adresse|linebreaksbr }}</p>{% endif %}
+  </div>
+  <div class="apercu-texte">{{ texte }}</div>
+  {% if c.mode == "importe" %}<p class="aide"><i>Le courrier importé (photo, scan ou PDF) sera joint à cet endroit.</i></p>{% endif %}
+  <div class="apercu-signature"><b>Le signataire</b><br><span>(signature et QR code à la validation)</span></div>
+  <div class="apercu-pied">SIÈGE SOCIAL : C/N°135 TOKPOTA DAVO — BP : 800 PORTO-NOVO — Tél : +229-97-12-1321, +229-67-51-6393</div>
+</div>

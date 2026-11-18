@@ -11,17 +11,22 @@
       <p class="champ"><span>Numéro d'ordre</span><strong>Attribué à la signature</strong></p>
       <label class="champ champ--requis"><span>Lieu</span><input name="lieu" maxlength="100" required value="{{ c.lieu }}"></label>
     </div>
+    {% if c.nature == "autre" %}<label class="champ champ--requis"><span>Titre du document</span><input name="titre" maxlength="120" required value="{{ c.titre }}"></label>{% endif %}
     <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ c.objet }}" data-clavier></label>
-    {% include "courrier/_presentation.html" with v=c %}
+    <h2>Présentation</h2>
+    {% include "courrier/_mise_en_forme.html" with v=c %}
+    <h2>Contenu</h2>
     {% if c.mode == "importe" %}<label class="champ"><span>Remplacer le courrier importé (facultatif)</span><input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png"></label>{% endif %}
+    {% include "courrier/_langue_adresse.html" with v=c %}
+    {% include "courrier/_outils_texte.html" %}
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ c.texte }}</textarea></label>
     {% include "courrier/_clavier.html" %}
+    {% include "courrier/_apercu_boutons.html" %}
     <p class="aide">Les destinataires et les pièces jointes ne changent pas. Pour les changer, abandonnez ce courrier et préparez-en un nouveau.</p>
     <div class="boutons-courrier">
       <button type="submit" name="soumettre" value="1" class="bouton">Enregistrer et soumettre à la signature</button>
       <button type="submit" class="bouton bouton--secondaire">Enregistrer (reste en correction)</button>
     </div>
-    <p class="aide"><a href="{% url 'courrier:pdf' c.pk %}">Voir le projet en PDF</a> (enregistrez d'abord vos modifications).</p>
   </form>
 </section>
 {% endblock %}

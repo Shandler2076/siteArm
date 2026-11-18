@@ -62,14 +62,14 @@ def test_numero_automatique_attribue_a_la_signature_sans_trou(bn):
 def test_adresse_proposee_en_francais(bn):
     p1 = Unite(Niveau.PAROISSE, bn["P1"])
     assert s.adresse_proposee("lettre", "fr", bureaux=[p1]) == (
-        "À Monsieur le Chef de l'Unité paroissiale de P1"
+        "À\nMonsieur le Chef de l'Unité paroissiale de P1"
     )
     m1 = bn["m1"]
-    assert s.adresse_proposee("lettre", "fr", membres=[m1]) == f"Au {m1.nom_complet}"
+    assert s.adresse_proposee("lettre", "fr", membres=[m1]) == f"Au\n{m1.nom_complet}"
     m1.sexe = "F"
-    assert s.adresse_proposee("lettre", "fr", membres=[m1]) == f"À la {m1.nom_complet}"
+    assert s.adresse_proposee("lettre", "fr", membres=[m1]) == f"À la\n{m1.nom_complet}"
     assert s.adresse_proposee("communique", "fr") == "À l'attention de tous les bureaux"
-    assert s.adresse_proposee("lettre", "gun", bureaux=[p1]) == "Hlan "
+    assert s.adresse_proposee("lettre", "gun", bureaux=[p1]) == "Hlan\n"
 
 
 def test_adresse_goun_ecrite_a_la_main(bn):
@@ -296,7 +296,7 @@ def test_adresse_coherente_avec_la_langue(bn):
     with pytest.raises(s.CourrierRefuse):
         s.modifier(c, objet="o", texte="t", langue="fr", par=bn["sn"].compte)
     c = s.modifier(c, objet="o", texte="t", langue="fr", adresse="", par=bn["sn"].compte)
-    assert c.adresse.startswith("À Monsieur le Chef")  # vidée : le site propose de nouveau
+    assert c.adresse.startswith("À\nMonsieur le Chef")  # vidée : le site propose de nouveau
 
 
 def test_une_page_identique_pour_expediteur_et_destinataires(bn, nouveau_membre):

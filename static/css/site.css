@@ -356,3 +356,31 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .demande-correction { margin-top: 12px; }
 .demande-correction summary, details.encadre > summary { cursor: pointer; font-weight: 700; color: var(--marine); }
 details.encadre > summary.bouton { display: inline-block; width: auto; }
+
+/* Courrier : outils de mise en forme et aperçu (18/11/2026) */
+.outils-texte { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin: 4px 0; }
+.outils-texte button { min-width: 44px; min-height: 40px; border: 1px solid #C9D1DE; border-radius: 8px; background: #fff; font-size: 1.05rem; cursor: pointer; }
+.fenetre-apercu { width: min(820px, 96vw); max-height: 92vh; padding: 0; border: 0; border-radius: 12px; }
+.fenetre-apercu::backdrop { background: rgba(10, 20, 40, .6); }
+.fenetre-apercu__barre { position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--marine); color: #fff; z-index: 1; }
+.fenetre-apercu__barre .bouton { color: #fff; }
+#contenu-apercu { padding: 10px; background: #E9ECF2; }
+.apercu-page { background: #fff; color: #000; max-width: 760px; margin: 0 auto; padding: 4% 6%; box-shadow: 0 2px 10px rgba(0,0,0,.2); line-height: 1.4; }
+.apercu-bandeau { display: flex; align-items: center; gap: 2%; background: var(--marine); padding: 2%; }
+.apercu-logo { width: 14%; background: #fff; padding: 1%; }
+.apercu-logo--large { width: 26%; }
+.apercu-lignes { flex: 1; text-align: center; font-family: "DejaVu Sans", sans-serif; font-size: .55em; }
+.apercu-lignes em { display: block; font-weight: 700; color: #F7D417; }
+.apercu-lignes .apercu-ligne-1 { color: #fff; }
+.apercu-lignes .apercu-ligne-4 { color: #F29A1F; font-size: .85em; }
+.apercu-lignes strong { display: block; color: var(--or); font-size: 1.3em; }
+.apercu-filet { height: 5px; background: var(--or); margin-bottom: 1.2em; }
+.apercu-ligne-haut { display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1.2em; }
+.apercu-titre { text-align: center; font-weight: 700; font-size: 1.4em; color: var(--marine); margin: .4em 0; }
+.apercu-centre { text-align: center; }
+.apercu-objet-adresse { display: grid; grid-template-columns: 52% 48%; gap: 0 1em; }
+.apercu-texte p { text-align: justify; margin: 0 0 .6em; }
+.apercu-signature { margin: 2em 0 1em 50%; text-align: center; }
+.apercu-signature span { font-size: .8em; color: #666; }
+.apercu-pied { border-top: 2px solid #7A1F2B; margin-top: 2em; padding-top: .4em; font-size: .6em; text-align: center; font-weight: 700; font-family: sans-serif; }
+@media (max-width: 480px) { .apercu-page { font-size: 80% !important; } }

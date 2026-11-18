@@ -136,7 +136,7 @@ Décisions :
 - Fichier définitif reçu (427 × 239, fond transparent) : `static/img/logo-congregation-sans-texte.png`.
 - **Réalisé le 18/11/2026** (« on y va ») : courriers, fiche du membre, page d'accueil.
 
-## 13. Remarques du 18/11/2026 (après essai sur le site) — à compiler, NE PAS exécuter
+## 13. Remarques du 18/11/2026 (après essai sur le site) — réalisées le 18/11/2026 (« lance tout »)
 
 1. **Aperçu avant envoi** : un écran pour **visionner le courrier** tel qu'il sera (aussi sur
    téléphone) avant de le soumettre ou de générer le PDF.

@@ -2,7 +2,7 @@
 {% block titre %}{% if c.communique %}Communiqué{% else %}Courrier{% endif %} — {{ c.objet }}{% endblock %}
 {% block contenu %}
 <section class="carte courrier">
-  <p class="matricule">{% if c.communique %}Communiqué{% else %}Courrier{% endif %} — {{ c.get_etat_display }}</p>
+  <p class="matricule">{% if c.nature == "autre" and c.titre %}{{ c.titre|capfirst }}{% elif c.communique %}Communiqué{% else %}Courrier{% endif %} — {{ c.get_etat_display }}</p>
   <h1>{{ c.objet }}</h1>
   <dl class="fiche">
     <dt>Numéro</dt><dd>{% if c.numero %}{{ c.numero }}{% else %}attribué automatiquement à la signature{% endif %}</dd>
@@ -17,7 +17,7 @@
   {% if c.etat == "annule" %}<p class="message message--error">Courrier abandonné le {{ c.date_abandon|date:"d/m/Y" }} : il sera effacé un mois après, sauf si vous le reprenez.</p>{% endif %}
   <p class="boutons-courrier"><a class="bouton bouton--secondaire" href="{% url 'courrier:pdf' c.pk %}">{% if c.envoye %}Ouvrir le PDF (à imprimer){% else %}Voir le projet en PDF{% endif %}</a>
     {% if c.fichier %}<a class="bouton bouton--secondaire" href="{% url 'courrier:original' c.pk %}">Courrier importé (original)</a>{% endif %}</p>
-  {% if c.texte %}<div class="courrier__texte">{{ c.texte|linebreaks }}</div>{% endif %}
+  {% if c.texte %}<div class="courrier__texte">{{ texte_html }}</div>{% endif %}
   {% if c.pieces.all %}<h2>Pièces jointes</h2><ul class="fonctions">{% for p in c.pieces.all %}<li><a href="{% url 'courrier:piece' c.pk p.pk %}">{{ p.nom }}</a></li>{% endfor %}</ul>{% endif %}
 
   {% for ligne in mes_lignes %}

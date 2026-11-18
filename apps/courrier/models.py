@@ -32,6 +32,7 @@ def _jeton() -> str:
 class Nature(models.TextChoices):
     LETTRE = "lettre", "Courrier"
     COMMUNIQUE = "communique", "Communiqué"
+    AUTRE = "autre", "Autre (décision, lettre de recommandation…)"
 
 
 class Mode(models.TextChoices):
@@ -116,6 +117,7 @@ class Courrier(models.Model):
     )
     taille = models.PositiveSmallIntegerField("taille du texte", default=12)
     une_page = models.BooleanField("tenir sur une page", default=False)
+    titre = models.CharField("titre du document", max_length=120, blank=True)  # nature « Autre »
     objet = models.CharField("objet", max_length=250)
     texte = models.TextField("texte", blank=True)
     fichier = models.FileField(

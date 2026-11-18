@@ -1,0 +1,37 @@
+<div class="boutons-courrier">
+  <button type="button" class="bouton bouton--secondaire" id="bouton-apercu" data-url="{{ url_apercu }}">Aperçu</button>
+  <button type="submit" class="bouton bouton--secondaire" formaction="{{ url_apercu_pdf }}" formtarget="_blank" formnovalidate>Aperçu en PDF</button>
+</div>
+<dialog id="fenetre-apercu" class="fenetre-apercu" aria-label="Aperçu du courrier">
+  <div class="fenetre-apercu__barre"><strong>Aperçu</strong><button type="button" class="bouton bouton--discret" id="fermer-apercu">Fermer</button></div>
+  <div id="contenu-apercu"></div>
+</dialog>
+<script>
+  (function () {
+    var bouton = document.getElementById('bouton-apercu'), fenetre = document.getElementById('fenetre-apercu');
+    var contenu = document.getElementById('contenu-apercu'), form = bouton.closest('form');
+    document.getElementById('fermer-apercu').addEventListener('click', function () { fenetre.close(); });
+    bouton.addEventListener('click', function () {
+      var donnees = new FormData(form);
+      donnees.delete('fichier'); donnees.delete('pieces');  // l'aperçu n'envoie pas les fichiers
+      contenu.textContent = 'Préparation de l’aperçu…';
+      if (fenetre.showModal) fenetre.showModal(); else fenetre.setAttribute('open', '');
+      fetch(bouton.dataset.url, { method: 'POST', body: donnees, credentials: 'same-origin' })
+        .then(function (r) { return r.text(); })
+        .then(function (html) { contenu.innerHTML = html; })  // rendu par le site, texte échappé
+        .catch(function () { contenu.textContent = 'Aperçu impossible pour le moment.'; });
+    });
+    form.querySelectorAll('[data-format]').forEach(function (b) {
+      b.addEventListener('mousedown', function (e) { e.preventDefault(); });
+      b.addEventListener('click', function () {
+        var zone = form.querySelector('textarea[name="texte"]'), marque = b.dataset.format === 'gras' ? '**' : '__';
+        var d = zone.selectionStart, f = zone.selectionEnd;
+        if (d === f) { zone.focus(); return; }
+        var choix = zone.value.slice(d, f);
+        zone.setRangeText(marque + choix + marque, d, f, 'end');
+        zone.focus();
+        zone.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+    });
+  })();
+</script>
