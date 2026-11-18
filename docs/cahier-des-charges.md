@@ -1054,9 +1054,20 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   « 007-2026/CCOSECS-CNC/AS/UP-GBOA/S » (sigles UP, SC, BRC). La **date** est celle de la signature.
 - **Langue** (18/11/2026) : français ou goun, choisie avant la rédaction ; le clavier goun n'apparaît
   qu'en goun.
-- **Ligne d'adresse** à la place du mot « Destinataire » : en français, « À Monsieur le … »,
-  « Au Capitaine … », « À la Capitaine … » (proposée par le site, corrigeable) ; en goun, « Hlan »
-  suivi de ce que le rédacteur écrit (une personne, un bureau, une région, toute la communauté…).
+- **Ligne d'adresse** à la place du mot « Destinataire », **sur deux lignes** comme dans les lettres
+  administratives : en français, « À » (ou « Au », « À la ») seul en haut, puis le titre à la ligne
+  (proposée par le site, corrigeable) ; en goun, « Hlan » seul en haut, puis le destinataire écrit
+  par le rédacteur (une personne, un bureau, une région, toute la communauté…).
+- **Nature** : courrier, communiqué, ou **autre** (décision, lettre de recommandation…) avec un
+  titre imprimé en tête (ex. « DÉCISION »), même format.
+- **Gras, italique, souligné** : boutons G, I et S au-dessus du texte (marques **, * et __ dans le
+  texte ; G puis I pour le gras italique) ; chaque police a ses vraies versions italique et gras
+  italique.
+- **Aperçu** avant de préparer ou de soumettre : le courrier mis en page dans une fenêtre (lisible
+  sur téléphone), ou en PDF ; rien n'est enregistré.
+- **Formulaire** : bureaux choisis par une recherche (la liste se replie après le choix) ; police et
+  taille en haut ; langue et ligne d'adresse juste au-dessus du texte ; le clavier goun se place
+  sous le champ où l'on écrit (objet, adresse, texte).
 - **Police et taille** (18/11/2026) : Charis SIL (par défaut en goun), Gentium Plus, Liberation
   Serif (par défaut en français), Liberation Sans, Noto Serif ; 10, 11, 12 ou 13 points, et « Tenir
   sur une page » (jusqu'à 9 points). Le texte s'affiche dans la police choisie pendant la frappe, et

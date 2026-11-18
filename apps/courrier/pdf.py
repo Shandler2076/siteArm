@@ -48,12 +48,32 @@ from apps.membres.pdf import (
 LOGO_EN_TETE = LOGO_CONGREGATION_SANS_TEXTE  # triangle et deux anges, sans texte (18/11/2026)
 
 # Polices des courriers (décision du 18/11/2026) : (fichier normal, fichier gras).
-FICHIERS_POLICES = {
-    "liberation_serif": ("LiberationSerif-Regular.ttf", "LiberationSerif-Bold.ttf"),
-    "liberation_sans": ("LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf"),
-    "charis": ("CharisSIL-Regular.ttf", "CharisSIL-Bold.ttf"),
-    "gentium": ("GentiumPlus-Regular.ttf", "GentiumPlus-Bold.ttf"),
-    "noto_serif": ("NotoSerif-Regular.ttf", "NotoSerif-Bold.ttf"),
+FICHIERS_POLICES = {  # (normal, gras, italique, gras italique)
+    "liberation_serif": (
+        "LiberationSerif-Regular",
+        "LiberationSerif-Bold",
+        "LiberationSerif-Italic",
+        "LiberationSerif-BoldItalic",
+    ),
+    "liberation_sans": (
+        "LiberationSans-Regular",
+        "LiberationSans-Bold",
+        "LiberationSans-Italic",
+        "LiberationSans-BoldItalic",
+    ),
+    "charis": ("CharisSIL-Regular", "CharisSIL-Bold", "CharisSIL-Italic", "CharisSIL-BoldItalic"),
+    "gentium": (
+        "GentiumPlus-Regular",
+        "GentiumPlus-Bold",
+        "GentiumPlus-Italic",
+        "GentiumPlus-BoldItalic",
+    ),
+    "noto_serif": (
+        "NotoSerif-Regular",
+        "NotoSerif-Bold",
+        "NotoSerif-Italic",
+        "NotoSerif-BoldItalic",
+    ),
 }
 _polices_courrier: set[str] = set()
 
@@ -65,14 +85,16 @@ def police_courrier(cle: str) -> str:
     nom = f"Courrier-{cle}"
     if cle not in _polices_courrier:
         dossier = STATIQUE / "fonts" / "courrier"
-        normal, gras = FICHIERS_POLICES[cle]
-        if not (dossier / normal).exists():
+        fichiers = FICHIERS_POLICES[cle]
+        if not (dossier / f"{fichiers[0]}.ttf").exists():
             return "Sans"
-        pdfmetrics.registerFont(TTFont(nom, str(dossier / normal)))
-        pdfmetrics.registerFont(TTFont(f"{nom}-Gras", str(dossier / gras)))
-        registerFontFamily(
-            nom, normal=nom, bold=f"{nom}-Gras", italic=nom, boldItalic=f"{nom}-Gras"
-        )
+        noms = (nom, f"{nom}-Gras", f"{nom}-Italique", f"{nom}-GrasItalique")
+        for n, f in zip(noms, fichiers, strict=True):
+            chemin = dossier / f"{f}.ttf"
+            pdfmetrics.registerFont(
+                TTFont(n, str(chemin if chemin.exists() else dossier / f"{fichiers[0]}.ttf"))
+            )
+        registerFontFamily(nom, normal=noms[0], bold=noms[1], italic=noms[2], boldItalic=noms[3])
         _polices_courrier.add(cle)
     return nom
 
@@ -222,8 +244,17 @@ def _date_fr(courrier) -> str:
 
 
 def _paragraphes(texte: str, style) -> list:
+    """Paragraphes du texte, avec le gras, l'italique et le souligné demandés par le rédacteur."""
     blocs = [b.strip() for b in (texte or "").replace("\r\n", "\n").split("\n\n")]
-    return [Paragraph(escape(b).replace("\n", "<br/>"), style) for b in blocs if b]
+    paragraphes = []
+    for b in blocs:
+        if not b:
+            continue
+        try:
+            paragraphes.append(Paragraph(services.mise_en_forme(b).replace("\n", "<br/>"), style))
+        except ValueError:  # par sécurité : jamais d'erreur d'impression à cause d'une marque
+            paragraphes.append(Paragraph(escape(b).replace("\n", "<br/>"), style))
+    return paragraphes
 
 
 def _image_courrier(fichier, largeur, hauteur) -> Image:
@@ -335,6 +366,8 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
             objet,
         ]
     else:
+        if courrier.nature == "autre" and courrier.titre:  # décision, recommandation… (18/11)
+            flux += [Paragraph(escape(courrier.titre), st["titre"]), Spacer(1, 4 * mm)]
         # Pas de mot « Destinataire » : la formule d'adresse des lettres (18/11/2026).
         bloc = Table(
             [[objet, Paragraph(adresse, st["gauche"])]],
@@ -363,7 +396,7 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
             except (OSError, ValueError):
                 flux.append(Paragraph("<i>Image du courrier illisible.</i>", st["texte"]))
     flux += _bloc_signature(courrier, st)
-    pieces = list(courrier.pieces.all())
+    pieces = list(courrier.pieces.all()) if courrier.pk else []  # aperçu : rien d'enregistré
     if pieces:
         flux.append(Spacer(1, 4 * mm))
         flux.append(
@@ -372,7 +405,11 @@ def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
                 st["petit"],
             )
         )
-    directs = list(services.destinataires_directs(courrier)[:2000]) if avec_membres else []
+    directs = (
+        list(services.destinataires_directs(courrier)[:2000])
+        if avec_membres and courrier.pk
+        else []
+    )
     if not courrier.communique and len(directs) > 3:
         flux.append(Spacer(1, 4 * mm))
         flux.append(Paragraph("<b>Annexe — liste des destinataires</b>", st["gauche"]))
@@ -388,7 +425,7 @@ def _construire(courrier, st, avec_membres, membre) -> tuple[bytes, int]:
     doc = BaseDocTemplate(
         tampon,
         pagesize=A4,
-        title=f"{'Communiqué' if courrier.communique else 'Courrier'} — {courrier.objet}",
+        title=f"{courrier.titre or courrier.get_nature_display()} — {courrier.objet}",
         author=courrier.expediteur_libelle,
     )
     cadre = Frame(

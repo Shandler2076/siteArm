@@ -318,24 +318,80 @@ def _verifier_adresse(langue: str, adresse: str) -> None:
         raise CourrierRefuse("En français, la ligne d'adresse ne commence pas par « Hlan ».")
 
 
+MARQUES = {
+    "***": ("<b><i>", "</i></b>"),
+    "**": ("<b>", "</b>"),
+    "*": ("<i>", "</i>"),
+    "__": ("<u>", "</u>"),
+}
+DECOUPE = re.compile(r"(\*\*\*|\*\*|\*|__)")
+
+
+def mise_en_forme(texte: str) -> str:
+    """Texte sûr pour le PDF et l'aperçu : ***gras italique***, **gras**, *italique* et
+    __souligné__ (boutons G, I et S).
+
+    Les marques sont lues avec une pile : une marque fermante qui ne correspond pas à la
+    dernière ouverte, ou une marque jamais fermée, reste écrite telle quelle. Les balises
+    produites sont donc toujours bien imbriquées (le PDF ne peut pas échouer)."""
+    from xml.sax.saxutils import escape
+
+    sur = escape(texte or "")
+    sortie: list[str] = []
+    pile: list[tuple[str, int]] = []  # (marque, position dans `sortie`)
+    debut = 0
+    for trouve in DECOUPE.finditer(sur):
+        m = trouve.group()
+        sortie.append(sur[debut : trouve.start()])
+        debut = trouve.end()
+        avant = sur[trouve.start() - 1] if trouve.start() else " "
+        apres = sur[trouve.end()] if trouve.end() < len(sur) else " "
+        if pile and pile[-1][0] == m and not avant.isspace():
+            pile.pop()
+            sortie.append(MARQUES[m][1])
+        elif m not in (p for p, _ in pile) and not apres.isspace():
+            pile.append((m, len(sortie)))
+            sortie.append(MARQUES[m][0])
+        else:
+            sortie.append(m)
+    sortie.append(sur[debut:])
+    for m, position in pile:  # jamais fermées : la marque reste du texte
+        sortie[position] = m
+    return "".join(sortie)
+
+
+def texte_html(texte: str) -> str:
+    """Texte du courrier pour les pages du site (paragraphes, gras, souligné), déjà échappé."""
+    blocs = [b.strip() for b in (texte or "").replace("\r\n", "\n").split("\n\n")]
+    return "".join(f"<p>{mise_en_forme(b).replace(chr(10), '<br>')}</p>" for b in blocs if b)
+
+
+def _titre(nature: str, titre: str) -> str:
+    titre = (titre or "").strip()[:120].upper()
+    if nature == Nature.AUTRE and not titre:
+        raise CourrierRefuse("Indiquez le titre du document (ex. « DÉCISION »).")
+    return titre if nature == Nature.AUTRE else ""
+
+
 def adresse_proposee(nature: str, langue: str, bureaux=(), membres=()) -> str:
     """Début de la ligne d'adresse ; le rédacteur l'écrit ou la corrige toujours à la main.
 
     Français : « À Monsieur le … », « Au Capitaine … », « À la Capitaine … ».
     Goun : « Hlan », suivi de ce que le rédacteur écrit lui-même.
     """
+    # Comme dans les lettres administratives : « À » seul en haut, le titre à la ligne.
     if langue == Langue.GOUN:
-        return "Hlan "
+        return "Hlan\n"
     if nature == Nature.COMMUNIQUE:
         return COMMUNIQUE_ADRESSE
     if len(bureaux) + len(membres) != 1:
-        return "À Mesdames et Messieurs les destinataires"
+        return "À\nMesdames et Messieurs les destinataires"
     if bureaux:
         u = bureaux[0]
         titre = TITRES_RESPONSABLES[u.niveau]
-        return "À " + (titre if u.niveau == Niveau.NATIONAL else titre.format(nom=_nom_propre(u)))
+        return "À\n" + (titre if u.niveau == Niveau.NATIONAL else titre.format(nom=_nom_propre(u)))
     m = membres[0]
-    return ("À la " if m.sexe == "F" else "Au ") + m.nom_complet
+    return ("À la\n" if m.sexe == "F" else "Au\n") + m.nom_complet
 
 
 # --- Préparation ---------------------------------------------------------------------------------
@@ -374,8 +430,7 @@ def _contenu(mode, texte, fichier, courrier=None) -> tuple[str, str | None]:
     return texte, type_fichier(fichier)
 
 
-@transaction.atomic
-def preparer(
+def _brouillon(
     *,
     unite: Unite,
     nature: str,
@@ -387,6 +442,7 @@ def preparer(
     lieu: str = "",
     langue: str = Langue.FRANCAIS,
     adresse: str = "",
+    titre: str = "",
     police: str = "",
     taille: int = 12,
     une_page: bool = False,
@@ -394,18 +450,24 @@ def preparer(
     niveaux=(),
     membres=(),
     pieces=(),
-) -> Courrier:
+    apercu: bool = False,
+):
+    """Vérifie tout et construit le courrier SANS l'enregistrer (préparation ou aperçu)."""
     _controler_preparateur(unite, par)
     if nature not in Nature.values:
         raise CourrierRefuse("Nature du courrier inconnue.")
     objet = (objet or "").strip()
     if not objet:
         raise CourrierRefuse("L'objet du courrier est obligatoire.")
-    texte, extension = _contenu(mode, texte, fichier)
+    titre = _titre(nature, titre)
+    if apercu and mode == Mode.IMPORTE and fichier is None:
+        texte, extension = (texte or "").strip(), None  # l'aperçu ne demande pas le fichier
+    else:
+        texte, extension = _contenu(mode, texte, fichier)
     destinataires_bureaux, destinataires_membres = _destinataires(unite, bureaux, niveaux, membres)
     if len(pieces) > PIECES_MAX:
         raise CourrierRefuse(f"{PIECES_MAX} pièces jointes au plus.")
-    extensions_pieces = [type_fichier(p) for p in pieces]
+    extensions_pieces = [] if apercu else [type_fichier(p) for p in pieces]
     presentation = _presentation(langue, police, taille, une_page)
     adresse = (adresse or "").strip()[:500] or adresse_proposee(
         nature, langue, destinataires_bureaux, destinataires_membres
@@ -414,6 +476,7 @@ def preparer(
     annee = timezone.localdate().year
     c = Courrier(
         adresse=adresse,
+        titre=titre,
         **presentation,
         nature=nature,
         mode=mode,
@@ -425,6 +488,64 @@ def preparer(
         objet=objet[:250],
         texte=texte,
         prepare_par=par,
+    )
+    return c, extension, destinataires_bureaux, destinataires_membres, extensions_pieces
+
+
+def apercu(*, unite: Unite, par, **donnees) -> Courrier:
+    """Courrier mis en forme pour l'aperçu : rien n'est enregistré (décision du 18/11/2026)."""
+    donnees.pop("fichier", None)
+    donnees.pop("pieces", None)
+    c, _ext, *_reste = _brouillon(unite=unite, par=par, apercu=True, **donnees)
+    return c
+
+
+def apercu_modification(
+    courrier: Courrier,
+    *,
+    par,
+    objet,
+    texte="",
+    lieu="",
+    adresse="",
+    titre=None,
+    langue=None,
+    police=None,
+    taille=None,
+    une_page=False,
+):
+    """Copie du courrier en correction avec les modifications du formulaire, SANS l'enregistrer.
+
+    Seulement en correction : un courrier envoyé porte la signature et le QR code ; un aperçu
+    au texte changé serait un faux (relecture du 18/11/2026)."""
+    import copy
+
+    _preparateur(courrier, par)
+    if courrier.etat != Etat.A_CORRIGER:
+        raise CourrierRefuse(
+            "L'aperçu des modifications n'existe que pour un courrier en correction."
+        )
+    c = copy.copy(courrier)
+    _appliquer_modifications(
+        c,
+        objet=objet,
+        texte=texte,
+        fichier=None,
+        lieu=lieu,
+        adresse=adresse,
+        titre=titre,
+        langue=langue,
+        police=police,
+        taille=taille,
+        une_page=une_page,
+    )
+    return c
+
+
+@transaction.atomic
+def preparer(*, unite: Unite, par, fichier=None, pieces=(), **donnees) -> Courrier:
+    c, extension, destinataires_bureaux, destinataires_membres, extensions_pieces = _brouillon(
+        unite=unite, par=par, fichier=fichier, pieces=pieces, **donnees
     )
     if extension:
         c.fichier.save(
@@ -498,27 +619,11 @@ def mettre_en_correction(courrier: Courrier, *, par) -> Courrier:
     return c
 
 
-@transaction.atomic
-def modifier(
-    courrier: Courrier,
-    *,
-    objet: str,
-    par,
-    texte: str = "",
-    fichier=None,
-    lieu: str | None = None,
-    adresse: str | None = None,
-    langue: str | None = None,
-    police: str | None = None,
-    taille: int | None = None,
-    une_page: bool | None = None,
-    soumettre: bool = False,
-) -> Courrier:
-    """Le préparateur corrige un courrier en correction ; `soumettre` le renvoie à la signature."""
-    c = _verrouiller(courrier)
-    unite = _preparateur(c, par)
-    if c.etat != Etat.A_CORRIGER:
-        raise CourrierRefuse("Cliquez d'abord sur « Modifier » : le courrier passe en correction.")
+def _appliquer_modifications(
+    c: Courrier, *, objet, texte, fichier, lieu, adresse, titre, langue, police, taille, une_page
+):
+    """Applique les champs du formulaire de correction à `c` (sans enregistrer). Partagé par
+    `modifier` et `apercu_modification` : l'aperçu montre exactement ce qui sera enregistré."""
     objet = (objet or "").strip()
     if not objet:
         raise CourrierRefuse("L'objet du courrier est obligatoire.")
@@ -532,6 +637,8 @@ def modifier(
     for champ, valeur in presentation.items():
         setattr(c, champ, valeur)
     c.objet, c.texte = objet[:250], texte
+    if titre is not None:
+        c.titre = _titre(c.nature, titre)
     if lieu is not None and lieu.strip():
         c.lieu = lieu.strip()[:100]
     if adresse is not None:
@@ -553,6 +660,44 @@ def modifier(
         ]
         c.adresse = adresse_proposee(c.nature, c.langue, bureaux, membres).strip()
     _verifier_adresse(c.langue, c.adresse)
+    return extension
+
+
+@transaction.atomic
+def modifier(
+    courrier: Courrier,
+    *,
+    objet: str,
+    par,
+    texte: str = "",
+    fichier=None,
+    lieu: str | None = None,
+    adresse: str | None = None,
+    titre: str | None = None,
+    langue: str | None = None,
+    police: str | None = None,
+    taille: int | None = None,
+    une_page: bool | None = None,
+    soumettre: bool = False,
+) -> Courrier:
+    """Le préparateur corrige un courrier en correction ; `soumettre` le renvoie à la signature."""
+    c = _verrouiller(courrier)
+    unite = _preparateur(c, par)
+    if c.etat != Etat.A_CORRIGER:
+        raise CourrierRefuse("Cliquez d'abord sur « Modifier » : le courrier passe en correction.")
+    extension = _appliquer_modifications(
+        c,
+        objet=objet,
+        texte=texte,
+        fichier=fichier,
+        lieu=lieu,
+        adresse=adresse,
+        titre=titre,
+        langue=langue,
+        police=police,
+        taille=taille,
+        une_page=une_page,
+    )
     if extension:
         c.fichier.save(
             _nom_de_fichier(fichier.name, extension),
@@ -804,7 +949,9 @@ def _prevenir_destinataires(c: Courrier) -> None:
     from apps.bureaux.perimetre import titulaires_gestion_par_cle
     from apps.notifications.services import notifier
 
-    nature = "Communiqué" if c.communique else "Courrier"
+    nature = {"communique": "Communiqué", "autre": (c.titre or "Document").capitalize()}.get(
+        c.nature, "Courrier"
+    )
     message = f"{nature} reçu de {c.expediteur_libelle} : « {c.objet} » (n° {c.numero})."
     lien = f"/courrier/c/{c.pk}/"
     lignes = c.destinataires.select_related("membre__compte")

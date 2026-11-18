@@ -1,0 +1,45 @@
+{# Recherche d'un bureau (18/11/2026) : un seul champ, la liste se replie après le choix. #}
+{{ bureaux_proposes|json_script:"donnees-bureaux" }}
+<div class="recherche-membre">
+  <label class="champ"><span>Bureaux destinataires</span>
+    <input type="search" id="recherche-bureau" autocomplete="off" placeholder="Rechercher un bureau (région, circuit, paroisse)…"></label>
+  <ul id="resultats-bureau" hidden></ul>
+</div>
+<ul id="bureaux-choisis" class="selection">{% for b in bureaux_choisis %}
+  <li><input type="hidden" name="bureaux" value="{{ b.cle }}"><span>{{ b.libelle }}</span><button type="button" class="retirer" aria-label="Retirer" onclick="this.parentNode.remove()">✕</button></li>{% endfor %}</ul>
+<script>
+  (function () {
+    var bureaux = JSON.parse(document.getElementById('donnees-bureaux').textContent);
+    var champ = document.getElementById('recherche-bureau'), liste = document.getElementById('resultats-bureau');
+    var choisis = document.getElementById('bureaux-choisis');
+    function simple(t) { return t.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase(); }
+    function dejaChoisi(cle) { return !!choisis.querySelector('input[value="' + cle.replace(/"/g, '') + '"]'); }
+    function ajouter(b) {
+      if (dejaChoisi(b.cle)) return;
+      var li = document.createElement('li');
+      var h = document.createElement('input'); h.type = 'hidden'; h.name = 'bureaux'; h.value = b.cle; li.appendChild(h);
+      var s = document.createElement('span'); s.textContent = b.libelle; li.appendChild(s);
+      var x = document.createElement('button'); x.type = 'button'; x.className = 'retirer'; x.textContent = '✕'; x.setAttribute('aria-label', 'Retirer');
+      x.addEventListener('click', function () { li.remove(); }); li.appendChild(x); choisis.appendChild(li);
+    }
+    champ.addEventListener('keydown', function (e) {  // Entrée ne doit pas envoyer le formulaire
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var premier = liste.querySelector('button');
+      if (premier && !liste.hidden) premier.click();
+    });
+    champ.addEventListener('input', function () {
+      var q = simple(champ.value.trim());
+      liste.textContent = '';
+      if (q.length < 2) { liste.hidden = true; return; }
+      var trouves = bureaux.filter(function (b) { return simple(b.libelle).indexOf(q) !== -1; }).slice(0, 12);
+      trouves.forEach(function (b) {
+        var li = document.createElement('li'), bt = document.createElement('button');
+        bt.type = 'button'; bt.textContent = b.libelle;
+        bt.addEventListener('click', function () { ajouter(b); champ.value = ''; liste.hidden = true; liste.textContent = ''; });
+        li.appendChild(bt); liste.appendChild(li);
+      });
+      liste.hidden = trouves.length === 0;
+    });
+  })();
+</script>

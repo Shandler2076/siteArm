@@ -1,16 +1,10 @@
-{# Langue, ligne d'adresse, police et taille (décisions du 18/11/2026). Variables : v (valeurs). #}
+{# Langue et ligne d'adresse, juste au-dessus du texte et du clavier goun (18/11/2026). #}
 <fieldset class="choix-ligne" id="choix-langue"><legend>Langue de rédaction</legend>
   {% for val, lib in langues %}<label><input type="radio" name="langue" value="{{ val }}" {% if v.langue == val or not v.langue and val == "fr" %}checked{% endif %}> {{ lib }}</label>{% endfor %}
 </fieldset>
-<label class="champ"><span>Ligne d'adresse</span><textarea name="adresse" rows="2" maxlength="500" data-clavier placeholder="Laissez vide en français : le site écrit « À Monsieur le … », « Au Capitaine … » ou « À la Capitaine … » selon les destinataires.">{{ v.adresse|default:'' }}</textarea>
-  <small class="aide">En goun, la ligne commence par « Hlan » : écrivez la suite (une personne, un bureau, une région, toute la communauté…).</small></label>
-<div class="date-heure">
-  <label class="champ"><span>Police</span><select name="police" id="choix-police">
-    {% for val, lib in polices %}<option value="{{ val }}" {% if v.police == val %}selected{% endif %}>{{ lib }}</option>{% endfor %}</select></label>
-  <label class="champ"><span>Taille du texte</span><select name="taille" id="choix-taille">
-    {% for t in tailles %}<option value="{{ t }}" {% if v.taille|stringformat:"s" == t|stringformat:"s" or not v.taille and t == 12 %}selected{% endif %}>{{ t }} points</option>{% endfor %}</select></label>
-</div>
-<label class="option-ligne"><input type="checkbox" name="une_page" value="1" {% if v.une_page %}checked{% endif %}> Tenir sur une page (le site resserre le texte, jusqu'à 9 points)</label>
+<label class="champ"><span>Ligne d'adresse</span>
+  <small class="aide">Sur deux lignes, comme dans les lettres administratives : « À » (ou « Au », « À la ») seul en haut, puis le titre à la ligne. En goun : « Hlan » seul en haut, puis à la ligne le destinataire (une personne, un bureau, une région, toute la communauté…).</small><textarea name="adresse" rows="3" maxlength="500" data-clavier placeholder="Laissez vide en français : le site écrit « À » puis, à la ligne, « Monsieur le … » ou le grade et le nom du destinataire.">{{ v.adresse|default:'' }}</textarea>
+  </label>
 {{ police_par_langue|json_script:"police-par-langue" }}
 <script>
   (function () {
@@ -35,7 +29,7 @@
       if (clavier) clavier.hidden = l !== 'gun';
       // La police suit la langue quand on change de langue (pas au chargement de la page).
       if (e && e.type === 'change' && !policeChoisie && parLangue[l]) police.value = parLangue[l];
-      if (l === 'gun' && !adresse.value.trim()) adresse.value = 'Hlan ';
+      if (l === 'gun' && !adresse.value.trim()) adresse.value = 'Hlan\n';
       if (l === 'fr' && adresse.value.trim().toLowerCase() === 'hlan') adresse.value = '';
       apercu();
     }

@@ -31,24 +31,31 @@ signez, et plus du tout après la fin de votre mandat. Chaque dépôt est inscri
 
 Menu « Courrier » → **Nouveau courrier**.
 
-1. **Nature** : courrier, ou communiqué (titre « COMMUNIQUÉ »).
+1. **Nature** : courrier, communiqué (titre « COMMUNIQUÉ »), ou **autre** (décision, lettre de
+   recommandation…) : écrivez alors le titre du document (ex. « DÉCISION »).
 2. **Numéro d'ordre** : rien à saisir. Le site l'attribue automatiquement à la signature (le suivant
    de votre bureau, 001 chaque année) : deux courriers ne peuvent jamais avoir le même numéro. La
    date imprimée est celle de la signature.
 3. **Lieu** (Porto-Novo au national) et **objet**.
-4. **Destinataires** : cochez des bureaux (recherche par nom), des niveaux entiers (tous les bureaux
-   de région, de circuit, de paroisse), et/ou ajoutez des membres (recherche par nom ou matricule).
+4. **Destinataires** : tapez le nom d'un bureau (région, circuit, paroisse) dans « Rechercher un
+   bureau » et touchez-le (répétez pour en ajouter d'autres ; ✕ pour en retirer) ; cochez des
+   niveaux entiers (tous les bureaux de région, de circuit, de paroisse), et/ou ajoutez des membres
+   (recherche par nom ou matricule).
    Un bureau local écrit au Bureau national ou aux bureaux placés en dessous de lui.
 5. **Présentation** :
    - **langue** : français ou goun (le clavier goun n'apparaît qu'en goun) ;
-   - **ligne d'adresse** : en français, laissez vide et le site écrit « À Monsieur le … »,
-     « Au Capitaine … » ou « À la Capitaine … » (vous pourrez la corriger) ; en goun, elle commence
-     par « Hlan » : écrivez la suite (une personne, un bureau, une région, toute la communauté…) ;
+   - **ligne d'adresse** (sur deux lignes) : en français, laissez vide et le site écrit « À », puis
+     à la ligne « Monsieur le … » ou le grade et le nom (« Au » / « À la » pour un membre) ; en
+     goun, « Hlan » seul en haut : écrivez à la ligne le destinataire (une personne, un bureau, une
+     région, toute la communauté…) ;
    - **police** (Charis SIL, Gentium Plus, Liberation Serif, Liberation Sans, Noto Serif) et
      **taille** (10 à 13 points) : le texte s'affiche aussitôt dans la police choisie ;
    - **Tenir sur une page** : le site resserre le texte (jusqu'à 9 points).
 6. **Contenu** : rédigez le texte (une ligne vide entre deux paragraphes), **ou** importez un
-   courrier déjà écrit (photo, scan ou PDF, 10 Mo au plus).
+   courrier déjà écrit (photo, scan ou PDF, 10 Mo au plus). Pour mettre des mots **en gras**, *en
+   italique* ou soulignés : sélectionnez-les, puis touchez **G**, **I** ou **S** (G puis I pour le
+   gras italique).
+   Avant de préparer : **Aperçu** montre le courrier mis en page (ou **Aperçu en PDF**).
 7. **Pièces jointes** : 5 au plus (PDF, JPEG, PNG).
 8. **Préparer le courrier** : il attend la signature ; le signataire est prévenu. Ouvrez **Voir le
    projet en PDF** pour le voir exactement comme il sera imprimé.

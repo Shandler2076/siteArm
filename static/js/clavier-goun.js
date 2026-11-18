@@ -118,7 +118,20 @@
     }
 
     Array.prototype.forEach.call(champs, function (c) {
-      c.addEventListener("focus", function () { cible = c; proposer(); });
+      c.addEventListener("focus", function () {
+        cible = c;
+        // Le clavier vient se placer juste sous le champ où l'on écrit (adresse, objet, texte).
+        var bloc = c.closest(".champ") || c;
+        if (bloc.nextElementSibling !== panneau) {
+          // Déplacé seulement si besoin, et défilement seulement à ce moment-là : pas de saut
+          // de la page à chaque touche.
+          bloc.after(panneau);
+          if (!panneau.hidden && panneau.scrollIntoView) {
+            setTimeout(function () { panneau.scrollIntoView({ block: "nearest" }); }, 250);
+          }
+        }
+        proposer();
+      });
       c.addEventListener("input", proposer);
       c.addEventListener("click", proposer);
       c.addEventListener("keyup", function (e) {
