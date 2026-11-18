@@ -247,11 +247,11 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
 
 ### Échange 18 (18/11/2026) — culte dominical
 - Le **culte dominical** reprend le format des fêtes, **sauf** (numéros tels qu'imprimés sur l'exemplaire) :
-  - **retirés :** n° 16 *Ouverture de Rideau*, n° 17 *Antienne*, n° 18 *Allaga lè yiylo*
-    (le mainteneur a aussi dit « 15, 16, 17 » à la fin de son message → **à confirmer**) ;
+  - **[décidé] retirés :** n° 16 *Ouverture de Rideau*, n° 17 *Antienne*, n° 18 *Allaga lè yiylo*
+    (les *Quêtes*, n° 15, restent) ;
   - **facultatif :** n° 19 *Oflin mehe sio oylo le ton* : proposé d'office, on peut le retirer selon
     le jour.
-- Les lectures viennent du **calendrier annuel**.
+- **[décidé]** Les lectures viennent **directement du calendrier annuel**.
 
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
