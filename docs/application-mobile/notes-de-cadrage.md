@@ -205,12 +205,13 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
 |---|---|---|
 | a | **Culte dominical** | Lectures tirées du calendrier annuel. |
 | b | **Aïsun** | **Veillée de prière**, deux sortes : **veillée d'enterrement** (souvent du jeudi soir au vendredi matin) et **veillée simple**. |
-| c | **Isọji** | (sens à préciser) |
+| c | **Isọji** | **Séances de prière intenses**, avec un programme particulier. Elles se font en série (**3, 7, 21 fois**…). Parfois intégrées en plein culte. |
 | d | **Sọdodovi** | **Fête d'adoption**. |
 | e | **Fêtes ordinaires** | Actions de grâce, Pâques, fêtes de groupement (femmes…), etc. Tout est regroupé ici. **L'intitulé et les dates sont saisis librement.** Pas de Noël ni d'anniversaire dans la liste. |
 | f | **Sinsẹn Ọṣio didi tọn** | **Culte d'enterrement** : le culte qui précède l'inhumation, le samedi matin. |
-| g | **Gbigbọ de jẹtẹ** (orthographe de « jẹtẹ » à confirmer) | **Sortie de transe**. |
+| g | **Gbigbọ de jẹte** (point sous le premier e seulement) | **Sortie de transe**. |
 
+- **Isọji en série :** un programme par séance (« séance 3/7 ») ou un seul pour toute la série ? → à préciser.
 - **Obsèques** = type **f** (culte d'enterrement) + type **b** (veillée d'enterrement).
 - **[proposition] Conséquence technique :** l'application, ses écrans et ses PDF doivent afficher
   correctement les lettres Goun et Yoruba à point souscrit (ẹ, ọ, ṣ…) et les accents. La recherche
