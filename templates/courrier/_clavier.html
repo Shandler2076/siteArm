@@ -1,5 +1,5 @@
 {% load static %}{{ clavier|json_script:"donnees-clavier" }}
-<div class="clavier" data-source="donnees-clavier" role="group" aria-label="Clavier goun">
+<div class="clavier" data-source="donnees-clavier" data-mots="{% url 'courrier:mots' %}" role="group" aria-label="Clavier goun">
   <p class="clavier__titre">Clavier goun <small class="aide">— touchez une lettre ou un mot proposé : il s'écrit à l'endroit du curseur. Les tons en rouge (´ ` ~ ^) se posent sur la lettre déjà tapée.</small></p>
   <div class="clavier__mots" aria-label="Mots proposés"></div>
   <div class="clavier__lettres"></div>

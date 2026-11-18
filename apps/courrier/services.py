@@ -793,15 +793,47 @@ def mots_appris_proposes(limite: int = 500):
     ).order_by("-nombre", "mot")[:limite]
 
 
-def mots_suggeres(limite: int = 500) -> list[str]:
-    """Mots du BN d'abord (ordre alphabétique), puis les mots appris les plus employés."""
-    bn = list(
-        MotClavier.objects.filter(actif=True, origine=OrigineMot.BN)
-        .order_by("mot")
-        .values_list("mot", flat=True)
+def _cle(mot: str) -> str:
+    from apps.courrier.models import cle_de_recherche
+
+    return cle_de_recherche(mot)
+
+
+def proposer_mots(debut: str, limite: int = 8) -> list[str]:
+    """Mots qui commencent par `debut`, sans tenir compte des points ni des tons : liste du BN
+    d'abord, puis lexique et mots appris (après deux courriers), du plus fréquent au moins."""
+    from django.db.models import Case, IntegerField, Value, When
+
+    cle = _cle(debut)
+    if not cle:
+        return []
+    deja = unicodedata.normalize("NFC", debut).lower()
+    mots = (
+        MotClavier.objects.filter(actif=True, cle__startswith=cle[:60])
+        .filter(~Q(origine=OrigineMot.APPRIS) | Q(nombre__gte=SEUIL_COURRIERS))
+        .exclude(mot=deja)
+        .annotate(
+            rang=Case(
+                When(origine=OrigineMot.BN, then=Value(0)),
+                default=Value(1),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("rang", "-nombre", "mot")
     )
-    reste = max(0, limite - len(bn))
-    return bn + [m.mot for m in mots_appris_proposes(reste)] if reste else bn
+    candidats = list(mots.values_list("mot", "rang")[:60])
+    # Les mots qui gardent les points tapés (« tọ » → tọn avant to) passent devant.
+    tape = _sans_tons(deja)
+    if "\u0323" in unicodedata.normalize("NFD", tape):  # point tapé : on le respecte d'abord
+        candidats.sort(key=lambda p: (p[1], not _sans_tons(p[0]).startswith(tape)))
+    return [mot for mot, _rang in candidats[:limite]]
+
+
+def _sans_tons(mot: str) -> str:
+    """Retire les tons mais garde le point souscrit (ẹ, ọ, ṣ)."""
+    decompose = unicodedata.normalize("NFD", mot)
+    garde = "".join(c for c in decompose if unicodedata.category(c) != "Mn" or c == "\u0323")
+    return unicodedata.normalize("NFC", garde)
 
 
 @transaction.atomic

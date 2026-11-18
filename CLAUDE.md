@@ -95,7 +95,8 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (`numero_complet`, sigles BNC/UP/SC/BRC) ; réception par les responsables (`unites_courrier`),
   accusés ; transmission d'un communiqué par la paroisse ; PDF `courrier/pdf.py` (modèle national,
   QR → `/courrier/verifier/<jeton>/`) ; clavier goun `static/js/clavier-goun.js` (lettres
-  `ReglagesClavier`, mots `MotClavier` : liste BN + mots appris).
+  `ReglagesClavier` : ẹ ọ ṣ + tons ; mots `MotClavier` : liste BN, lexique goun 6 481 mots
+  `courrier/data/lexique_gun.json`, mots appris ; `proposer_mots` via `/courrier/mots/?debut=`).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 

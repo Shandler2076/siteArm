@@ -8,6 +8,7 @@ urlpatterns = [
     path("moi/", views.moi, name="moi"),
     path("ma-signature/", views.ma_signature, name="ma_signature"),
     path("ma-signature/image.png", views.ma_signature_image, name="ma_signature_image"),
+    path("mots/", views.mots, name="mots"),
     path("verifier/<str:jeton>/", views.verifier, name="verifier"),
     path("bn/registre/", views.bn_registre, name="bn_registre"),
     path("bn/clavier/", views.bn_clavier, name="bn_clavier"),

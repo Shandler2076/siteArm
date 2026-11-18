@@ -8,7 +8,13 @@
 > **Réalisé le 18/11/2026** (module `apps/courrier`, cahier des charges § 18.1, guide 13), avec le
 > clavier goun demandé le 18/11/2026. Lettres fournies par le mainteneur le 18/11/2026 (d'après
 > son traducteur, gun de la Bible de 1923) : ẹ ọ ṣ et les tons ´ ` ~ (plus ^), posés sur la
-> lettre tapée ; liste réglable par le BN.
+> lettre tapée ; liste réglable par le BN. Lexique goun du même fichier (6 481 mots) ajouté aux mots
+> proposés (accord du 18/11/2026).
+>
+> Réponses du 18/11/2026 : le Secrétaire prépare, le Président ou le Chef signe, sinon le
+> Secrétaire pour ordre (fonctionnement actuel, inchangé). Envoi différé des e-mails : plus tard,
+> en option. Question en attente : le BN doit-il lire le contenu des courriers entre bureaux locaux
+> et des courriers adressés aux membres, ou seulement le registre ?
 
 Besoin : le BNC doit pouvoir écrire, depuis le site, sans passer par un événement :
 - à **un bureau particulier** : au sujet de l'un de ses membres, ou d'une affaire qui ne concerne

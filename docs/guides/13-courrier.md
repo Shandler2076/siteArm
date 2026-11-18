@@ -42,9 +42,7 @@ Menu « Courrier » → **Courriers envoyés** → **Nouveau courrier**.
 
 ### Le clavier goun
 
-Sous le texte, touchez une **lettre goun** (ẹ, ọ, ṣ) : elle s'écrit à l'endroit du curseur. Les **tons** (touches rouges : ´ haut, ` bas, ~ nasale, ^ circonflexe) se posent sur la lettre que vous venez de taper : ẹ puis ´ donne ẹ́. **⇧ Maj** passe en majuscules. Pendant que vous tapez, des **mots
-proposés** apparaissent : touchez-en un pour l'écrire en entier. Les mots viennent de la liste du
-Bureau national et des mots déjà écrits dans les courriers envoyés.
+Sous le texte, touchez une **lettre goun** (ẹ, ọ, ṣ) : elle s'écrit à l'endroit du curseur. Les **tons** (touches rouges : ´ haut, ` bas, ~ nasale, ^ circonflexe) se posent sur la lettre que vous venez de taper : ẹ puis ´ donne ẹ́. **⇧ Maj** passe en majuscules. Pendant que vous tapez, des **mots proposés** apparaissent : touchez-en un pour l'écrire en entier. Ils viennent du **lexique goun** (6 481 mots du gun de la Bible de 1923, du plus fréquent au moins fréquent), de la liste du Bureau national et des mots goun déjà écrits dans au moins deux courriers envoyés. Pas besoin de taper les points ni les tons : « so » propose sọ ; si vous tapez le point (« tọ »), les mots avec ce point passent en premier.
 
 ## 4. Signer
 
@@ -75,4 +73,4 @@ objet, signataire), sans jamais en montrer le texte.
 
 - **Registre des courriers** : tous les courriers envoyés, par bureau et par année.
 - **Clavier goun** : lettres et tons du clavier (ẹ ọ ṣ ; tons ´ ` ~ ^ ; écrire « ◌ » suivi du ton pour en ajouter un), mots
-  proposés par le BN (un par ligne), mots appris à retirer.
+  proposés par le BN (un par ligne), mots du lexique ou mots appris à ne plus proposer.

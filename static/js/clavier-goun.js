@@ -17,7 +17,7 @@
     var champs = document.querySelectorAll("[data-clavier]");
     var cible = champs[0] || null;
     var majuscule = false;
-    var index = donnees.mots.map(function (m) { return [sansAccents(m), m]; });
+    var urlMots = panneau.dataset.mots, cache = {}, attente = null, demande = 0;
 
     function bouton(texte, classe, action, etiquette) {
       var b = document.createElement("button");
@@ -88,22 +88,33 @@
       return m ? m[0] : "";
     }
 
+    function afficher(debut, mots) {
+      motsZone.textContent = "";
+      mots.forEach(function (m) {
+        var mot = m;
+        if (debut && debut[0] !== debut[0].toLowerCase()) mot = m[0].toUpperCase() + m.slice(1);
+        motsZone.appendChild(bouton(mot, "clavier__mot", function () { inserer(mot + " ", debut.length); }));
+      });
+      motsZone.hidden = mots.length === 0;
+    }
+
+    /* Mots proposés : demandés au site au fil de la frappe (lexique goun, liste du BN, mots appris). */
     function proposer() {
-      motsZone.innerHTML = "";
       var debut = motEnCours();
       var cle = sansAccents(debut);
-      var vus = 0;
-      for (var i = 0; i < index.length && vus < 8; i++) {
-        var paire = index[i];
-        if (cle && (paire[0].indexOf(cle) !== 0 || paire[1] === debut.toLowerCase())) continue;
-        var mot = paire[1];
-        if (debut && debut[0] !== debut[0].toLowerCase()) mot = mot[0].toUpperCase() + mot.slice(1);
-        (function (m, longueur) {
-          motsZone.appendChild(bouton(m, "clavier__mot", function () { inserer(m + " ", longueur); }));
-        })(mot, debut.length);
-        vus++;
-      }
-      motsZone.hidden = vus === 0;
+      clearTimeout(attente);
+      if (!cle || !urlMots) { afficher("", []); return; }
+      if (cache[debut]) { afficher(debut, cache[debut]); return; }
+      var numero = ++demande;
+      attente = setTimeout(function () {
+        fetch(urlMots + "?debut=" + encodeURIComponent(debut), { credentials: "same-origin" })
+          .then(function (r) { return r.ok ? r.json() : { mots: [] }; })
+          .then(function (d) {
+            cache[debut] = d.mots || [];
+            if (numero === demande) afficher(debut, cache[debut]);
+          })
+          .catch(function () {});
+      }, 150);
     }
 
     Array.prototype.forEach.call(champs, function (c) {

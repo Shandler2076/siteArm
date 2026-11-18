@@ -289,26 +289,48 @@ def test_qui_peut_voir_un_courrier(bn, compte_technique):
 
 
 # --- Clavier -------------------------------------------------------------------------------------
+def test_lexique_gun_charge(db):
+    """Lexique du mainteneur (gun de la Bible de 1923) : 6 481 mots, du plus fréquent au moins."""
+    lexique = MotClavier.objects.filter(origine="lexique")
+    assert lexique.count() == 6481
+    assert lexique.get(mot="sọ").nombre == 4246
+    assert lexique.get(mot="sọ").cle == "so"
+
+
+def test_mots_proposes_sans_tenir_compte_des_points_ni_des_tons(db):
+    proposes = s.proposer_mots("so")
+    assert proposes[0] == "sọ"  # le plus fréquent d'abord
+    assert len(proposes) == 8 and all(s._cle(m).startswith("so") for m in proposes)
+    assert s.proposer_mots("tọ")[0] == "tọn"
+    assert s.proposer_mots("") == []  # rien avant la première lettre
+    assert "sọ" not in s.proposer_mots("sọ")  # le mot déjà entier n'est pas reproposé
+
+
 def test_mots_appris_seulement_goun_et_apres_deux_courriers(bn):
-    texte = "Ẹ̀ jẹ́ mì wá gbọ́n. Mawu na yí wìdó. Adjovi sanction gbọ́n."
+    assert not MotClavier.objects.filter(mot__in=["kplọ́zẹ", "xwẹ̀dọ"]).exists()
+    texte = "Kplọ́zẹ kplọ́zẹ xwẹ̀dọ. Mawu sanction kplọ́zẹ."
     _envoye(bn, texte=texte)
-    mots = {m.mot: m for m in MotClavier.objects.all()}
-    assert "gbọ́n" in mots and mots["gbọ́n"].nombre == 1  # une fois par courrier
+    mots = {m.mot: m for m in MotClavier.objects.filter(origine="appris")}
+    assert mots["xwẹ̀dọ"].nombre == 1  # une fois par courrier
     assert "mawu" not in mots and "sanction" not in mots  # français ou sans lettre goun
-    assert "ẹ̀" not in mots  # écrit avec une majuscule : nom propre possible
-    assert "gbọ́n" not in s.mots_suggeres()  # un seul courrier : pas encore proposé
-    _envoye(bn, texte="gbọ́n wìdó", numero_ordre=2)
-    assert "gbọ́n" in s.mots_suggeres() and "wìdó" in s.mots_suggeres()
+    assert "kplọ́zẹ" in mots  # écrit en minuscule au moins une fois
+    assert "xwẹ̀dọ" not in s.proposer_mots("xwe")  # un seul courrier : pas encore proposé
+    _envoye(bn, texte="xwẹ̀dọ", numero_ordre=2)
+    assert "xwẹ̀dọ" in s.proposer_mots("xwe")
+
+
+def test_nom_propre_jamais_appris(bn):
+    _envoye(bn, texte="Hounkpẹ̀ a écrit.")
+    _envoye(bn, texte="Hounkpẹ̀ a écrit.", numero_ordre=2)
+    assert not MotClavier.objects.filter(mot="hounkpẹ̀").exists()
 
 
 def test_mots_du_bn_en_tete_et_mots_masques(bn):
-    s.enregistrer_mots_bn("Akpé\nMawu\n", par=bn["sn"].compte)
-    _envoye(bn, texte="wìdó wìdó")
-    _envoye(bn, texte="wìdó", numero_ordre=2)
-    assert s.mots_suggeres()[:2] == ["akpé", "mawu"]
-    assert "wìdó" in s.mots_suggeres()
-    s.masquer_mot("wìdó", par=bn["sn"].compte)
-    assert "wìdó" not in s.mots_suggeres()
+    s.enregistrer_mots_bn("Sọgbe\nMawu\n", par=bn["sn"].compte)
+    assert s.proposer_mots("so")[0] == "sọgbe"  # liste du BN avant le lexique
+    assert s.proposer_mots("maw")[0] == "mawu"
+    s.masquer_mot("sọ", par=bn["sn"].compte)  # un mot du lexique se retire aussi
+    assert "sọ" not in s.proposer_mots("so")
 
 
 def test_signature_refusee_si_le_courrier_a_change(bn):

@@ -223,12 +223,22 @@ class ReglagesClavier(models.Model):
 class OrigineMot(models.TextChoices):
     BN = "bn", "Liste du Bureau national"
     APPRIS = "appris", "Appris des courriers"
+    LEXIQUE = "lexique", "Lexique goun (Bible de 1923)"
+
+
+def cle_de_recherche(mot: str) -> str:
+    """Mot sans points ni tons, en minuscules : « sọ́ » → « so »."""
+    import unicodedata
+
+    decompose = unicodedata.normalize("NFD", mot or "").lower()
+    return "".join(c for c in decompose if unicodedata.category(c) != "Mn")
 
 
 class MotClavier(models.Model):
-    """Mot proposé par le clavier : liste du BN, ou appris des courriers déjà envoyés."""
+    """Mot proposé par le clavier : liste du BN, lexique goun, ou appris des courriers envoyés."""
 
     mot = models.CharField("mot", max_length=60, unique=True)
+    cle = models.CharField("clé de recherche", max_length=60, db_index=True, editable=False)
     origine = models.CharField("origine", max_length=8, choices=OrigineMot.choices)
     nombre = models.PositiveIntegerField("nombre d'emplois", default=0)
     actif = models.BooleanField("proposé", default=True)
@@ -240,3 +250,7 @@ class MotClavier(models.Model):
 
     def __str__(self) -> str:
         return self.mot
+
+    def save(self, *args, **kwargs):
+        self.cle = cle_de_recherche(self.mot)[:60]
+        super().save(*args, **kwargs)

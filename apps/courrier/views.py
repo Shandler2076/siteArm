@@ -53,10 +53,7 @@ def _gerer_membres(request):
 
 
 def _clavier():
-    return {
-        "lettres": ReglagesClavier.courant().liste(),
-        "mots": services.mots_suggeres(),
-    }
+    return {"lettres": ReglagesClavier.courant().liste()}
 
 
 @login_required
@@ -143,6 +140,16 @@ def nouveau(request, cle):
             "Nature": Nature,
         },
     )
+
+
+@login_required
+def mots(request):
+    """Mots proposés par le clavier goun pendant la frappe (rédacteurs de courrier seulement)."""
+    if not (unites_courrier(request.user) or request.user.has_perm("membres.gerer_membres")):
+        raise Http404
+    r = JsonResponse({"mots": services.proposer_mots(request.GET.get("debut", "")[:60])})
+    r["Cache-Control"] = "private, max-age=600"
+    return r
 
 
 @login_required
@@ -446,6 +453,7 @@ def bn_clavier(request):
                 .values_list("mot", flat=True)
             ),
             "appris": services.mots_appris_proposes(),
+            "nb_lexique": MotClavier.objects.filter(origine=OrigineMot.LEXIQUE, actif=True).count(),
             "clavier": _clavier(),
         },
     )

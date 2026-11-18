@@ -306,3 +306,11 @@ def test_nombre_de_requetes_stable_avec_beaucoup_de_destinataires(
     m1 = _client(bn["m1"])
     with django_assert_max_num_queries(40):
         assert m1.get(f"/courrier/c/{c.pk}/").status_code == 200
+
+
+def test_mots_proposes_par_le_site(bn):
+    sec = _client(bn["sec_p1"])
+    r = sec.get("/courrier/mots/", {"debut": "tọ"})
+    assert r.status_code == 200 and r.json()["mots"][0] == "tọn"
+    # Un membre simple n'écrit pas de courrier : pas de propositions.
+    assert _client(bn["m1"]).get("/courrier/mots/", {"debut": "to"}).status_code == 404
