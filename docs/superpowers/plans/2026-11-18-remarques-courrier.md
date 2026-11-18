@@ -91,3 +91,16 @@ Constat général : la rubrique est « un peu mélangée ». Points relevés apr
   - Proposition : numéro définitif attribué à la signature (aucun trou si un courrier est abandonné).
 - **Texte bien aligné** : paragraphes justifiés, alignés sur la même marge que l'objet et
   l'en-tête, espacements réguliers ; à vérifier sur un texte long (plusieurs pages).
+
+### Précisions du mainteneur sur la formule d'adresse (18/11/2026)
+- Femme : « **À la** Capitaine … » (validé).
+- La formule suit la **langue choisie** :
+  - **français** : « À Monsieur le … », « Au Capitaine … », « À la Capitaine … » ;
+  - **goun** : pas de formule française ; la ligne commence par « **Hlan** », suivi d'un texte
+    **saisi à la main**.
+- Le destinataire n'est pas toujours une personne : toute la communauté, tous les membres, un
+  bureau, une région, les membres d'une unité… La ligne d'adresse est donc **saisie (ou corrigée)
+  à la main** par le rédacteur ; le site peut seulement proposer un début.
+
+## 10. En-tête
+- Le **logo de gauche** (Congrégation) va changer : le mainteneur proposera bientôt le nouveau logo.
