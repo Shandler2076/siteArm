@@ -135,3 +135,28 @@ Décisions :
   **élargie à sa forme** (option 2, aperçu validé) ; les cinq lignes restent au centre.
 - Fichier définitif reçu (427 × 239, fond transparent) : `static/img/logo-congregation-sans-texte.png`.
 - **Réalisé le 18/11/2026** (« on y va ») : courriers, fiche du membre, page d'accueil.
+
+## 13. Remarques du 18/11/2026 (après essai sur le site) — à compiler, NE PAS exécuter
+
+1. **Aperçu avant envoi** : un écran pour **visionner le courrier** tel qu'il sera (aussi sur
+   téléphone) avant de le soumettre ou de générer le PDF.
+   - Proposition : bouton « Aperçu » dans le formulaire, qui montre le courrier mis en page (le même
+     rendu que le PDF, page par page, en images), sans rien enregistrer.
+2. **Gras et souligné** dans le texte (en plus de la police et de la taille).
+   - Proposition : boutons **G** et **S** au-dessus du texte : on sélectionne des mots, on touche
+     le bouton ; le PDF les imprime en gras ou soulignés.
+3. **Nature** : ajouter **« Autre »** (lettre de recommandation, décision…), avec un titre à
+   saisir (ex. « DÉCISION ») ; même format que le courrier.
+4. **Ligne d'adresse sur deux lignes**, comme dans les lettres administratives :
+   - « À » / « Au » / « À la » seul en haut, puis à la ligne le titre de la personne ou du bureau ;
+   - en goun : « Hlan » seul en haut (sans virgule), puis à la ligne le destinataire.
+5. **Recherche d'un bureau** (Nouveau courrier) : la longue liste à cocher gêne le défilement sur
+   téléphone (le doigt fait défiler la liste au lieu de la page).
+   - Remplacer par un seul champ « Rechercher un bureau » : on tape le nom (région, circuit,
+     paroisse) et seuls les bureaux trouvés apparaissent ; une fois choisi, la liste se replie.
+     Les bureaux choisis restent affichés (comme les membres choisis).
+6. **Clavier goun dans la ligne d'adresse** : il fonctionne déjà (lettres et mots proposés), mais
+   le clavier est affiché tout en bas, sous le texte : sur téléphone, on ne le voit pas quand on
+   écrit l'adresse, donc on croit qu'il ne marche pas.
+   - Proposition : le clavier **se place juste sous le champ** où l'on écrit (adresse, objet ou
+     texte), et le suit.
