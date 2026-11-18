@@ -217,6 +217,12 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
   correctement les lettres Goun et Yoruba à point souscrit (ẹ, ọ, ṣ…) et les accents. La recherche
   doit trouver « Sọdodovi » même si l'on tape « sododovi ».
 
+### Échange 15 (18/11/2026) — premier exemplaire
+- Reçu : programme réel présenté comme **fête d'adoption** → analyse détaillée dans
+  `format-02-programme-fete-adoption.md`.
+- L'Église du mainteneur est la **Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et
+  Séraphins (Mont-Sion)**.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
