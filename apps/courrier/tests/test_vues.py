@@ -65,7 +65,7 @@ def test_parcours_complet_par_les_pages(bn):
     pres = _client(bn["president"])
     assert c.objet in _html(pres.get("/courrier/a-signer/"))
     pres.post("/courrier/ma-signature/", {"image": image_signature()})
-    pres.post(f"/courrier/c/{c.pk}/action/", {"action": "valider"})
+    pres.post(f"/courrier/c/{c.pk}/action/", {"action": "valider", "version": c.version})
     c.refresh_from_db()
     assert c.etat == Etat.ENVOYE and c.numero == "012-2026/CCOSECS-CNC/AS/BNC/SN"
     # Le Secrétaire de P1 reçoit, ouvre, confirme.
@@ -198,6 +198,7 @@ def test_verification_publique(envoye):
     r = anonyme.get(f"/courrier/verifier/{envoye.jeton}/")
     assert r.status_code == 200 and "authentique" in _html(r)
     assert "Nous vous informons" not in _html(r)  # jamais le texte
+    assert "Préparatifs" not in _html(r)  # ni l'objet
     assert "aucun courrier" in _html(anonyme.get("/courrier/verifier/faux-jeton/"))
 
 
@@ -240,3 +241,68 @@ def test_journal_lisible(envoye, bn):
     assert any("A préparé le courrier « Préparatifs" in p for p in phrases)
     assert any("A déposé l'image de sa signature" in p for p in phrases)
     assert any("A signé et envoyé le courrier n° 001-2026" in p for p in phrases)
+
+
+def test_signature_sans_version_refusee_par_la_page(bn):
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="o",
+        texte="t",
+        bureaux=["national"][:0] or [f"paroisse-{bn['P1'].pk}"],
+        par=bn["sn"].compte,
+    )
+    s.deposer_signature(bn["president"].compte, image_signature())
+    _client(bn["president"]).post(f"/courrier/c/{c.pk}/action/", {"action": "valider"})
+    c.refresh_from_db()
+    assert c.etat == Etat.A_SIGNER
+
+
+@pytest.mark.parametrize("qui", ["m1", "sec_p1"])
+def test_fichiers_et_actions_refuses_aux_autres(bn, qui):
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="Confidentiel",
+        mode="importe",
+        fichier=image_signature("scan.png"),
+        bureaux=[f"paroisse-{bn['P2'].pk}"],
+        pieces=[image_signature("piece.png")],
+        par=bn["sn"].compte,
+    )
+    s.deposer_signature(bn["president"].compte, image_signature())
+    c = s.valider(c, par=bn["president"].compte)
+    autre = _client(bn[qui])
+    piece = c.pieces.get()
+    assert autre.get(f"/courrier/c/{c.pk}/original/").status_code == 404
+    assert autre.get(f"/courrier/c/{c.pk}/piece/{piece.pk}/").status_code == 404
+    ligne = c.destinataires.get()
+    assert (
+        autre.post(
+            f"/courrier/c/{c.pk}/action/", {"action": "accuser", "ligne": ligne.pk}
+        ).status_code
+        == 404
+    )
+    # Le destinataire (Chef de P2 = bn["chef"] ? non : Secrétaire/Chef de P2 absents) — le BN voit.
+    assert _client(bn["sn"]).get(f"/courrier/c/{c.pk}/original/").status_code == 200
+
+
+def test_nombre_de_requetes_stable_avec_beaucoup_de_destinataires(
+    bn, nouveau_membre, django_assert_max_num_queries
+):
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="communique",
+        objet="Communiqué",
+        texte="t",
+        niveaux=["paroisse"],
+        par=bn["sn"].compte,
+    )
+    s.deposer_signature(bn["president"].compte, image_signature())
+    s.valider(c, par=bn["president"].compte)
+    for i in range(15):
+        nouveau_membre(bn["P1"], f"Membre{i}")
+    s.transmettre_aux_membres(c, Unite(Niveau.PAROISSE, bn["P1"]), par=bn["sec_p1"].compte)
+    m1 = _client(bn["m1"])
+    with django_assert_max_num_queries(40):
+        assert m1.get(f"/courrier/c/{c.pk}/").status_code == 200

@@ -112,7 +112,9 @@ def test_import_exige_un_fichier_valide(bn):
     faux = SimpleUploadedFile("lettre.pdf", b"pas un pdf", content_type="application/pdf")
     with pytest.raises(s.CourrierRefuse, match="Format"):
         _preparer(bn, mode="importe", texte="", fichier=faux)
-    vrai = SimpleUploadedFile("lettre.pdf", b"%PDF-1.4\n%fin", content_type="application/pdf")
+    from apps.courrier.tests.test_vues import _un_pdf
+
+    vrai = SimpleUploadedFile("lettre.pdf", _un_pdf(), content_type="application/pdf")
     c = _preparer(bn, mode="importe", texte="", fichier=vrai)
     assert c.fichier.name.endswith(".pdf")
 
@@ -287,19 +289,72 @@ def test_qui_peut_voir_un_courrier(bn, compte_technique):
 
 
 # --- Clavier -------------------------------------------------------------------------------------
-def test_mots_appris_des_courriers_envoyes(bn):
-    _envoye(bn, texte="Ẹ̀ jẹ́ mì wá gbọ́n. Mawu na yí wìdó. Mawu sín.")
+def test_mots_appris_seulement_goun_et_apres_deux_courriers(bn):
+    texte = "Ẹ̀ jẹ́ mì wá gbọ́n. Mawu na yí wìdó. Adjovi sanction gbọ́n."
+    _envoye(bn, texte=texte)
     mots = {m.mot: m for m in MotClavier.objects.all()}
-    assert "mawu" in mots and mots["mawu"].nombre == 2
-    assert "gbọ́n" in mots and "na" not in mots  # trop court
+    assert "gbọ́n" in mots and mots["gbọ́n"].nombre == 1  # une fois par courrier
+    assert "mawu" not in mots and "sanction" not in mots  # français ou sans lettre goun
+    assert "ẹ̀" not in mots  # écrit avec une majuscule : nom propre possible
+    assert "gbọ́n" not in s.mots_suggeres()  # un seul courrier : pas encore proposé
+    _envoye(bn, texte="gbọ́n wìdó", numero_ordre=2)
+    assert "gbọ́n" in s.mots_suggeres() and "wìdó" in s.mots_suggeres()
 
 
 def test_mots_du_bn_en_tete_et_mots_masques(bn):
     s.enregistrer_mots_bn("Akpé\nMawu\n", par=bn["sn"].compte)
-    _envoye(bn, texte="wìdó wìdó wìdó")
+    _envoye(bn, texte="wìdó wìdó")
+    _envoye(bn, texte="wìdó", numero_ordre=2)
     assert s.mots_suggeres()[:2] == ["akpé", "mawu"]
+    assert "wìdó" in s.mots_suggeres()
     s.masquer_mot("wìdó", par=bn["sn"].compte)
     assert "wìdó" not in s.mots_suggeres()
+
+
+def test_signature_refusee_si_le_courrier_a_change(bn):
+    c = _preparer(bn)
+    _signer(bn["president"].compte)
+    lu = c.version
+    s.modifier(c, objet="Autre objet", texte="Autre texte", par=bn["sn"].compte)
+    with pytest.raises(s.CourrierRefuse, match="modifié"):
+        s.valider(c, par=bn["president"].compte, version=lu)
+    c.refresh_from_db()
+    s.valider(c, par=bn["president"].compte, version=c.version)
+
+
+def test_changement_d_annee_entre_preparation_et_signature(bn):
+    c = _preparer(bn)
+    Courrier.objects.filter(pk=c.pk).update(annee=2025, numero_ordre=45)
+    _signer(bn["president"].compte)
+    c = s.valider(c, par=bn["president"].compte)
+    assert c.annee == 2026 and c.numero.startswith("001-2026/")
+
+
+def test_numero_pris_entre_temps_remplace_par_le_suivant(bn):
+    a = _preparer(bn, numero_ordre=7)
+    b = _preparer(bn, numero_ordre=8)
+    Courrier.objects.filter(pk=b.pk).update(numero_ordre=7)
+    _signer(bn["president"].compte)
+    s.valider(a, par=bn["president"].compte)
+    b = s.valider(b, par=bn["president"].compte)
+    assert b.numero_ordre == 8
+
+
+def test_noms_des_membres_destinataires_caches_aux_autres(bn):
+    c = _envoye(bn, bureaux=[f"paroisse-{bn['P1'].pk}"], membres=[bn["m1"], bn["m4"]])
+    complet = s.libelle_destinataires(c)
+    assert bn["m4"].nom_complet in complet
+    pour_m1 = s.libelle_destinataires(c, avec_membres=False, membre=bn["m1"])
+    assert bn["m1"].nom_complet in pour_m1 and bn["m4"].nom_complet not in pour_m1
+    assert "1 autre(s) membre(s)" in pour_m1
+    pour_bureau = s.libelle_destinataires(c, avec_membres=False)
+    assert bn["m1"].nom_complet not in pour_bureau and "2 membre(s)" in pour_bureau
+
+
+def test_pdf_illisible_refuse_a_l_import(bn):
+    faux = SimpleUploadedFile("x.pdf", b"%PDF-1.4\n garbage", content_type="application/pdf")
+    with pytest.raises(s.CourrierRefuse, match="illisible"):
+        _preparer(bn, mode="importe", texte="", fichier=faux)
 
 
 def test_lettres_du_clavier_modifiables(bn):

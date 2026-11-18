@@ -104,6 +104,7 @@ class Courrier(models.Model):
         SignatureDeposee, on_delete=models.PROTECT, null=True, blank=True, related_name="+"
     )
     date_envoi = models.DateTimeField("envoyé le", null=True, blank=True)
+    version = models.PositiveIntegerField("version", default=1)
     jeton = models.CharField("jeton de vérification", max_length=64, unique=True, default=_jeton)
 
     class Meta:

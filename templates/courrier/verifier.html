@@ -9,7 +9,6 @@
       <dt>Numéro</dt><dd>{{ c.numero }}</dd>
       <dt>Expéditeur</dt><dd>{{ c.expediteur_libelle }}</dd>
       <dt>Date</dt><dd>{{ c.date_envoi|date:"j F Y" }}</dd>
-      <dt>Objet</dt><dd>{{ c.objet }}</dd>
       <dt>Signé par</dt><dd>{% if c.qualite == "po" %}P.O. le {% endif %}{{ c.fonction_signataire }} — {{ c.nom_signataire }}</dd>
     </dl>
   {% else %}

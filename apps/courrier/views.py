@@ -5,6 +5,7 @@ import mimetypes
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Count, Prefetch, Q
 from django.http import FileResponse, Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -79,7 +80,9 @@ def recus(request, cle):
 @login_required
 def envoyes(request, cle):
     unite = _unite(request, cle)
-    courriers = services.courriers_envoyes(unite).prefetch_related("destinataires")[:300]
+    courriers = services.courriers_envoyes(unite).annotate(
+        nb_destinataires=Count("destinataires", filter=Q(destinataires__transmis_par=""))
+    )[:300]
     return render(request, "courrier/envoyes.html", {"unite": unite, "courriers": courriers})
 
 
@@ -164,6 +167,14 @@ def recherche(request, cle):
     return JsonResponse({"resultats": resultats})
 
 
+def vue_complete(request, c: Courrier) -> bool:
+    """L'expéditeur et le Bureau national voient les noms de tous les destinataires."""
+    unite = services.unite_expeditrice(c)
+    if unite is not None and unite in unites_courrier(request.user):
+        return True
+    return c.envoye and request.user.has_perm("membres.gerer_membres")
+
+
 def _courrier_visible(request, pk) -> Courrier:
     c = get_object_or_404(Courrier, pk=pk)
     if not services.peut_voir(request.user, c):
@@ -179,7 +190,15 @@ def detail(request, pk):
         services.ouvrir(d, request.user)  # accusé de lecture
     unite = services.unite_expeditrice(c)
     expediteur = unite is not None and unite in unites_courrier(request.user)
-    voit_suivi = expediteur or (c.envoye and request.user.has_perm("membres.gerer_membres"))
+    voit_suivi = vue_complete(request, c)
+    transmis = (
+        c.destinataires.exclude(transmis_par="")
+        .values("transmis_par")
+        .annotate(n=Count("pk"), lus=Count("lu_le"))
+        .order_by("transmis_par")
+        if voit_suivi
+        else []
+    )
     paroisses = [
         u
         for u in unites_courrier(request.user)
@@ -193,13 +212,16 @@ def detail(request, pk):
             "c": c,
             "mes_lignes": [Destinataire.objects.get(pk=d.pk) for d in mes_lignes],
             "expediteur": expediteur,
-            "suivi": list(c.destinataires.select_related("membre", "lu_par", "accuse_par"))
+            "suivi": list(services.destinataires_directs(c).select_related("lu_par", "accuse_par"))
             if voit_suivi
             else [],
+            "transmis": [(unite_par_cle(t["transmis_par"]), t["n"], t["lus"]) for t in transmis],
             "qualite": services.peut_signer(request.user, c),
             "a_signature": services.signature_active(request.user) is not None,
             "transmettre": paroisses if c.communique and c.envoye else [],
-            "destinataire_texte": services.libelle_destinataires(c),
+            "destinataire_texte": services.libelle_destinataires(
+                c, avec_membres=voit_suivi, membre=getattr(request.user, "membre", None)
+            ),
         },
     )
 
@@ -211,7 +233,8 @@ def action(request, pk):
     quoi = request.POST.get("action", "")
     try:
         if quoi == "valider":
-            services.valider(c, par=request.user)
+            version = request.POST.get("version", "")
+            services.valider(c, par=request.user, version=int(version) if version.isdigit() else -1)
             messages.success(request, "Courrier signé et envoyé.")
         elif quoi == "renvoyer":
             services.renvoyer(c, motif=request.POST.get("motif", ""), par=request.user)
@@ -278,7 +301,11 @@ def pdf(request, pk):
     from apps.courrier.pdf import courrier_pdf
 
     c = _courrier_visible(request, pk)
-    r = HttpResponse(courrier_pdf(c), content_type="application/pdf")
+    complet = vue_complete(request, c)
+    membre = getattr(request.user, "membre", None)
+    r = HttpResponse(
+        courrier_pdf(c, avec_membres=complet, membre=membre), content_type="application/pdf"
+    )
     nom = f"courrier-{c.annee}-{c.numero_ordre:03d}.pdf"
     r["Content-Disposition"] = f'inline; filename="{nom}"'
     r["Cache-Control"] = "private, no-store"
@@ -363,7 +390,9 @@ def verifier(request, jeton):
 @login_required
 def bn_registre(request):
     _gerer_membres(request)
-    courriers = Courrier.objects.filter(etat=Etat.ENVOYE).prefetch_related("destinataires")
+    courriers = Courrier.objects.filter(etat=Etat.ENVOYE).prefetch_related(
+        Prefetch("destinataires", queryset=Destinataire.objects.filter(transmis_par=""))
+    )
     bureau = request.GET.get("bureau", "")
     if bureau:
         courriers = courriers.filter(expediteur_cle=bureau)
@@ -416,7 +445,7 @@ def bn_clavier(request):
                 .order_by("mot")
                 .values_list("mot", flat=True)
             ),
-            "appris": MotClavier.objects.filter(origine=OrigineMot.APPRIS, actif=True)[:100],
+            "appris": services.mots_appris_proposes(),
             "clavier": _clavier(),
         },
     )

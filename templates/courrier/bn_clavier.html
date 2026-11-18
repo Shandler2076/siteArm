@@ -15,8 +15,8 @@
     <button type="submit" class="bouton">Enregistrer la liste</button>
   </form>
   <h2>Mots appris des courriers envoyés</h2>
-  <p class="aide">Les mots les plus employés dans les courriers déjà envoyés sont proposés aussi. Retirez ceux qui ne doivent pas l'être.</p>
-  <ul class="fonctions">{% for m in appris %}<li><form method="post">{% csrf_token %}<input type="hidden" name="action" value="masquer"><input type="hidden" name="mot" value="{{ m.mot }}">{{ m.mot }} <small class="aide">({{ m.nombre }} fois)</small> <button type="submit" class="bouton bouton--discret">Ne plus proposer</button></form></li>
+  <p class="aide">Les mots goun (avec une lettre spéciale) employés dans au moins deux courriers envoyés sont proposés aussi ; les mots français et les noms propres ne sont pas appris. Retirez ceux qui ne doivent pas l'être.</p>
+  <ul class="fonctions">{% for m in appris %}<li><form method="post">{% csrf_token %}<input type="hidden" name="action" value="masquer"><input type="hidden" name="mot" value="{{ m.mot }}">{{ m.mot }} <small class="aide">({{ m.nombre }} courriers)</small> <button type="submit" class="bouton bouton--discret">Ne plus proposer</button></form></li>
   {% empty %}<li class="aide">Aucun mot appris pour l'instant.</li>{% endfor %}</ul>
 </section>
 {% endblock %}

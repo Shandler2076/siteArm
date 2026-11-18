@@ -242,6 +242,21 @@ def titulaires_gestion(unite: Unite, jour: datetime.date | None = None) -> Query
     return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
 
 
+def titulaires_gestion_par_cle(cles) -> dict[str, list[Compte]]:
+    """Comme `titulaires_gestion`, pour beaucoup d'unités en une seule requête."""
+    voulues = set(cles)
+    if not voulues:
+        return {}
+    resultat: dict[str, list[Compte]] = {cle: [] for cle in voulues}
+    mandats = _mandats_de_gestion().select_related("fonction", "membre__compte")
+    for m in mandats.filter(membre__compte__is_active=True):
+        niveau = m.fonction.niveau
+        cle = "national" if niveau == Niveau.NATIONAL else f"{niveau}-{getattr(m, niveau + '_id')}"
+        if cle in voulues:
+            resultat[cle].append(m.membre.compte)
+    return resultat
+
+
 def membre_pour_mutation(matricule: str) -> Membre | None:
     """Seule exception au périmètre : la paroisse d'arrivée retrouve un membre par matricule.
 

@@ -170,6 +170,28 @@ def _image_courrier(fichier, largeur, hauteur) -> Image:
     return Image(donnees, iw * echelle, ih * echelle)
 
 
+def _signature_reduite(fichier, largeur, hauteur) -> Image:
+    """Signature réduite et posée sur fond blanc : le PDF ne contient pas l'image nette et
+    transparente d'origine (rangée en stockage privé)."""
+    from PIL import Image as PilImage
+
+    fichier.open("rb")
+    try:
+        image = PilImage.open(io.BytesIO(fichier.read()))
+        image.load()
+    finally:
+        fichier.close()
+    image.thumbnail((320, 130))
+    fond = PilImage.new("RGB", image.size, "white")
+    fond.paste(image.convert("RGBA"), mask=image.convert("RGBA").split()[3])
+    sortie = io.BytesIO()
+    fond.save(sortie, "JPEG", quality=70)
+    sortie.seek(0)
+    iw, ih = fond.size
+    echelle = min(largeur / iw, hauteur / ih)
+    return Image(sortie, iw * echelle, ih * echelle)
+
+
 def _qr(courrier, cote) -> Image:
     tampon = io.BytesIO()
     segno.make(url_verification(courrier), error="m").save(
@@ -189,7 +211,7 @@ def _bloc_signature(courrier, st) -> list:
     droite = [Paragraph(f"<b>{escape(qualite)}</b>", st["signature"])]
     if courrier.envoye and courrier.signature_id:
         try:
-            droite.append(_image_courrier(courrier.signature.image, 55 * mm, 22 * mm))
+            droite.append(_signature_reduite(courrier.signature.image, 55 * mm, 22 * mm))
         except (OSError, ValueError):
             droite.append(Spacer(1, 18 * mm))
         droite.append(Paragraph(escape(courrier.nom_signataire), st["signature"]))
@@ -210,7 +232,7 @@ def _bloc_signature(courrier, st) -> list:
     return [Spacer(1, 8 * mm), KeepTogether(t)]
 
 
-def _contenu(courrier, st) -> list:
+def _contenu(courrier, st, avec_membres=True, membre=None) -> list:
     largeur = A4[0] - 2 * MARGE
     unite = services.unite_expeditrice(courrier)
     numero = courrier.numero or (
@@ -237,7 +259,10 @@ def _contenu(courrier, st) -> list:
         ]
     else:
         destinataire = Paragraph(
-            "<b>Destinataire</b><br/>" + escape(services.libelle_destinataires(courrier)),
+            "<b>Destinataire</b><br/>"
+            + escape(
+                services.libelle_destinataires(courrier, avec_membres=avec_membres, membre=membre)
+            ),
             st["gauche"],
         )
         bloc = Table([[objet, destinataire]], colWidths=[largeur * 0.58, largeur * 0.42])
@@ -265,7 +290,7 @@ def _contenu(courrier, st) -> list:
                 st["petit"],
             )
         )
-    directs = [d for d in courrier.destinataires.all() if not d.transmis_par]
+    directs = list(services.destinataires_directs(courrier)[:2000]) if avec_membres else []
     if not courrier.communique and len(directs) > 3:
         flux.append(Spacer(1, 4 * mm))
         flux.append(Paragraph("<b>Annexe — liste des destinataires</b>", st["gauche"]))
@@ -273,7 +298,7 @@ def _contenu(courrier, st) -> list:
     return flux
 
 
-def courrier_pdf(courrier) -> bytes:
+def courrier_pdf(courrier, avec_membres: bool = True, membre=None) -> bytes:
     _polices()
     registerFontFamily(
         "Sans", normal="Sans", bold="Sans-Gras", italic="Sans", boldItalic="Sans-Gras"
@@ -295,7 +320,7 @@ def courrier_pdf(courrier) -> bytes:
         _pied(c, larg, d.page)
 
     doc.addPageTemplates([PageTemplate(id="courrier", frames=[cadre], onPage=page)])
-    doc.build(_contenu(courrier, _styles()))
+    doc.build(_contenu(courrier, _styles(), avec_membres=avec_membres, membre=membre))
     contenu = tampon.getvalue()
     if courrier.mode == "importe" and courrier.fichier.name.lower().endswith(".pdf"):
         contenu = _ajouter_pdf_importe(contenu, courrier.fichier)
@@ -304,7 +329,6 @@ def courrier_pdf(courrier) -> bytes:
 
 def _ajouter_pdf_importe(contenu: bytes, fichier) -> bytes:
     from pypdf import PdfReader, PdfWriter
-    from pypdf.errors import PdfReadError
 
     sortie = PdfWriter()
     sortie.append(PdfReader(io.BytesIO(contenu)))
@@ -314,7 +338,7 @@ def _ajouter_pdf_importe(contenu: bytes, fichier) -> bytes:
             sortie.append(PdfReader(io.BytesIO(fichier.read())))
         finally:
             fichier.close()
-    except (PdfReadError, OSError, ValueError):
+    except Exception:  # noqa: BLE001 — un PDF importé abîmé ne doit pas empêcher l'impression
         return contenu
     tampon = io.BytesIO()
     sortie.write(tampon)

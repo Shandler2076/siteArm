@@ -10,7 +10,6 @@ import io
 import re
 import unicodedata
 import warnings
-from collections import Counter
 
 from django.core.files.base import ContentFile
 from django.db import IntegrityError, transaction
@@ -24,11 +23,11 @@ from apps.bureaux.perimetre import (
     membres_visibles,
     peut_deposer_signature,
     qualite_signataire,
-    titulaires_gestion,
     unite_par_cle,
     unites_courrier,
     unites_inferieures,
 )
+from apps.comptes.models import Compte
 from apps.courrier.models import (
     Courrier,
     Destinataire,
@@ -161,6 +160,7 @@ def type_fichier(fichier) -> str:
     debut = fichier.read(5)
     fichier.seek(0)
     if debut.startswith(b"%PDF"):
+        _verifier_pdf(fichier)
         return "pdf"
     try:
         with warnings.catch_warnings():
@@ -177,6 +177,42 @@ def type_fichier(fichier) -> str:
     if image.format not in formats:
         raise CourrierRefuse(MESSAGE_FORMAT)
     return formats[image.format]
+
+
+def _verifier_pdf(fichier) -> None:
+    """Refuse un PDF illisible ou protégé : il ne pourrait pas être joint au courrier imprimé."""
+    from pypdf import PdfReader
+
+    try:
+        lecteur = PdfReader(fichier)
+        if lecteur.is_encrypted or len(lecteur.pages) < 1:
+            raise CourrierRefuse("PDF protégé ou vide : enregistrez-le sans mot de passe.")
+    except CourrierRefuse:
+        raise
+    except Exception as e:  # noqa: BLE001 — tout PDF mal formé est refusé ici, pas plus tard
+        raise CourrierRefuse(
+            "Ce PDF est illisible. Enregistrez-le de nouveau, ou scannez-le."
+        ) from e
+    finally:
+        fichier.seek(0)
+
+
+def _contenu_nettoye(fichier, extension: str):
+    """Les images sont réenregistrées sans métadonnées (position GPS, appareil…)."""
+    if extension == "pdf":
+        return fichier
+    from PIL import ImageOps
+
+    fichier.seek(0)
+    image = Image.open(fichier)
+    image.load()
+    image = ImageOps.exif_transpose(image)
+    sortie = io.BytesIO()
+    if extension == "jpg":
+        image.convert("RGB").save(sortie, "JPEG", quality=88)
+    else:
+        image.save(sortie, "PNG")
+    return ContentFile(sortie.getvalue())
 
 
 def _nom_de_fichier(nom: str, extension: str) -> str:
@@ -223,21 +259,41 @@ def _destinataires(unite: Unite, bureaux, niveaux, membres) -> tuple[list[Unite]
     return list(choisis.values()), liste_membres
 
 
-def libelle_destinataires(courrier: Courrier) -> str:
-    """Texte « Destinataire » imprimé sur le courrier."""
+def destinataires_directs(courrier: Courrier):
+    return courrier.destinataires.filter(transmis_par="").select_related("membre")
+
+
+def libelle_destinataires(courrier: Courrier, avec_membres: bool = True, membre=None) -> str:
+    """Texte « Destinataire ».
+
+    Les noms des membres destinataires ne sont montrés qu'à l'expéditeur et au Bureau national
+    (`avec_membres`) ; un membre destinataire ne voit que son propre nom (un membre ne voit jamais
+    un autre membre).
+    """
     if courrier.communique:
         return "À l'attention de tous les bureaux"
-    directs = [d for d in courrier.destinataires.all() if not d.transmis_par]
-    if len(directs) > 3:
-        bureaux = sum(1 for d in directs if d.type == TypeDestinataire.BUREAU)
-        membres = len(directs) - bureaux
-        morceaux = []
-        if bureaux:
-            morceaux.append(f"{bureaux} bureaux")
-        if membres:
-            morceaux.append(f"{membres} membres")
-        return "À l'attention de " + " et ".join(morceaux) + " (liste en annexe)"
-    return " ; ".join(d.libelle for d in directs)
+    directs = destinataires_directs(courrier)
+    bureaux = [d.libelle for d in directs.filter(type=TypeDestinataire.BUREAU)[:4]]
+    nb_bureaux = directs.filter(type=TypeDestinataire.BUREAU).count()
+    membres = directs.filter(type=TypeDestinataire.MEMBRE)
+    nb_membres = membres.count()
+    if avec_membres:
+        if nb_bureaux + nb_membres > 3:
+            morceaux = []
+            if nb_bureaux:
+                morceaux.append(f"{nb_bureaux} bureaux")
+            if nb_membres:
+                morceaux.append(f"{nb_membres} membres")
+            return "À l'attention de " + " et ".join(morceaux) + " (liste en annexe)"
+        return " ; ".join(bureaux + [d.libelle for d in membres])
+    morceaux = bureaux if nb_bureaux <= 3 else [f"{nb_bureaux} bureaux"]
+    autres, lui = nb_membres, False
+    if membre is not None and membres.filter(membre=membre).exists():
+        morceaux.append(membre.nom_complet)
+        autres, lui = autres - 1, True
+    if autres:
+        morceaux.append(f"{autres} autre(s) membre(s)" if lui else f"{autres} membre(s)")
+    return " ; ".join(morceaux)
 
 
 def _libelle_bureau(u: Unite) -> str:
@@ -316,7 +372,11 @@ def preparer(
         prepare_par=par,
     )
     if extension:
-        c.fichier.save(_nom_de_fichier(fichier.name, extension), fichier, save=False)
+        c.fichier.save(
+            _nom_de_fichier(fichier.name, extension),
+            _contenu_nettoye(fichier, extension),
+            save=False,
+        )
     c.save()
     for u in destinataires_bureaux:
         Destinataire.objects.create(
@@ -328,7 +388,7 @@ def preparer(
         )
     for p, ext in zip(pieces, extensions_pieces, strict=True):
         pj = PieceJointe(courrier=c, nom=p.name[:200])
-        pj.fichier.save(_nom_de_fichier(p.name, ext), p, save=True)
+        pj.fichier.save(_nom_de_fichier(p.name, ext), _contenu_nettoye(p, ext), save=True)
     _journal(par, "courrier_prepare", unite=unite.cle, courrier=c.pk, objet=c.objet)
     _avertir_signataires(c, unite)
     return c
@@ -378,9 +438,14 @@ def modifier(
     if lieu is not None and lieu.strip():
         c.lieu = lieu.strip()[:100]
     if extension:
-        c.fichier.save(_nom_de_fichier(fichier.name, extension), fichier, save=False)
+        c.fichier.save(
+            _nom_de_fichier(fichier.name, extension),
+            _contenu_nettoye(fichier, extension),
+            save=False,
+        )
     revenu = c.etat == Etat.A_CORRIGER
     c.etat, c.motif_renvoi = Etat.A_SIGNER, ""
+    c.version += 1  # le signataire doit relire la nouvelle version
     c.save()
     _journal(par, "courrier_modifie", unite=unite.cle, courrier=c.pk, objet=c.objet)
     if revenu:
@@ -427,6 +492,7 @@ def deposer_signature(compte, fichier) -> SignatureDeposee:
             "Seuls le Président, les Chefs et les Secrétaires en fonction déposent une signature."
         )
     contenu = _image_signature(fichier)
+    Compte.objects.select_for_update().filter(pk=compte.pk).first()  # dépôts simultanés
     remplacee = SignatureDeposee.objects.filter(compte=compte, active=True).update(active=False)
     sig = SignatureDeposee(compte=compte)
     sig.image.save(f"signature-{compte.pk}.png", contenu, save=True)
@@ -444,7 +510,7 @@ def peut_signer(compte, courrier: Courrier):
 
 
 @transaction.atomic
-def valider(courrier: Courrier, *, par) -> Courrier:
+def valider(courrier: Courrier, *, par, version: int | None = None) -> Courrier:
     """Signature : le courrier reçoit son numéro définitif, la signature du validateur et part."""
     c = _verrouiller(courrier)
     unite = unite_expeditrice(c)
@@ -460,7 +526,24 @@ def valider(courrier: Courrier, *, par) -> Courrier:
         raise CourrierRefuse(
             "Déposez d'abord l'image de votre signature (rubrique « Ma signature »)."
         )
-    _verifier_numero(unite, c.annee, c.numero_ordre, sauf=c)
+    if version is not None and version != c.version:
+        raise CourrierRefuse(
+            "Le courrier a été modifié depuis que vous l'avez ouvert : relisez-le avant de signer."
+        )
+    annee = timezone.localdate().year
+    if c.annee != annee:  # préparé en décembre, signé en janvier : numéro de la nouvelle année
+        c.annee, c.numero_ordre = annee, proposer_numero(unite, annee)
+    elif (
+        Courrier.objects.filter(
+            expediteur_cle=c.expediteur_cle,
+            annee=c.annee,
+            numero_ordre=c.numero_ordre,
+            etat=Etat.ENVOYE,
+        )
+        .exclude(pk=c.pk)
+        .exists()
+    ):
+        c.numero_ordre = proposer_numero(unite, annee)  # numéro pris entre-temps : le suivant
     membre = getattr(par, "membre", None)
     c.etat = Etat.ENVOYE
     c.numero = numero_complet(unite, c.numero_ordre, c.annee)
@@ -474,28 +557,33 @@ def valider(courrier: Courrier, *, par) -> Courrier:
         with transaction.atomic():
             c.save()
     except IntegrityError as e:
-        raise CourrierRefuse("Ce numéro d'ordre vient d'être employé ; changez-le.") from e
+        raise CourrierRefuse(
+            "Un autre courrier vient de prendre ce numéro : cliquez de nouveau sur « Signer »."
+        ) from e
     _journal(par, "courrier_envoye", unite=unite.cle, courrier=c.pk, numero=c.numero, objet=c.objet)
-    _apprendre_mots(c.texte)
-    _prevenir_destinataires(c, list(c.destinataires.all()))
+    texte, pk = c.texte, c.pk
+    transaction.on_commit(lambda: _apprendre_mots(texte))
+    transaction.on_commit(lambda: _prevenir_destinataires(Courrier.objects.get(pk=pk)))
     return c
 
 
-def _prevenir_destinataires(c: Courrier, destinataires) -> None:
+def _prevenir_destinataires(c: Courrier) -> None:
+    """Après l'envoi (hors verrou) : responsables des bureaux et membres destinataires."""
+    from apps.bureaux.perimetre import titulaires_gestion_par_cle
     from apps.notifications.services import notifier
 
     nature = "Communiqué" if c.communique else "Courrier"
     message = f"{nature} reçu de {c.expediteur_libelle} : « {c.objet} » (n° {c.numero})."
     lien = f"/courrier/c/{c.pk}/"
-    envois = []
-    for d in destinataires:
-        if d.type == TypeDestinataire.BUREAU:
-            unite = unite_par_cle(d.unite_cle)
-            if unite is not None:
-                envois.append(list(titulaires_gestion(unite)))
-        elif d.membre is not None and d.membre.compte_id:
-            envois.append([d.membre.compte])
-    transaction.on_commit(lambda: [notifier(comptes, message, lien) for comptes in envois])
+    lignes = c.destinataires.select_related("membre__compte")
+    cles = [d.unite_cle for d in lignes if d.type == TypeDestinataire.BUREAU]
+    comptes = [compte for liste in titulaires_gestion_par_cle(cles).values() for compte in liste]
+    comptes += [
+        d.membre.compte
+        for d in lignes
+        if d.type == TypeDestinataire.MEMBRE and d.membre and d.membre.compte_id
+    ]
+    notifier(comptes, message, lien)
 
 
 @transaction.atomic
@@ -526,14 +614,13 @@ def destinataires_du_compte(compte, courrier: Courrier) -> list[Destinataire]:
     """Lignes de destinataire que ce compte représente (son bureau, ou lui-même)."""
     if not courrier.envoye:
         return []
-    cles = {u.cle for u in unites_courrier(compte)}
-    resultat = []
-    for d in courrier.destinataires.all():
-        if d.type == TypeDestinataire.BUREAU and d.unite_cle in cles:
-            resultat.append(d)
-        elif d.type == TypeDestinataire.MEMBRE and d.membre and d.membre.compte_id == compte.pk:
-            resultat.append(d)
-    return resultat
+    cles = [u.cle for u in unites_courrier(compte)]
+    return list(
+        courrier.destinataires.filter(
+            Q(type=TypeDestinataire.BUREAU, unite_cle__in=cles)
+            | Q(type=TypeDestinataire.MEMBRE, membre__compte=compte)
+        )
+    )
 
 
 def marquer_recus(destinataires, compte) -> None:
@@ -587,7 +674,10 @@ def transmettre_aux_membres(courrier: Courrier, unite: Unite, *, par) -> int:
             libelle=m.nom_complet,
             transmis_par=unite.cle,
         )
-        for m in membres_visibles(unite).exclude(statut__in=SORTIS).exclude(pk__in=deja)
+        for m in membres_visibles(unite)
+        .exclude(statut__in=SORTIS)
+        .exclude(pk__in=deja)
+        .select_related("compte")
     ]
     Destinataire.objects.bulk_create(nouveaux)
     _journal(par, "courrier_transmis", unite=unite.cle, courrier=c.pk, nombre=len(nouveaux))
@@ -667,26 +757,51 @@ MOT = re.compile(r"(?:[^\W\d_]|[̀-ͯ])+")
 LONGUEUR_MIN = 3
 
 
+FRANCAIS = set("abcdefghijklmnopqrstuvwxyzàâäçéèêëîïôöùûüÿœæ")
+SEUIL_COURRIERS = 2  # un mot appris n'est proposé qu'après 2 courriers différents
+
+
 def _mots(texte: str) -> list[str]:
-    texte = unicodedata.normalize("NFC", texte or "").lower()
-    return [m for m in MOT.findall(texte) if LONGUEUR_MIN <= len(m) <= 60]
+    """Mots goun du texte : au moins une lettre hors de l'alphabet français (ẹ, ọ, ɖ, ɛ, á…).
+
+    Les mots français et les noms propres (écrits avec une majuscule) ne sont pas appris : les
+    propositions ne doivent rien révéler des courriers des autres bureaux.
+    """
+    texte = unicodedata.normalize("NFC", texte or "")
+    resultat = []
+    for m in MOT.findall(texte):
+        if not (LONGUEUR_MIN <= len(m) <= 60) or m[0] != m[0].lower():
+            continue
+        if any(ch not in FRANCAIS for ch in m.lower()):
+            resultat.append(m.lower())
+    return resultat
 
 
 def _apprendre_mots(texte: str) -> None:
-    for mot, n in Counter(_mots(texte)).items():
+    """Chaque courrier compte une fois par mot (ordre trié : pas de verrous croisés)."""
+    for mot in sorted(set(_mots(texte))):
         obj, cree = MotClavier.objects.get_or_create(
-            mot=mot, defaults={"origine": OrigineMot.APPRIS, "nombre": n}
+            mot=mot, defaults={"origine": OrigineMot.APPRIS, "nombre": 1}
         )
         if not cree:
-            MotClavier.objects.filter(pk=obj.pk).update(nombre=F("nombre") + n)
+            MotClavier.objects.filter(pk=obj.pk).update(nombre=F("nombre") + 1)
+
+
+def mots_appris_proposes(limite: int = 500):
+    return MotClavier.objects.filter(
+        actif=True, origine=OrigineMot.APPRIS, nombre__gte=SEUIL_COURRIERS
+    ).order_by("-nombre", "mot")[:limite]
 
 
 def mots_suggeres(limite: int = 500) -> list[str]:
     """Mots du BN d'abord (ordre alphabétique), puis les mots appris les plus employés."""
-    actifs = MotClavier.objects.filter(actif=True)
-    bn = list(actifs.filter(origine=OrigineMot.BN).order_by("mot").values_list("mot", flat=True))
-    appris = actifs.filter(origine=OrigineMot.APPRIS).order_by("-nombre", "mot")
-    return bn + list(appris.values_list("mot", flat=True)[: max(0, limite - len(bn))])
+    bn = list(
+        MotClavier.objects.filter(actif=True, origine=OrigineMot.BN)
+        .order_by("mot")
+        .values_list("mot", flat=True)
+    )
+    reste = max(0, limite - len(bn))
+    return bn + [m.mot for m in mots_appris_proposes(reste)] if reste else bn
 
 
 @transaction.atomic
@@ -722,11 +837,3 @@ def enregistrer_lettres(texte: str, *, par) -> ReglagesClavier:
     r.save()
     _journal(par, "clavier_modifie", unite="national", lettres=r.lettres)
     return r
-
-
-def liste_complete(courrier: Courrier) -> list[str]:
-    return [d.libelle for d in courrier.destinataires.filter(transmis_par="")]
-
-
-def q_destinataire_bureau(cle: str) -> Q:
-    return Q(destinataires__type=TypeDestinataire.BUREAU, destinataires__unite_cle=cle)
