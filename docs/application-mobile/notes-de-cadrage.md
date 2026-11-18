@@ -223,15 +223,31 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
 - L'Église du mainteneur est la **Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et
   Séraphins (Mont-Sion)**.
 
+### Échange 16 (18/11/2026) — précisions sur l'exemplaire
+- **[décidé]** C'est bien une **fête d'adoption**, cumulée ici avec une action de grâce. **Toutes les
+  fêtes** (adoption, action de grâce, fêtes ordinaires) ont **le même format de programme**.
+- **[décidé]** L'**en-tête et l'intitulé** sont **proposés** par l'application mais **toujours modifiables**
+  par celui qui remplit (ex. « culte d'Action de grâce et de reconnaissance à Dieu »).
+- **[décidé]** `CGN` = **Cantique Goun**. On reprend ce code.
+- `(PM)` : particularité du recueil, à comprendre quand le recueil sera fourni.
+- **[décidé]** Un même numéro peut avoir **plusieurs versions : A, B, C** (ex. `596(A)`). Un cantique
+  s'identifie donc par **numéro + lettre facultative**.
+- Le dépôt `siteArm` **n'est pas public** : les exemplaires peuvent y rester.
+- **[décidé]** Les **noms et titres (grades)** des officiants sont **saisis à la main**.
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
 - Modification des formats dans l'application ou export Word (à discuter).
+- Code du recueil Yoruba (équivalent de `CGN`) ?
+- Liste des rubriques du format « fêtes » : fixe, ou modifiable à chaque programme ?
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 - **Dépôt GitHub séparé** à créer par le mainteneur (Claude ne peut pas créer de dépôt). Ces notes
   y seront déplacées.
 - Liste et format exact de chaque type de culte (modèles papier existants ?)
+- Code du recueil Yoruba (équivalent de `CGN`) ?
+- Liste des rubriques du format « fêtes » : fixe, ou modifiable à chaque programme ?
 - Format imprimé du pamphlet : feuille simple, livret plié (A4 → A5), nombre de pages ?
 - Hors ligne ? Android seulement ? Partage (WhatsApp, impression) ?
 

@@ -3,8 +3,9 @@
 Document reçu : `documents-recus/02-programme-fete-adoption.jpg` (programme réel, 1 page A4).
 Église : Congrégation Chrétienne de l'Ordre Sacré Éternel des Chérubins et Séraphins (Mont-Sion).
 
-> Attention : le titre du document dit « culte d'**Action de grâce** et de reconnaissance à Dieu ».
-> Le mainteneur le présente comme une **fête d'adoption** → à confirmer.
+> Confirmé : fête d'adoption (cumulée avec une action de grâce). **Ce format vaut pour toutes les
+> fêtes** (adoption, action de grâce, fêtes ordinaires). `CGN` = Cantique Goun ; `596(A)` = version A
+> du cantique 596 (versions A, B, C). En-tête et intitulé : proposés, toujours modifiables.
 
 ## 1. En-tête (haut de page)
 - **À gauche :** logo de l'Église et nom complet de la congrégation.
