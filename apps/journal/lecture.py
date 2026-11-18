@@ -284,6 +284,30 @@ def lire(entrees) -> list[Ligne]:
                 d.get("presence"), d.get("presence")
             )
             return f"A pointé {m} : {etat} à « {d.get('nom')} »."
+        if a == j.COURRIER_PREPARE:
+            return f"A préparé le courrier « {d.get('objet', '')} » (en attente de signature)."
+        if a == j.COURRIER_MODIFIE:
+            return f"A modifié le courrier « {d.get('objet', '')} » avant signature."
+        if a == j.COURRIER_ABANDONNE:
+            return f"A abandonné le courrier « {d.get('objet', '')} » (jamais envoyé)."
+        if a == j.COURRIER_RENVOYE:
+            return f"A renvoyé un courrier pour correction (motif : {d.get('motif', '')})."
+        if a == j.COURRIER_ENVOYE:
+            return f"A signé et envoyé le courrier n° {d.get('numero')} « {d.get('objet', '')} »."
+        if a == j.COURRIER_ACCUSE:
+            return "A confirmé la réception d'un courrier (« Courrier reçu »)."
+        if a == j.COURRIER_TRANSMIS:
+            return f"A transmis un communiqué à {d.get('nombre', 0)} membre(s) de la paroisse."
+        if a == j.SIGNATURE_DEPOSEE:
+            if d.get("remplacement"):
+                return "A remplacé l'image de sa signature."
+            return "A déposé l'image de sa signature."
+        if a == j.CLAVIER_MODIFIE:
+            if d.get("masque"):
+                return f"A retiré le mot « {d['masque']} » des propositions du clavier goun."
+            if d.get("lettres"):
+                return f"A modifié les lettres du clavier goun : {d['lettres']}."
+            return f"A enregistré la liste des mots du clavier goun ({d.get('mots', 0)} mots)."
         if a == j.CONNEXION:
             return "S'est connecté au site."
         if a == j.CONNEXION_ECHOUEE:

@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     "apps.cotisations",
     "apps.evenements",
     "apps.tresorerie",
+    "apps.courrier",
     "axes",
 ]
 

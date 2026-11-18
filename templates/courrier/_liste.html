@@ -1,0 +1,4 @@
+<ul class="liste-membres">{% for c, ligne in lignes %}
+  <li><a href="{% url 'courrier:detail' c.pk %}"><strong>{% if ligne and not ligne.lu_le %}● {% endif %}{{ c.objet }}</strong>
+    <span>{% if c.communique %}Communiqué{% else %}Courrier{% endif %} n° {{ c.numero }} — {{ c.expediteur_libelle }} — {{ c.date_envoi|date:"d/m/Y" }}{% if ligne.accuse_le %} — reçu confirmé{% endif %}</span></a></li>
+{% empty %}<li class="aide">Aucun courrier.</li>{% endfor %}</ul>

@@ -31,6 +31,7 @@ def test_menu_bn_groupes_sans_doublon(compte_technique):
         "Cotisations mensuelles",
         "Trésorerie",
         "Événements",
+        "Courrier",
         "Bureaux et droits",
         "Contrôle",
     ]
@@ -87,7 +88,7 @@ def test_menu_bureau_paroisse(monde):
     assert titres[:2] == ["Mon espace", "Mon bureau"]
     assert "Listes et statistiques" in titres and "Grades" in titres
     assert "Bureaux et droits" not in titres and "Contrôle" not in titres
-    assert "Événements" not in titres
+    assert "Événements" not in titres and "Courrier" in titres
     bureau = next(g for g in menu if g.titre == "Mon bureau")
     assert [lien.libelle for lien in bureau.liens] == [
         "Membres",
@@ -98,7 +99,9 @@ def test_menu_bureau_paroisse(monde):
 
 
 def test_menu_membre_simple(monde):
-    assert _titres(_menu(monde["m1"].compte)) == ["Mon espace"]
+    menu = _menu(monde["m1"].compte)
+    assert _titres(menu) == ["Mon espace"]
+    assert "Mes courriers" in [lien.libelle for lien in menu[0].liens]
 
 
 def test_rendu_groupes_repliables(client_technique, monde):
@@ -106,7 +109,7 @@ def test_rendu_groupes_repliables(client_technique, monde):
     html = unescape(r.content.decode())
     debut = html.index('<nav class="menu"')
     menu = html[debut : html.index("</nav>", debut)]
-    assert menu.count("<details") == 9
+    assert menu.count("<details") == 10
     assert menu.count('<details class="menu__groupe" open') == 1
     assert 'class="actif" aria-current="page">Tous les membres' in menu
 

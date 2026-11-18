@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block titre %}Vérification d'un courrier — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Vérification d'un courrier</h1>
+  {% if c %}
+    <p class="message">✓ Courrier authentique, enregistré sur le site de l'Armée du Salut du Bénin.</p>
+    <dl class="fiche">
+      <dt>Numéro</dt><dd>{{ c.numero }}</dd>
+      <dt>Expéditeur</dt><dd>{{ c.expediteur_libelle }}</dd>
+      <dt>Date</dt><dd>{{ c.date_envoi|date:"j F Y" }}</dd>
+      <dt>Signé par</dt><dd>{% if c.qualite == "po" %}P.O. le {% endif %}{{ c.fonction_signataire }} — {{ c.nom_signataire }}</dd>
+    </dl>
+  {% else %}
+    <p class="message message--error">✗ Ce code ne correspond à aucun courrier envoyé. Le document n'est pas authentique.</p>
+  {% endif %}
+</section>
+{% endblock %}

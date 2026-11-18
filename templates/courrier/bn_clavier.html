@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titre %}Clavier goun — Bureau national{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Clavier goun</h1>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="lettres">
+    <label class="champ champ--requis"><span>Lettres du clavier (séparées par des espaces)</span><textarea name="lettres" rows="3" required>{{ lettres }}</textarea>
+      <small class="aide">Lettres goun : ẹ ọ ṣ. Les tons (◌́ haut, ◌̀ bas, ◌̃ nasale, ◌̂ circonflexe) se posent sur la lettre déjà tapée. Pour ajouter un ton, écrivez « ◌ » suivi du ton.</small></label>
+    <button type="submit" class="bouton">Enregistrer les lettres</button>
+  </form>
+  <h2>Mots proposés par le Bureau national</h2>
+  <form method="post">{% csrf_token %}<input type="hidden" name="action" value="mots">
+    <label class="champ"><span>Un mot (ou une courte expression) par ligne</span><textarea name="mots" rows="10" data-clavier>{{ mots_bn }}</textarea></label>
+    {% include "courrier/_clavier.html" %}
+    <button type="submit" class="bouton">Enregistrer la liste</button>
+  </form>
+  <h2>Lexique goun</h2>
+  <p class="aide">{{ nb_lexique }} mots du gun de la Bible de 1923 (orthographe de 1923), proposés du plus fréquent au moins fréquent. Pour retirer un mot du lexique :</p>
+  <form method="post" class="date-heure">{% csrf_token %}<input type="hidden" name="action" value="masquer">
+    <label class="champ"><span>Mot à ne plus proposer</span><input name="mot" maxlength="60" required data-clavier></label>
+    <button type="submit" class="bouton bouton--secondaire">Ne plus proposer</button></form>
+  <h2>Mots appris des courriers envoyés</h2>
+  <p class="aide">Les mots goun (avec une lettre spéciale) employés dans au moins deux courriers envoyés sont proposés aussi ; les mots français et les noms propres ne sont pas appris. Retirez ceux qui ne doivent pas l'être.</p>
+  <ul class="fonctions">{% for m in appris %}<li><form method="post">{% csrf_token %}<input type="hidden" name="action" value="masquer"><input type="hidden" name="mot" value="{{ m.mot }}">{{ m.mot }} <small class="aide">({{ m.nombre }} courriers)</small> <button type="submit" class="bouton bouton--discret">Ne plus proposer</button></form></li>
+  {% empty %}<li class="aide">Aucun mot appris pour l'instant.</li>{% endfor %}</ul>
+</section>
+{% endblock %}

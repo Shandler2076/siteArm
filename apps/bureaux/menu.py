@@ -15,7 +15,9 @@ from apps.bureaux.perimetre import (
     est_bn,
     est_tresorier_national,
     est_validateur_reversements,
+    peut_deposer_signature,
     unites_cotisations,
+    unites_courrier,
     unites_gerees,
     unites_tresorerie,
     unites_verification,
@@ -195,8 +197,38 @@ def construire_menu(request) -> list[Groupe]:
         groupes.append(Groupe("Trésorerie", tres))
 
     if gestion_bn:
+        groupes.append(
+            Groupe("Événements", [Lien("Événements nationaux", reverse("evenements:liste"))])
+        )
+
+    # Courrier et communiqués (décisions des 13, 14 et 16/11/2026).
+    courrier = []
+    u_cour = unites_courrier(user)
+    for u in u_cour:
+        s = f" — {u.libelle}" if len(u_cour) > 1 else ""
+        courrier += [
+            Lien(f"Courrier reçu{s}", reverse("courrier:recus", args=[u.cle])),
+            Lien(
+                f"Courriers envoyés{s}",
+                reverse("courrier:envoyes", args=[u.cle]),
+                prefixes=(f"/courrier/{u.cle}/",),
+            ),
+        ]
+    if peut_deposer_signature(user):
+        courrier += [
+            Lien("Courriers à signer", reverse("courrier:a_signer"), compteur=_nb_a_signer(user)),
+            Lien("Ma signature", reverse("courrier:ma_signature")),
+        ]
+    if gestion_bn:
+        courrier += [
+            Lien("Registre des courriers", reverse("courrier:bn_registre")),
+            Lien("Clavier goun", reverse("courrier:bn_clavier")),
+        ]
+    if courrier:
+        groupes.append(Groupe("Courrier", courrier))
+
+    if gestion_bn:
         groupes += [
-            Groupe("Événements", [Lien("Événements nationaux", reverse("evenements:liste"))]),
             Groupe(
                 "Bureaux et droits",
                 [
@@ -227,6 +259,7 @@ def _mon_espace(user) -> list[Lien]:
                 "Payer (mobile money)", reverse("tresorerie:payer"), prefixes=("/tresorerie/payer",)
             ),
             Lien("Mes événements", reverse("evenements:moi")),
+            Lien("Mes courriers", reverse("courrier:moi")),
         ]
     liens += [
         Lien(
@@ -237,6 +270,12 @@ def _mon_espace(user) -> list[Lien]:
         Lien("Protection de vos données", reverse("protection_donnees")),
     ]
     return liens
+
+
+def _nb_a_signer(user) -> int:
+    from apps.courrier.services import courriers_a_signer
+
+    return courriers_a_signer(user).count()
 
 
 def _nb_decisions() -> int:

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titre %}{% if c.communique %}Communiqué{% else %}Courrier{% endif %} — {{ c.objet }}{% endblock %}
+{% block contenu %}
+<section class="carte courrier">
+  <p class="matricule">{% if c.communique %}Communiqué{% else %}Courrier{% endif %} — {{ c.get_etat_display }}</p>
+  <h1>{{ c.objet }}</h1>
+  <dl class="fiche">
+    <dt>Numéro</dt><dd>{% if c.numero %}{{ c.numero }}{% else %}{{ c.numero_ordre|stringformat:"03d" }}-{{ c.annee }} (attribué à la signature){% endif %}</dd>
+    <dt>Expéditeur</dt><dd>{{ c.expediteur_libelle }}</dd>
+    <dt>{{ c.lieu }}, le</dt><dd>{% if c.date_envoi %}{{ c.date_envoi|date:"j F Y à H:i" }}{% else %}— (pas encore envoyé){% endif %}</dd>
+    <dt>Destinataire</dt><dd>{{ destinataire_texte }}</dd>
+    {% if c.envoye %}<dt>Signé par</dt><dd>{% if c.qualite == "po" %}P.O. le {{ c.fonction_signataire }} : {% else %}{{ c.fonction_signataire }} : {% endif %}{{ c.nom_signataire }}</dd>{% endif %}
+  </dl>
+  {% if c.motif_renvoi and not c.envoye %}<p class="message message--error">Renvoyé pour correction : {{ c.motif_renvoi }}</p>{% endif %}
+  <p class="boutons-courrier"><a class="bouton bouton--secondaire" href="{% url 'courrier:pdf' c.pk %}">{% if c.envoye %}Ouvrir le PDF (à imprimer){% else %}Voir le projet en PDF{% endif %}</a>
+    {% if c.fichier %}<a class="bouton bouton--secondaire" href="{% url 'courrier:original' c.pk %}">Courrier importé (original)</a>{% endif %}</p>
+  {% if c.texte %}<div class="courrier__texte">{{ c.texte|linebreaks }}</div>{% endif %}
+  {% if c.pieces.all %}<h2>Pièces jointes</h2><ul class="fonctions">{% for p in c.pieces.all %}<li><a href="{% url 'courrier:piece' c.pk p.pk %}">{{ p.nom }}</a></li>{% endfor %}</ul>{% endif %}
+
+  {% for ligne in mes_lignes %}
+    <div class="encadre">
+      {% if ligne.accuse_le %}<p>✓ Vous avez confirmé la réception le {{ ligne.accuse_le|date:"d/m/Y à H:i" }}.</p>
+      {% else %}<form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="accuser"><input type="hidden" name="ligne" value="{{ ligne.pk }}">
+        <button type="submit" class="bouton">Courrier reçu</button></form>
+        <p class="aide">Ce bouton prévient l'expéditeur que vous avez bien reçu ce courrier.</p>{% endif %}
+    </div>
+  {% endfor %}
+  {% for u in transmettre %}
+    <form method="post" action="{% url 'courrier:action' c.pk %}" class="encadre">{% csrf_token %}<input type="hidden" name="action" value="transmettre"><input type="hidden" name="unite" value="{{ u.cle }}">
+      <button type="submit" class="bouton bouton--secondaire" onclick="return confirm('Transmettre ce communiqué à tous les membres de la paroisse ?');">Transmettre aux membres de {{ u.libelle }}</button></form>
+  {% endfor %}
+
+  {% if qualite and c.etat == "a_signer" %}
+    <div class="encadre">
+      <h2>Signature</h2>
+      {% if a_signature %}
+        <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="valider"><input type="hidden" name="version" value="{{ c.version }}">
+          <button type="submit" class="bouton" onclick="return confirm('Signer et envoyer ce courrier ? Il ne pourra plus être modifié.');">{% if qualite.0 == "po" %}Signer pour ordre et envoyer{% else %}Signer et envoyer{% endif %}</button></form>
+      {% else %}<p class="message message--error">Déposez d'abord l'image de votre signature : <a href="{% url 'courrier:ma_signature' %}">Ma signature</a>.</p>{% endif %}
+      <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="renvoyer">
+        <label class="champ"><span>Renvoyer pour correction : ce qu'il faut corriger</span><input name="motif" maxlength="300" required></label>
+        <button type="submit" class="bouton bouton--secondaire">Renvoyer pour correction</button></form>
+    </div>
+  {% endif %}
+  {% if expediteur and not c.envoye and c.etat != "annule" %}
+    <p class="boutons-courrier"><a class="bouton bouton--secondaire" href="{% url 'courrier:modifier' c.pk %}">Modifier</a></p>
+    <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="abandonner">
+      <button type="submit" class="bouton bouton--discret" onclick="return confirm('Abandonner ce courrier ? Il ne sera jamais envoyé.');">Abandonner ce courrier</button></form>
+  {% endif %}
+
+  {% if suivi %}
+    <h2>Suivi des destinataires</h2>
+    <div class="tableau-defilant"><table class="tableau tableau--souple">
+      <thead><tr><th>Destinataire</th><th>Reçu</th><th>Ouvert</th><th>« Courrier reçu »</th></tr></thead>
+      <tbody>{% for d in suivi %}<tr><td>{{ d.libelle }}</td>
+        <td>{{ d.recu_le|date:"d/m/Y H:i"|default:"—" }}</td>
+        <td>{{ d.lu_le|date:"d/m/Y H:i"|default:"—" }}{% if d.lu_par %}<small>{{ d.lu_par }}</small>{% endif %}</td>
+        <td>{{ d.accuse_le|date:"d/m/Y H:i"|default:"—" }}{% if d.accuse_par %}<small>{{ d.accuse_par }}</small>{% endif %}</td></tr>{% endfor %}</tbody>
+    </table></div>
+    {% for u, n, lus in transmis %}<p class="aide">Transmis par {{ u.libelle|default:"une paroisse" }} à {{ n }} membre(s), dont {{ lus }} l'ont ouvert.</p>{% endfor %}
+  {% endif %}
+</section>
+{% endblock %}

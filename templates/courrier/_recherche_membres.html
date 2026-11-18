@@ -1,0 +1,36 @@
+<div class="recherche-membre">
+  <label class="champ"><span>Membres destinataires (matricule ou nom)</span>
+    <input type="search" id="recherche" autocomplete="off" data-url="{% url 'courrier:recherche' unite.cle %}" placeholder="Ex. 2015-01AS-0157 ou ADJOVI"></label>
+  <ul id="resultats" hidden></ul>
+</div>
+<ul id="selection" class="selection">{% for m in membres_choisis %}
+  <li id="sel{{ m.pk }}"><input type="hidden" name="membres" value="{{ m.pk }}"><span>{{ m.nom_complet }} — {{ m.matricule }}</span><button type="button" class="retirer" aria-label="Retirer" onclick="this.parentNode.remove()">✕</button></li>{% endfor %}</ul>
+<script>
+  (function () {
+    var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), sel = document.getElementById('selection'), t;
+    function txt(s) { return document.createTextNode(s); }
+    function ajouter(m) {
+      if (document.getElementById('sel' + m.pk)) return;
+      var li = document.createElement('li'); li.id = 'sel' + m.pk;
+      var h = document.createElement('input'); h.type = 'hidden'; h.name = 'membres'; h.value = m.pk; li.appendChild(h);
+      var s = document.createElement('span'); s.appendChild(txt(m.nom + ' — ' + m.matricule)); li.appendChild(s);
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'retirer'; b.textContent = '✕'; b.setAttribute('aria-label', 'Retirer');
+      b.addEventListener('click', function () { li.remove(); }); li.appendChild(b); sel.appendChild(li);
+    }
+    champ.addEventListener('input', function () {
+      clearTimeout(t); var q = champ.value.trim();
+      if (q.length < 2) { liste.hidden = true; return; }
+      t = setTimeout(function () {
+        fetch(champ.dataset.url + '?q=' + encodeURIComponent(q), {credentials: 'same-origin'}).then(function (r) { return r.json(); }).then(function (d) {
+          liste.textContent = '';
+          d.resultats.forEach(function (m) {
+            var li = document.createElement('li'), b = document.createElement('button'); b.type = 'button';
+            b.appendChild(txt(m.nom + ' ')); var s = document.createElement('small'); s.appendChild(txt(m.matricule)); b.appendChild(s);
+            b.addEventListener('click', function () { ajouter(m); liste.hidden = true; champ.value = ''; }); li.appendChild(b); liste.appendChild(li);
+          });
+          liste.hidden = !d.resultats.length;
+        });
+      }, 250);
+    });
+  })();
+</script>
