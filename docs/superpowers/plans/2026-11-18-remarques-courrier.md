@@ -77,3 +77,17 @@ Constat général : la rubrique est « un peu mélangée ». Points relevés apr
   d'envoyer**.
 - **Taille (§ 7)** : validé — 10, 11, 12 ou 13 points, plus « Tenir sur une page ».
 - §§ 3, 4, 6 et 8 : propositions présentées, réalisation avec le reste du lot.
+
+## 9. Format du courrier (18/11/2026, suite)
+- **Retirer le mot « Destinataire »** du courrier. À la place, la formule d'adresse des lettres :
+  « **À Monsieur** le … », « **Au Capitaine** … », etc.
+  - Proposition : ligne « À … » pré-remplie par le site, que le secrétaire peut corriger :
+    - bureau : « À Monsieur le Chef de l'Unité paroissiale de … » ;
+    - membre : « Au » + grade + Prénoms NOM (« Au Capitaine Marc Aurel KOUDAKPO ») ; pour une
+      femme, « À la » + grade (à confirmer).
+- **Numéro d'ordre automatique** : le secrétaire n'a rien à saisir.
+  - Le numéro est déjà en place dès l'ouverture de « Nouveau courrier ».
+  - Il n'est **plus modifiable**, pour qu'on ne puisse jamais entrer deux fois le même numéro.
+  - Proposition : numéro définitif attribué à la signature (aucun trou si un courrier est abandonné).
+- **Texte bien aligné** : paragraphes justifiés, alignés sur la même marge que l'objet et
+  l'en-tête, espacements réguliers ; à vérifier sur un texte long (plusieurs pages).
