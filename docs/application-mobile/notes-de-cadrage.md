@@ -196,6 +196,20 @@
 - **[décidé]** Notation `G12` (Goun) / `Y45` (Yoruba). La lettre `F` est réservée au recueil français
   pour plus tard.
 
+### Échange 14 (18/11/2026) — liste des types de culte
+Document reçu : `documents-recus/01-liste-types-de-culte.jpg` (liste manuscrite).
+Lecture de Claude, **orthographe à confirmer** :
+
+| | Type de culte (lecture) | Précision donnée |
+|---|---|---|
+| a | Culte dominical | |
+| b | Aïsun | (veillée de prière ?) |
+| c | Isoji | |
+| d | Sodidovi (?) | Fête d'Adoption |
+| e | Fêtes ordinaires | |
+| f | Sinsen Osio didi ton (?) | |
+| g | Gbigbo de jeté (?) | Sortie de transe |
+
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
   (photo ou PDF).
