@@ -22,6 +22,12 @@
       var x = document.createElement('button'); x.type = 'button'; x.className = 'retirer'; x.textContent = '✕'; x.setAttribute('aria-label', 'Retirer');
       x.addEventListener('click', function () { li.remove(); }); li.appendChild(x); choisis.appendChild(li);
     }
+    champ.addEventListener('keydown', function (e) {  // Entrée ne doit pas envoyer le formulaire
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      var premier = liste.querySelector('button');
+      if (premier && !liste.hidden) premier.click();
+    });
     champ.addEventListener('input', function () {
       var q = simple(champ.value.trim());
       liste.textContent = '';

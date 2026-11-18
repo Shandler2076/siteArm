@@ -1,6 +1,6 @@
 <div class="boutons-courrier">
   <button type="button" class="bouton bouton--secondaire" id="bouton-apercu" data-url="{{ url_apercu }}">Aperçu</button>
-  <button type="submit" class="bouton bouton--secondaire" formaction="{{ url_apercu_pdf }}" formtarget="_blank" formnovalidate>Aperçu en PDF</button>
+  <button type="button" class="bouton bouton--secondaire" id="bouton-apercu-pdf" data-url="{{ url_apercu_pdf }}">Aperçu en PDF</button>
 </div>
 <dialog id="fenetre-apercu" class="fenetre-apercu" aria-label="Aperçu du courrier">
   <div class="fenetre-apercu__barre"><strong>Aperçu</strong><button type="button" class="bouton bouton--discret" id="fermer-apercu">Fermer</button></div>
@@ -8,27 +8,60 @@
 </dialog>
 <script>
   (function () {
-    var bouton = document.getElementById('bouton-apercu'), fenetre = document.getElementById('fenetre-apercu');
-    var contenu = document.getElementById('contenu-apercu'), form = bouton.closest('form');
+    var bouton = document.getElementById('bouton-apercu'), boutonPdf = document.getElementById('bouton-apercu-pdf');
+    var fenetre = document.getElementById('fenetre-apercu'), contenu = document.getElementById('contenu-apercu');
+    var form = bouton.closest('form');
     document.getElementById('fermer-apercu').addEventListener('click', function () { fenetre.close(); });
+    function ouvrir(message) {
+      contenu.textContent = message;
+      if (fenetre.showModal) { if (!fenetre.open) fenetre.showModal(); } else fenetre.setAttribute('open', '');
+    }
+    function donnees() {
+      var d = new FormData(form);
+      d.delete('fichier'); d.delete('pieces');  // l'aperçu n'envoie pas les fichiers
+      return d;
+    }
+    function envoyer(url) {
+      return fetch(url, { method: 'POST', body: donnees(), credentials: 'same-origin' }).then(function (r) {
+        if (!r.ok || r.redirected) throw new Error('refus');
+        return r;
+      });
+    }
+    function echec() { ouvrir('Aperçu impossible pour le moment. Rechargez la page et réessayez.'); }
     bouton.addEventListener('click', function () {
-      var donnees = new FormData(form);
-      donnees.delete('fichier'); donnees.delete('pieces');  // l'aperçu n'envoie pas les fichiers
-      contenu.textContent = 'Préparation de l’aperçu…';
-      if (fenetre.showModal) fenetre.showModal(); else fenetre.setAttribute('open', '');
-      fetch(bouton.dataset.url, { method: 'POST', body: donnees, credentials: 'same-origin' })
-        .then(function (r) { return r.text(); })
+      ouvrir('Préparation de l’aperçu…');
+      envoyer(bouton.dataset.url).then(function (r) { return r.text(); })
         .then(function (html) { contenu.innerHTML = html; })  // rendu par le site, texte échappé
-        .catch(function () { contenu.textContent = 'Aperçu impossible pour le moment.'; });
+        .catch(echec);
     });
+    boutonPdf.addEventListener('click', function () {
+      var onglet = window.open('', '_blank');  // ouvert tout de suite (sinon bloqué sur téléphone)
+      envoyer(boutonPdf.dataset.url).then(function (r) {
+        var type = r.headers.get('Content-Type') || '';
+        if (type.indexOf('application/pdf') === 0) {
+          return r.blob().then(function (b) {
+            var adresse = URL.createObjectURL(b);
+            if (onglet) onglet.location = adresse; else window.location = adresse;
+          });
+        }
+        if (onglet) onglet.close();
+        return r.text().then(function (html) { ouvrir(''); contenu.innerHTML = html; });
+      }).catch(function () { if (onglet) onglet.close(); echec(); });
+    });
+    // G, I, S : la sélection est nettoyée de ses espaces, et chaque paragraphe est marqué à part.
     form.querySelectorAll('[data-format]').forEach(function (b) {
       b.addEventListener('mousedown', function (e) { e.preventDefault(); });
       b.addEventListener('click', function () {
-        var zone = form.querySelector('textarea[name="texte"]'), marque = b.dataset.format === 'gras' ? '**' : '__';
+        var zone = form.querySelector('textarea[name="texte"]');
+        var marque = { gras: '**', italique: '*', souligne: '__' }[b.dataset.format];
         var d = zone.selectionStart, f = zone.selectionEnd;
+        while (d < f && /\s/.test(zone.value[d])) d++;
+        while (f > d && /\s/.test(zone.value[f - 1])) f--;
         if (d === f) { zone.focus(); return; }
-        var choix = zone.value.slice(d, f);
-        zone.setRangeText(marque + choix + marque, d, f, 'end');
+        var marque_ = zone.value.slice(d, f).split(/(\n\s*\n)/).map(function (morceau, i) {
+          return i % 2 || !morceau.trim() ? morceau : marque + morceau + marque;
+        }).join('');
+        zone.setRangeText(marque_, d, f, 'select');  // reste sélectionné : G puis I
         zone.focus();
         zone.dispatchEvent(new Event('input', { bubbles: true }));
       });

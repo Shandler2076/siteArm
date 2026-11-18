@@ -160,6 +160,8 @@ Décisions :
    écrit l'adresse, donc on croit qu'il ne marche pas.
    - Proposition : le clavier **se place juste sous le champ** où l'on écrit (adresse, objet ou
      texte), et le suit.
+2 bis. **Italique et gras italique** (question du mainteneur, 18/11/2026) : bouton **I** ajouté ;
+   G puis I = gras italique ; vraies polices italiques intégrées. Réalisé avec le lot.
 7. **Ordre du formulaire** (précision du mainteneur sur le point 6) : la ligne d'adresse est trop
    loin du clavier. Nouvel ordre de la partie « Présentation » et « Contenu » :
    - en haut : **police**, **taille**, « Tenir sur une page » ;

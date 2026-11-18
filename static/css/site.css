@@ -353,6 +353,11 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 @font-face { font-family: "CourrierCharis"; src: url("../fonts/courrier/CharisSIL-Regular.ttf"); font-display: swap; }
 @font-face { font-family: "CourrierGentium"; src: url("../fonts/courrier/GentiumPlus-Regular.ttf"); font-display: swap; }
 @font-face { font-family: "CourrierNotoSerif"; src: url("../fonts/courrier/NotoSerif-Regular.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierLiberationSerif"; font-style: italic; src: url("../fonts/courrier/LiberationSerif-Italic.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierLiberationSans"; font-style: italic; src: url("../fonts/courrier/LiberationSans-Italic.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierCharis"; font-style: italic; src: url("../fonts/courrier/CharisSIL-Italic.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierGentium"; font-style: italic; src: url("../fonts/courrier/GentiumPlus-Italic.ttf"); font-display: swap; }
+@font-face { font-family: "CourrierNotoSerif"; font-style: italic; src: url("../fonts/courrier/NotoSerif-Italic.ttf"); font-display: swap; }
 .demande-correction { margin-top: 12px; }
 .demande-correction summary, details.encadre > summary { cursor: pointer; font-weight: 700; color: var(--marine); }
 details.encadre > summary.bouton { display: inline-block; width: auto; }

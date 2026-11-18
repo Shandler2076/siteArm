@@ -41,8 +41,8 @@
       <small class="aide">Laissez une ligne vide entre deux paragraphes. Pour un courrier importé, le texte est facultatif (mot d'accompagnement).</small></label>
     {% include "courrier/_clavier.html" %}
     <label class="champ"><span>Pièces jointes (5 au plus : PDF, JPEG ou PNG)</span><input type="file" name="pieces" multiple accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></label>
-    {% include "courrier/_apercu_boutons.html" %}
     <button type="submit" class="bouton">Préparer le courrier (envoi après signature)</button>
+    {% include "courrier/_apercu_boutons.html" %}
   </form>
 </section>
 <script>

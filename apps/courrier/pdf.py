@@ -48,12 +48,32 @@ from apps.membres.pdf import (
 LOGO_EN_TETE = LOGO_CONGREGATION_SANS_TEXTE  # triangle et deux anges, sans texte (18/11/2026)
 
 # Polices des courriers (décision du 18/11/2026) : (fichier normal, fichier gras).
-FICHIERS_POLICES = {
-    "liberation_serif": ("LiberationSerif-Regular.ttf", "LiberationSerif-Bold.ttf"),
-    "liberation_sans": ("LiberationSans-Regular.ttf", "LiberationSans-Bold.ttf"),
-    "charis": ("CharisSIL-Regular.ttf", "CharisSIL-Bold.ttf"),
-    "gentium": ("GentiumPlus-Regular.ttf", "GentiumPlus-Bold.ttf"),
-    "noto_serif": ("NotoSerif-Regular.ttf", "NotoSerif-Bold.ttf"),
+FICHIERS_POLICES = {  # (normal, gras, italique, gras italique)
+    "liberation_serif": (
+        "LiberationSerif-Regular",
+        "LiberationSerif-Bold",
+        "LiberationSerif-Italic",
+        "LiberationSerif-BoldItalic",
+    ),
+    "liberation_sans": (
+        "LiberationSans-Regular",
+        "LiberationSans-Bold",
+        "LiberationSans-Italic",
+        "LiberationSans-BoldItalic",
+    ),
+    "charis": ("CharisSIL-Regular", "CharisSIL-Bold", "CharisSIL-Italic", "CharisSIL-BoldItalic"),
+    "gentium": (
+        "GentiumPlus-Regular",
+        "GentiumPlus-Bold",
+        "GentiumPlus-Italic",
+        "GentiumPlus-BoldItalic",
+    ),
+    "noto_serif": (
+        "NotoSerif-Regular",
+        "NotoSerif-Bold",
+        "NotoSerif-Italic",
+        "NotoSerif-BoldItalic",
+    ),
 }
 _polices_courrier: set[str] = set()
 
@@ -65,14 +85,16 @@ def police_courrier(cle: str) -> str:
     nom = f"Courrier-{cle}"
     if cle not in _polices_courrier:
         dossier = STATIQUE / "fonts" / "courrier"
-        normal, gras = FICHIERS_POLICES[cle]
-        if not (dossier / normal).exists():
+        fichiers = FICHIERS_POLICES[cle]
+        if not (dossier / f"{fichiers[0]}.ttf").exists():
             return "Sans"
-        pdfmetrics.registerFont(TTFont(nom, str(dossier / normal)))
-        pdfmetrics.registerFont(TTFont(f"{nom}-Gras", str(dossier / gras)))
-        registerFontFamily(
-            nom, normal=nom, bold=f"{nom}-Gras", italic=nom, boldItalic=f"{nom}-Gras"
-        )
+        noms = (nom, f"{nom}-Gras", f"{nom}-Italique", f"{nom}-GrasItalique")
+        for n, f in zip(noms, fichiers, strict=True):
+            chemin = dossier / f"{f}.ttf"
+            pdfmetrics.registerFont(
+                TTFont(n, str(chemin if chemin.exists() else dossier / f"{fichiers[0]}.ttf"))
+            )
+        registerFontFamily(nom, normal=noms[0], bold=noms[1], italic=noms[2], boldItalic=noms[3])
         _polices_courrier.add(cle)
     return nom
 
@@ -222,9 +244,17 @@ def _date_fr(courrier) -> str:
 
 
 def _paragraphes(texte: str, style) -> list:
-    """Paragraphes du texte, avec le **gras** et le __souligné__ demandés par le rédacteur."""
+    """Paragraphes du texte, avec le gras, l'italique et le souligné demandés par le rédacteur."""
     blocs = [b.strip() for b in (texte or "").replace("\r\n", "\n").split("\n\n")]
-    return [Paragraph(services.mise_en_forme(b).replace("\n", "<br/>"), style) for b in blocs if b]
+    paragraphes = []
+    for b in blocs:
+        if not b:
+            continue
+        try:
+            paragraphes.append(Paragraph(services.mise_en_forme(b).replace("\n", "<br/>"), style))
+        except ValueError:  # par sécurité : jamais d'erreur d'impression à cause d'une marque
+            paragraphes.append(Paragraph(escape(b).replace("\n", "<br/>"), style))
+    return paragraphes
 
 
 def _image_courrier(fichier, largeur, hauteur) -> Image:

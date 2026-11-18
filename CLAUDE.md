@@ -99,7 +99,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   `ReglagesClavier` : ẹ ọ ṣ + tons ; mots `MotClavier` : liste BN, lexique goun 6 481 mots
   `courrier/data/lexique_gun.json`, mots appris ; `proposer_mots` via `/courrier/mots/?debut=`).
   Numéro automatique à la signature ; langue fr/goun ; ligne d'adresse (« À Monsieur le … » / « Hlan … ») ;
-  5 polices `static/fonts/courrier/` + taille + « une page » ; états : à signer → en correction
+  5 polices `static/fonts/courrier/` (normal, gras, italique, gras italique) + taille + « une page » ;
+  mise en forme `services.mise_en_forme` (***gras italique***, **gras**, *italique*, __souligné__) ;
+  aperçu sans enregistrement (`services.apercu`, `/courrier/<cle>/apercu/`) ; nature « autre » + titre ; états : à signer → en correction
   (`mettre_en_correction`, `soumettre_a_la_signature`) → envoyé ; abandonné (`reprendre`, `supprimer`,
   effacé après 30 jours : `purger_courriers_abandonnes`, tâche quotidienne).
 - Logos : `LOGO_CONGREGATION_SANS_TEXTE` (triangle + anges, sans texte) là où le nom de la

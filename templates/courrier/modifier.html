@@ -21,12 +21,12 @@
     {% include "courrier/_outils_texte.html" %}
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ c.texte }}</textarea></label>
     {% include "courrier/_clavier.html" %}
-    {% include "courrier/_apercu_boutons.html" %}
     <p class="aide">Les destinataires et les pièces jointes ne changent pas. Pour les changer, abandonnez ce courrier et préparez-en un nouveau.</p>
     <div class="boutons-courrier">
       <button type="submit" name="soumettre" value="1" class="bouton">Enregistrer et soumettre à la signature</button>
       <button type="submit" class="bouton bouton--secondaire">Enregistrer (reste en correction)</button>
     </div>
+    {% include "courrier/_apercu_boutons.html" %}
   </form>
 </section>
 {% endblock %}

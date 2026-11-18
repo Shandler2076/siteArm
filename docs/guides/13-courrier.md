@@ -52,8 +52,9 @@ Menu « Courrier » → **Nouveau courrier**.
      **taille** (10 à 13 points) : le texte s'affiche aussitôt dans la police choisie ;
    - **Tenir sur une page** : le site resserre le texte (jusqu'à 9 points).
 6. **Contenu** : rédigez le texte (une ligne vide entre deux paragraphes), **ou** importez un
-   courrier déjà écrit (photo, scan ou PDF, 10 Mo au plus). Pour mettre des mots **en gras** ou
-   **soulignés** : sélectionnez-les, puis touchez **G** ou **S**.
+   courrier déjà écrit (photo, scan ou PDF, 10 Mo au plus). Pour mettre des mots **en gras**, *en
+   italique* ou soulignés : sélectionnez-les, puis touchez **G**, **I** ou **S** (G puis I pour le
+   gras italique).
    Avant de préparer : **Aperçu** montre le courrier mis en page (ou **Aperçu en PDF**).
 7. **Pièces jointes** : 5 au plus (PDF, JPEG, PNG).
 8. **Préparer le courrier** : il attend la signature ; le signataire est prévenu. Ouvrez **Voir le

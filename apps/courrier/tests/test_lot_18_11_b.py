@@ -79,6 +79,35 @@ def test_gras_et_souligne():
     assert s.mise_en_forme("a ** b") == "a ** b"  # marque isolée : laissée telle quelle
 
 
+def test_italique_et_gras_italique():
+    assert s.mise_en_forme("Un *mot* en italique") == "Un <i>mot</i> en italique"
+    assert s.mise_en_forme("***Très important***") == "<b><i>Très important</i></b>"
+    assert s.mise_en_forme("**gras** et *italique*") == "<b>gras</b> et <i>italique</i>"
+    assert s.mise_en_forme("2 * 3 = 6") == "2 * 3 = 6"  # étoile isolée : laissée telle quelle
+
+
+@pytest.mark.parametrize(
+    "police", ["liberation_serif", "liberation_sans", "charis", "gentium", "noto_serif"]
+)
+def test_italique_dans_le_pdf_avec_la_vraie_police_italique(bn, police):
+    from apps.courrier.pdf import courrier_pdf
+
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="o",
+        police=police,
+        texte="*penché* et ***gras penché***",
+        bureaux=[f"paroisse-{bn['P1'].pk}"],
+        par=bn["sn"].compte,
+    )
+    page = PdfReader(io.BytesIO(courrier_pdf(c))).pages[0]
+    noms = " ".join(
+        str(page["/Resources"]["/Font"][k]["/BaseFont"]) for k in page["/Resources"]["/Font"]
+    )
+    assert "Italic" in noms and "BoldItalic" in noms
+
+
 def test_gras_dans_le_pdf(bn):
     from apps.courrier.pdf import courrier_pdf
 
@@ -144,9 +173,79 @@ def test_formulaire_recherche_de_bureau_et_ordre(bn):
     assert police < langue < adresse < texte < clavier
     assert 'value="autre"' in html and "Aperçu" in html
     assert 'data-format="gras"' in html and 'data-format="souligne"' in html
+    assert 'data-format="italique"' in html
 
 
 def test_bureaux_choisis_par_la_recherche(bn):
     sn = _client(bn["sn"])
     sn.post("/courrier/national/nouveau/", _donnees(bn, bureaux=[f"paroisse-{bn['P2'].pk}"]))
     assert Courrier.objects.get().destinataires.get().unite_cle == f"paroisse-{bn['P2'].pk}"
+
+
+# --- Corrections de la relecture ----------------------------------------------------------------
+def test_apercu_refuse_pour_un_courrier_envoye(bn):
+    """Pas de faux : l'aperçu d'un courrier signé (signature et QR) ne peut pas changer le texte."""
+    from apps.courrier.tests.conftest import image_signature
+
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="Vrai",
+        texte="Vrai texte",
+        bureaux=[f"paroisse-{bn['P1'].pk}"],
+        par=bn["sn"].compte,
+    )
+    s.deposer_signature(bn["president"].compte, image_signature())
+    s.valider(c, par=bn["president"].compte)
+    sn = _client(bn["sn"])
+    for url in (f"/courrier/c/{c.pk}/apercu/", f"/courrier/c/{c.pk}/apercu.pdf"):
+        r = sn.post(url, {"objet": "Faux", "texte": "Faux texte"})
+        assert r.status_code == 404 or "application/pdf" not in r.get("Content-Type", "")
+
+
+@pytest.mark.parametrize(
+    "texte",
+    ["**a __b** c__", "__a **b__ c**", "**__x**__", "***a* b**", "*a **b* c**", "** __ *", "__**"],
+)
+def test_marques_mal_imbriquees_ne_cassent_jamais_le_pdf(bn, texte):
+    from apps.courrier.pdf import courrier_pdf
+
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="o",
+        texte=texte,
+        bureaux=[f"paroisse-{bn['P1'].pk}"],
+        par=bn["sn"].compte,
+    )
+    assert courrier_pdf(c).startswith(b"%PDF")
+
+
+@pytest.mark.parametrize(
+    "texte", ["**__x**__", "**a __b** c__", "***a* b**", "*a **b* c**", "__**", "** x **"]
+)
+def test_marques_mal_imbriquees_restent_lisibles(texte):
+    from xml.dom.minidom import parseString
+
+    resultat = s.mise_en_forme(texte)
+    parseString(f"<r>{resultat}</r>")  # balises toujours bien imbriquées
+    assert "x" in resultat or "a" in resultat or "*" in resultat or "_" in resultat
+    assert s.mise_en_forme("**__x**__") == "**<u>x**</u>"  # marques orphelines laissées en texte
+
+
+def test_apercu_modification_comme_l_enregistrement(bn):
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="o",
+        texte="t",
+        bureaux=[f"paroisse-{bn['P1'].pk}"],
+        par=bn["sn"].compte,
+    )
+    s.mettre_en_correction(c, par=bn["sn"].compte)
+    c.refresh_from_db()
+    with pytest.raises(s.CourrierRefuse, match="texte"):
+        s.apercu_modification(c, par=bn["sn"].compte, objet="o", texte="")
+    a = s.apercu_modification(c, par=bn["sn"].compte, objet="o", texte="t", adresse="")
+    assert a.adresse.startswith("À\nMonsieur le Chef")  # vidée : proposée de nouveau
+    assert Courrier.objects.get(pk=c.pk).texte == "t"  # rien d'enregistré

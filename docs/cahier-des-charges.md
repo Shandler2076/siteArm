@@ -1060,7 +1060,9 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   par le rédacteur (une personne, un bureau, une région, toute la communauté…).
 - **Nature** : courrier, communiqué, ou **autre** (décision, lettre de recommandation…) avec un
   titre imprimé en tête (ex. « DÉCISION »), même format.
-- **Gras et souligné** : boutons G et S au-dessus du texte (marques ** et __ dans le texte).
+- **Gras, italique, souligné** : boutons G, I et S au-dessus du texte (marques **, * et __ dans le
+  texte ; G puis I pour le gras italique) ; chaque police a ses vraies versions italique et gras
+  italique.
 - **Aperçu** avant de préparer ou de soumettre : le courrier mis en page dans une fenêtre (lisible
   sur téléphone), ou en PDF ; rien n'est enregistré.
 - **Formulaire** : bureaux choisis par une recherche (la liste se replie après le choix) ; police et
