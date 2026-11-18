@@ -160,3 +160,10 @@ Décisions :
    écrit l'adresse, donc on croit qu'il ne marche pas.
    - Proposition : le clavier **se place juste sous le champ** où l'on écrit (adresse, objet ou
      texte), et le suit.
+7. **Ordre du formulaire** (précision du mainteneur sur le point 6) : la ligne d'adresse est trop
+   loin du clavier. Nouvel ordre de la partie « Présentation » et « Contenu » :
+   - en haut : **police**, **taille**, « Tenir sur une page » ;
+   - puis, juste au-dessus du texte : **langue de rédaction** et **ligne d'adresse** ;
+   - puis le **texte**, et le **clavier goun** tout de suite dessous.
+   Ainsi, en écrivant l'adresse, on voit les propositions du clavier sans descendre. (Le clavier
+   qui suit le champ actif, point 6, reste prévu en complément.)
