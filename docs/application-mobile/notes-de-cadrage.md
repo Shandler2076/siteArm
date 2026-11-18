@@ -242,8 +242,16 @@ Corrigé par le mainteneur (orthographe Goun : le point sous la lettre change le
   - **`CANT. GUN`** = Cantique Goun ;
   - **`CANT. YOR`** = Cantique Yoruba.
   (On n'imite pas les codes incohérents des programmes actuels : CGN, CN…)
-- **[proposition]** Pour taper vite, des raccourcis de saisie : `G596A` → affiché
+- **[décidé]** Pour taper vite, des raccourcis de saisie : `G596A` → affiché
   « CANT. GUN N° 596(A) », `Y45` → « CANT. YOR N° 45 ».
+
+### Échange 18 (18/11/2026) — culte dominical
+- Le **culte dominical** reprend le format des fêtes, **sauf** (numéros tels qu'imprimés sur l'exemplaire) :
+  - **retirés :** n° 16 *Ouverture de Rideau*, n° 17 *Antienne*, n° 18 *Allaga lè yiylo*
+    (le mainteneur a aussi dit « 15, 16, 17 » à la fin de son message → **à confirmer**) ;
+  - **facultatif :** n° 19 *Oflin mehe sio oylo le ton* : proposé d'office, on peut le retirer selon
+    le jour.
+- Les lectures viennent du **calendrier annuel**.
 
 ## 2. Questions ouvertes
 - Liste des types de culte, avec un **modèle réel** de programme et de pamphlet pour chacun
