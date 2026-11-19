@@ -43,15 +43,25 @@ def _pk(valeur) -> int:
 @login_required
 @bn
 def liste(request):
+    # Décision du 19/11/2026 : « passés » = réellement tenus (date passée, convocations
+    # envoyées) ; « annulés » = annulés après l'envoi des convocations ; le reste (jamais
+    # convoqué) est « non abouti », à part.
+    from django.db.models import Exists, OuterRef
+
+    from apps.evenements.models import Convocation
+
     maintenant = timezone.now()
-    tous = Evenement.objects.all()
+    tous = Evenement.objects.annotate(
+        convoque=Exists(Convocation.objects.filter(evenement=OuterRef("pk")))
+    )
     return render(
         request,
         "evenements/liste.html",
         {
             "a_venir": tous.filter(debut__gte=maintenant, etat="prevu").order_by("debut"),
-            "passes": tous.filter(debut__lt=maintenant, etat="prevu"),
-            "annules": tous.filter(etat="annule"),
+            "passes": tous.filter(debut__lt=maintenant, etat="prevu", convoque=True),
+            "annules": tous.filter(etat="annule", convoque=True),
+            "non_aboutis": tous.filter(convoque=False).exclude(debut__gte=maintenant, etat="prevu"),
         },
     )
 

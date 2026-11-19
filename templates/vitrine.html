@@ -13,7 +13,12 @@
   <h1>Armée du Salut du Bénin</h1>
   <p class="vitrine-nom">Ọmọ Ogun Igbala</p>
   <p class="vitrine-devise">FOI – AMOUR – JUSTICE</p>
+  {% if user.is_authenticated %}
+  <p class="vitrine-connecte">✓ Vous êtes connecté{% if user.nom_affiche %} : {{ user.nom_affiche }}{% endif %}.</p>
+  <a class="bouton vitrine-cta" href="{% url 'accueil' %}">Aller à mon espace</a>
+  {% else %}
   <a class="bouton vitrine-cta" href="{% url 'connexion' %}">Se connecter à l'espace des membres</a>
+  {% endif %}
 </section>
 
 <section class="carte vitrine-bloc">

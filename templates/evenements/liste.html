@@ -9,6 +9,8 @@
   <ul class="fonctions">{% for ev in a_venir %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y H:i" }}{% if ev.lieu %}, {{ ev.lieu }}{% endif %}{% if ev.avec_autorisation %} · <small class="aide">avec autorisation</small>{% endif %}</li>{% empty %}<li class="aide">Aucun.</li>{% endfor %}</ul>
   <h2>Passés</h2>
   <ul class="fonctions">{% for ev in passes %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y" }}</li>{% empty %}<li class="aide">Aucun.</li>{% endfor %}</ul>
+  {% if non_aboutis %}<details class="encadre"><summary>Non aboutis ({{ non_aboutis|length }}) — jamais convoqués</summary>
+  <ul class="fonctions">{% for ev in non_aboutis %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y" }}{% if ev.annule %} <small class="aide">(annulé)</small>{% endif %}</li>{% endfor %}</ul></details>{% endif %}
   {% if annules %}<h2>Annulés</h2>
   <ul class="fonctions">{% for ev in annules %}<li><a href="{% url 'evenements:detail' ev.pk %}">{{ ev.nom }}</a> — {{ ev.debut|date:"d/m/Y" }} <small class="aide">({{ ev.motif_annulation }})</small></li>{% endfor %}</ul>{% endif %}
 </section>

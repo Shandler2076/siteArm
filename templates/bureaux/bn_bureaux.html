@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block titre %}Bureaux en place — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Bureaux en place</h1>
+  <p class="aide">Un tableau par région : chaque circuit et ses paroisses, avec leur bureau installé ou non. Touchez « Installé » pour voir la composition du bureau.
+    Bureau National de Commandement : {% if national_installe %}<a class="etiquette etiquette--oui" href="{% url 'bureaux:bn_bureau' 'national' %}">Installé</a>{% else %}<span class="etiquette etiquette--non">Non installé</span>{% endif %}</p>
+  <input type="search" class="recherche-liste" id="recherche-bureaux" placeholder="Rechercher une région, un circuit ou une paroisse…" aria-label="Rechercher">
+  <div id="tableaux-bureaux">
+  {% for r in regions %}
+    <div class="tableau-defilant tableau-bureaux">
+      <table class="tableau tableau--souple">
+        <caption>Région {{ r.objet.nom }}
+          ({% if r.installe %}<a class="etiquette etiquette--oui" href="{% url 'bureaux:bn_bureau' r.cle %}">Installé</a>{% else %}<span class="etiquette etiquette--non">Non installé</span>{% endif %})
+          <small>— paroisses installées : {{ r.nb_installees }} / {{ r.nb_paroisses }}</small></caption>
+        <thead><tr><th>Circuit</th><th>Paroisses</th></tr></thead>
+        <tbody>{% for c in r.circuits %}
+          <tr><td><strong>{{ c.objet.nom }}</strong><br>
+              ({% if c.installe %}<a class="etiquette etiquette--oui" href="{% url 'bureaux:bn_bureau' c.cle %}">Installé</a>{% else %}<span class="etiquette etiquette--non">Non installé</span>{% endif %})</td>
+            <td><ul class="paroisses-bureaux">{% for p in c.paroisses %}<li>{{ p.objet.nom }} — {% if p.installe %}<a class="etiquette etiquette--oui" href="{% url 'bureaux:bn_bureau' p.cle %}">Installé</a>{% else %}<span class="etiquette etiquette--non">Non installé</span>{% endif %}</li>{% empty %}<li class="aide">Aucune paroisse.</li>{% endfor %}</ul></td></tr>
+        {% empty %}<tr><td colspan="2" class="aide">Aucun circuit.</td></tr>{% endfor %}</tbody>
+      </table>
+    </div>
+  {% endfor %}
+  </div>
+</section>
+<script>
+  (function () {
+    // Recherche : n'affiche que les régions, circuits et paroisses qui contiennent le texte.
+    var champ = document.getElementById('recherche-bureaux');
+    function simple(t) { return t.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase(); }
+    champ.addEventListener('input', function () {
+      var q = simple(champ.value.trim());
+      document.querySelectorAll('.tableau-bureaux').forEach(function (bloc) {
+        var region = simple(bloc.querySelector('caption').textContent).indexOf(q) !== -1;
+        var visibles = 0;
+        bloc.querySelectorAll('tbody tr').forEach(function (ligne) {
+          var ok = !q || region || simple(ligne.textContent).indexOf(q) !== -1;
+          ligne.hidden = !ok;
+          if (ok) visibles++;
+        });
+        bloc.hidden = !!q && !region && visibles === 0;
+      });
+    });
+  })();
+</script>
+{% endblock %}

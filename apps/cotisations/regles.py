@@ -59,10 +59,17 @@ def _statut_au(changements: list, statut_actuel: str, jour: datetime.date) -> st
     return statut
 
 
+def debut_cotisations(membre) -> datetime.date:
+    """Premier mois que le membre doit (décision du 19/11/2026) : janvier de son année
+    d'intégration, et non la date de son inscription sur le site (les membres existaient avant
+    le site). Le mois de départ fixé par le BN reste la limite (voir `_dus`)."""
+    return datetime.date(membre.annee_integration, 1, 1)
+
+
 def _dus(membre, changements, mois_depart, jusqu_a) -> list[datetime.date]:
     if mois_depart is None:
         return []
-    debut = max(mois_depart, premier_du_mois(membre.date_enregistrement.date()))
+    debut = max(mois_depart, debut_cotisations(membre))
     return [
         m
         for m in _mois_entre(debut, premier_du_mois(jusqu_a))
@@ -120,7 +127,7 @@ def _situation(dus, cotises, liste_tarifs, mois_courant) -> Situation:
 def situations(qs, mois_courant: datetime.date) -> dict[int, Situation]:
     """Situation de chaque membre de `qs` au mois `mois_courant`, en quelques requêtes."""
     mois_courant = premier_du_mois(mois_courant)
-    membres = list(qs.only("pk", "statut", "date_enregistrement"))
+    membres = list(qs.only("pk", "statut", "date_enregistrement", "annee_integration"))
     mois_depart = ParametresCotisations.courant().mois_depart
     liste_tarifs = tarifs()
     changements = _changements(membres)
@@ -149,14 +156,13 @@ def situation(membre, mois_courant: datetime.date) -> Situation:
 def annees_consultables(membre, s: Situation, annee_courante: int) -> list[int]:
     """Années que l'on peut afficher : du début des cotisations du membre à l'année en cours.
 
-    Début = le plus tardif entre le départ des cotisations sur le site et l'enregistrement du
-    membre. Une année où un mois a été payé d'avance s'ajoute aussi.
+    Début = le plus tardif entre le départ des cotisations sur le site et janvier de l'année
+    d'intégration du membre. Une année où un mois a été payé d'avance s'ajoute aussi.
     """
     debut = annee_courante
     mois_depart = ParametresCotisations.courant().mois_depart
     if mois_depart is not None:
-        inscrit = premier_du_mois(membre.date_enregistrement.date())
-        debut = min(debut, max(mois_depart, inscrit).year)
+        debut = min(debut, max(mois_depart, debut_cotisations(membre)).year)
     annees = set(range(debut, annee_courante + 1))
     annees |= {m.year for m in s.payes | s.en_attente}
     return sorted(annees)

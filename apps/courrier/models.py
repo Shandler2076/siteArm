@@ -57,7 +57,7 @@ class Police(models.TextChoices):
 
     LIBERATION_SERIF = "liberation_serif", "Liberation Serif (type Times New Roman)"
     LIBERATION_SANS = "liberation_sans", "Liberation Sans (type Arial)"
-    CHARIS = "charis", "Charis SIL (langues africaines, Bibles)"
+    CHARIS = "charis", "Charis SIL (lettres goun et tons)"
     GENTIUM = "gentium", "Gentium Plus"
     NOTO_SERIF = "noto_serif", "Noto Serif"
 
@@ -226,7 +226,7 @@ class PieceJointe(models.Model):
 
 
 # --- Clavier goun --------------------------------------------------------------------------------
-# Liste du mainteneur (18/11/2026, d'après le gun de la Bible de 1923) : lettres à point souscrit,
+# Liste du mainteneur (18/11/2026) : lettres à point souscrit,
 # puis les tons, qui se posent sur la lettre déjà tapée (« ◌ » marque une touche de ton).
 LETTRES_PAR_DEFAUT = "ẹ ọ ṣ \u25cc\u0301 \u25cc\u0300 \u25cc\u0303 \u25cc\u0302"
 
@@ -255,7 +255,7 @@ class ReglagesClavier(models.Model):
 class OrigineMot(models.TextChoices):
     BN = "bn", "Liste du Bureau national"
     APPRIS = "appris", "Appris des courriers"
-    LEXIQUE = "lexique", "Lexique goun (Bible de 1923)"
+    LEXIQUE = "lexique", "Lexique goun"
 
 
 def cle_de_recherche(mot: str) -> str:

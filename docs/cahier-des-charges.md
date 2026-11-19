@@ -261,8 +261,12 @@ mandat et une mention « **droit de gérer le site** » :
 
 - Un **mandat** relie un membre, une fonction, une unité précise et des dates de début et de fin.
 - La **date de fin prévue** est calculée d'après la durée de la fonction.
-- Le site **prévient** le BNC et le bureau concerné **60 jours avant l'échéance**, puis quand un
-  mandat est échu sans renouvellement. Il ne coupe jamais un mandat de lui-même : c'est l'installation
+- Le site **prévient par bureau**, jamais personne par personne (décision du 19/11/2026) : le BNC et
+  les membres du bureau reçoivent « Le mandat du bureau de … arrive à échéance le … » **à 30, 14 et
+  7 jours**, puis quand le mandat est échu sans renouvellement. La page « Mandats à échéance » liste
+  les bureaux ; la page **« Bureaux en place »** présente, région par région, chaque circuit et ses
+  paroisses, installés ou non, et la composition de chaque bureau (matricule, nom, poste). La date
+  de début se saisit à l'installation (date réelle, même antérieure à l'ouverture du site). Il ne coupe jamais un mandat de lui-même : c'est l'installation
   du nouveau bureau par le BNC qui clôt les anciens mandats.
 - Une même personne peut avoir **plusieurs mandats** à la fois, à tous les niveaux. Ses droits sont
   la somme des droits de ses mandats en cours.
@@ -716,8 +720,10 @@ compter du mois de mise en service du site**. Il n'enregistre pas l'argent lui-m
 
 ### 16.3 Ce qui est dû
 
-- Un membre doit la cotisation de chaque mois **à partir du mois de départ**, ou de son mois
-  d'enregistrement s'il est arrivé plus tard, **jusqu'au mois en cours**.
+- Un membre doit la cotisation de chaque mois **à partir du mois de départ**, ou de **janvier de son
+  année d'intégration** s'il est arrivé plus tard (et non de la date de son inscription sur le site,
+  décision du 19/11/2026), **jusqu'au mois en cours**. Un paiement règle toujours les mois dus les
+  plus anciens d'abord : en novembre, 9 mois payés sans rien avant = janvier à septembre.
 - La cotisation concerne **tous les membres** : membres actifs, d'honneur et sympathisants, membres
   sanctionnés pendant leur sanction, et mineurs. Toute exception future sera décidée par le BNC et
   ajoutée au site.
@@ -1041,7 +1047,7 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   par exemple en langue locale). Le site ajoute l'en-tête, le numéro, la date et la signature.
 - **Clavier goun** sous le texte : lettres ẹ ọ ṣ et tons ´ ` ~ ^ posés sur la lettre tapée (liste
   du mainteneur du 18/11/2026, réglable par le BN) et **mots proposés** pendant la frappe, sans tenir compte des points ni des tons : **lexique goun** de
-  6 481 mots (gun de la Bible de 1923, fourni par le mainteneur le 18/11/2026), liste du BN, et mots
+  environ 6 481 mots (fourni par le mainteneur le 18/11/2026), proposés du plus fréquent au moins fréquent, liste du BN, et mots
   goun déjà écrits dans au moins deux courriers envoyés (jamais les noms propres) ; le BN peut retirer
   un mot.
 - **Format** du modèle national : bandeau marine et filet or, logos, cinq lignes (la dernière au nom

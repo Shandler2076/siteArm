@@ -249,3 +249,26 @@ def test_apercu_modification_comme_l_enregistrement(bn):
     a = s.apercu_modification(c, par=bn["sn"].compte, objet="o", texte="t", adresse="")
     assert a.adresse.startswith("À\nMonsieur le Chef")  # vidée : proposée de nouveau
     assert Courrier.objects.get(pk=c.pk).texte == "t"  # rien d'enregistré
+
+
+# --- Remarques du 19/11/2026 --------------------------------------------------------------------
+def test_objet_apres_la_langue_pour_le_clavier_goun(bn):
+    html = _html(_client(bn["sn"]).get("/courrier/national/nouveau/"))
+    langue, objet = html.index('name="langue"'), html.index('<input name="objet"')
+    assert langue < objet < html.index('<textarea name="texte"')
+
+
+def test_demande_de_correction_seulement_pour_le_titulaire(bn):
+    from apps.courrier.tests.conftest import image_signature
+
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="o",
+        texte="t",
+        bureaux=[f"paroisse-{bn['P1'].pk}"],
+        par=bn["sn"].compte,
+    )
+    s.deposer_signature(bn["sn"].compte, image_signature())
+    assert "Demander une correction" not in _html(_client(bn["sn"]).get(f"/courrier/c/{c.pk}/"))
+    assert "Demander une correction" in _html(_client(bn["president"]).get(f"/courrier/c/{c.pk}/"))
