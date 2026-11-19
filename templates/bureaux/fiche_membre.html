@@ -53,7 +53,9 @@
     {% endfor %}
   </ul>
   {% if blocage_rehabilitation %}<p class="aide">{{ blocage_rehabilitation }}</p>{% endif %}
-  {% if unite.niveau == "paroisse" %}
+  {% if unite.niveau == "paroisse" and reinitialisation_par_bn %}
+  <p class="aide">Ce membre a une fonction en cours : en cas de mot de passe oublié, seul le Bureau national peut lui donner un nouveau mot de passe.</p>
+  {% elif unite.niveau == "paroisse" %}
   <div class="actions">
     <form method="post" action="{% url 'bureaux:reinitialiser' unite.cle membre.matricule %}">
       {% csrf_token %}

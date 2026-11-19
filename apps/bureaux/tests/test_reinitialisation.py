@@ -58,3 +58,46 @@ def test_get_interdit(client, monde):
 def test_bn_reinitialise_un_secretaire_de_paroisse(client_technique, monde):
     r = client_technique.post(f"/membres/bn/{monde['sec_p1'].matricule}/fiche-identifiants.pdf")
     assert r.status_code == 200
+
+
+def test_paroisse_ne_reinitialise_pas_son_tresorier(client, monde):
+    """Faille H1 : un membre qui a une fonction (même sans droit de gestion, comme un
+    trésorier) ne peut être réinitialisé que par le Bureau national."""
+    cible = monde["tresorier"]
+    ancien_hash = cible.compte.password
+    r = _post(client, monde["sec_p1"], f"paroisse-{monde['P1'].pk}", cible)
+    cible.compte.refresh_from_db()
+    assert r.status_code == 403 and cible.compte.password == ancien_hash
+
+
+def test_paroisse_reinitialise_un_ancien_titulaire(client, monde, donner_mandat):
+    """Un mandat terminé ne protège plus : le membre redevient simple."""
+    cible = monde["m1"]
+    donner_mandat(
+        cible,
+        "Trésorier paroissial",
+        monde["P1"],
+        debut=datetime.date(2020, 1, 1),
+        fin=datetime.date(2024, 1, 1),
+    )
+    r = _post(client, monde["sec_p1"], f"paroisse-{monde['P1'].pk}", cible)
+    assert r.status_code == 200
+
+
+def test_bouton_cache_pour_un_titulaire(client, monde):
+    client.force_login(monde["sec_p1"].compte)
+    url = f"/bureau/paroisse-{monde['P1'].pk}/membres/{monde['tresorier'].matricule}/"
+    page = client.get(url).content.decode()
+    assert "/reinitialiser/" not in page and "seul le Bureau national" in page
+
+
+def test_refus_sur_un_futur_titulaire(client, monde, donner_mandat):
+    """Relecture : un mandat qui commence plus tard protège déjà le compte."""
+    import datetime as _d
+
+    cible = monde["m1"]
+    donner_mandat(
+        cible, "Trésorier paroissial", monde["P1"], debut=_d.date.today() + _d.timedelta(days=10)
+    )
+    r = _post(client, monde["sec_p1"], f"paroisse-{monde['P1'].pk}", cible)
+    assert r.status_code == 403

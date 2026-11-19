@@ -49,6 +49,7 @@ def fiche_membre(request, cle, matricule):
         raise Http404
     parcours = membre.affectations.select_related("paroisse", "circuit_a_date", "region_a_date")
     mandats = membre.mandats.select_related("fonction", "paroisse", "circuit", "region")
+    from apps.bureaux.services import _mandat_en_cours_ou_a_venir
     from apps.journal.models import CONSULTATION_FICHE
     from apps.journal.services import journaliser
     from apps.membres.rubriques import contexte_rubriques
@@ -64,6 +65,7 @@ def fiche_membre(request, cle, matricule):
             "membre": membre,
             "parcours": parcours,
             "mandats": mandats,
+            "reinitialisation_par_bn": _mandat_en_cours_ou_a_venir(membre),
             **contexte_fiche(unite, membre),
             **contexte_rubriques(request, membre, avec_evenements=unite.niveau == "national"),
         },

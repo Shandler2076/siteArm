@@ -11,6 +11,13 @@ class Connexion(auth_views.LoginView):
     authentication_form = FormulaireConnexion
     redirect_authenticated_user = True
 
+    def post(self, request, *args, **kwargs):
+        from apps.comptes.securite import adresse_bloquee
+
+        if adresse_bloquee(request):
+            return render(request, "comptes/compte_bloque.html", status=429)
+        return super().post(request, *args, **kwargs)
+
 
 def _vitrine(request):
     from apps.organisation.models import Circuit, Paroisse, Region

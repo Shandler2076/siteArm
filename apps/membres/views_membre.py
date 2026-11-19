@@ -40,10 +40,12 @@ def mes_coordonnees(request):
     membre = membre_de(request)
     form = FormulaireCoordonnees(request.POST or None, instance=membre)
     if request.method == "POST" and form.is_valid():
-        changements = {
-            champ: [str(form.initial.get(champ) or ""), str(form.cleaned_data.get(champ) or "")]
+        # Noms des champs seulement : le journal est immuable, il ne garde pas les valeurs.
+        changements = [
+            champ
             for champ in form.changed_data
-        }
+            if str(form.initial.get(champ) or "") != str(form.cleaned_data.get(champ) or "")
+        ]
         form.save()
         if changements:
             from apps.journal.models import COORDONNEES

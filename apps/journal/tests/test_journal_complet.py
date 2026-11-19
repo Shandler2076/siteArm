@@ -83,9 +83,10 @@ def test_coordonnees_ancienne_nouvelle_valeur(client, monde):
     assert client.post("/membres/ma-fiche/coordonnees/", donnees).status_code == 302
     e = EntreeJournal.objects.get(action="coordonnees")
     assert e.details["membre"] == m1.matricule
-    assert e.details["changements"]["telephone"] == ["0197000000", "0161000000"]
-    assert e.details["changements"]["quartier"] == ["", "Akpakpa"]
-    assert "ville" not in e.details["changements"]
+    # Seulement le nom des champs : le journal immuable ne garde pas les coordonnées elles-mêmes
+    # (minimisation des données, APDP).
+    assert sorted(e.details["changements"]) == ["quartier", "telephone"]
+    assert "0161000000" not in str(e.details) and "Akpakpa" not in str(e.details)
 
 
 def test_reinitialisation_journalisee(client_technique, monde):

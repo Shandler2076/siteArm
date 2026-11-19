@@ -112,9 +112,18 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (`views_bn.bureaux_en_place`, composition `bn_bureau`). Cotisations : mois dus depuis janvier de
   l'année d'intégration (`cotisations/regles.py::debut_cotisations`), pas depuis l'inscription.
   Événements : « passés » = tenus (convocations envoyées) ; « non aboutis » à part. Menu : lien
-  « Accueil du site » (`/site/`) ; bouton « Voir » sur tout mot de passe (`static/js/site.js`).
+  « Accueil » (`/site/`) et « Ma page » dans Mon espace ; bouton « Voir » sur tout mot de passe (`static/js/site.js`).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
+
+- Sécurité (lot du 19/11/2026, `docs/securite/analyse-2026-11-19.md`) : réinitialisation d'un
+  titulaire de mandat par le BN seul ; double vérification aussi pour le Trésorier national ;
+  paiement simulé interdit sans `SITE_DEMO` (refus au démarrage) ; blocage des connexions par
+  identifiant ET par IP (`comptes/securite.py`, `DERRIERE_RELAIS`) ; recherches par matricule
+  journalisées et limitées (`journal/recherches.py`) ; envois > `TAILLE_MAX_ENVOI` refusés tôt
+  (`securite/envois.py`, + Permissions-Policy) ; Pillow : JPEG/PNG seulement ; versions figées ;
+  `/gestion/` en lecture seule hors site d'essai (`securite/admin_lecture.py`,
+  `DJANGO_ADMIN_LECTURE_SEULE`) ; journal des coordonnées = noms des champs seulement.
 
 ## Hébergement
 - Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre

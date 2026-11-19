@@ -18,7 +18,7 @@ Le menu est rangé par **thèmes**. Chacun ne voit que les groupes de ses droits
 | **Cotisations mensuelles** | Tableau de bord, parts reçues, réglages (BN) |
 | **Trésorerie** | Trésorerie du bureau ; pour le BN : cotisations spéciales, numéros des trésoriers, reversements mensuels |
 | **Événements** | Événements nationaux (BN) |
-| **⌂ Accueil du site** (tout en haut du menu) | La page d'accueil publique du site ; une fois connecté, elle indique « Vous êtes connecté » |
+| **⌂ Accueil** (tout en haut du menu) | La page d'accueil publique du site ; une fois connecté, elle indique « Vous êtes connecté » |
 | **Bureaux et droits** | Installer un bureau (recherche de l'unité), bureaux en place (tableau par région), fonctions et droits, mandats à échéance par bureau (BN) |
 | **Contrôle** | Journal (BN) |
 

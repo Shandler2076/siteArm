@@ -3,7 +3,18 @@ from django.urls import reverse
 
 from apps.securite.services import doit_verifier, double_verification_active, est_verifie
 
-LIBRES = ("/securite/", "/deconnexion/", "/connexion/", "/mot-de-passe/changer/", "/static/")
+LIBRES = ("/securite/", "/deconnexion/", "/connexion/", "/static/")
+# Changer son mot de passe sans le code n'est permis qu'à la première connexion (mot de passe
+# provisoire) : sinon, un voleur du seul mot de passe pourrait le changer.
+CHANGEMENT = "/mot-de-passe/changer/"
+
+
+def _libre(request) -> bool:
+    if request.path.startswith(LIBRES):
+        return True
+    return request.path.startswith(CHANGEMENT) and getattr(
+        request.user, "doit_changer_mot_de_passe", False
+    )
 
 
 class DoubleVerificationObligatoire:
@@ -14,7 +25,7 @@ class DoubleVerificationObligatoire:
 
     def __call__(self, request):
         if (
-            not request.path.startswith(LIBRES)
+            not _libre(request)
             and doit_verifier(request.user)
             and not est_verifie(request)
         ):

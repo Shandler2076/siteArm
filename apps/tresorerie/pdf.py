@@ -38,6 +38,12 @@ def quittance_pdf(c) -> bytes:
         y -= 8 * mm
     pdf.setFont("Sans", 8)
     pdf.drawString(MARGE, y - 4 * mm, "Payé au Bureau national de commandement (numéro unique).")
+    if c.paiement.plateforme == "simulee":
+        pdf.setFont("Sans-Gras", 11)
+        pdf.setFillColorRGB(0.6, 0.1, 0.1)
+        pdf.drawString(
+            MARGE, y - 12 * mm, "PAIEMENT SIMULÉ — site d'essai, aucun argent n'a été versé."
+        )
     pied_de_page(pdf, 1, larg)
     pdf.showPage()
     pdf.save()

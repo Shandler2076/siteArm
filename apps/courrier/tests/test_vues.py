@@ -199,6 +199,8 @@ def test_verification_publique(envoye):
     assert "Nous vous informons" not in _html(r)  # jamais le texte
     assert "Préparatifs" not in _html(r)  # ni l'objet
     assert "aucun courrier" in _html(anonyme.get("/courrier/verifier/faux-jeton/"))
+    # Ni indexée par les moteurs de recherche, ni gardée en cache.
+    assert r["X-Robots-Tag"] == "noindex" and r["Cache-Control"] == "no-store"
 
 
 def test_transmission_par_la_page(bn):
@@ -347,3 +349,23 @@ def test_registre_national_courriers_recus_par_le_bn(bn):
     sn = _client(bn["sn"])
     assert sn.get(f"/courrier/c/{c.pk}/").status_code == 200
     assert "Affaire du circuit" in _html(sn.get("/courrier/bn/registre/"))
+
+
+def test_fichiers_importes_telecharges_pas_ouverts(bn):
+    """Un fichier importé (PDF, image) vient de l'extérieur : il est proposé au téléchargement,
+    jamais ouvert dans la page du site."""
+    c = s.preparer(
+        unite=NATIONAL,
+        nature="lettre",
+        objet="Importé",
+        mode="importe",
+        fichier=image_signature("scan.png"),
+        bureaux=[f"paroisse-{bn['P2'].pk}"],
+        pieces=[image_signature("piece.png")],
+        par=bn["sn"].compte,
+    )
+    moi = _client(bn["sn"])
+    for url in (f"/courrier/c/{c.pk}/original/", f"/courrier/c/{c.pk}/piece/{c.pieces.get().pk}/"):
+        r = moi.get(url)
+        assert r.status_code == 200 and r["Content-Disposition"].startswith("attachment")
+        assert r["X-Content-Type-Options"] == "nosniff"

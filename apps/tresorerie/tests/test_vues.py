@@ -230,3 +230,100 @@ def test_pas_d_amende_avec_une_exclusion(tresoriers, compte_technique):
             amende=1000,
         )
     assert not s.CotisationSpeciale.objects.exists()
+
+
+def test_quittance_simulee_porte_la_mention(tresoriers, compte_technique):
+    """Une quittance de la plateforme simulée ne doit pas pouvoir passer pour un vrai reçu."""
+    import io
+
+    from pypdf import PdfReader
+
+    from apps.tresorerie.pdf import quittance_pdf
+
+    cs = s.creer_cotisation_speciale(
+        libelle="Essai", type_montant="fixe", montant=1000, par=compte_technique
+    )
+    m1 = tresoriers["m1"]
+    s.confirmer_paiement(s.initier_paiement_special(m1.compte, cs, 1000, membre=m1))
+    texte = PdfReader(io.BytesIO(quittance_pdf(Contribution.objects.get()))).pages[0].extract_text()
+    assert "SIMULÉ" in texte and "aucun argent" in texte
+
+
+def _amende(membre, par):
+    import datetime as _d
+
+    from apps.mouvements.sanctions import enregistrer_sanction
+
+    enregistrer_sanction(
+        membre=membre,
+        degre=1,
+        type="amende",
+        date_debut=_d.date(2026, 11, 1),
+        motif="Faute X",
+        reference="BNC-9",
+        par=par,
+        amende=2000,
+    )
+    return s.CotisationSpeciale.objects.get(sanction__isnull=False)
+
+
+def test_payer_pour_ne_montre_pas_l_amende_d_un_tiers(tresoriers, compte_technique, ouvert):
+    """Faille M3 : voir l'amende d'un autre membre révèle qu'il est sanctionné."""
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    _amende(m1, compte_technique)
+    html = _h(_c(m2).get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert "Amende" not in html
+    # Le membre lui-même la voit toujours.
+    html = _h(_c(m1).get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert "Amende — 2000 F" in html
+
+
+def test_payer_pour_recherche_journalisee_et_limitee(tresoriers, settings, ouvert):
+    from apps.journal.models import RECHERCHE_MATRICULE, EntreeJournal
+    from apps.tresorerie.views import confirmation_reduite
+
+    settings.LIMITE_RECHERCHES_MATRICULE = 3
+    m1, m2, m3 = tresoriers["m1"], tresoriers["m2"], tresoriers["m3"]
+    c = _c(m2)
+    vu = confirmation_reduite(m1)
+    for _ in range(3):  # la même personne, recherchée trois fois : comptée une fois
+        assert vu in _h(c.get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    entrees = EntreeJournal.objects.filter(action=RECHERCHE_MATRICULE, auteur=m2.compte)
+    assert entrees.count() == 1 and entrees.first().details["saisi"] == m1.matricule
+    c.get("/tresorerie/payer-pour/", {"matricule": m3.matricule})
+    c.get("/tresorerie/payer-pour/", {"matricule": "2015-01AS-9999"})
+    assert entrees.count() == 3
+    html = _h(c.get("/tresorerie/payer-pour/", {"matricule": tresoriers["m4"].matricule}))
+    assert confirmation_reduite(tresoriers["m4"]) not in html
+    assert "trop de recherches" in html.lower()
+
+
+def test_payer_pour_confirmer_ne_contourne_pas_la_limite(tresoriers, settings, ouvert):
+    """Relecture : une confirmation sans recherche préalable du même matricule est comptée."""
+    from apps.journal.models import RECHERCHE_MATRICULE, EntreeJournal
+    from apps.tresorerie.views import confirmation_reduite
+
+    settings.LIMITE_RECHERCHES_MATRICULE = 2
+    m1, m2, m3 = tresoriers["m1"], tresoriers["m2"], tresoriers["m3"]
+    c = _c(m2)
+    for m in (m1, m3):
+        c.post("/tresorerie/payer-pour/", {"matricule": m.matricule, "confirmer": "1"})
+    assert EntreeJournal.objects.filter(action=RECHERCHE_MATRICULE).count() == 2
+    html = _h(c.post("/tresorerie/payer-pour/", {"matricule": "2015-01AS-9999", "confirmer": "1"}))
+    assert "trop de recherches" in html.lower()
+    # Mais la personne déjà cherchée aujourd'hui peut toujours être payée (pas recomptée).
+    html = _h(c.get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert confirmation_reduite(m1) in html
+
+
+def test_payer_pour_refuse_une_cotisation_non_proposee(tresoriers, compte_technique, ouvert):
+    """Relecture : l'amende d'un tiers ne se devine pas en la « payant » par POST."""
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    amende = _amende(m1, compte_technique)
+    c = _c(m2)
+    c.get("/tresorerie/payer-pour/", {"matricule": m1.matricule})
+    r = c.post(
+        "/tresorerie/payer-pour/",
+        {"matricule": m1.matricule, "confirmer": "1", "speciale": amende.pk, "montant": "2000"},
+    )
+    assert r.status_code == 200 and not Paiement.objects.exists()

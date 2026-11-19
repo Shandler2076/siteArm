@@ -60,6 +60,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.securite.envois.TailleDesEnvois",
+    "apps.securite.envois.EntetesDeSecurite",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -73,6 +75,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
 ]
+
+# Taille maximale d'un envoi (toutes pièces comprises) : un courrier importé (10 Mo) et ses
+# 5 pièces jointes (10 Mo chacune) tiennent dedans. Au-delà, refus avant réception.
+TAILLE_MAX_ENVOI = int(os.environ.get("DJANGO_TAILLE_MAX_ENVOI_MO", "64")) * 1024 * 1024
 
 ROOT_URLCONF = "config.urls"
 
@@ -119,8 +125,15 @@ AXES_USERNAME_CALLABLE = "apps.comptes.securite.identifiant_pour_blocage"
 AXES_LOCKOUT_TEMPLATE = "comptes/compte_bloque.html"
 AXES_HTTP_RESPONSE_CODE = 429
 AXES_RESET_ON_SUCCESS = True
-# Blocage volontairement par identifiant seul : bloquer par adresse IP bloquerait tous les
-# membres d'un même cybercafé ou d'un même réseau mobile après 5 échecs cumulés.
+# Derrière le relais d'alwaysdata, l'adresse du visiteur est la dernière de X-Forwarded-For.
+DERRIERE_RELAIS = _bool("DJANGO_DERRIERE_RELAIS", False)
+AXES_CLIENT_IP_CALLABLE = "apps.comptes.securite.adresse_ip"
+# Recherches d'un membre par matricule (« payer pour », aperçu de mutation) par compte et par jour.
+LIMITE_RECHERCHES_MATRICULE = int(os.environ.get("DJANGO_LIMITE_RECHERCHES_MATRICULE", "30"))
+# axes bloque par identifiant (5 échecs). En plus, une adresse IP est bloquée après
+# LIMITE_ECHECS_PAR_IP échecs, tous identifiants confondus : seuil large, car au Bénin beaucoup
+# d'abonnés mobiles (et les cybercafés) partagent une même adresse.
+LIMITE_ECHECS_PAR_IP = int(os.environ.get("DJANGO_LIMITE_ECHECS_PAR_IP", "30"))
 SILENCED_SYSTEM_CHECKS = [
     "axes.W006",
     # Pas d'inscription à la liste HSTS « preload » : engagement difficile à annuler.
@@ -214,6 +227,14 @@ SITE_DEMO = _bool("DJANGO_SITE_DEMO", False)
 # Paiement mobile money SIMULÉ (aucun argent réel) : seulement sur le site d'essai ou en
 # développement. Sur le vrai site, il reste fermé tant qu'aucune plateforme réelle n'est branchée.
 PAIEMENT_SIMULE = _bool("DJANGO_PAIEMENT_SIMULE", SITE_DEMO or DEBUG)
+if PAIEMENT_SIMULE and not (SITE_DEMO or DEBUG or EN_TEST):
+    raise ImproperlyConfigured(
+        "DJANGO_PAIEMENT_SIMULE=True est interdit sur le vrai site : le paiement simulé "
+        "n'encaisse aucun argent. Il n'est permis qu'avec DJANGO_SITE_DEMO=True."
+    )
+
+# Gestion technique (/gestion/) en lecture seule sur le vrai site (apps/securite/admin_lecture.py).
+ADMIN_LECTURE_SEULE = _bool("DJANGO_ADMIN_LECTURE_SEULE", not (SITE_DEMO or DEBUG or EN_TEST))
 
 # Contact pour les questions sur les données personnelles (page « Protection de vos données »).
 CONTACT_DONNEES = os.environ.get("DJANGO_CONTACT_DONNEES", "")

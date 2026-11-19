@@ -151,3 +151,41 @@ def test_activation_possible_avec_un_seul_telephone(bn):
     assert "Ajouter à mon application d" in html
     assert "Copier la clé" in html and f'data-cle="{secret}"' in html
     assert html.index("otpauth://") < html.index("<svg")  # le bouton passe avant le QR code
+
+
+@pytest.mark.parametrize("fonction", ["Trésorier national", "Trésorier national adjoint"])
+def test_tresorier_national_concerne(client, monde, donner_mandat, fonction):
+    """Il prépare les reversements : son compte est aussi protégé par le code."""
+    donner_mandat(monde["m1"], fonction)
+    client.force_login(monde["m1"].compte)
+    assert client.get("/").url.startswith("/securite/activer/")
+
+
+def test_changer_mot_de_passe_exige_le_code(bn, compte_technique):
+    """Faille M1 : avec le seul mot de passe, on ne change pas le mot de passe d'un compte BN."""
+    DoubleVerification.objects.create(compte=compte_technique, secret="A" * 32, active=True)
+    r = bn.get("/mot-de-passe/changer/")
+    assert r.status_code == 302 and r.url.startswith("/securite/code/")
+
+
+def test_premiere_connexion_change_le_mot_de_passe_avant_le_code(bn, compte_technique):
+    """Le mot de passe provisoire se change d'abord (première connexion)."""
+    compte_technique.doit_changer_mot_de_passe = True
+    compte_technique.save()
+    assert bn.get("/mot-de-passe/changer/").status_code == 200
+
+
+def test_activation_previent_le_compte_et_le_mainteneur(client, monde, donner_mandat):
+    """M1 : une activation inattendue (par quelqu'un qui aurait volé le mot de passe avant la
+    première activation) doit se voir."""
+    from apps.comptes.models import Compte
+    from apps.notifications.models import Notification
+
+    mainteneur = Compte.objects.create_superuser(identifiant="mainteneur", password="x" * 12)
+    donner_mandat(monde["m1"], "Secrétaire national")
+    client.force_login(monde["m1"].compte)
+    _activer(client)
+    for compte in (monde["m1"].compte, mainteneur):
+        assert Notification.objects.filter(
+            destinataire=compte, message__contains="double vérification"
+        ).exists()

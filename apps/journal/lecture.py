@@ -113,6 +113,13 @@ def lire(entrees) -> list[Ligne]:
             return f"A attribué le grade {d.get('grade')} à {m}."
         if a == j.CONSULTATION_FICHE:
             return f"A consulté la fiche de {m}."
+        if a == j.RECHERCHE_MATRICULE:
+            pour = {"payer_pour": "payer pour lui", "mutation": "une mutation"}.get(
+                d.get("pour"), d.get("pour", "")
+            )
+            if not d.get("membre"):
+                return f"A cherché le matricule « {d.get('saisi', '')} » ({pour}) : introuvable."
+            return f"A cherché {m} par son matricule ({pour})."
         if a == j.VERIFICATION_MEMBRE:
             from apps.membres.verification import MOTIFS
 

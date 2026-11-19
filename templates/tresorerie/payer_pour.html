@@ -9,6 +9,7 @@
     <button type="submit" class="bouton bouton--secondaire">Chercher</button>
   </form>
   {% if introuvable %}<p class="message message--error">Aucun membre ne porte ce matricule.</p>{% endif %}
+  {% if limite %}<p class="message message--error">{{ limite }}</p>{% endif %}
   {% if beneficiaire %}
     <p class="encadre-identifiants"><strong>{{ confirmation }}</strong><br><small>Vérifiez que c'est bien la bonne personne.</small></p>
     <form method="post">{% csrf_token %}
