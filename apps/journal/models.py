@@ -68,6 +68,7 @@ COURRIER_SOUMIS = "courrier_soumis"
 COURRIER_REPRIS = "courrier_repris"
 COURRIER_SUPPRIME = "courrier_supprime"
 COURRIERS_PURGES = "courriers_purges"
+RECHERCHE_MATRICULE = "recherche_matricule"
 
 LIBELLES = {
     COURRIER_PREPARE: "Courrier préparé",
@@ -109,6 +110,7 @@ LIBELLES = {
     CONNEXION_ECHOUEE: "Connexion échouée",
     CONSULTATION_FICHE: "Consultation d'une fiche",
     VERIFICATION_MEMBRE: "Vérification d'un membre (hors périmètre)",
+    RECHERCHE_MATRICULE: "Recherche d'un membre par matricule",
     REINITIALISATION: "Mot de passe réinitialisé",
     PHOTO_DECISION: "Décision sur une photo",
     ENREGISTREMENT: "Membre enregistré",

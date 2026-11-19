@@ -247,3 +247,49 @@ def test_quittance_simulee_porte_la_mention(tresoriers, compte_technique):
     s.confirmer_paiement(s.initier_paiement_special(m1.compte, cs, 1000, membre=m1))
     texte = PdfReader(io.BytesIO(quittance_pdf(Contribution.objects.get()))).pages[0].extract_text()
     assert "SIMULÉ" in texte and "aucun argent" in texte
+
+
+def _amende(membre, par):
+    import datetime as _d
+
+    from apps.mouvements.sanctions import enregistrer_sanction
+
+    enregistrer_sanction(
+        membre=membre,
+        degre=1,
+        type="amende",
+        date_debut=_d.date(2026, 11, 1),
+        motif="Faute X",
+        reference="BNC-9",
+        par=par,
+        amende=2000,
+    )
+    return s.CotisationSpeciale.objects.get(sanction__isnull=False)
+
+
+def test_payer_pour_ne_montre_pas_l_amende_d_un_tiers(tresoriers, compte_technique, ouvert):
+    """Faille M3 : voir l'amende d'un autre membre révèle qu'il est sanctionné."""
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    _amende(m1, compte_technique)
+    html = _h(_c(m2).get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert "Amende" not in html
+    # Le membre lui-même la voit toujours.
+    html = _h(_c(m1).get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert "Amende — 2000 F" in html
+
+
+def test_payer_pour_recherche_journalisee_et_limitee(tresoriers, settings, ouvert):
+    from apps.journal.models import RECHERCHE_MATRICULE, EntreeJournal
+
+    settings.LIMITE_RECHERCHES_MATRICULE = 3
+    m1, m2 = tresoriers["m1"], tresoriers["m2"]
+    c = _c(m2)
+    from apps.tresorerie.views import confirmation_reduite
+
+    vu = confirmation_reduite(m1)
+    for _ in range(3):
+        assert vu in _h(c.get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    entrees = EntreeJournal.objects.filter(action=RECHERCHE_MATRICULE, auteur=m2.compte)
+    assert entrees.count() == 3 and entrees.first().details["saisi"] == m1.matricule
+    html = _h(c.get("/tresorerie/payer-pour/", {"matricule": m1.matricule}))
+    assert vu not in html and "trop de recherches" in html.lower()

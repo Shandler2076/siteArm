@@ -124,6 +124,8 @@ DERRIERE_RELAIS = _bool("DJANGO_DERRIERE_RELAIS", False)
 AXES_CLIENT_IP_CALLABLE = "apps.comptes.securite.adresse_ip"
 # Échecs tolérés depuis une même adresse IP, tous identifiants confondus (seuil large : au Bénin,
 # beaucoup d'abonnés mobiles partagent la même adresse chez leur opérateur).
+# Recherches d'un membre par matricule (« payer pour », aperçu de mutation) par compte et par jour.
+LIMITE_RECHERCHES_MATRICULE = int(os.environ.get("DJANGO_LIMITE_RECHERCHES_MATRICULE", "30"))
 LIMITE_ECHECS_PAR_IP = int(os.environ.get("DJANGO_LIMITE_ECHECS_PAR_IP", "30"))
 # Blocage volontairement par identifiant seul : bloquer par adresse IP bloquerait tous les
 # membres d'un même cybercafé ou d'un même réseau mobile après 5 échecs cumulés.

@@ -102,14 +102,19 @@ def payer_pour(request):
     réduite, nombre de mois ou cotisation spéciale."""
     if _membre(request.user) is None and not _bn(request.user):
         raise Http404
+    from apps.journal.recherches import MESSAGE_LIMITE, noter_recherche, recherches_epuisees
+
     matricule = (request.POST.get("matricule") or request.GET.get("matricule") or "").strip()
+    limite = bool(matricule) and not _bn(request.user) and recherches_epuisees(request.user)
     beneficiaire = (
         Membre.objects.filter(
             matricule=matricule.upper(), statut__in=[Statut.ACTIF, Statut.SANCTIONNE]
         ).first()
-        if matricule
+        if matricule and not limite
         else None
     )
+    if matricule and not limite and not request.POST.get("confirmer"):
+        noter_recherche(request.user, pour="payer_pour", saisi=matricule, membre=beneficiaire)
     soi_meme = beneficiaire is not None and beneficiaire.compte_id == request.user.pk
     if request.method == "POST" and beneficiaire and request.POST.get("confirmer"):
         try:
@@ -135,11 +140,13 @@ def payer_pour(request):
         else:
             return _vers_plateforme(p)
     # Seules les cotisations spéciales demandées à TOUS les membres sont proposées : une
-    # cotisation ciblée révélerait le grade, l'âge ou la catégorie du membre aidé.
+    # cotisation ciblée révélerait le grade, l'âge ou la catégorie du membre aidé, et une
+    # amende révélerait une sanction (on ne la voit que pour soi-même).
     speciales = [
         x["cs"]
         for x in (s.speciales_du_membre(beneficiaire) if beneficiaire else [])
-        if x["cs"].pour_membres == PourMembres.TOUS or (x["cs"].sanction_id and not x["reglee"])
+        if (x["cs"].pour_membres == PourMembres.TOUS and not x["cs"].sanction_id)
+        or (soi_meme and x["cs"].sanction_id and not x["reglee"])
     ]
     return render(
         request,
@@ -148,7 +155,8 @@ def payer_pour(request):
             "matricule": matricule,
             "beneficiaire": beneficiaire,
             "confirmation": confirmation_reduite(beneficiaire) if beneficiaire else "",
-            "introuvable": bool(matricule) and beneficiaire is None,
+            "introuvable": bool(matricule) and beneficiaire is None and not limite,
+            "limite": MESSAGE_LIMITE if limite else "",
             "speciales": speciales,
         },
     )
