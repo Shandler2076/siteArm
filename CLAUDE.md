@@ -125,6 +125,12 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   `/gestion/` en lecture seule hors site d'essai (`securite/admin_lecture.py`,
   `DJANGO_ADMIN_LECTURE_SEULE`) ; journal des coordonnées = noms des champs seulement.
 
+- Style coloré (19/11/2026) : variables CSS en tête de `static/css/site.css` (marine #14284B,
+  bordeaux #8E1F35, or #F2C230, fond crème #FBF6EA), Poppins (titres) + Inter (texte) servies par
+  le site (`static/fonts/site/`, jamais Google Fonts) ; « Ma page » en tuiles
+  (`apps/comptes/tableau.py::tuiles`, rien d'un autre membre) ; photos de l'accueil public dans
+  `static/img/photos/` (accord des personnes, mention APDP finalité 10).
+
 ## Hébergement
 - Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre
   gratuite) : `docs/guide-alwaysdata.md` + scripts `deploiement/alwaysdata/` (installer, mettre à
