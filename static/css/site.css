@@ -1,13 +1,37 @@
+/* Style coloré (choisi le 19/11/2026) : marine, bordeaux, or, fond crème ; Poppins + Inter,
+   servies par le site lui-même (aucune requête vers Google : pas d'adresse IP envoyée). */
+@font-face { font-family: "Poppins"; font-weight: 500; font-display: swap; src: url("../fonts/site/poppins-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Poppins"; font-weight: 500; font-display: swap; src: url("../fonts/site/poppins-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Poppins"; font-weight: 600; font-display: swap; src: url("../fonts/site/poppins-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Poppins"; font-weight: 600; font-display: swap; src: url("../fonts/site/poppins-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Poppins"; font-weight: 700; font-display: swap; src: url("../fonts/site/poppins-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Poppins"; font-weight: 700; font-display: swap; src: url("../fonts/site/poppins-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Poppins"; font-weight: 800; font-display: swap; src: url("../fonts/site/poppins-latin-800-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Poppins"; font-weight: 800; font-display: swap; src: url("../fonts/site/poppins-latin-ext-800-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("../fonts/site/inter-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Inter"; font-weight: 400; font-display: swap; src: url("../fonts/site/inter-latin-ext-400-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("../fonts/site/inter-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Inter"; font-weight: 500; font-display: swap; src: url("../fonts/site/inter-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("../fonts/site/inter-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Inter"; font-weight: 600; font-display: swap; src: url("../fonts/site/inter-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
+@font-face { font-family: "Inter"; font-weight: 700; font-display: swap; src: url("../fonts/site/inter-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD; }
+@font-face { font-family: "Inter"; font-weight: 700; font-display: swap; src: url("../fonts/site/inter-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF; }
 :root {
   --marine: #14284B;
-  --rouge: #B3122E;
-  --or: #D4A017;
-  --fond: #F4F6FA;
+  --marine-fonce: #0B1830;
+  --rouge: #8E1F35;
+  --bordeaux: #8E1F35;
+  --or: #F2C230;
+  --or-fonce: #C9A227;
+  --fond: #FBF6EA;
+  --carte: #FFFFFF;
+  --bleu-pale: #EEF2F9;
   --texte: #1D2433;
-  --gris: #5B6578;
+  --gris: #4A5468;
+  --titre: "Poppins", "Inter", system-ui, sans-serif;
 }
 * { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+body { margin: 0; font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--fond); color: var(--texte); line-height: 1.5; }
 .entete { display: flex; align-items: center; justify-content: space-between; gap: 12px;
   padding: 12px 16px; background: var(--marine); color: #fff; border-bottom: 4px solid var(--rouge); }
@@ -405,3 +429,81 @@ details.encadre > summary.bouton { display: inline-block; width: auto; }
 .mot-de-passe input { flex: 1; }
 .voir-mdp { flex: none; border: 1px solid #C9D1DE; border-radius: 8px; background: #fff; padding: 8px 10px; cursor: pointer; font-size: .85rem; color: var(--marine); }
 .vitrine-connecte { background: rgba(255,255,255,.15); border-radius: 8px; padding: 8px 12px; margin: 0 auto 12px; max-width: 420px; }
+
+
+/* ===================== Style coloré (19/11/2026) ===================== */
+h1, h2, .menu__titre, .tuile__valeur, .vitrine-hero h1, .bouton { font-family: var(--titre); }
+h1 { font-weight: 700; }
+h2 { color: var(--bordeaux); font-weight: 700; }
+.entete { background: var(--marine); border-bottom: 6px solid var(--or); padding: 12px 16px; }
+.entete__marque { font-family: var(--titre); font-weight: 700; }
+.entete__marque small { color: var(--or); font-weight: 600; }
+.entete__filet { display: none; }
+.bouton-menu, .cloche { background: rgba(255,255,255,.12); border: 0; border-radius: 12px; }
+.bouton-menu { padding: 10px 12px; }
+.cloche { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; }
+.cloche__nombre { top: 2px; right: 2px; background: var(--or); color: var(--marine); }
+.carte { border-radius: 16px; border-top: 0; box-shadow: 0 2px 12px rgba(20,40,75,.07); }
+.bouton { border-radius: 12px; background: var(--bordeaux); font-weight: 600; }
+.bouton:hover { background: #721829; }
+.bouton--secondaire { background: #fff; color: var(--marine); border: 2px solid var(--marine); }
+.bouton--secondaire:hover { background: var(--bleu-pale); }
+.bouton--discret { background: transparent; border: 1px solid rgba(255,255,255,.45); border-radius: 10px; font-family: inherit; }
+.bouton--connexion { background: var(--or); color: var(--marine); border-radius: 22px; font-weight: 700; }
+.champ input, .champ select, .champ textarea { border-radius: 10px; }
+.champ input:focus, .champ select:focus, .champ textarea:focus { outline: 3px solid rgba(242,194,48,.45); border-color: var(--marine); }
+.liens a { border-radius: 12px; border: 0; background: var(--bleu-pale); font-weight: 600; }
+.liens a:hover { background: #DFE6F3; }
+.matricule { background: var(--or); color: var(--marine); border-radius: 12px; }
+.tableau th { background: var(--marine); }
+.menu__accueil { border-radius: 10px; }
+.menu li a.actif { box-shadow: inset 5px 0 0 var(--or); }
+.menu__titre { color: var(--bordeaux); }
+.fonctions-actuelles li { background: var(--bleu-pale); }
+.alerte { background: #FFF6DA; border-left-color: var(--or); }
+
+/* « Ma page » : bandeau et tuiles */
+.bandeau-page { background: var(--marine); color: #fff; border-radius: 16px; padding: 18px 18px 14px;
+  border-bottom: 6px solid var(--or); margin-bottom: 14px; position: relative; z-index: 16; }
+.bandeau-page h1 { color: #fff; font-size: 1.35rem; margin: 0 0 6px; }
+.bandeau-page__matricule { margin: 0 0 8px; color: #DCE5F3; font-size: .9rem; }
+.bandeau-page__matricule strong { color: var(--marine); background: var(--or); padding: 2px 10px; border-radius: 10px; margin-left: 4px; }
+.bandeau-page .fonctions-actuelles ul { margin: 4px 0 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.bandeau-page .fonctions-actuelles li { background: rgba(255,255,255,.12); color: #fff; border-left-color: var(--or); margin: 0; }
+.tuiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 0 0 14px; position: relative; z-index: 16; }
+@media (min-width: 720px) { .tuiles { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.tuile { display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 16px; text-decoration: none; min-height: 92px; }
+.tuile__libelle { font-size: .8rem; }
+.tuile__valeur { font-size: 1.75rem; font-weight: 800; line-height: 1.1; }
+.tuile__valeur--texte { font-size: .95rem; font-weight: 700; font-family: inherit; }
+.tuile--bordeaux { background: var(--bordeaux); color: #fff; } .tuile--bordeaux .tuile__libelle { color: #F6DCE1; }
+.tuile--marine { background: var(--marine); color: #fff; } .tuile--marine .tuile__libelle { color: #DCE5F3; }
+.tuile--or { background: var(--or); color: var(--marine); } .tuile--or .tuile__libelle { color: #5A4300; }
+.tuile--vert { background: #fff; color: #1E5E2E; border-left: 5px solid #2E7D44; } .tuile--vert .tuile__libelle { color: var(--gris); }
+.tuile--alerte { background: #fff; color: var(--bordeaux); border-left: 5px solid var(--bordeaux); } .tuile--alerte .tuile__libelle { color: var(--gris); }
+.tuile--blanc { background: #fff; color: var(--marine); border-left: 5px solid var(--marine); } .tuile--blanc .tuile__libelle { color: var(--gris); }
+.tuile:hover { filter: brightness(1.06); }
+.carte--rapide h2 { margin-top: 4px; }
+.liens--grille { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 380px) { .liens--grille { grid-template-columns: 1fr; } }
+.liens--grille a { height: 100%; padding: 14px 12px; }
+
+/* Accueil public : bandeau marine bordé d'or, logos en cartouches blancs, photos */
+.vitrine-hero { background: var(--marine); border-radius: 16px; border-bottom: 6px solid var(--or); box-shadow: none; }
+.vitrine-logos img { box-shadow: none; }
+.vitrine-hero h1 { font-weight: 800; }
+.vitrine-surtitre { color: #DCE5F3; font-weight: 600; font-size: .85rem; }
+.vitrine-cta { background: var(--bordeaux); color: #fff; }
+.vitrine-cta:hover { background: #721829; }
+.vitrine-chiffres div { background: #fff; border-top: 4px solid var(--marine); box-shadow: 0 2px 10px rgba(20,40,75,.06); }
+.vitrine-chiffres div:nth-child(2) { border-top-color: var(--or-fonce); }
+.vitrine-chiffres div:nth-child(3) { border-top-color: var(--bordeaux); }
+.vitrine-chiffres strong { font-family: var(--titre); }
+.vitrine-photo { margin: 0 0 18px; position: relative; z-index: 16; }
+.vitrine-photo img { display: block; width: 100%; height: auto; border-radius: 16px; }
+.vitrine-photo figcaption, .galerie figcaption { color: var(--gris); font-size: .85rem; text-align: center; margin-top: 6px; }
+.galerie { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 14px 0 4px; }
+.galerie figure { margin: 0; }
+.galerie img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 12px; }
+@media (max-width: 520px) { .galerie { grid-template-columns: 1fr 1fr; } .galerie figure:last-child { grid-column: 1 / -1; } .galerie figure:last-child img { aspect-ratio: 4 / 3; } }
+a.bouton { text-decoration: none; text-align: center; }
