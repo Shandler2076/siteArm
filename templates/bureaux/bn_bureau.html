@@ -6,10 +6,12 @@
   <h1>Bureau — {{ unite.libelle }}</h1>
   {% if mandats %}
   <div class="tableau-defilant"><table class="tableau tableau--souple">
-    <thead><tr><th>Poste</th><th>Matricule</th><th>Nom et prénoms</th><th>Depuis le</th><th>Fin prévue</th></tr></thead>
-    <tbody>{% for m in mandats %}<tr><td>{{ m.fonction.nom }}</td><td><a href="{% url 'membres:bn_fiche' m.membre.matricule %}">{{ m.membre.matricule }}</a></td><td>{{ m.membre.nom_complet }}</td><td>{{ m.date_debut|date:"d/m/Y" }}</td><td>{{ m.date_fin_prevue|date:"d/m/Y" }}</td></tr>{% endfor %}</tbody>
+    <thead><tr><th>Poste</th><th>Matricule</th><th>Nom et prénoms</th><th>Depuis le</th><th>Fin prévue</th><th></th></tr></thead>
+    <tbody>{% for m in mandats %}<tr><td>{{ m.fonction.nom }}</td><td><a href="{% url 'membres:bn_fiche' m.membre.matricule %}">{{ m.membre.matricule }}</a></td><td>{{ m.membre.nom_complet }}</td><td>{{ m.date_debut|date:"d/m/Y" }}</td><td>{{ m.date_fin_prevue|date:"d/m/Y" }}</td><td><a href="{% url 'bureaux:bn_remplacer' unite.cle m.pk %}">Remplacer / retirer</a></td></tr>{% endfor %}</tbody>
   </table></div>
   {% else %}<p class="aide">Aucun bureau installé.</p>{% endif %}
+  {% if mandats %}<p><a class="bouton bouton--secondaire" href="{% url 'bureaux:bn_pourvoir' unite.cle %}">Pourvoir un poste vacant</a></p>{% endif %}
+  <p class="aide">« Installer un nouveau bureau » commence un nouveau mandat pour TOUS les postes (les mandats en cours sont fermés). Pour changer une seule personne, utilisez « Remplacer / retirer » ou « Pourvoir un poste vacant ».</p>
   <p><a class="bouton bouton--secondaire" href="{% url 'bureaux:bn_installer' %}?niveau={{ unite.niveau }}{% if unite.objet %}&unite={{ unite.objet.pk }}{% endif %}">Installer un nouveau bureau</a></p>
 </section>
 {% endblock %}

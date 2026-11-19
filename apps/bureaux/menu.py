@@ -247,6 +247,7 @@ def construire_menu(request) -> list[Groupe]:
                     ),
                     Lien("Fonctions et droits", reverse("bureaux:bn_fonctions")),
                     Lien("Mandats à échéance", reverse("bureaux:bn_echeances")),
+                    Lien("Mandats à corriger", reverse("bureaux:bn_mandats_a_corriger")),
                 ],
             ),
         ]

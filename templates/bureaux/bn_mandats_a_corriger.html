@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block titre %}Mandats à corriger{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Mandats à corriger</h1>
+  <p class="aide">Mandats en cours dont le titulaire n'est pas de la zone du bureau (paroisse, circuit ou région), ou n'est plus un membre actif. Ils ont été enregistrés avant le contrôle de zone. « Fermer » met fin au mandat aujourd'hui (rien n'est effacé : le parcours garde la trace) ; le poste devient vacant.</p>
+  {% if lignes %}
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Bureau</th><th>Poste</th><th>Titulaire</th><th>Raison</th><th></th></tr></thead>
+    <tbody>{% for m, raison in lignes %}<tr>
+      <td>{{ m.unite|default:"Bureau National de Commandement" }}</td><td>{{ m.fonction.nom }}</td>
+      <td>{{ m.membre.nom_complet }}<br><small>{{ m.membre.matricule }}</small></td>
+      <td style="white-space: normal">{{ raison }}</td>
+      <td><form method="post" action="{% url 'bureaux:bn_fermer_mandat' m.pk %}" data-confirmer="Fermer le mandat de {{ m.membre.nom_complet }} ?">{% csrf_token %}<button type="submit" class="bouton bouton--secondaire">Fermer</button></form></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="message">Aucun mandat à corriger.</p>{% endif %}
+</section>
+{% endblock %}

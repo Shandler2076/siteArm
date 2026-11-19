@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block titre %}Pourvoir un poste vacant — {{ unite.libelle }}{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <p><a href="{% url 'bureaux:bn_bureau' unite.cle %}">← Bureau — {{ unite.libelle }}</a></p>
+  <h1>Pourvoir un poste vacant</h1>
+  <p class="aide">La personne nommée termine le mandat en cours du bureau ; les autres membres ne changent pas.</p>
+  {% for e in erreurs %}<p class="message message--error">{{ e }}</p>{% endfor %}
+  {% if vacants %}
+  <form method="post">{% csrf_token %}
+    <label class="champ"><span>Poste vacant</span><select name="fonction" required>
+      {% for f in vacants %}<option value="{{ f.pk }}"{% if saisie.fonction == f.pk|stringformat:"s" %} selected{% endif %}>{{ f.nom }}</option>{% endfor %}
+    </select></label>
+    <label class="champ"><span>Matricule de la personne nommée</span><input name="matricule" value="{{ saisie.matricule|default:'' }}" placeholder="Ex. 2015-01AS-0157" autocomplete="off" required></label>
+    <label class="champ"><span>Date de début</span><input type="date" name="date" value="{{ saisie.date|default:aujourdhui }}" required></label>
+    <button type="submit" class="bouton">Nommer</button>
+  </form>
+  {% else %}<p>Tous les postes de ce bureau sont occupés.</p>{% endif %}
+</section>
+{% endblock %}

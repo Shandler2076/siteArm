@@ -176,6 +176,24 @@ def lire(entrees) -> list[Ligne]:
         if a == j.INSTALLATION_BUREAU:
             titulaires = "; ".join(f"{f} : {qui(t)}" for f, t in d.get("titulaires", {}).items())
             return f"A installé le bureau à compter du {_date(d.get('date_debut'))} — {titulaires}."
+        if a == j.TITULAIRE_REMPLACE:
+            from apps.bureaux.services import MOTIFS_DEPART
+
+            motif = MOTIFS_DEPART.get(d.get("motif"), d.get("motif", "")).lower()
+            suite = (
+                f", remplacé(e) par {qui(d['remplacant'])}"
+                if d.get("remplacant")
+                else " (poste vacant)"
+            )
+            return (
+                f"A mis fin au mandat de {d.get('fonction')} de {m} le {_date(d.get('date'))} "
+                f"({motif}){suite}."
+            )
+        if a == j.POSTE_POURVU:
+            return (
+                f"A nommé {m} {d.get('fonction')} à compter du {_date(d.get('date'))} "
+                "(poste vacant)."
+            )
         if a == j.REINITIALISATION:
             return f"A réinitialisé le mot de passe de {m}."
         if a == j.LOT_VALIDE:

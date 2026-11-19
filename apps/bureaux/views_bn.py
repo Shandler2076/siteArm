@@ -189,3 +189,156 @@ def bureau_en_place(request, cle):
         raise Http404
     mandats = _bureaux_installes().get(unite.cle, [])
     return render(request, "bureaux/bn_bureau.html", {"unite": unite, "mandats": mandats})
+
+
+def _matricule_membre(saisie):
+    if not (saisie or "").strip():
+        return None, ""
+    matricule = normaliser_identifiant(saisie)
+    membre = Membre.objects.filter(matricule=matricule).first()
+    return membre, ("" if membre else f"Matricule inconnu : {matricule}")
+
+
+def _date_saisie(valeur):
+    try:
+        return datetime.date.fromisoformat(valeur or "")
+    except ValueError:
+        return None
+
+
+@bn_requis
+def remplacer(request, cle, pk):
+    """Remplacer UN titulaire (ou le retirer : poste vacant) ; les autres ne bougent pas."""
+    from django.http import Http404
+    from django.utils import timezone
+
+    from apps.bureaux.perimetre import unite_par_cle
+    from apps.bureaux.services import MOTIFS_DEPART, remplacer_titulaire
+
+    unite = unite_par_cle(cle)
+    if unite is None:
+        raise Http404
+    mandat = get_object_or_404(
+        _mandats_de_l_unite(unite).select_related("membre", "fonction"), pk=pk
+    )
+    erreurs = []
+    if request.method == "POST":
+        date = _date_saisie(request.POST.get("date"))
+        remplacant, erreur = _matricule_membre(request.POST.get("matricule"))
+        if date is None:
+            erreurs.append("Indiquez la date de départ.")
+        if erreur:
+            erreurs.append(erreur)
+        if not erreurs:
+            try:
+                remplacer_titulaire(
+                    mandat=mandat,
+                    date=date,
+                    motif=request.POST.get("motif", ""),
+                    remplacant=remplacant,
+                    par=request.user,
+                )
+            except InstallationRefusee as e:
+                erreurs.append(str(e))
+            else:
+                messages.success(
+                    request,
+                    "Titulaire remplacé." if remplacant else "Mandat fermé : le poste est vacant.",
+                )
+                return redirect("bureaux:bn_bureau", cle=unite.cle)
+    return render(
+        request,
+        "bureaux/bn_remplacer.html",
+        {
+            "unite": unite,
+            "mandat": mandat,
+            "motifs": [(k, v) for k, v in MOTIFS_DEPART.items() if k != "incoherent"],
+            "erreurs": erreurs,
+            "aujourdhui": timezone.localdate().isoformat(),
+            "saisie": request.POST,
+        },
+    )
+
+
+@bn_requis
+def pourvoir(request, cle):
+    """Nommer UNE personne à un poste vacant ; elle termine le mandat en cours du bureau."""
+    from django.http import Http404
+    from django.utils import timezone
+
+    from apps.bureaux.perimetre import unite_par_cle
+    from apps.bureaux.services import pourvoir_poste
+
+    unite = unite_par_cle(cle)
+    if unite is None:
+        raise Http404
+    occupes = set(_mandats_de_l_unite(unite).en_cours().values_list("fonction_id", flat=True))
+    vacants = [
+        f
+        for f in Fonction.objects.filter(niveau=unite.niveau).order_by("ordre")
+        if f.pk not in occupes
+    ]
+    erreurs = []
+    if request.method == "POST":
+        fonction = next((f for f in vacants if str(f.pk) == request.POST.get("fonction")), None)
+        date = _date_saisie(request.POST.get("date"))
+        membre, erreur = _matricule_membre(request.POST.get("matricule"))
+        if fonction is None:
+            erreurs.append("Choisissez un poste vacant.")
+        if date is None:
+            erreurs.append("Indiquez la date de début.")
+        if membre is None:
+            erreurs.append(erreur or "Indiquez le matricule de la personne nommée.")
+        if not erreurs:
+            try:
+                pourvoir_poste(
+                    unite=unite, fonction=fonction, membre=membre, date_debut=date, par=request.user
+                )
+            except InstallationRefusee as e:
+                erreurs.append(str(e))
+            else:
+                messages.success(request, f"{membre.nom_complet} est nommé(e) {fonction.nom}.")
+                return redirect("bureaux:bn_bureau", cle=unite.cle)
+    return render(
+        request,
+        "bureaux/bn_pourvoir.html",
+        {
+            "unite": unite,
+            "vacants": vacants,
+            "erreurs": erreurs,
+            "aujourdhui": timezone.localdate().isoformat(),
+            "saisie": request.POST,
+        },
+    )
+
+
+@bn_requis
+def mandats_a_corriger(request):
+    """Mandats enregistrés avant le contrôle de zone : titulaire hors de sa zone ou plus actif."""
+    from apps.bureaux.services import mandats_incoherents
+
+    return render(request, "bureaux/bn_mandats_a_corriger.html", {"lignes": mandats_incoherents()})
+
+
+@bn_requis
+def fermer_mandat_incoherent(request, pk):
+    from django.http import HttpResponseNotAllowed
+    from django.utils import timezone
+
+    from apps.bureaux.services import mandats_incoherents, remplacer_titulaire
+
+    if request.method != "POST":
+        return HttpResponseNotAllowed(["POST"])
+    mandat = next((m for m, _r in mandats_incoherents() if m.pk == pk), None)
+    if mandat is None:
+        messages.error(request, "Ce mandat n'est pas (ou plus) à corriger.")
+    else:
+        remplacer_titulaire(
+            mandat=mandat,
+            date=timezone.localdate(),
+            motif="incoherent",
+            remplacant=None,
+            par=request.user,
+        )
+        messages.success(request, f"Mandat de {mandat.membre.nom_complet} fermé.")
+    return redirect("bureaux:bn_mandats_a_corriger")

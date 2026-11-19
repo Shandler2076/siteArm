@@ -21,6 +21,61 @@ def _mandats_de_l_unite(unite: Unite):
     return qs
 
 
+MOTIFS_DEPART = {
+    "demission": "Démission",
+    "voyage": "Voyage ou absence prolongée",
+    "deces": "Décès",
+    "mutation": "Mutation",
+    "sanction": "Sanction",
+    "incoherent": "Nomination hors de sa zone (correction)",
+    "autre": "Autre motif",
+}
+
+
+def raison_hors_zone(unite: Unite, membre: Membre) -> str:
+    """Vide si le membre est de la zone de l'unité ; sinon la raison du refus.
+
+    Décision du 19/11/2026 : on n'est membre du bureau d'une paroisse, d'un circuit ou d'une
+    région que si sa paroisse actuelle s'y trouve. Le Bureau National de Commandement est
+    ouvert à tout membre actif du pays."""
+    if unite.niveau == "national":
+        return ""
+    actuelle = membre.affectation_actuelle
+    if actuelle is None:
+        return f"{membre.nom_complet} ({membre.matricule}) n'a pas de paroisse actuelle."
+    paroisse = actuelle.paroisse
+    if unite.niveau == "paroisse" and paroisse != unite.objet:
+        return (
+            f"{membre.nom_complet} ({membre.matricule}) est de la paroisse {paroisse.nom}, "
+            f"pas de {unite.objet.nom}."
+        )
+    if unite.niveau == "circuit" and paroisse.circuit_id != unite.objet.pk:
+        return (
+            f"{membre.nom_complet} ({membre.matricule}) est du circuit {paroisse.circuit.nom}, "
+            f"pas du circuit {unite.objet.nom}."
+        )
+    if unite.niveau == "region" and paroisse.circuit.region_id != unite.objet.pk:
+        return (
+            f"{membre.nom_complet} ({membre.matricule}) est de la région "
+            f"{paroisse.circuit.region.nom}, pas de la région {unite.objet.nom}."
+        )
+    return ""
+
+
+def _verifier_titulaire(unite: Unite, fonction: Fonction, membre: Membre) -> None:
+    if fonction.niveau != unite.niveau:
+        raise InstallationRefusee(
+            f"La fonction « {fonction.nom} » n'est pas du niveau de cette unité."
+        )
+    if membre.statut != Statut.ACTIF:
+        raise InstallationRefusee(
+            f"{membre.nom_complet} ({membre.matricule}) n'est pas un membre actif."
+        )
+    raison = raison_hors_zone(unite, membre)
+    if raison:
+        raise InstallationRefusee(raison)
+
+
 def installer_bureau(
     *, unite: Unite, titulaires: dict[Fonction, Membre], date_debut: datetime.date, par
 ) -> list[Mandat]:
@@ -30,14 +85,7 @@ def installer_bureau(
     if not titulaires:
         raise InstallationRefusee("Indiquez au moins un titulaire.")
     for fonction, membre in titulaires.items():
-        if fonction.niveau != unite.niveau:
-            raise InstallationRefusee(
-                f"La fonction « {fonction.nom} » n'est pas du niveau de cette unité."
-            )
-        if membre.statut != Statut.ACTIF:
-            raise InstallationRefusee(
-                f"{membre.nom_complet} ({membre.matricule}) n'est pas un membre actif."
-            )
+        _verifier_titulaire(unite, fonction, membre)
     if unite.niveau == "national" and not any(f.droit_gerer for f in titulaires):
         raise InstallationRefusee(
             "Le Bureau National doit avoir au moins un Président ou Secrétaire national "
@@ -103,6 +151,168 @@ def installer_bureau(
         date_debut=date_debut.isoformat(),
     )
     return nouveaux
+
+
+def _fin_du_bureau(unite: Unite, jour: datetime.date) -> datetime.date | None:
+    """Date de fin prévue du mandat en cours du bureau (la plus fréquente parmi ses mandats)."""
+    from collections import Counter
+
+    fins = Counter(
+        _mandats_de_l_unite(unite).en_cours(jour).values_list("date_fin_prevue", flat=True)
+    )
+    return fins.most_common(1)[0][0] if fins else None
+
+
+def _nouveau_mandat(unite, fonction, membre, date_debut, fin_prevue, par) -> Mandat:
+    mandat = Mandat(
+        membre=membre,
+        fonction=fonction,
+        date_debut=date_debut,
+        date_fin_prevue=fin_prevue,
+        installe_par=par,
+    )
+    if unite.objet is not None:
+        setattr(mandat, unite.niveau, unite.objet)
+    mandat.full_clean()
+    mandat.save()
+    return mandat
+
+
+def remplacer_titulaire(
+    *, mandat: Mandat, date: datetime.date, motif: str, remplacant: Membre | None, par
+) -> Mandat | None:
+    """Ferme le mandat d'UN titulaire (les autres ne bougent pas) ; le remplaçant éventuel
+    termine le mandat en cours, à la même date de fin prévue. Sans remplaçant : poste vacant."""
+    from apps.bureaux.perimetre import Unite as _Unite
+    from apps.journal.models import TITULAIRE_REMPLACE
+    from apps.journal.services import journaliser
+    from apps.notifications.services import notifier
+
+    if motif not in MOTIFS_DEPART:
+        raise InstallationRefusee("Choisissez le motif du départ.")
+    unite = _Unite(mandat.fonction.niveau, mandat.unite)
+    with transaction.atomic():
+        mandat = Mandat.objects.select_for_update().get(pk=mandat.pk)
+        if mandat.date_fin is not None and mandat.date_fin <= date:
+            raise InstallationRefusee("Ce mandat est déjà terminé à cette date.")
+        if date <= mandat.date_debut:
+            if motif != "incoherent" or remplacant is not None:
+                raise InstallationRefusee(
+                    "La date de départ doit suivre la date de début du mandat."
+                )
+            # Nomination à annuler (pas encore commencée, ou commencée aujourd'hui) :
+            # fin = début, le mandat n'aura jamais été en cours.
+            date = mandat.date_debut
+        if remplacant is not None:
+            _verifier_titulaire(unite, mandat.fonction, remplacant)
+        mandat.date_fin = date
+        mandat.save(update_fields=["date_fin"])
+        nouveau = None
+        if remplacant is not None:
+            nouveau = _nouveau_mandat(
+                unite, mandat.fonction, remplacant, date, mandat.date_fin_prevue, par
+            )
+        date_txt = date.strftime("%d/%m/%Y")
+        partant, fonction = mandat.membre, mandat.fonction
+
+        def prevenir():
+            notifier(
+                [partant.compte],
+                f"Votre mandat de {fonction.nom} ({unite.libelle}) a pris fin le {date_txt}.",
+                "/membres/ma-fiche/",
+            )
+            if nouveau is not None:
+                notifier(
+                    [nouveau.membre.compte],
+                    f"Vous êtes installé(e) {fonction.nom} ({unite.libelle}) à compter du "
+                    f"{date_txt}, jusqu'à la fin du mandat en cours.",
+                    "/bureau/",
+                )
+
+        transaction.on_commit(prevenir)
+    journaliser(
+        par,
+        TITULAIRE_REMPLACE,
+        unite=unite.cle,
+        fonction=fonction.nom,
+        membre=partant.matricule,
+        remplacant=remplacant.matricule if remplacant else "",
+        motif=motif,
+        date=date.isoformat(),
+    )
+    return nouveau
+
+
+def pourvoir_poste(
+    *, unite: Unite, fonction: Fonction, membre: Membre, date_debut: datetime.date, par
+) -> Mandat:
+    """Nomme UNE personne à un poste vacant ; elle termine le mandat en cours du bureau."""
+    from apps.journal.models import POSTE_POURVU
+    from apps.journal.services import journaliser
+    from apps.notifications.services import notifier
+
+    _verifier_titulaire(unite, fonction, membre)
+    with transaction.atomic():
+        occupe = (
+            _mandats_de_l_unite(unite)
+            .select_for_update()
+            .filter(fonction=fonction)
+            .filter(Q(date_fin__isnull=True) | Q(date_fin__gt=date_debut))
+            .filter(date_debut__lte=date_debut)
+            .exists()
+        )
+        if occupe:
+            raise InstallationRefusee(
+                f"Le poste de {fonction.nom} est déjà occupé : utilisez « Remplacer »."
+            )
+        fin = _fin_du_bureau(unite, date_debut)
+        if fin is None:
+            raise InstallationRefusee(
+                "Aucun bureau n'est en place dans cette unité : installez d'abord un bureau."
+            )
+        mandat = _nouveau_mandat(unite, fonction, membre, date_debut, fin, par)
+        date_txt = date_debut.strftime("%d/%m/%Y")
+        transaction.on_commit(
+            lambda: notifier(
+                [membre.compte],
+                f"Vous êtes installé(e) {fonction.nom} ({unite.libelle}) à compter du "
+                f"{date_txt}, jusqu'à la fin du mandat en cours.",
+                "/bureau/",
+            )
+        )
+    journaliser(
+        par,
+        POSTE_POURVU,
+        unite=unite.cle,
+        fonction=fonction.nom,
+        membre=membre.matricule,
+        date=date_debut.isoformat(),
+    )
+    return mandat
+
+
+def mandats_incoherents(jour: datetime.date | None = None) -> list[tuple[Mandat, str]]:
+    """Mandats en cours (ou à venir) dont le titulaire n'est pas de la zone, ou n'est plus actif
+    (enregistrés avant le contrôle du 19/11/2026) : à fermer par le BNC."""
+    from django.utils import timezone
+
+    from apps.bureaux.perimetre import Unite as _Unite
+
+    j = jour or timezone.localdate()
+    resultat = []
+    mandats = (
+        Mandat.objects.filter(Q(date_fin__isnull=True) | Q(date_fin__gt=j))
+        .select_related("fonction", "membre", "paroisse", "circuit", "region")
+        .order_by("fonction__niveau", "date_debut")
+    )
+    for m in mandats:
+        if m.membre.statut != Statut.ACTIF:
+            resultat.append((m, f"{m.membre.nom_complet} n'est plus un membre actif."))
+            continue
+        raison = raison_hors_zone(_Unite(m.fonction.niveau, m.unite), m.membre)
+        if raison:
+            resultat.append((m, raison))
+    return resultat
 
 
 def _mandat_en_cours_ou_a_venir(membre) -> bool:
