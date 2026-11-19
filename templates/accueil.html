@@ -8,7 +8,7 @@
 
 <section class="tuiles" aria-label="En un coup d'œil">
   {% for t in tuiles %}
-  <a class="tuile tuile--{{ t.variante }}" href="{{ t.url }}">
+  <a class="tuile tuile--{{ t.variante }}{% if t.attention %} tuile--attention{% endif %}" href="{{ t.url }}">
     <span class="tuile__libelle">{{ t.libelle }}</span>
     <span class="tuile__valeur{% if t.texte %} tuile__valeur--texte{% endif %}">{{ t.valeur }}</span>
   </a>

@@ -72,6 +72,7 @@ def tuiles(compte) -> list[dict]:
                 "valeur": a_signer,
                 "url": reverse("courrier:a_signer"),
                 "variante": "bordeaux",
+                "attention": True,
             }
         )
     if compte.has_perm("membres.gerer_membres"):

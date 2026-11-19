@@ -516,3 +516,78 @@ a.bouton { text-decoration: none; text-align: center; }
 .menu__bureau[open] > summary::after { transform: rotate(90deg); }
 .menu__bureau > summary:hover { background: var(--fond); }
 .menu__bureau > ul { margin: 0 0 6px 10px; padding-left: 8px; border-left: 3px solid var(--or); }
+
+/* ===================== Animations (19/11/2026) =====================
+   Courtes et sobres ; aucune bibliothèque ; tout est coupé si le téléphone demande de
+   « réduire les animations » (voir la fin de ce bloc). */
+
+/* 1. Apparition en douceur des cartes et tuiles, l'une après l'autre. */
+@keyframes apparaitre { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+.page > .carte, .page > section, .page > figure, .tuile, .vitrine-chiffres > div {
+  animation: apparaitre .5s cubic-bezier(.2, .7, .2, 1) both;
+}
+.page > :nth-child(2) { animation-delay: .06s; } .page > :nth-child(3) { animation-delay: .12s; }
+.page > :nth-child(4) { animation-delay: .18s; } .page > :nth-child(5) { animation-delay: .24s; }
+.page > :nth-child(n+6) { animation-delay: .3s; }
+.tuile:nth-child(1) { animation-delay: .12s; } .tuile:nth-child(2) { animation-delay: .2s; }
+.tuile:nth-child(3) { animation-delay: .28s; } .tuile:nth-child(4) { animation-delay: .36s; }
+.tuile:nth-child(n+5) { animation-delay: .44s; }
+.vitrine-chiffres > div:nth-child(2) { animation-delay: .1s; }
+.vitrine-chiffres > div:nth-child(3) { animation-delay: .2s; }
+
+/* 3. Réaction au survol et au toucher : la tuile se soulève. */
+.tuile, .liens a, .bouton, .vitrine-chiffres > div {
+  transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, filter .18s ease;
+}
+.tuile:hover, .liens a:hover, .vitrine-chiffres > div:hover {
+  transform: translateY(-3px); box-shadow: 0 8px 18px rgba(20, 40, 75, .14);
+}
+.tuile:active, .liens a:active, .bouton:active { transform: translateY(0) scale(.98); box-shadow: none; }
+.bouton:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(142, 31, 53, .25); }
+
+/* 4. Diaporama des photos de l'accueil : fondu enchaîné et léger zoom. */
+.diaporama { position: relative; aspect-ratio: 4 / 3; overflow: hidden; border-radius: 16px; background: var(--marine); }
+.diaporama img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0;
+  transition: opacity 1.2s ease; transform: scale(1.04); }
+.diaporama img.visible { opacity: 1; animation: zoom-lent 6s ease-out forwards; }
+@keyframes zoom-lent { from { transform: scale(1.04); } to { transform: scale(1.12); } }
+.diaporama__points { position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 8px; }
+.diaporama__points button { width: 10px; height: 10px; padding: 0; border: 0; border-radius: 50%;
+  background: rgba(255, 255, 255, .55); cursor: pointer; transition: transform .2s, background-color .2s; }
+.diaporama__points button.actif { background: var(--or); transform: scale(1.3); }
+
+/* 5. Menu : rubriques qui se déplient en douceur ; voile qui apparaît en fondu. */
+@keyframes deplier { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+.menu__groupe[open] > ul, .menu__bureau[open] > ul { animation: deplier .22s ease both; }
+.menu { transition: transform .28s cubic-bezier(.2, .7, .2, 1); }
+.menu-ouvert .voile { animation: fondu .25s ease both; }
+@keyframes fondu { from { opacity: 0; } to { opacity: 1; } }
+
+/* 6. Signaux d'attention : pastille des notifications, courriers à signer. */
+@keyframes pulsation { 0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(242, 194, 48, .7); }
+  50% { transform: scale(1.15); box-shadow: 0 0 0 7px rgba(242, 194, 48, 0); } }
+.cloche__nombre { animation: pulsation 1.6s ease-in-out 3; }
+@keyframes halo { 0%, 100% { box-shadow: 0 0 0 0 rgba(142, 31, 53, .45); } 50% { box-shadow: 0 0 0 8px rgba(142, 31, 53, 0); } }
+.tuile--attention { animation: apparaitre .5s both, halo 1.8s ease-in-out .6s 4; }
+
+/* 7. Passage d'une page à l'autre : fondu (navigateurs récents, ex. Chrome sur Android). */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: .18s ease both fondu-sortie; }
+::view-transition-new(root) { animation: .25s ease both fondu; }
+@keyframes fondu-sortie { to { opacity: 0; } }
+
+/* 8. Attente visible (PDF, aperçu, envoi) : petit bandeau qui tourne. */
+.attente { position: fixed; left: 0; right: 0; bottom: 22px; margin: 0 auto; width: max-content; max-width: calc(100% - 32px); z-index: 60; display: flex;
+  align-items: center; gap: 10px; padding: 10px 16px; border-radius: 999px; background: var(--marine); color: #fff;
+  font-weight: 600; box-shadow: 0 8px 22px rgba(20, 40, 75, .3); animation: apparaitre .25s both; }
+.attente::before { content: ""; width: 18px; height: 18px; border-radius: 50%; border: 3px solid rgba(255, 255, 255, .3);
+  border-top-color: var(--or); animation: tourner .8s linear infinite; }
+@keyframes tourner { to { transform: rotate(360deg); } }
+
+/* Respect du réglage « réduire les animations » du téléphone ou de l'ordinateur. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after, ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) {
+    animation: none !important; transition: none !important;
+  }
+  .diaporama img.visible { transform: none; }
+}
