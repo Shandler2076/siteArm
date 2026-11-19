@@ -129,7 +129,7 @@ def test_lien_d_alerte_accessible_aux_bureaux(monde):
     m = monde["sec_p1"].mandats.get()
     m.date_fin_prevue = datetime.date(2027, 1, 9)
     m.save()
-    alertes_echeances(datetime.date(2026, 11, 10))
+    alertes_echeances(datetime.date(2026, 12, 20))
     n = Notification.objects.get(destinataire=monde["sec_p1"].compte)
     assert n.lien == "/"  # l'accueil, accessible à tous les destinataires
 

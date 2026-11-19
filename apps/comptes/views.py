@@ -12,18 +12,27 @@ class Connexion(auth_views.LoginView):
     redirect_authenticated_user = True
 
 
+def _vitrine(request):
+    from apps.organisation.models import Circuit, Paroisse, Region
+
+    chiffres = {
+        "regions": Region.objects.filter(active=True).count(),
+        "circuits": Circuit.objects.filter(active=True).count(),
+        "paroisses": Paroisse.objects.filter(active=True).count(),
+    }
+    return render(request, "vitrine.html", {"chiffres": chiffres})
+
+
 def accueil(request):
     """Page d'accueil publique (présentation du mouvement) ; tableau de bord une fois connecté."""
     if not request.user.is_authenticated:
-        from apps.organisation.models import Circuit, Paroisse, Region
-
-        chiffres = {
-            "regions": Region.objects.filter(active=True).count(),
-            "circuits": Circuit.objects.filter(active=True).count(),
-            "paroisses": Paroisse.objects.filter(active=True).count(),
-        }
-        return render(request, "vitrine.html", {"chiffres": chiffres})
+        return _vitrine(request)
     return render(request, "accueil.html")
+
+
+def accueil_du_site(request):
+    """La page d'accueil du site elle-même, aussi une fois connecté (décision du 19/11/2026)."""
+    return _vitrine(request)
 
 
 class ChangerMotDePasse(auth_views.PasswordChangeView):

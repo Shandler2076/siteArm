@@ -89,7 +89,9 @@ def _choisir_mois(membre, montant, mois_choisis, jour) -> list[tuple[datetime.da
     fin_annee = courant.replace(month=12)
     s = situation(membre, courant)
     occupes = s.payes | s.en_attente
-    debut = s.dus[0] if s.dus else max(depart, premier_du_mois(membre.date_enregistrement.date()))
+    from apps.cotisations.regles import debut_cotisations
+
+    debut = s.dus[0] if s.dus else max(depart, debut_cotisations(membre))
     liste = tarifs()
     # Paiement d'avance (mois après le mois en cours) : seulement pour un membre encore dans le
     # mouvement. Mois passés ou en cours : seulement les mois dus (pas pendant une exclusion…).

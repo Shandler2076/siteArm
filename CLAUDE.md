@@ -107,6 +107,12 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Logos : `LOGO_CONGREGATION_SANS_TEXTE` (triangle + anges, sans texte) là où le nom de la
   Congrégation est déjà écrit (courriers, fiche du membre, accueil) ; l'ancien logo avec le texte en
   arc reste sur les autres PDF (listes, statistiques, autorisations).
+- Bureaux (19/11/2026) : alertes d'échéance PAR BUREAU à 30/14/7 jours puis échu
+  (`bureaux/services.py::alertes_echeances`, modèle `AlerteBureau`) ; page « Bureaux en place »
+  (`views_bn.bureaux_en_place`, composition `bn_bureau`). Cotisations : mois dus depuis janvier de
+  l'année d'intégration (`cotisations/regles.py::debut_cotisations`), pas depuis l'inscription.
+  Événements : « passés » = tenus (convocations envoyées) ; « non aboutis » à part. Menu : lien
+  « Accueil du site » (`/site/`) ; bouton « Voir » sur tout mot de passe (`static/js/site.js`).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 

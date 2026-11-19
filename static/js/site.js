@@ -62,7 +62,31 @@
     });
   }
 
+  /* « Voir » à côté de chaque mot de passe (décision du 19/11/2026). */
+  function voirMotDePasse(champ) {
+    if (champ.dataset.voir) return;
+    champ.dataset.voir = "1";
+    var enveloppe = document.createElement("span");
+    enveloppe.className = "mot-de-passe";
+    champ.parentNode.insertBefore(enveloppe, champ);
+    enveloppe.appendChild(champ);
+    var bouton = document.createElement("button");
+    bouton.type = "button";
+    bouton.className = "voir-mdp";
+    bouton.textContent = "Voir";
+    bouton.setAttribute("aria-label", "Afficher le mot de passe");
+    bouton.addEventListener("click", function () {
+      var cache = champ.type === "password";
+      champ.type = cache ? "text" : "password";
+      bouton.textContent = cache ? "Cacher" : "Voir";
+      bouton.setAttribute("aria-label", cache ? "Cacher le mot de passe" : "Afficher le mot de passe");
+      champ.focus();
+    });
+    enveloppe.appendChild(bouton);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('input[type="password"]').forEach(voirMotDePasse);
     document.querySelectorAll("form").forEach(cascade);
     document.querySelectorAll(".deroulant").forEach(deroulant);
     document.querySelectorAll("input[data-filtre]").forEach(filtreListe);

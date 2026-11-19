@@ -389,3 +389,19 @@ details.encadre > summary.bouton { display: inline-block; width: auto; }
 .apercu-signature span { font-size: .8em; color: #666; }
 .apercu-pied { border-top: 2px solid #7A1F2B; margin-top: 2em; padding-top: .4em; font-size: .6em; text-align: center; font-weight: 700; font-family: sans-serif; }
 @media (max-width: 480px) { .apercu-page { font-size: 80% !important; } }
+
+/* Bureaux en place (19/11/2026) */
+.tableau-bureaux caption { text-align: left; font-weight: 800; color: var(--marine); padding: 8px 4px; font-size: 1.05rem; }
+.tableau-bureaux caption small { font-weight: 400; color: var(--gris); }
+.paroisses-bureaux { list-style: none; margin: 0; padding: 0; }
+.paroisses-bureaux li { padding: 3px 0; white-space: normal; }
+.tableau-bureaux td { white-space: normal !important; }
+.etiquette { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: .82rem; font-weight: 700; text-decoration: none; }
+.etiquette--oui { background: #E3F2E6; color: #1E5E2E; }
+.etiquette--non { background: #F4F6FA; color: var(--gris); }
+/* Accueil du site dans le menu ; bouton « Voir le mot de passe » */
+.menu__accueil { display: block; margin: 8px 12px; padding: 8px 12px; border-radius: 8px; background: var(--or); color: var(--marine); font-weight: 800; text-decoration: none; }
+.mot-de-passe { position: relative; display: flex; gap: 6px; align-items: center; }
+.mot-de-passe input { flex: 1; }
+.voir-mdp { flex: none; border: 1px solid #C9D1DE; border-radius: 8px; background: #fff; padding: 8px 10px; cursor: pointer; font-size: .85rem; color: var(--marine); }
+.vitrine-connecte { background: rgba(255,255,255,.15); border-radius: 8px; padding: 8px 12px; margin: 0 auto 12px; max-width: 420px; }

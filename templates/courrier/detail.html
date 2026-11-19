@@ -40,12 +40,14 @@
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="valider"><input type="hidden" name="version" value="{{ c.version }}">
           <button type="submit" class="bouton" onclick="return confirm('Signer et envoyer ce courrier ? Il ne pourra plus être modifié.');">{% if qualite.0 == "po" %}Signer pour ordre et envoyer{% else %}Signer et envoyer{% endif %}</button></form>
       {% else %}<p class="message message--error">Déposez d'abord l'image de votre signature : <a href="{% url 'courrier:ma_signature' %}">Ma signature</a>.</p>{% endif %}
+      {% if qualite.0 == "titulaire" and c.prepare_par_id != user.pk %}
       <details class="demande-correction"><summary>Demander une correction au secrétaire</summary>
         <p class="aide">Le courrier n'est pas signé : il retourne au secrétaire avec votre message, et passe « en correction ». Vous le signerez quand il vous sera soumis de nouveau.</p>
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="renvoyer">
           <label class="champ"><span>Votre message au secrétaire (ce qu'il faut corriger)</span><input name="motif" maxlength="300" required></label>
           <button type="submit" class="bouton bouton--secondaire">Envoyer la demande de correction</button></form>
       </details>
+      {% endif %}
     </div>
   {% endif %}
   {% if expediteur and not c.envoye %}

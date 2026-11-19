@@ -156,52 +156,75 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
     return contenu
 
 
-DELAI_ALERTE = datetime.timedelta(days=60)
+DELAI_ALERTE = datetime.timedelta(days=30)
+PALIERS = (30, 14, 7)  # jours avant la fin du mandat d'un bureau (décision du 19/11/2026)
 
 
-def _destinataires_echeance(mandat: Mandat):
-    from apps.bureaux.perimetre import Unite, titulaires_gestion
+def nom_du_bureau(unite) -> str:
+    """« du bureau de la Paroisse P1 », « du bureau du Circuit X », « du Bureau National… »."""
+    from apps.bureaux.perimetre import Niveau
 
-    unite = Unite(mandat.fonction.niveau, mandat.unite)
-    return [
-        mandat.membre.compte,
-        *titulaires_gestion(unite),
-        *titulaires_gestion(Unite("national", None)),
-    ]
+    if unite.niveau == Niveau.NATIONAL:
+        return "du Bureau National de Commandement"
+    article = "du" if unite.niveau == Niveau.CIRCUIT else "de la"
+    return f"du bureau {article} {unite.libelle}"
+
+
+def bureaux_a_echeance(jour: datetime.date, horizon: datetime.timedelta = DELAI_ALERTE):
+    """[(unité, date de fin, mandats)] des bureaux dont le mandat finit avant `jour + horizon`
+    (ou est déjà échu), un élément par bureau et par date de fin."""
+    from apps.bureaux.perimetre import Unite
+
+    groupes: dict = {}
+    mandats = (
+        Mandat.objects.en_cours(jour)
+        .filter(date_fin_prevue__lte=jour + horizon)
+        .select_related("fonction", "membre__compte", "paroisse", "circuit", "region")
+        .order_by("date_fin_prevue")
+    )
+    for m in mandats:
+        unite = Unite(m.fonction.niveau, m.unite)
+        groupes.setdefault((unite.cle, m.date_fin_prevue), (unite, m.date_fin_prevue, []))[
+            2
+        ].append(m)
+    return sorted(groupes.values(), key=lambda g: (g[1], g[0].cle))
 
 
 def alertes_echeances(jour: datetime.date | None = None) -> tuple[int, int]:
-    """Prévient 60 jours avant la fin prévue, puis quand le mandat est échu. Ne coupe rien."""
+    """Prévient chaque bureau (ses membres et le Bureau national) à 30, 14 et 7 jours de la fin
+    de son mandat, puis à l'échéance. Une seule alerte par bureau et par palier. Ne coupe rien."""
     from django.utils import timezone
 
-    from apps.bureaux.perimetre import Unite
+    from apps.bureaux.models import AlerteBureau
+    from apps.bureaux.perimetre import Unite, titulaires_gestion
     from apps.notifications.services import notifier
 
     j = jour or timezone.localdate()
     echeances = echus = 0
-    mandats = (
-        Mandat.objects.en_cours(j)
-        .filter(date_fin_prevue__lte=j + DELAI_ALERTE)
-        .select_related("fonction", "membre__compte", "paroisse", "circuit", "region")
-    )
-    for m in mandats:
-        unite = Unite(m.fonction.niveau, m.unite)
-        texte = f"Le mandat de {m.fonction.nom} ({unite.libelle}) de {m.membre.nom_complet}"
-        fin = m.date_fin_prevue.strftime("%d/%m/%Y")
-        if m.date_fin_prevue > j and m.alerte_echeance_le is None:
-            notifier(_destinataires_echeance(m), f"{texte} arrive à échéance le {fin}.", "/")
-            m.alerte_echeance_le = j
-            m.save(update_fields=["alerte_echeance_le"])
-            echeances += 1
-        elif m.date_fin_prevue <= j and m.alerte_echu_le is None:
-            notifier(
-                _destinataires_echeance(m),
-                f"{texte} est échu depuis le {fin} et n'a pas été renouvelé.",
-                "/",  # l'accueil montre à chacun les liens auxquels il a droit
+    nationaux = list(titulaires_gestion(Unite("national", None)))
+    for unite, fin, mandats in bureaux_a_echeance(j):
+        jours = (fin - j).days
+        palier = 0 if jours <= 0 else min(p for p in PALIERS if jours <= p)
+        _alerte, creee = AlerteBureau.objects.get_or_create(
+            unite_cle=unite.cle, date_fin=fin, palier=palier, defaults={"envoyee_le": j}
+        )
+        if not creee:
+            continue
+        date = fin.strftime("%d/%m/%Y")
+        if palier:
+            texte = (
+                f"Le mandat {nom_du_bureau(unite)} arrive à échéance le {date} "
+                f"(dans {jours} jour{'s' if jours > 1 else ''})."
             )
-            m.alerte_echu_le = j
-            m.save(update_fields=["alerte_echu_le"])
+            echeances += 1
+        else:
+            texte = (
+                f"Le mandat {nom_du_bureau(unite)} est arrivé à échéance le {date} : "
+                "installez le nouveau bureau."
+            )
             echus += 1
+        destinataires = [m.membre.compte for m in mandats if m.membre.compte_id] + nationaux
+        notifier(destinataires, texte, "/")
     return echeances, echus
 
 

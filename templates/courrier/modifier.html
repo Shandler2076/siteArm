@@ -12,12 +12,12 @@
       <label class="champ champ--requis"><span>Lieu</span><input name="lieu" maxlength="100" required value="{{ c.lieu }}"></label>
     </div>
     {% if c.nature == "autre" %}<label class="champ champ--requis"><span>Titre du document</span><input name="titre" maxlength="120" required value="{{ c.titre }}"></label>{% endif %}
-    <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ c.objet }}" data-clavier></label>
     <h2>Présentation</h2>
     {% include "courrier/_mise_en_forme.html" with v=c %}
     <h2>Contenu</h2>
     {% if c.mode == "importe" %}<label class="champ"><span>Remplacer le courrier importé (facultatif)</span><input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png"></label>{% endif %}
     {% include "courrier/_langue_adresse.html" with v=c %}
+    <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ c.objet }}" data-clavier></label>
     {% include "courrier/_outils_texte.html" %}
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ c.texte }}</textarea></label>
     {% include "courrier/_clavier.html" %}

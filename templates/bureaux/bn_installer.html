@@ -13,8 +13,9 @@
         </select>
       </div>
       {% if choix_unites %}
+        <input type="search" class="recherche-liste" data-filtre="choix-unite" placeholder="Rechercher l'unité par son nom…" aria-label="Rechercher l'unité">
         <div class="champ"><span>Unité</span>
-          <select name="unite">
+          <select name="unite" id="choix-unite" size="8">
             {% for u in choix_unites %}<option value="{{ u.pk }}">{{ u.nom }}</option>{% endfor %}
           </select>
         </div>
@@ -28,7 +29,8 @@
       {% csrf_token %}
       <input type="hidden" name="niveau" value="{{ unite.niveau }}">
       {% if unite.objet %}<input type="hidden" name="unite" value="{{ unite.objet.pk }}">{% endif %}
-      <label class="champ champ--requis"><span>Date de début</span><input type="date" name="date_debut" value="{{ date_debut }}"></label>
+      <label class="champ champ--requis"><span>Date de début du mandat</span><input type="date" name="date_debut" value="{{ date_debut }}">
+        <small class="aide">La vraie date d'installation du bureau, même passée (un bureau en place depuis 3 mois avant l'ouverture du site : mettez sa date d'installation). Les échéances se calculent à partir de cette date.</small></label>
       {% for fonction, actuel, saisie in fonctions %}
         <label class="champ"><span>{{ fonction.nom }}{% if not fonction.membre_du_bureau %} (hors bureau){% endif %}</span>
           <input type="text" name="fonction_{{ fonction.pk }}" value="{{ saisie }}" placeholder="Matricule" autocapitalize="characters">

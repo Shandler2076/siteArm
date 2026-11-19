@@ -106,20 +106,86 @@ def fonctions(request):
 
 @bn_requis
 def echeances(request):
+    """Échéances par bureau (décision du 19/11/2026) : un bureau, pas une personne."""
     from django.utils import timezone
 
-    from apps.bureaux.models import Mandat
-    from apps.bureaux.services import DELAI_ALERTE
+    from apps.bureaux.services import bureaux_a_echeance
 
     j = timezone.localdate()
-    mandats = (
-        Mandat.objects.en_cours(j)
-        .filter(date_fin_prevue__lte=j + DELAI_ALERTE)
-        .select_related("fonction", "membre", "paroisse", "circuit", "region")
-        .order_by("date_fin_prevue")
-    )
     lignes = [
-        {"mandat": m, "unite": Unite(m.fonction.niveau, m.unite), "echu": m.date_fin_prevue <= j}
-        for m in mandats
+        {"unite": unite, "fin": fin, "jours": (fin - j).days, "echu": fin <= j, "nombre": len(m)}
+        for unite, fin, m in bureaux_a_echeance(j)
     ]
     return render(request, "bureaux/bn_echeances.html", {"lignes": lignes})
+
+
+def _bureaux_installes(jour=None) -> dict:
+    """{clé d'unité : mandats en cours} pour tous les bureaux installés, en une requête."""
+    from apps.bureaux.models import Mandat
+
+    installes: dict = {}
+    for m in (
+        Mandat.objects.en_cours(jour)
+        .select_related("fonction", "membre")
+        .order_by("fonction__ordre")
+    ):
+        niveau = m.fonction.niveau
+        cle = "national" if niveau == Niveau.NATIONAL else f"{niveau}-{getattr(m, niveau + '_id')}"
+        installes.setdefault(cle, []).append(m)
+    return installes
+
+
+@bn_requis
+def bureaux_en_place(request):
+    """Tableaux par région : circuits et paroisses, installés ou non (décision du 19/11/2026)."""
+    from apps.organisation.models import Circuit, Paroisse, Region
+
+    installes = _bureaux_installes()
+    paroisses: dict = {}
+    for p in Paroisse.objects.filter(active=True).order_by("nom"):
+        paroisses.setdefault(p.circuit_id, []).append(
+            {"objet": p, "cle": f"paroisse-{p.pk}", "installe": f"paroisse-{p.pk}" in installes}
+        )
+    circuits: dict = {}
+    for c in Circuit.objects.filter(active=True).order_by("nom"):
+        circuits.setdefault(c.region_id, []).append(
+            {
+                "objet": c,
+                "cle": f"circuit-{c.pk}",
+                "installe": f"circuit-{c.pk}" in installes,
+                "paroisses": paroisses.get(c.pk, []),
+            }
+        )
+    regions = []
+    for r in Region.objects.filter(active=True).order_by("code"):
+        lignes = circuits.get(r.pk, [])
+        toutes = [p for c in lignes for p in c["paroisses"]]
+        regions.append(
+            {
+                "objet": r,
+                "cle": f"region-{r.pk}",
+                "installe": f"region-{r.pk}" in installes,
+                "circuits": lignes,
+                "nb_paroisses": len(toutes),
+                "nb_installees": sum(1 for p in toutes if p["installe"]),
+            }
+        )
+    return render(
+        request,
+        "bureaux/bn_bureaux.html",
+        {"regions": regions, "national_installe": "national" in installes},
+    )
+
+
+@bn_requis
+def bureau_en_place(request, cle):
+    """Composition d'un bureau installé : matricule, noms, postes."""
+    from django.http import Http404
+
+    from apps.bureaux.perimetre import unite_par_cle
+
+    unite = unite_par_cle(cle)
+    if unite is None:
+        raise Http404
+    mandats = _bureaux_installes().get(unite.cle, [])
+    return render(request, "bureaux/bn_bureau.html", {"unite": unite, "mandats": mandats})

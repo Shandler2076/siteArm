@@ -16,7 +16,6 @@
         <small class="aide">Attribué automatiquement ; définitif à la signature (le suivant du bureau ce jour-là).</small></p>
       <label class="champ champ--requis"><span>Lieu</span><input name="lieu" maxlength="100" required value="{{ d.lieu|default:lieu }}"></label>
     </div>
-    <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ d.objet|default:'' }}" data-clavier></label>
 
     <h2>Destinataires</h2>
     {% if niveaux %}<fieldset class="choix-ligne"><legend>Niveaux entiers</legend>
@@ -36,6 +35,7 @@
     </fieldset>
     <label class="champ" id="champ-fichier"><span>Courrier importé (PDF, JPEG ou PNG, 10 Mo au plus)</span><input type="file" name="fichier" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"></label>
     {% include "courrier/_langue_adresse.html" with v=d %}
+    <label class="champ champ--requis"><span>Objet</span><input name="objet" maxlength="250" required value="{{ d.objet|default:'' }}" data-clavier></label>
     {% include "courrier/_outils_texte.html" %}
     <label class="champ"><span>Texte</span><textarea name="texte" rows="14" data-clavier>{{ d.texte|default:'' }}</textarea>
       <small class="aide">Laissez une ligne vide entre deux paragraphes. Pour un courrier importé, le texte est facultatif (mot d'accompagnement).</small></label>

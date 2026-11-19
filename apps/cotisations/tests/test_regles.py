@@ -21,11 +21,19 @@ def test_rien_du_sans_mois_de_depart(monde):
     assert mois_dus(monde["m1"], D(2026, 11, 12)) == []
 
 
-def test_mois_dus_depuis_depart_ou_enregistrement(monde, depart):
+def test_mois_dus_depuis_depart_et_non_depuis_l_inscription_sur_le_site(monde, depart):
+    """Décision du 19/11/2026 : un membre inscrit sur le site en septembre doit depuis janvier."""
     ancien = enregistre_le(monde["m1"], D(2025, 6, 3))
     recent = enregistre_le(monde["m2"], D(2026, 9, 20))
     assert mois_dus(ancien, D(2026, 3, 31)) == [M(2026, 1), M(2026, 2), M(2026, 3)]
-    assert mois_dus(recent, D(2026, 11, 12)) == [M(2026, 9), M(2026, 10), M(2026, 11)]
+    assert mois_dus(recent, D(2026, 3, 31)) == [M(2026, 1), M(2026, 2), M(2026, 3)]
+
+
+def test_mois_dus_depuis_janvier_de_l_annee_d_integration(monde, depart):
+    m = enregistre_le(monde["m2"], D(2026, 9, 20))
+    m.annee_integration = 2027
+    m.save(update_fields=["annee_integration"])
+    assert mois_dus(m, D(2027, 2, 28)) == [M(2027, 1), M(2027, 2)]
 
 
 def test_pas_du_apres_deces_et_de_nouveau_apres_rehabilitation(monde, depart):

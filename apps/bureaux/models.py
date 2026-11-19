@@ -122,3 +122,21 @@ class Mandat(models.Model):
     def est_en_cours(self, jour: datetime.date | None = None) -> bool:
         j = jour or timezone.localdate()
         return self.date_debut <= j and (self.date_fin is None or self.date_fin > j)
+
+
+class AlerteBureau(models.Model):
+    """Alerte d'échéance déjà envoyée pour un bureau (décision du 19/11/2026 : une alerte par
+    bureau, à 30, 14 et 7 jours, puis à l'échéance ; jamais une par personne)."""
+
+    unite_cle = models.CharField("bureau", max_length=30)
+    date_fin = models.DateField("fin du mandat")
+    palier = models.PositiveSmallIntegerField("jours avant la fin (0 : échu)")
+    envoyee_le = models.DateField("envoyée le")
+
+    class Meta:
+        verbose_name = "alerte d'échéance d'un bureau"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["unite_cle", "date_fin", "palier"], name="une_alerte_par_palier"
+            )
+        ]
