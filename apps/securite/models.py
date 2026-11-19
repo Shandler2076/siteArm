@@ -1,12 +1,14 @@
 from django.conf import settings
 from django.db import models
 
+from apps.securite.chiffrement import SecretChiffre
+
 
 class DoubleVerification(models.Model):
     compte = models.OneToOneField(
         settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="double_verification"
     )
-    secret = models.CharField("clé secrète", max_length=64, blank=True)
+    secret = SecretChiffre("clé secrète (chiffrée en base)", blank=True)
     active = models.BooleanField("activée", default=False)
     date_activation = models.DateTimeField("activée le", null=True, blank=True)
     dernier_pas = models.BigIntegerField("dernier code utilisé", null=True, blank=True)

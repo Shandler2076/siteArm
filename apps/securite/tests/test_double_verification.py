@@ -149,7 +149,7 @@ def test_activation_possible_avec_un_seul_telephone(bn):
     secret = bn.session["double_verification_secret"]
     assert 'href="otpauth://totp/' in html and f"secret={secret}" in html
     assert "Ajouter à mon application d" in html
-    assert "Copier la clé" in html and f'data-cle="{secret}"' in html
+    assert "Copier la clé" in html and f'data-texte="{secret}"' in html
     assert html.index("otpauth://") < html.index("<svg")  # le bouton passe avant le QR code
 
 

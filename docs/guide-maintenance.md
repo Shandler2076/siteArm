@@ -91,6 +91,14 @@ donner l'autorisation de transition…) :
 | `DJANGO_ALLOWED_HOSTS` | Nom(s) de domaine, ex. `armeedusalut.bj` |
 | `DJANGO_CSRF_TRUSTED_ORIGINS` | Adresse(s) complète(s), ex. `https://armeedusalut.bj` |
 | `DATABASE_URL` | Fournie par l'hébergeur (PostgreSQL) |
+| `DJANGO_CLE_DOUBLE_VERIFICATION` | Facultatif : clé de chiffrement des clés de double vérification (sinon dérivée de `DJANGO_SECRET_KEY`) |
+| `DJANGO_DERRIERE_RELAIS` | `True` chez alwaysdata (après la vérification décrite dans `docs/securite/analyse-2026-11-19.md`) |
+| `DJANGO_ADMIN_LECTURE_SEULE` | `True` par défaut sur le vrai site (§ 7) |
+
+**Attention :** si `DJANGO_SECRET_KEY` (ou `DJANGO_CLE_DOUBLE_VERIFICATION`) change, les clés de
+double vérification enregistrées deviennent illisibles : chaque compte du BN doit refaire son
+activation (`python manage.py reinitialiser_double_verification <identifiant>`). Gardez ces clés
+dans la sauvegarde chiffrée (le `.env` y est déjà).
 
 Générer une clé secrète :
 `python -c "from django.core.management.utils import get_random_secret_key as g; print(g())"`
