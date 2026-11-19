@@ -260,7 +260,7 @@ def construire_menu(request) -> list[Groupe]:
 
 
 def _mon_espace(user) -> list[Lien]:
-    liens = [Lien("Mon accueil", reverse("accueil"), exact=True)]
+    liens = [Lien("Ma page", reverse("accueil"), exact=True)]
     if _membre(user) is not None:
         liens += [
             Lien("Ma fiche et mon parcours", reverse("membres:ma_fiche")),

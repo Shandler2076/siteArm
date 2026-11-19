@@ -78,7 +78,7 @@ def test_eligibles_distingues_des_listes(compte_technique, monde):
 
 
 def test_accueil_seulement_sur_la_page_d_accueil(compte_technique):
-    assert _actifs(_menu(compte_technique, "/")) == [("Mon espace", "Mon accueil")]
+    assert _actifs(_menu(compte_technique, "/")) == [("Mon espace", "Ma page")]
     assert _actifs(_menu(compte_technique, "/page-inconnue/")) == []
 
 

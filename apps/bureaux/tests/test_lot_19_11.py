@@ -91,6 +91,6 @@ def test_recherche_d_unite_a_l_installation(client_technique, territoire):
 
 def test_accueil_du_site_dans_le_menu_et_page_connecte(client_technique):
     html = _html(client_technique.get("/"))
-    assert 'href="/site/"' in html and "Accueil du site" in html
+    assert 'href="/site/"' in html and ">⌂ Accueil<" in html
     html = _html(client_technique.get("/site/"))
     assert "Vous êtes connecté" in html and "Ọmọ Ogun Igbala" in html

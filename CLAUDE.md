@@ -112,7 +112,7 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (`views_bn.bureaux_en_place`, composition `bn_bureau`). Cotisations : mois dus depuis janvier de
   l'année d'intégration (`cotisations/regles.py::debut_cotisations`), pas depuis l'inscription.
   Événements : « passés » = tenus (convocations envoyées) ; « non aboutis » à part. Menu : lien
-  « Accueil du site » (`/site/`) ; bouton « Voir » sur tout mot de passe (`static/js/site.js`).
+  « Accueil » (`/site/`) et « Ma page » dans Mon espace ; bouton « Voir » sur tout mot de passe (`static/js/site.js`).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 

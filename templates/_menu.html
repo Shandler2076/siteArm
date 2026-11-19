@@ -3,7 +3,7 @@
     <strong>{{ user.nom_affiche|default:user.identifiant }}</strong>
     {% for f in mes_fonctions %}<span>{{ f }}</span>{% empty %}<span>{% if user.membre %}Membre simple{% else %}Compte technique{% endif %}</span>{% endfor %}
   </div>
-  <a class="menu__accueil" href="{% url 'accueil_du_site' %}">⌂ Accueil du site</a>
+  <a class="menu__accueil" href="{% url 'accueil_du_site' %}">⌂ Accueil</a>
   {% for groupe in menu %}
   <details class="menu__groupe"{% if groupe.ouvert %} open{% endif %}>
     <summary class="menu__titre">{{ groupe.titre }}</summary>

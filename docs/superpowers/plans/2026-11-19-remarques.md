@@ -9,8 +9,8 @@
 4. **Échéances par bureau**, jamais par personne : « Le mandat du bureau de … arrive à échéance
    le … (dans N jours) », à **30, 14 et 7 jours**, puis à l'échéance ; page « Mandats à échéance »
    par bureau.
-5. Menu : **« ⌂ Accueil du site »** tout en haut (page d'accueil publique ; une fois connecté :
-   « Vous êtes connecté ») ; l'accueil de « Mon espace » devient « Mon accueil ».
+5. Menu : **« ⌂ Accueil »** tout en haut (page d'accueil publique ; une fois connecté :
+   « Vous êtes connecté ») ; l'accueil de « Mon espace » devient « Ma page » (précision du 19/11).
 6. **Installer un bureau** : recherche de l'unité par son nom. La date de début se saisit déjà à la
    main : mettre la vraie date d'installation (même antérieure au site) ; les échéances en partent.
 7. **Bureaux en place** (Bureaux et droits) : un tableau par région (installé ou non), circuits
