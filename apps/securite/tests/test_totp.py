@@ -25,3 +25,12 @@ def test_nouveau_secret_et_uri():
     assert len(base64.b32decode(s)) == 20
     uri = uri_provisioning(s, "2015-01AS-0001")
     assert uri.startswith("otpauth://totp/") and f"secret={s}" in uri and "issuer=" in uri
+
+
+def test_uri_courte_et_lisible_par_google_authenticator():
+    """Code QR : contenu ASCII, espaces en %20 (jamais « + »), sans réglages par défaut."""
+    uri = uri_provisioning("JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP", "2015-01AS-0001")
+    assert uri.isascii() and "+" not in uri and "%C3" not in uri
+    assert uri.startswith("otpauth://totp/Armee%20du%20Salut%20Benin:2015-01AS-0001?")
+    assert "issuer=Armee%20du%20Salut%20Benin" in uri
+    assert "digits=" not in uri and "period=" not in uri

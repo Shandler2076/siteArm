@@ -10,6 +10,9 @@ from urllib.parse import quote, urlencode
 PERIODE = 30
 CHIFFRES = 6
 EMETTEUR = "Armée du Salut Bénin"
+# Dans le code QR : sans accents (certaines applications les lisent mal), et le plus court
+# possible (moins de petits carrés = lecture plus facile sur un écran).
+EMETTEUR_QR = "Armee du Salut Benin"
 
 
 def nouveau_secret() -> str:
@@ -47,7 +50,9 @@ def verifier(secret: str, code: str, instant: float, dernier_pas: int | None) ->
 
 
 def uri_provisioning(secret: str, identifiant: str) -> str:
-    etiquette = quote(f"{EMETTEUR}:{identifiant}")
+    """Adresse « otpauth » (format Google Authenticator) : 6 chiffres et 30 secondes sont les
+    valeurs par défaut de toutes les applications, inutile de les écrire."""
+    etiquette = quote(EMETTEUR_QR) + ":" + quote(identifiant)
     return f"otpauth://totp/{etiquette}?" + urlencode(
-        {"secret": secret, "issuer": EMETTEUR, "digits": CHIFFRES, "period": PERIODE}
+        {"secret": secret, "issuer": EMETTEUR_QR}, quote_via=quote
     )
