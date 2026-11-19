@@ -482,11 +482,15 @@ def modifier(request, pk):
     )
 
 
-def _fichier(champ, nom):
+def _fichier(champ, nom, *, telecharger=True):
+    """Fichier privé. Ce qui a été importé vient de l'extérieur : proposé au téléchargement, pas
+    ouvert dans le navigateur sous l'adresse du site."""
     if not champ:
         raise Http404
     type_contenu = mimetypes.guess_type(champ.name)[0] or "application/octet-stream"
-    r = FileResponse(champ.open("rb"), content_type=type_contenu, filename=nom)
+    r = FileResponse(
+        champ.open("rb"), content_type=type_contenu, filename=nom, as_attachment=telecharger
+    )
     r["Cache-Control"] = "private, no-store"
     return r
 
@@ -578,7 +582,7 @@ def ma_signature_image(request):
     sig = services.signature_active(request.user)
     if sig is None:
         raise Http404
-    return _fichier(sig.image, "signature.png")
+    return _fichier(sig.image, "signature.png", telecharger=False)  # image produite par le site
 
 
 def verifier(request, jeton):

@@ -44,7 +44,29 @@ URL="$(grep -E '^DATABASE_URL=' .env 2>/dev/null | head -1 | cut -d= -f2- || tru
 URL="${DATABASE_URL:-$URL}"
 case "$URL" in
     postgres://*|postgresql://*)
-        pg_dump --format=custom --no-owner --file "$CIBLE/base/postgresql.dump" "$URL"
+        # Le mot de passe passe par un fichier PGPASSFILE privé, jamais par la ligne de commande
+        # (visible des autres processus du serveur).
+        export PGPASSFILE="$TRAVAIL/pgpass"
+        # L'adresse (avec le mot de passe) passe par l'environnement, pas par les arguments.
+        URL_BASE="$URL" "$PYTHON" - "$PGPASSFILE" > "$TRAVAIL/pgargs" <<'PY'
+import os
+import sys
+import urllib.parse as u
+
+p = u.urlsplit(os.environ["URL_BASE"])
+def esc(s):
+    return (s or "").replace("\\", "\\\\").replace(":", "\\:")
+hote, port = p.hostname or "localhost", str(p.port or 5432)
+base, user = u.unquote(p.path.lstrip("/")), u.unquote(p.username or "")
+with open(sys.argv[1], "w") as f:
+    f.write(":".join(esc(x) for x in (hote, port, base, user, u.unquote(p.password or ""))) + "\n")
+print(hote, port, user, base, sep="\n")
+PY
+        chmod 600 "$PGPASSFILE"
+        mapfile -t PG < "$TRAVAIL/pgargs"
+        pg_dump --format=custom --no-owner --file "$CIBLE/base/postgresql.dump" \
+            --host "${PG[0]}" --port "${PG[1]}" --username "${PG[2]}" --dbname "${PG[3]}" \
+            --no-password
         echo "   copie PostgreSQL faite." ;;
     *)
         echo "   le site n'utilise pas PostgreSQL : le format universel suffit." ;;
@@ -77,6 +99,11 @@ tar -C "$TRAVAIL" -czf - "$NOM" \
     | gpg --batch --yes --symmetric --cipher-algo AES256 --pinentry-mode loopback \
           --passphrase-fd 3 --output "$DESTINATION/$NOM.tar.gz.gpg" 3<<<"$PHRASE"
 chmod 600 "$DESTINATION/$NOM.tar.gz.gpg"
+
+# Rotation : on garde les GARDER dernières sauvegardes (10 par défaut) dans ce dossier.
+GARDER="${GARDER:-10}"
+ls -1t "$DESTINATION"/siteArm-sauvegarde-*.tar.gz.gpg 2>/dev/null | tail -n +"$((GARDER + 1))" \
+    | while read -r ANCIENNE; do rm -f -- "$ANCIENNE"; echo "   ancienne sauvegarde effacée : $ANCIENNE"; done
 
 TAILLE="$(du -h "$DESTINATION/$NOM.tar.gz.gpg" | cut -f1)"
 echo

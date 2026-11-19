@@ -49,3 +49,11 @@ def test_versions_figees():
         if ligne.strip() and not ligne.startswith("#")
     ]
     assert lignes and all("==" in ligne for ligne in lignes)
+
+
+@pytest.mark.django_db
+def test_entete_permissions_policy(client):
+    """Le site n'utilise ni caméra, ni micro, ni position : le navigateur les refuse d'office."""
+    entete = client.get("/").headers["Permissions-Policy"]
+    for api in ("camera=()", "microphone=()", "geolocation=()", "payment=()"):
+        assert api in entete
