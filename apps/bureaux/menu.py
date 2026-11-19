@@ -316,16 +316,12 @@ def construire_menu(request) -> list[Groupe]:
     from apps.bureaux import deux_cles
 
     if deux_cles.peut_voir_les_demandes(user):
-        from apps.bureaux.models import DemandeValidation
-
         bureaux.insert(
             0,
             Lien(
                 "Actions à valider",
                 reverse("bureaux:bn_validations"),
-                compteur=DemandeValidation.objects.filter(
-                    etat=DemandeValidation.Etat.ATTENTE
-                ).count(),
+                compteur=deux_cles.demandes_en_attente().count(),
             ),
         )
     if deux_cles._a_la_fonction(user, "Président"):

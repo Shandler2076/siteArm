@@ -18,9 +18,7 @@ def test_page_publique(client, db):
         "APDP",
     ):
         assert titre in html, titre
-    assert "photo du CIP" in html and "Bureau National de Commandement" in html.replace(
-        "Bureau National de Commandement", "Bureau National de Commandement"
-    )
+    assert "photo du CIP" in html and "Bureau National de Commandement" in html
 
 
 def test_liens_vers_la_page(client, monde):

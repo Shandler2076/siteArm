@@ -298,7 +298,8 @@ def remplacer(request, cle, pk):
         if not erreurs:
             motif = request.POST.get("motif", "")
             try:
-                if motif not in MOTIFS_DEPART:
+                # « incoherent » est réservé à la page « Mandats à corriger ».
+                if motif not in MOTIFS_DEPART or motif == "incoherent":
                     raise InstallationRefusee("Choisissez le motif du départ.")
                 if remplacant is not None:
                     _verifier_titulaire(unite, mandat.fonction, remplacant)
@@ -409,12 +410,26 @@ def fermer_mandat_incoherent(request, pk):
     from django.http import HttpResponseNotAllowed
     from django.utils import timezone
 
-    from apps.bureaux.services import mandats_incoherents
+    from apps.bureaux.models import Mandat
+    from apps.bureaux.perimetre import Unite as _Unite
+    from apps.bureaux.services import raison_hors_zone
+    from apps.membres.models import Statut
 
     if request.method != "POST":
         return HttpResponseNotAllowed(["POST"])
-    mandat = next((m for m, _r in mandats_incoherents() if m.pk == pk), None)
-    if mandat is None:
+    mandat = (
+        Mandat.objects.filter(pk=pk)
+        .select_related("fonction", "membre", "paroisse", "circuit", "region")
+        .first()
+    )
+    a_corriger = mandat is not None and (
+        (mandat.date_fin is None or mandat.date_fin > timezone.localdate())
+        and (
+            mandat.membre.statut != Statut.ACTIF
+            or raison_hors_zone(_Unite(mandat.fonction.niveau, mandat.unite), mandat.membre)
+        )
+    )
+    if not a_corriger:
         messages.error(request, "Ce mandat n'est pas (ou plus) à corriger.")
     else:
         appliquer_ou_demander(

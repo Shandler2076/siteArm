@@ -170,3 +170,103 @@ def test_pages(bnc):
         {"delegataire": bnc["sna"].matricule, "objet": "deux_cles", "heures": "72"},
     )
     assert r.status_code == 302 and Delegation.objects.exists()
+
+
+def test_double_verification_pour_les_validateurs(bnc):
+    """Relecture : le Vice-président et un délégataire valident : code à 6 chiffres exigé."""
+    from django.test import override_settings
+
+    from apps.securite.services import doit_verifier
+
+    with override_settings(DOUBLE_VERIFICATION_BN=True):
+        assert doit_verifier(type(bnc["vp"].compte).objects.get(pk=bnc["vp"].compte.pk))
+        assert doit_verifier(type(bnc["sna"].compte).objects.get(pk=bnc["sna"].compte.pk))
+
+
+def test_le_secretaire_qui_a_perdu_sa_fonction(bnc):
+    """Relecture : à la validation, l'auteur doit encore être Secrétaire national."""
+    d, _ = dc.soumettre_ou_executer(bnc["sn"].compte, "installer", _installer_p1(bnc), "X")
+    bnc["sn"].mandats.update(date_fin=datetime.date.today())
+    d = dc.valider(d, par=bnc["pres"].compte)
+    assert d.etat == Etat.ECHEC and not _chef_p1()
+
+
+def test_erreur_imprevue_marquee_echec(bnc):
+    """Relecture : une donnée disparue ne bloque pas la demande (pas d'erreur 500)."""
+    donnees = _installer_p1(bnc)
+    d, _ = dc.soumettre_ou_executer(bnc["sn"].compte, "installer", donnees, "X")
+    DemandeValidation.objects.filter(pk=d.pk).update(
+        donnees={**donnees, "titulaires": {"999999": bnc["m1"].matricule}}
+    )
+    assert dc.valider(d, par=bnc["pres"].compte).etat == Etat.ECHEC
+
+
+def test_pas_de_validation_de_sa_propre_nomination(bnc):
+    """Relecture : le Vice-président ne valide pas une action qui le nomme lui-même."""
+    pres = Mandat.objects.get(membre=bnc["pres"])
+    d, _ = dc.soumettre_ou_executer(
+        bnc["sn"].compte,
+        "remplacer",
+        {
+            "mandat": pres.pk,
+            "date": "2026-06-01",
+            "motif": "demission",
+            "remplacant": bnc["vp"].matricule,
+        },
+        "Remplacer le Président par le Vice-président",
+    )
+    DemandeValidation.objects.filter(pk=d.pk).update(
+        date=timezone.now() - datetime.timedelta(days=8)
+    )
+    d.refresh_from_db()
+    assert dc.qualite_pour_valider(bnc["vp"].compte, d) == ""
+
+
+def test_circuit_complet_des_actions_par_le_secretaire(bnc, nouveau_membre):
+    """Aller-retour des données pour chaque action préparée par le Secrétaire."""
+    import json
+
+    from apps.mouvements.models import Sanction
+
+    nouveau = nouveau_membre(bnc["P1"], "Nouveau")
+    pres_mandat = Mandat.objects.get(membre=bnc["pres"])
+    tn = Fonction.objects.get(nom="Trésorier national")
+    actions = [
+        (
+            "pourvoir",
+            {
+                "unite": "national",
+                "fonction": tn.pk,
+                "membre": nouveau.matricule,
+                "date_debut": datetime.date.today().isoformat(),
+            },
+        ),
+        ("droits", {"fonction": tn.pk, "case": "droit_grades", "valeur": True}),
+        (
+            "sanction",
+            {
+                "membre": bnc["m2"].matricule,
+                "champs": {
+                    "degre": 1,
+                    "type": "avertissement_ecrit",
+                    "date_debut": "2026-11-01",
+                    "date_fin": None,
+                    "motif": "Retards",
+                    "reference": "BNC-1",
+                    "precision": "",
+                    "amende": None,
+                },
+            },
+        ),
+    ]
+    for action, donnees in actions:
+        json.dumps(donnees)  # les données doivent passer en JSON
+        d, _ = dc.soumettre_ou_executer(bnc["sn"].compte, action, donnees, action)
+        d = dc.valider(d, par=bnc["pres"].compte)
+        assert d.etat == Etat.VALIDEE, (action, d.motif)
+    sanction = Sanction.objects.get()
+    d, _ = dc.soumettre_ou_executer(
+        bnc["sn"].compte, "lever", {"sanction": sanction.pk, "motif": "Fin"}, "lever"
+    )
+    assert dc.valider(d, par=bnc["pres"].compte).etat == Etat.VALIDEE
+    assert pres_mandat.membre == bnc["pres"]

@@ -184,3 +184,76 @@ def test_pages_remplacer_pourvoir_et_mandats_a_corriger(
         monde["m4"].matricule
         not in client_technique.get("/bureau/bn/mandats-a-corriger/").content.decode()
     )
+
+
+def test_motif_incoherent_refuse_sur_un_mandat_en_cours(compte_technique, bureau_p1):
+    """Relecture : « incoherent » n'efface pas rétroactivement un mandat valable."""
+    with pytest.raises(InstallationRefusee):
+        remplacer_titulaire(
+            mandat=bureau_p1["Trésorier paroissial"],
+            date=datetime.date(2000, 1, 1),
+            motif="incoherent",
+            remplacant=None,
+            par=compte_technique,
+        )
+
+
+def test_remplacant_garde_la_fin_deja_fixee(monde, compte_technique, nouveau_membre, bureau_p1):
+    """Relecture : nouveau bureau déjà fixé au 01/01/2027 → le remplaçant s'arrête aussi là."""
+    tres = bureau_p1["Trésorier paroissial"]
+    Mandat.objects.filter(pk=tres.pk).update(date_fin=datetime.date(2027, 1, 1))
+    tres.refresh_from_db()
+    c = nouveau_membre(monde["P1"], "Capo")
+    nouveau = remplacer_titulaire(
+        mandat=tres,
+        date=datetime.date(2026, 12, 10),
+        motif="demission",
+        remplacant=c,
+        par=compte_technique,
+    )
+    assert nouveau.date_fin == datetime.date(2027, 1, 1)
+
+
+def test_pas_de_remplacement_d_un_mandat_termine(
+    monde, compte_technique, nouveau_membre, bureau_p1
+):
+    tres = bureau_p1["Trésorier paroissial"]
+    Mandat.objects.filter(pk=tres.pk).update(date_fin=datetime.date(2026, 3, 1))
+    tres.refresh_from_db()
+    with pytest.raises(InstallationRefusee):
+        remplacer_titulaire(
+            mandat=tres,
+            date=datetime.date(2026, 2, 1),
+            motif="demission",
+            remplacant=nouveau_membre(monde["P1"], "Capo"),
+            par=compte_technique,
+        )
+
+
+def test_le_bnc_garde_un_president_ou_un_secretaire(monde, compte_technique, nouveau_membre):
+    p = nouveau_membre(monde["P1"], "Pres")
+    s = nouveau_membre(monde["P2"], "Secr")
+    mandats = {
+        m.fonction.nom: m
+        for m in installer_bureau(
+            unite=Unite("national", None),
+            titulaires={_f("Président"): p, _f("Secrétaire national"): s},
+            date_debut=D,
+            par=compte_technique,
+        )
+    }
+    remplacer_titulaire(
+        mandat=mandats["Président"],
+        date=datetime.date(2026, 6, 1),
+        motif="demission",
+        remplacant=None,
+        par=compte_technique,
+    )
+    with pytest.raises(InstallationRefusee, match="Président ou Secrétaire"):
+        remplacer_titulaire(
+            mandat=mandats["Secrétaire national"],
+            date=datetime.date(2026, 6, 2),
+            motif="demission",
+            remplacant=None,
+            par=compte_technique,
+        )

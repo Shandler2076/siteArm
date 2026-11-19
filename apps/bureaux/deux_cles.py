@@ -67,9 +67,33 @@ def doit_etre_valide(compte) -> bool:
     return _a_la_fonction(compte, "Secrétaire national")
 
 
+def _membres_concernes(demande: DemandeValidation) -> set[str]:
+    """Matricules des personnes que l'action nomme, remplace ou sanctionne."""
+    d = demande.donnees
+    concernes = set((d.get("titulaires") or {}).values())
+    concernes |= {d.get("remplacant"), d.get("membre")}
+    if d.get("mandat"):
+        concernes |= set(
+            Mandat.objects.filter(pk=d["mandat"]).values_list("membre__matricule", flat=True)
+        )
+    if d.get("sanction"):
+        from apps.mouvements.models import Sanction
+
+        concernes |= set(
+            Sanction.objects.filter(pk=d["sanction"]).values_list("membre__matricule", flat=True)
+        )
+    return {m for m in concernes if m}
+
+
 def qualite_pour_valider(compte, demande: DemandeValidation) -> str:
-    """« Président », « Vice-président (…) », « sur délégation du Président », ou « »."""
+    """« Président », « Vice-président (…) », « sur délégation du Président », ou « ».
+
+    On ne valide ni sa propre demande, ni une action qui vous concerne (nomination,
+    remplacement ou sanction de soi-même)."""
     if demande.preparee_par_id == getattr(compte, "pk", None):
+        return ""
+    membre = getattr(compte, "membre", None) if hasattr(compte, "membre") else None
+    if membre is not None and membre.matricule in _membres_concernes(demande):
         return ""
     if _a_la_fonction(compte, "Président"):
         return "Président"
@@ -178,10 +202,23 @@ ACTIONS = {
 
 
 def _erreurs_metier():
+    """Erreurs qui font passer la demande en « impossible à appliquer » (jamais d'erreur 500 :
+    une donnée a pu changer ou disparaître depuis la préparation)."""
+    from django.core.exceptions import ObjectDoesNotExist, ValidationError
+
     from apps.bureaux.services import InstallationRefusee
     from apps.mouvements.services import MouvementRefuse
 
-    return (InstallationRefusee, MouvementRefuse, DeuxClesRefusee)
+    return (
+        InstallationRefusee,
+        MouvementRefuse,
+        DeuxClesRefusee,
+        ObjectDoesNotExist,
+        ValidationError,
+        KeyError,
+        ValueError,
+        AttributeError,
+    )
 
 
 def _notifier_secretaires(texte: str, sauf=None):
@@ -209,6 +246,15 @@ def soumettre_ou_executer(compte, action: str, donnees: dict, resume: str):
             transaction.on_commit(
                 lambda: _notifier_secretaires(f"Pour information, le Président a fait : {resume}.")
             )
+        elif getattr(compte, "is_superuser", False):
+            # Compte technique (mainteneur) : il agit sans validation, mais le Président et le
+            # Secrétaire national le savent toujours.
+            def prevenir():
+                texte = f"Pour information, le compte technique a fait : {resume}."
+                _notifier_secretaires(texte)
+                notifier(_titulaires("Président"), texte, "/bureau/bn/validations/")
+
+            transaction.on_commit(prevenir)
         return None, resultat
     demande = DemandeValidation.objects.create(
         action=action, resume=resume[:400], donnees=donnees, preparee_par=compte
@@ -221,11 +267,32 @@ def soumettre_ou_executer(compte, action: str, donnees: dict, resume: str):
     return demande, None
 
 
-def expirer_demandes() -> int:
-    limite = timezone.now() - DUREE_DEMANDE
-    return DemandeValidation.objects.filter(etat=Etat.ATTENTE, date__lt=limite).update(
-        etat=Etat.EXPIREE
+def demandes_en_attente():
+    """En attente ET pas encore expirées (pour les compteurs)."""
+    return DemandeValidation.objects.filter(
+        etat=Etat.ATTENTE, date__gte=timezone.now() - DUREE_DEMANDE
     )
+
+
+def expirer_demandes() -> int:
+    from apps.journal.models import DEMANDE_DECIDEE
+    from apps.journal.services import journaliser
+
+    limite = timezone.now() - DUREE_DEMANDE
+    n = 0
+    for d in DemandeValidation.objects.filter(etat=Etat.ATTENTE, date__lt=limite):
+        if DemandeValidation.objects.filter(pk=d.pk, etat=Etat.ATTENTE).update(etat=Etat.EXPIREE):
+            n += 1
+            journaliser(
+                None,
+                DEMANDE_DECIDEE,
+                demande=d.pk,
+                resume=d.resume,
+                decision=Etat.EXPIREE,
+                qualite="expiration (30 jours sans réponse)",
+                auteur=d.preparee_par.identifiant,
+            )
+    return n
 
 
 def valider(demande: DemandeValidation, *, par) -> DemandeValidation:
@@ -245,8 +312,16 @@ def valider(demande: DemandeValidation, *, par) -> DemandeValidation:
         demande.date_decision = timezone.now()
         try:
             with transaction.atomic():
-                # L'action est faite au nom de son auteur (le Secrétaire), validée par `par`.
-                ACTIONS[demande.action][1](demande.donnees, demande.preparee_par)
+                # L'action est faite au nom de son auteur, validée par `par` : l'auteur doit
+                # encore être Secrétaire national (ou Président) au moment de la validation.
+                from apps.comptes.models import Compte
+
+                auteur = Compte.objects.get(pk=demande.preparee_par_id)
+                if not _noms_fonctions(auteur) & {"Secrétaire national", "Président"}:
+                    raise DeuxClesRefusee(
+                        "Son auteur n'est plus Secrétaire national : la demande ne s'applique pas."
+                    )
+                ACTIONS[demande.action][1](demande.donnees, auteur)
         except _erreurs_metier() as e:
             demande.etat, demande.motif = Etat.ECHEC, str(e)[:400]
         else:
@@ -277,6 +352,7 @@ def refuser(demande: DemandeValidation, *, par, motif: str) -> DemandeValidation
     from apps.journal.services import journaliser
     from apps.notifications.services import notifier
 
+    expirer_demandes()
     qualite = qualite_pour_valider(par, demande)
     if not qualite:
         raise DeuxClesRefusee("Vous ne pouvez pas refuser cette demande.")

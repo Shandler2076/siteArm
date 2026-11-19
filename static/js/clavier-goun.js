@@ -1,5 +1,5 @@
 /* Clavier goun : lettres spéciales et mots proposés, pour les champs marqués data-clavier.
-   Les lettres et les mots viennent du site (liste du Bureau national + mots déjà écrits).
+   Les lettres et les mots viennent du site (liste du Bureau National de Commandement + mots déjà écrits).
    Rien n'est envoyé ailleurs. */
 (function () {
   "use strict";

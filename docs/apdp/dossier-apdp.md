@@ -206,6 +206,7 @@ Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
 | Courriers abandonnés (jamais envoyés) et leurs pièces jointes | Effacés automatiquement un mois après l'abandon |
 | Courriers envoyés | Conservés au registre du bureau (archives du mouvement) |
 | Sauvegardes | Rotation automatique de l'hébergeur (environ 30 jours) ; sauvegardes chiffrées du BNC : les 10 dernières |
+| Demandes de validation (deux clés) : résumé de l'action, y compris le motif et la référence d'une sanction | Gardées comme le journal (5 ans, proposition), pour savoir qui a préparé et qui a validé |
 | Photos de la page d'accueil publique | Tant que l'accord des personnes est maintenu ; retrait sur demande |
 
 ### 3.9 Mesures de sécurité
