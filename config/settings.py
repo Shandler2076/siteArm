@@ -119,6 +119,12 @@ AXES_USERNAME_CALLABLE = "apps.comptes.securite.identifiant_pour_blocage"
 AXES_LOCKOUT_TEMPLATE = "comptes/compte_bloque.html"
 AXES_HTTP_RESPONSE_CODE = 429
 AXES_RESET_ON_SUCCESS = True
+# Derrière le relais d'alwaysdata, l'adresse du visiteur est la dernière de X-Forwarded-For.
+DERRIERE_RELAIS = _bool("DJANGO_DERRIERE_RELAIS", False)
+AXES_CLIENT_IP_CALLABLE = "apps.comptes.securite.adresse_ip"
+# Échecs tolérés depuis une même adresse IP, tous identifiants confondus (seuil large : au Bénin,
+# beaucoup d'abonnés mobiles partagent la même adresse chez leur opérateur).
+LIMITE_ECHECS_PAR_IP = int(os.environ.get("DJANGO_LIMITE_ECHECS_PAR_IP", "30"))
 # Blocage volontairement par identifiant seul : bloquer par adresse IP bloquerait tous les
 # membres d'un même cybercafé ou d'un même réseau mobile après 5 échecs cumulés.
 SILENCED_SYSTEM_CHECKS = [

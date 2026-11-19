@@ -54,3 +54,27 @@ def test_reglages_session(settings):
     assert settings.SESSION_COOKIE_AGE == 7200
     assert settings.SESSION_SAVE_EVERY_REQUEST is True
     assert settings.SESSION_COOKIE_HTTPONLY is True
+
+
+def test_essais_en_rafale_depuis_une_meme_adresse_bloques(client, compte, settings):
+    """Faille M2 : essayer un mot de passe sur beaucoup d'identifiants différents depuis la même
+    adresse IP finit par bloquer cette adresse (seuil large : beaucoup de gens au Bénin partagent
+    une même adresse IP chez leur opérateur mobile)."""
+    from django.test import Client
+
+    for i in range(settings.LIMITE_ECHECS_PAR_IP):
+        _essai(client, "faux", f"2020-01AS-{i:04d}")
+    assert _essai(client, "MotDePasse!2026").status_code == 429
+    autre = Client(REMOTE_ADDR="10.9.9.9")
+    assert _essai(autre, "MotDePasse!2026").status_code == 302
+
+
+def test_adresse_ip_derriere_le_relais(rf, settings):
+    from apps.comptes.securite import adresse_ip
+
+    r = rf.get("/", REMOTE_ADDR="10.0.0.1", HTTP_X_FORWARDED_FOR="6.6.6.6, 41.85.1.2")
+    settings.DERRIERE_RELAIS = False
+    assert adresse_ip(r) == "10.0.0.1"
+    settings.DERRIERE_RELAIS = True
+    # La dernière adresse est celle ajoutée par le relais ; la première peut être inventée.
+    assert adresse_ip(r) == "41.85.1.2"

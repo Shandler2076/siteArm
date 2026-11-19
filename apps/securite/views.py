@@ -54,6 +54,24 @@ def _echec(request) -> bool:
     return False
 
 
+def _prevenir_activation(compte) -> None:
+    """Le titulaire et le mainteneur voient toute activation : si quelqu'un a volé le mot de
+    passe avant la première activation, l'intrus ne passe pas inaperçu."""
+    from apps.comptes.models import Compte
+    from apps.notifications.services import notifier
+
+    quand = timezone.localtime().strftime("%d/%m/%Y à %H:%M")
+    notifier(
+        [compte],
+        f"La double vérification a été activée sur votre compte le {quand}. Si ce n'est pas "
+        "vous, prévenez tout de suite le mainteneur du site.",
+    )
+    notifier(
+        Compte.objects.filter(is_superuser=True, is_active=True).exclude(pk=compte.pk),
+        f"Pour information : la double vérification a été activée par {compte} le {quand}.",
+    )
+
+
 @login_required
 def activer(request):
     if not doit_verifier(request.user):
@@ -74,6 +92,7 @@ def activer(request):
             dv.secret, dv.active, dv.date_activation = secret, True, timezone.now()
             _ouvrir(request, dv, pas)
             journaliser(request.user, DOUBLE_VERIFICATION, evenement="activation")
+            _prevenir_activation(request.user)
             messages.success(request, "Double vérification activée.")
             return redirect(_suivant(request))
     uri = uri_provisioning(secret, request.user.identifiant)
