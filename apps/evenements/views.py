@@ -24,7 +24,7 @@ from apps.evenements.services import (
 )
 from apps.listes.filtres import FiltreListeForm, membres_filtres
 
-bn = permission_required("membres.gerer_membres", raise_exception=True)
+bn = permission_required("evenements.gerer", raise_exception=True)
 NATIONAL = Unite(Niveau.NATIONAL, None)
 MAX_PROPOSES = 500
 # Filtres visibles d'emblée sur la page « Convoquer » ; les autres sont sous « Plus de filtres ».
@@ -451,7 +451,7 @@ def verifier(request, jeton):
             "valable": etat == "valable",
             "photo": photo,
             "raison": raison,
-            "peut_pointer": etat == "valable" and request.user.has_perm("membres.gerer_membres"),
+            "peut_pointer": etat == "valable" and request.user.has_perm("evenements.gerer"),
         },
     )
     reponse["Cache-Control"] = "no-store"

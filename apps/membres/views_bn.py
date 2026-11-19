@@ -21,10 +21,12 @@ from apps.membres.services import (
 from apps.organisation.models import Paroisse
 
 gerer_membres = permission_required("membres.gerer_membres", raise_exception=True)
+# Président et Secrétaire national seulement (19/11/2026).
+enregistrer_membres = permission_required("membres.enregistrer", raise_exception=True)
 
 
 @login_required
-@gerer_membres
+@enregistrer_membres
 def enregistrer(request):
     form = FormulaireEnregistrement(request.POST or None, request.FILES or None)
     doublons = []

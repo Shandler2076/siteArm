@@ -98,12 +98,13 @@ def construire_menu(request) -> list[Groupe]:
                 prefixes=("/membres/bn/",),
             )
         )
-    if gestion_bn:
+    if user.has_perm("membres.enregistrer"):
         liens += [
             Lien("Enregistrer un membre", reverse("membres:bn_enregistrer")),
             Lien("Enregistrer par lots", reverse("lots:liste")),
-            Lien("Photos à valider", reverse("membres:bn_photos")),
         ]
+    if gestion_bn:
+        liens.append(Lien("Photos à valider", reverse("membres:bn_photos")))
     if national:
         liens.append(
             Lien(
@@ -140,7 +141,8 @@ def construire_menu(request) -> list[Groupe]:
             Lien(f"Listes{noms[cle]}", url_listes),
             Lien(f"Statistiques{noms[cle]}", reverse("listes:statistiques", args=[cle])),
         ]
-        if not (cle == "national" and gestion_bn):  # le BN a sa propre page (sessions de test)
+        # Le BN (case « grades ») a sa propre page, avec les sessions de test.
+        if not (cle == "national" and user.has_perm("grades.gerer")):
             grades.append(
                 Lien(
                     f"Éligibles au grade visé{noms[cle]}",
@@ -150,6 +152,7 @@ def construire_menu(request) -> list[Groupe]:
             )
     if gestion_bn:
         listes.append(Lien("Tranches d'âge", reverse("listes:tranches")))
+    if user.has_perm("grades.gerer"):
         # Grades (13/11/2026) : éligibles au grade visé → test ou examen → promotion ; à part,
         # la promotion spéciale (art. 84) ; et les actes.
         grades = [
@@ -186,17 +189,16 @@ def construire_menu(request) -> list[Groupe]:
     for u, _agit in u_tres:
         s = f" — {u.libelle}" if len(u_tres) > 1 else ""
         tres.append(Lien(f"Trésorerie du bureau{s}", reverse("tresorerie:espace", args=[u.cle])))
+    if user.has_perm("tresorerie.creer_speciales"):
+        tres.append(Lien("Cotisations spéciales", reverse("tresorerie:bn_speciales")))
     if gestion_bn:
-        tres += [
-            Lien("Cotisations spéciales", reverse("tresorerie:bn_speciales")),
-            Lien("Numéros des trésoriers", reverse("tresorerie:bn_numeros")),
-        ]
+        tres.append(Lien("Numéros des trésoriers", reverse("tresorerie:bn_numeros")))
     if gestion_bn or est_tresorier_national(user) or est_validateur_reversements(user):
         tres.append(Lien("Reversements mensuels", reverse("tresorerie:bn_reversements")))
     if tres:
         groupes.append(Groupe("Trésorerie", tres))
 
-    if gestion_bn:
+    if user.has_perm("evenements.gerer"):
         groupes.append(
             Groupe("Événements", [Lien("Événements nationaux", reverse("evenements:liste"))])
         )
@@ -234,26 +236,49 @@ def construire_menu(request) -> list[Groupe]:
     if courrier:
         groupes.append(Groupe("Courrier", courrier))
 
+    bureaux = []
+    if user.has_perm("bureaux.installer"):
+        bureaux.append(Lien("Installer un bureau", reverse("bureaux:bn_installer")))
     if gestion_bn:
-        groupes += [
-            Groupe(
-                "Bureaux et droits",
-                [
-                    Lien("Installer un bureau", reverse("bureaux:bn_installer")),
-                    Lien(
-                        "Bureaux en place",
-                        reverse("bureaux:bn_bureaux"),
-                        prefixes=("/bureau/bn/bureaux/",),
-                    ),
-                    Lien("Fonctions et droits", reverse("bureaux:bn_fonctions")),
-                    Lien("Mandats à échéance", reverse("bureaux:bn_echeances")),
-                    Lien("Mandats à corriger", reverse("bureaux:bn_mandats_a_corriger")),
-                ],
-            ),
+        bureaux.append(
+            Lien(
+                "Bureaux en place",
+                reverse("bureaux:bn_bureaux"),
+                prefixes=("/bureau/bn/bureaux/",),
+            )
+        )
+    if user.has_perm("bureaux.installer"):
+        bureaux += [
+            Lien("Fonctions et droits", reverse("bureaux:bn_fonctions")),
+            Lien("Mandats à corriger", reverse("bureaux:bn_mandats_a_corriger")),
         ]
-        controle = [Lien("Journal", reverse("journal:liste"))]
-        if user.is_superuser:
-            controle.append(Lien("Administration technique", "/gestion/"))
+    if gestion_bn:
+        bureaux.append(Lien("Mandats à échéance", reverse("bureaux:bn_echeances")))
+    from apps.bureaux import deux_cles
+
+    if deux_cles.peut_voir_les_demandes(user):
+        from apps.bureaux.models import DemandeValidation
+
+        bureaux.insert(
+            0,
+            Lien(
+                "Actions à valider",
+                reverse("bureaux:bn_validations"),
+                compteur=DemandeValidation.objects.filter(
+                    etat=DemandeValidation.Etat.ATTENTE
+                ).count(),
+            ),
+        )
+    if deux_cles._a_la_fonction(user, "Président"):
+        bureaux.append(Lien("Déléguer une validation", reverse("bureaux:bn_delegations")))
+    if bureaux:
+        groupes.append(Groupe("Bureaux et droits", bureaux))
+    controle = []
+    if user.has_perm("journal.voir"):
+        controle.append(Lien("Journal", reverse("journal:liste")))
+    if user.is_superuser:
+        controle.append(Lien("Administration technique", "/gestion/"))
+    if controle:
         groupes.append(Groupe("Contrôle", controle))
 
     _marquer_actif(groupes, request.path, request.GET, getattr(request, "rubrique_menu", None))

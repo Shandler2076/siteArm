@@ -180,6 +180,7 @@ def test_pages_remplacer_pourvoir_et_mandats_a_corriger(
     r = client_technique.post(f"/bureau/bn/mandats-a-corriger/{faux.pk}/fermer/")
     faux.refresh_from_db()
     assert r.status_code == 302 and faux.date_fin is not None
-    assert monde["m4"].matricule not in client_technique.get(
-        "/bureau/bn/mandats-a-corriger/"
-    ).content.decode()
+    assert (
+        monde["m4"].matricule
+        not in client_technique.get("/bureau/bn/mandats-a-corriger/").content.decode()
+    )

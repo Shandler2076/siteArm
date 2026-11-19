@@ -345,13 +345,79 @@ def _a_fonction_nationale(compte, noms) -> bool:
 
 
 def est_tresorier_national(compte) -> bool:
-    """Prépare l'état des reversements et enregistre les envois."""
+    """Prépare l'état des reversements et enregistre les envois : le Trésorier national ; son
+    adjoint seulement par intérim, quand le poste de Trésorier est vacant (19/11/2026)."""
+    if _a_fonction_nationale(compte, ("Trésorier national",)):
+        return True
+    return _a_fonction_nationale(compte, ("Trésorier national adjoint",)) and not (
+        Mandat.objects.en_cours()
+        .filter(fonction__niveau=Niveau.NATIONAL, fonction__nom="Trésorier national")
+        .filter(membre__statut=Statut.ACTIF)
+        .exists()
+    )
+
+
+def a_une_fonction_de_tresorerie_nationale(compte) -> bool:
+    """Trésorier national ou adjoint (même hors intérim) : double vérification obligatoire."""
     return _a_fonction_nationale(compte, ("Trésorier national", "Trésorier national adjoint"))
 
 
+# --- Droits nationaux (décisions du 19/11/2026) -------------------------------------------------
+# En dur, jamais par une case : seuls le Président et le Secrétaire national installent les
+# bureaux, règlent les droits, inscrivent les sanctions et enregistrent les membres.
+DIRECTION_NATIONALE = ("Président", "Secrétaire national")
+CREATEURS_COTISATIONS_SPECIALES = (
+    "Président",
+    "Secrétaire national",
+    "Trésorier national",
+    "Trésorier national adjoint",
+)
+DROITS_DIRECTION = frozenset({"bureaux.installer", "mouvements.sanctionner", "membres.enregistrer"})
+# Cases de « Fonctions et droits » (fonctions nationales) → permissions.
+DROITS_PAR_CASE = {
+    "droit_gerer": frozenset({"membres.gerer_membres", "membres.voir_cip"}),
+    "droit_evenements": frozenset({"evenements.gerer"}),
+    "droit_grades": frozenset({"grades.gerer"}),
+    "droit_journal": frozenset({"journal.voir"}),
+}
+
+
+def droits_nationaux(compte) -> set[str]:
+    """Toutes les permissions nationales d'un compte, d'après ses mandats en cours."""
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return set()
+    mandats = (
+        Mandat.objects.en_cours()
+        .filter(
+            membre__compte=compte,
+            membre__statut=Statut.ACTIF,
+            fonction__niveau=Niveau.NATIONAL,
+        )
+        .select_related("fonction")
+    )
+    droits: set[str] = set()
+    for m in mandats:
+        f = m.fonction
+        for case, perms in DROITS_PAR_CASE.items():
+            if getattr(f, case):
+                droits |= perms
+        if f.nom in DIRECTION_NATIONALE:
+            droits |= DROITS_DIRECTION
+        if f.nom in CREATEURS_COTISATIONS_SPECIALES:
+            droits.add("tresorerie.creer_speciales")
+    return droits
+
+
 def est_validateur_reversements(compte) -> bool:
-    """Valide l'état mensuel des reversements : le Président ou le Secrétaire national."""
-    return _a_fonction_nationale(compte, ("Président", "Secrétaire national"))
+    """Valide l'état mensuel des reversements : le Président ou le Secrétaire national, ou la
+    personne à qui le Président a délégué cette validation (19/11/2026)."""
+    from apps.bureaux.deux_cles import delegation_active
+    from apps.bureaux.models import Delegation
+
+    return _a_fonction_nationale(compte, ("Président", "Secrétaire national")) or bool(
+        getattr(compte, "is_authenticated", False)
+        and delegation_active(compte, Delegation.Objet.REVERSEMENTS)
+    )
 
 
 # --- Courrier (décisions du mainteneur des 13, 14 et 16/11/2026) --------------------------------

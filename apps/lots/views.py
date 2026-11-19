@@ -30,7 +30,7 @@ def bn_requis(vue):
     @wraps(vue)
     @login_required
     def enveloppe(request, *args, **kwargs):
-        if not request.user.has_perm("membres.gerer_membres"):
+        if not request.user.has_perm("membres.enregistrer"):
             raise PermissionDenied
         return vue(request, *args, **kwargs)
 

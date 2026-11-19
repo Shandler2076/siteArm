@@ -86,10 +86,12 @@ def installer_bureau(
         raise InstallationRefusee("Indiquez au moins un titulaire.")
     for fonction, membre in titulaires.items():
         _verifier_titulaire(unite, fonction, membre)
-    if unite.niveau == "national" and not any(f.droit_gerer for f in titulaires):
+    if unite.niveau == "national" and not any(
+        f.nom in ("Président", "Secrétaire national") for f in titulaires
+    ):
         raise InstallationRefusee(
-            "Le Bureau National doit avoir au moins un Président ou Secrétaire national "
-            "(une fonction qui gère le site) : sinon plus personne ne pourrait gérer le site."
+            "Le Bureau National de Commandement doit avoir au moins un Président ou un "
+            "Secrétaire national : sinon plus personne ne pourrait installer les bureaux."
         )
     plus_recent = (
         _mandats_de_l_unite(unite)
@@ -289,6 +291,23 @@ def pourvoir_poste(
         date=date_debut.isoformat(),
     )
     return mandat
+
+
+def modifier_droit(*, fonction: Fonction, case: str, valeur: bool, par) -> Fonction:
+    """Coche ou décoche une case de « Fonctions et droits » (cases nationales : fonctions
+    nationales seulement)."""
+    from apps.bureaux.perimetre import DROITS_PAR_CASE
+    from apps.journal.models import DROITS_MODIFIES
+    from apps.journal.services import journaliser
+
+    permises = DROITS_PAR_CASE if fonction.niveau == "national" else {"droit_gerer": None}
+    if case not in permises:
+        raise InstallationRefusee("Ce droit ne s'applique pas à cette fonction.")
+    setattr(fonction, case, bool(valeur))
+    fonction.save(update_fields=[case])
+    libelle = Fonction._meta.get_field(case).verbose_name
+    journaliser(par, DROITS_MODIFIES, fonction=fonction.nom, case=str(libelle), valeur=bool(valeur))
+    return fonction
 
 
 def mandats_incoherents(jour: datetime.date | None = None) -> list[tuple[Mandat, str]]:

@@ -12,10 +12,15 @@ urlpatterns = [
     path("bn/echeances/", views_bn.echeances, name="bn_echeances"),
     path("bn/bureaux/", views_bn.bureaux_en_place, name="bn_bureaux"),
     path("bn/bureaux/<str:cle>/", views_bn.bureau_en_place, name="bn_bureau"),
-    path(
-        "bn/bureaux/<str:cle>/remplacer/<int:pk>/", views_bn.remplacer, name="bn_remplacer"
-    ),
+    path("bn/bureaux/<str:cle>/remplacer/<int:pk>/", views_bn.remplacer, name="bn_remplacer"),
     path("bn/bureaux/<str:cle>/pourvoir/", views_bn.pourvoir, name="bn_pourvoir"),
+    path("bn/validations/", views_bn.validations, name="bn_validations"),
+    path(
+        "bn/validations/<int:pk>/<str:decision>/",
+        views_bn.decider_validation,
+        name="bn_decider_validation",
+    ),
+    path("bn/delegations/", views_bn.delegations, name="bn_delegations"),
     path("bn/mandats-a-corriger/", views_bn.mandats_a_corriger, name="bn_mandats_a_corriger"),
     path(
         "bn/mandats-a-corriger/<int:pk>/fermer/",

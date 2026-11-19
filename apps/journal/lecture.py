@@ -189,6 +189,29 @@ def lire(entrees) -> list[Ligne]:
                 f"A mis fin au mandat de {d.get('fonction')} de {m} le {_date(d.get('date'))} "
                 f"({motif}){suite}."
             )
+        if a == j.DEMANDE_PREPAREE:
+            n = d.get("demande")
+            return f"A préparé, pour validation : {d.get('resume')} (demande n° {n})."
+        if a == j.DEMANDE_DECIDEE:
+            verbe = {
+                "validee": "A validé",
+                "refusee": "A refusé",
+                "echec": "A validé (sans effet : impossible à appliquer)",
+            }.get(d.get("decision"), "A traité")
+            return (
+                f"{verbe}, en qualité de {d.get('qualite')}, la demande de "
+                f"{qui(d.get('auteur', ''))} : {d.get('resume')}."
+            )
+        if a == j.DELEGATION:
+            if d.get("evenement") == "retiree":
+                return f"A retiré sa délégation à {qui(d.get('delegataire', ''))}."
+            return (
+                f"A délégué à {qui(d.get('delegataire', ''))} ({d.get('objet')}) jusqu'au "
+                f"{_date(d.get('fin', '')[:10])}."
+            )
+        if a == j.DROITS_MODIFIES:
+            etat = "coché" if d.get("valeur") else "décoché"
+            return f"A {etat} le droit « {d.get('case')} » pour la fonction {d.get('fonction')}."
         if a == j.POSTE_POURVU:
             return (
                 f"A nommé {m} {d.get('fonction')} à compter du {_date(d.get('date'))} "
