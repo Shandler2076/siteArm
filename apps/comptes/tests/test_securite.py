@@ -92,3 +92,12 @@ def test_adresse_relais_invalide_ignoree(rf, settings):
     settings.DERRIERE_RELAIS = True
     r = rf.get("/", REMOTE_ADDR="10.0.0.1", HTTP_X_FORWARDED_FOR="1.2.3.4, abc")
     assert adresse_ip(r) == "10.0.0.1"
+
+
+def test_gestion_sans_boucle_pour_un_membre_connecte(client, compte):
+    """Un membre connecté (pas compte technique) qui ouvre /gestion/ ne tourne pas en rond entre
+    /gestion/login/ et /connexion/ : il reçoit un refus clair."""
+    client.force_login(compte)
+    r = client.get("/gestion/", follow=True)
+    assert r.status_code == 403 and len(r.redirect_chain) <= 2
+    assert "Accès refusé" in r.content.decode()

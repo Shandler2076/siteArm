@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titre %}Page introuvable — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Page introuvable</h1>
+  <p>Cette page n'existe pas, ou vous n'y avez pas accès.</p>
+  <a class="bouton" href="{% url 'accueil' %}">Revenir à l'accueil</a>
+</section>
+{% endblock %}

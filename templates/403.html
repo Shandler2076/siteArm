@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titre %}Accès refusé — Armée du Salut{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Accès refusé</h1>
+  <p>Vous n'avez pas le droit d'ouvrir cette page.</p>
+  <a class="bouton" href="{% url 'accueil' %}">Revenir à ma page</a>
+</section>
+{% endblock %}
