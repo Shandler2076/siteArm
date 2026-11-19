@@ -138,6 +138,9 @@ class Membre(models.Model):
         permissions = [
             ("gerer_membres", "Gérer les membres (Bureau national)"),
             ("voir_cip", "Voir la photo du CIP"),
+            # Donnée par mandat au Président et au Secrétaire national ; à la main seulement
+            # pour un compte de transition (démarrage du site).
+            ("enregistrer", "Enregistrer des membres (Bureau National de Commandement)"),
         ]
 
     def __str__(self) -> str:

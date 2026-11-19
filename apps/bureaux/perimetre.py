@@ -327,21 +327,28 @@ def peut_voir_tresorerie(compte, unite: Unite) -> bool:
     return any(u == unite for u, _agit in unites_tresorerie(compte))
 
 
+def fonctions_nationales(compte) -> frozenset:
+    """Noms des fonctions nationales en cours du compte (une requête, gardée sur le compte le
+    temps de la requête HTTP)."""
+    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
+        return frozenset()
+    if not hasattr(compte, "_fonctions_nationales"):
+        compte._fonctions_nationales = frozenset(
+            Mandat.objects.en_cours()
+            .filter(
+                membre__compte=compte,
+                membre__statut=Statut.ACTIF,
+                fonction__niveau=Niveau.NATIONAL,
+            )
+            .values_list("fonction__nom", flat=True)
+        )
+    return compte._fonctions_nationales
+
+
 def _a_fonction_nationale(compte, noms) -> bool:
     # Pas de raccourci pour le compte technique : la séparation des rôles (préparer, valider,
     # envoyer) ne repose que sur de vrais mandats.
-    if not getattr(compte, "is_authenticated", False) or not compte.is_active:
-        return False
-    return (
-        Mandat.objects.en_cours()
-        .filter(
-            membre__compte=compte,
-            membre__statut=Statut.ACTIF,
-            fonction__niveau=Niveau.NATIONAL,
-            fonction__nom__in=noms,
-        )
-        .exists()
-    )
+    return bool(fonctions_nationales(compte) & set(noms))
 
 
 def est_tresorier_national(compte) -> bool:
@@ -414,9 +421,11 @@ def est_validateur_reversements(compte) -> bool:
     from apps.bureaux.deux_cles import delegation_active
     from apps.bureaux.models import Delegation
 
-    return _a_fonction_nationale(compte, ("Président", "Secrétaire national")) or bool(
-        getattr(compte, "is_authenticated", False)
-        and delegation_active(compte, Delegation.Objet.REVERSEMENTS)
+    if _a_fonction_nationale(compte, ("Président", "Secrétaire national")):
+        return True
+    # Une délégation ne va qu'à un membre du Bureau National de Commandement.
+    return bool(fonctions_nationales(compte)) and bool(
+        delegation_active(compte, Delegation.Objet.REVERSEMENTS)
     )
 
 

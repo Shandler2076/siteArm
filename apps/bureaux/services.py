@@ -90,8 +90,8 @@ def installer_bureau(
         f.nom in ("Président", "Secrétaire national") for f in titulaires
     ):
         raise InstallationRefusee(
-            "Le Bureau National de Commandement doit avoir au moins un Président ou un "
-            "Secrétaire national : sinon plus personne ne pourrait installer les bureaux."
+            "Le Bureau National de Commandement doit avoir au moins un Président ou Secrétaire "
+            "national : sinon plus personne ne pourrait installer les bureaux."
         )
     plus_recent = (
         _mandats_de_l_unite(unite)

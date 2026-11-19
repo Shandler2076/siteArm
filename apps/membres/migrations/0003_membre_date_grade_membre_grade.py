@@ -4,7 +4,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("membres", "0002_npi_message"),
     ]
@@ -13,9 +12,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name="membre",
             name="date_grade",
-            field=models.DateField(
-                blank=True, null=True, verbose_name="grade depuis le"
-            ),
+            field=models.DateField(blank=True, null=True, verbose_name="grade depuis le"),
         ),
         migrations.AddField(
             model_name="membre",

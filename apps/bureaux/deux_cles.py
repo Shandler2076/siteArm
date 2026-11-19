@@ -35,8 +35,14 @@ def _titulaires(nom: str):
     return Compte.objects.filter(is_active=True, membre__in=mandats.values("membre")).distinct()
 
 
+def _noms_fonctions(compte) -> frozenset:
+    from apps.bureaux.perimetre import fonctions_nationales
+
+    return fonctions_nationales(compte)
+
+
 def _a_la_fonction(compte, nom: str) -> bool:
-    return _titulaires(nom).filter(pk=getattr(compte, "pk", None)).exists()
+    return nom in _noms_fonctions(compte)
 
 
 def presidence_vacante() -> bool:
@@ -72,16 +78,18 @@ def qualite_pour_valider(compte, demande: DemandeValidation) -> str:
             return "Vice-président (poste de Président vacant)"
         if timezone.now() - demande.date >= DELAI_VICE_PRESIDENT:
             return "Vice-président (Président sans réponse depuis 7 jours)"
-    if delegation_active(compte, Delegation.Objet.DEUX_CLES):
+    if _noms_fonctions(compte) and delegation_active(compte, Delegation.Objet.DEUX_CLES):
         return "sur délégation du Président"
     return ""
 
 
 def peut_voir_les_demandes(compte) -> bool:
-    return any(
-        _a_la_fonction(compte, nom)
-        for nom in ("Président", "Vice-président", "Secrétaire national")
-    ) or bool(delegation_active(compte, Delegation.Objet.DEUX_CLES))
+    if _noms_fonctions(compte) & {"Président", "Vice-président", "Secrétaire national"}:
+        return True
+    # Une délégation ne va qu'à un membre du Bureau National de Commandement.
+    return bool(_noms_fonctions(compte)) and bool(
+        delegation_active(compte, Delegation.Objet.DEUX_CLES)
+    )
 
 
 # --- Actions --------------------------------------------------------------------------------
