@@ -74,7 +74,7 @@ automatiquement un mois après l'abandon. Un courrier envoyé, lui, ne se suppri
 
 ### Le clavier goun
 
-Sous le texte, touchez une **lettre goun** (ẹ, ọ, ṣ) : elle s'écrit à l'endroit du curseur. Les **tons** (touches rouges : ´ haut, ` bas, ~ nasale, ^ circonflexe) se posent sur la lettre que vous venez de taper : ẹ puis ´ donne ẹ́. **⇧ Maj** passe en majuscules. Pendant que vous tapez, des **mots proposés** apparaissent : touchez-en un pour l'écrire en entier. Ils viennent du **lexique goun** (6 481 mots du gun de la Bible de 1923, du plus fréquent au moins fréquent), de la liste du Bureau national et des mots goun déjà écrits dans au moins deux courriers envoyés. Pas besoin de taper les points ni les tons : « so » propose sọ ; si vous tapez le point (« tọ »), les mots avec ce point passent en premier.
+Sous le texte, touchez une **lettre goun** (ẹ, ọ, ṣ) : elle s'écrit à l'endroit du curseur. Les **tons** (touches rouges : ´ haut, ` bas, ~ nasale, ^ circonflexe) se posent sur la lettre que vous venez de taper : ẹ puis ´ donne ẹ́. **⇧ Maj** passe en majuscules. Pendant que vous tapez, des **mots proposés** apparaissent : touchez-en un pour l'écrire en entier. Ils viennent du **lexique goun** (environ 6 481 mots, du plus fréquent au moins fréquent), de la liste du Bureau national et des mots goun déjà écrits dans au moins deux courriers envoyés. Pas besoin de taper les points ni les tons : « so » propose sọ ; si vous tapez le point (« tọ »), les mots avec ce point passent en premier.
 
 ## 4. Signer
 

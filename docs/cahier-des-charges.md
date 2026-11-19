@@ -1041,7 +1041,7 @@ Le détail est dans `docs/superpowers/plans/2026-11-13-remarques-apres-pr14.md` 
   par exemple en langue locale). Le site ajoute l'en-tête, le numéro, la date et la signature.
 - **Clavier goun** sous le texte : lettres ẹ ọ ṣ et tons ´ ` ~ ^ posés sur la lettre tapée (liste
   du mainteneur du 18/11/2026, réglable par le BN) et **mots proposés** pendant la frappe, sans tenir compte des points ni des tons : **lexique goun** de
-  6 481 mots (gun de la Bible de 1923, fourni par le mainteneur le 18/11/2026), liste du BN, et mots
+  environ 6 481 mots (fourni par le mainteneur le 18/11/2026), proposés du plus fréquent au moins fréquent, liste du BN, et mots
   goun déjà écrits dans au moins deux courriers envoyés (jamais les noms propres) ; le BN peut retirer
   un mot.
 - **Format** du modèle national : bandeau marine et filet or, logos, cinq lignes (la dernière au nom

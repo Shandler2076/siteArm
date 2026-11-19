@@ -15,7 +15,7 @@
     <button type="submit" class="bouton">Enregistrer la liste</button>
   </form>
   <h2>Lexique goun</h2>
-  <p class="aide">{{ nb_lexique }} mots du gun de la Bible de 1923 (orthographe de 1923), proposés du plus fréquent au moins fréquent. Pour retirer un mot du lexique :</p>
+  <p class="aide">Environ {{ nb_lexique }} mots goun, proposés du plus fréquent au moins fréquent. Pour retirer un mot du lexique :</p>
   <form method="post" class="date-heure">{% csrf_token %}<input type="hidden" name="action" value="masquer">
     <label class="champ"><span>Mot à ne plus proposer</span><input name="mot" maxlength="60" required data-clavier></label>
     <button type="submit" class="bouton bouton--secondaire">Ne plus proposer</button></form>
