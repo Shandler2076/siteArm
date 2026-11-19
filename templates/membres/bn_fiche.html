@@ -58,7 +58,7 @@
       <label class="champ"><span>Catégorie exacte</span><select name="categorie">
         <option value="actif">Membre actif</option><option value="honneur">Membre d'honneur</option><option value="sympathisant">Membre sympathisant</option></select></label>
       <label class="champ champ--requis"><span>Motif de la correction</span><input name="motif" required maxlength="300"></label>
-      <button type="submit" class="bouton bouton--secondaire" onclick="return confirm('Corriger la catégorie ?');">Corriger la catégorie</button>
+      <button type="submit" class="bouton bouton--secondaire" data-confirmer="Corriger la catégorie ?">Corriger la catégorie</button>
     </form>
     <p class="aide">Les catégories s'excluent (art. 25 à 28). Un bureau ne peut plus demander de changement de catégorie.</p>
   </details>

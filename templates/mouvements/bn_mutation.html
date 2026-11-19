@@ -15,7 +15,7 @@
         <ul>{% for m in mandats %}<li>{{ m.fonction.nom }} — {{ m.unite.nom }}</li>{% endfor %}</ul>
       </div>
     {% endif %}
-    <form method="post" class="decision" onsubmit="return confirm('Valider cette mutation ? Le parcours du membre sera mis à jour immédiatement.');">
+    <form method="post" class="decision" data-confirmer="Valider cette mutation ? Le parcours du membre sera mis à jour immédiatement.">
       {% csrf_token %}
       <button type="submit" name="decision" value="valider" class="bouton">Valider la mutation</button>
     </form>

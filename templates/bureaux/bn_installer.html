@@ -7,7 +7,7 @@
   {% if not unite %}
     <form method="get">
       <div class="champ"><span>Niveau</span>
-        <select name="niveau" onchange="this.form.submit()">
+        <select name="niveau" data-soumettre-auto>
           <option value="">— choisir —</option>
           {% for valeur, libelle in niveaux %}<option value="{{ valeur }}" {% if valeur == niveau %}selected{% endif %}>{{ libelle }}</option>{% endfor %}
         </select>

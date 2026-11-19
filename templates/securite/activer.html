@@ -10,8 +10,7 @@
     <p><strong>2. Vous êtes sur le téléphone qui a l'application ?</strong> Touchez ce bouton : l'application s'ouvre et ajoute le compte toute seule.</p>
     <a class="bouton" href="{{ uri }}">Ajouter à mon application d'authentification</a>
     <p class="aide">Si rien ne s'ouvre : copiez la clé, puis dans l'application touchez <strong>+</strong> → <strong>« Saisir une clé de configuration »</strong> (ou « Saisir le code manuellement »), collez la clé et choisissez « Basé sur l'heure ».</p>
-    <button type="button" class="bouton bouton--secondaire" data-cle="{{ secret }}"
-      onclick="var b=this;navigator.clipboard.writeText(b.dataset.cle).then(function(){b.textContent='Clé copiée ✓'},function(){b.textContent='Copie impossible : recopiez la clé ci-dessous'})">Copier la clé</button>
+    <button type="button" class="bouton bouton--secondaire" data-action="copier" data-texte="{{ secret }}">Copier la clé</button>
     <p class="aide"><strong class="cle">Clé : {{ cle }}</strong></p>
   </div>
 

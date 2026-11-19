@@ -7,7 +7,7 @@
   <p><span class="matricule">{{ membre.matricule }}</span> {{ membre.nom_complet }} — {{ membre.get_statut_display }}</p>
   <p class="aide">Suspension ou retrait temporaire : statut « Sanctionné ». Exclusion : statut « Exclu » et compte désactivé. Avertissements, amende, blâme : inscrits sans changer le statut. Retour automatique à « Actif » à la date de fin.</p>
   {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
-  <form method="post" onsubmit="return confirm('Inscrire cette sanction ?');">
+  <form method="post" data-confirmer="Inscrire cette sanction ?">
     {% csrf_token %}
     {% for champ in form %}
       <label class="champ{% if champ.field.required %} champ--requis{% endif %}"><span>{{ champ.label }}</span>{{ champ }}

@@ -14,7 +14,7 @@
   </details>
   {% endfor %}
 </nav>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   /* Place le menu sur la rubrique active, au lieu de le laisser tout en haut. */
   (function () {
     var menu = document.getElementById('menu');

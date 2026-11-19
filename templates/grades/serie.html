@@ -6,12 +6,12 @@
   <p class="aide">Après une consécration, un test ou une décision de nomination : choisissez le grade, cochez les membres, indiquez la date et la référence. Si un seul membre ne remplit pas les conditions, personne n'est promu.</p>
   <form method="get" class="filtres">
     <label class="champ"><span>Grade à attribuer</span>
-      <select name="grade" onchange="this.form.submit()">
+      <select name="grade" data-soumettre-auto>
         <option value="">—</option>
         {% for v, lib in grades %}<option value="{{ v }}"{% if v == grade %} selected{% endif %}>{{ lib }}</option>{% endfor %}
       </select></label>
     <label class="champ"><span>Région</span>
-      <select name="region" onchange="this.form.submit()">
+      <select name="region" data-soumettre-auto>
         <option value="">Toutes</option>
         {% for r in regions %}<option value="{{ r.pk }}"{% if r.pk|stringformat:"s" == region_pk %} selected{% endif %}>{{ r.code }} — {{ r.nom }}</option>{% endfor %}
       </select></label>
@@ -32,7 +32,7 @@
       {% endfor %}
       </tbody>
     </table></div>
-    <button type="submit" class="bouton" onclick="return confirm('Enregistrer ces promotions ?');">Promouvoir les membres cochés</button>
+    <button type="submit" class="bouton" data-confirmer="Enregistrer ces promotions ?">Promouvoir les membres cochés</button>
     {% else %}<p class="aide">Aucun membre.</p>{% endif %}
   </form>
   {% endif %}

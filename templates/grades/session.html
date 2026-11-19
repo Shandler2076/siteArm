@@ -29,7 +29,7 @@
     </div>
     <label class="champ"><span>Date d'effet</span><input type="date" name="date_effet" value="{{ aujourdhui|date:'Y-m-d' }}"></label>
     <p class="aide">L'acte de promotion est généré : « Décision n° … du … portant promotion après le {{ s.get_type_display|lower }} du {{ s.date|date:"d/m/Y" }} », signé par le Président.</p>
-    <button type="submit" class="bouton" onclick="return confirm('Promouvoir les admis cochés ?');">Promouvoir les admis cochés</button>
+    <button type="submit" class="bouton" data-confirmer="Promouvoir les admis cochés ?">Promouvoir les admis cochés</button>
   </form>
 </section>
 {% endblock %}

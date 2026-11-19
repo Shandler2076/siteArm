@@ -85,6 +85,49 @@
     enveloppe.appendChild(bouton);
   }
 
+  /* Gestes de l'interface sans JavaScript écrit dans les pages (exigé par la politique de
+     sécurité des contenus, CSP) : chaque élément les déclare par un attribut data-… */
+  document.addEventListener("submit", function (e) {
+    var f = e.target;
+    if (f.dataset && f.dataset.confirmer && !window.confirm(f.dataset.confirmer)) e.preventDefault();
+  }, true);
+  document.addEventListener("click", function (e) {
+    var el = e.target.closest ? e.target.closest("[data-confirmer], [data-action]") : null;
+    if (!el || el.tagName === "FORM") return;
+    if (el.dataset.confirmer && !window.confirm(el.dataset.confirmer)) { e.preventDefault(); return; }
+    switch (el.dataset.action) {
+      case "menu":
+        el.setAttribute("aria-expanded", document.body.classList.toggle("menu-ouvert"));
+        break;
+      case "fermer-menu":
+        document.body.classList.remove("menu-ouvert");
+        break;
+      case "retour":
+        if (document.referrer.indexOf(location.host) !== -1 && history.length > 1) {
+          e.preventDefault();
+          history.back();
+        }
+        break;
+      case "retirer-ligne":
+        el.parentNode.remove();
+        break;
+      case "copier":
+        navigator.clipboard.writeText(el.dataset.texte).then(
+          function () { el.textContent = "Clé copiée ✓"; },
+          function () { el.textContent = "Copie impossible : recopiez la clé ci-dessous"; }
+        );
+        break;
+      case "tout-cocher":
+        document.querySelectorAll('input[name="' + el.dataset.cases + '"]').forEach(function (c) {
+          c.checked = el.checked;
+        });
+        break;
+    }
+  });
+  document.addEventListener("change", function (e) {
+    if (e.target.dataset && "soumettreAuto" in e.target.dataset && e.target.form) e.target.form.submit();
+  });
+
   document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('input[type="password"]').forEach(voirMotDePasse);
     document.querySelectorAll("form").forEach(cascade);

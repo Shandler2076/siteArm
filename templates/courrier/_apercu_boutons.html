@@ -6,7 +6,7 @@
   <div class="fenetre-apercu__barre"><strong>Aperçu</strong><button type="button" class="bouton bouton--discret" id="fermer-apercu">Fermer</button></div>
   <div id="contenu-apercu"></div>
 </dialog>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var bouton = document.getElementById('bouton-apercu'), boutonPdf = document.getElementById('bouton-apercu-pdf');
     var fenetre = document.getElementById('fenetre-apercu'), contenu = document.getElementById('contenu-apercu');

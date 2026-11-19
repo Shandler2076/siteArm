@@ -10,7 +10,7 @@
     <p>Si l'année ou la région d'intégration change, un <strong>nouveau matricule</strong> est attribué : le membre se connectera avec ce nouveau matricule (il est notifié). L'ancien reste noté dans l'historique de la fiche. La correction est inscrite au journal.</p>
   </div>
   {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
-  <form method="post" onsubmit="return confirm('Enregistrer cette correction ?');">
+  <form method="post" data-confirmer="Enregistrer cette correction ?">
     {% csrf_token %}
     {% for champ in form %}
       <label class="champ champ--requis"><span>{{ champ.label }}</span>{{ champ }}

@@ -60,7 +60,7 @@
     <button type="submit" class="bouton">Créer la cotisation spéciale</button>
   </form>
 </section>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     /* Le montant s'ouvre juste devant le type choisi. */
     var radios = document.querySelectorAll('input[name=type_montant]');
