@@ -21,7 +21,7 @@
       <label class="champ" id="bloc-montant" hidden><span>Montant (F CFA)</span><input type="number" name="montant" min="1"></label>
       <button type="submit" class="bouton">Payer par mobile money</button>
     </form>
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
       (function () { var c = document.getElementById('choix-paiement');
         function maj() { document.getElementById('bloc-nombre').hidden = !!c.value; document.getElementById('bloc-montant').hidden = !c.value; }
         c.addEventListener('change', maj); maj(); })();

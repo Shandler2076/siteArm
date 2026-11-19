@@ -40,7 +40,7 @@
     <button type="submit" class="bouton">Enregistrer</button>
   </form>
 </section>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     /* Blocs liés aux options : visibles seulement si l'option est cochée. */
     document.querySelectorAll('input[data-montre]').forEach(function (c) {

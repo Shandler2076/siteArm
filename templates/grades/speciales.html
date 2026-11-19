@@ -20,14 +20,14 @@
     </div>
     <label class="champ"><span>Date d'effet</span><input type="date" name="date_effet" value="{{ aujourdhui|date:'Y-m-d' }}"></label>
     <label class="champ champ--requis"><span>Motif</span><textarea name="motif" rows="3" required></textarea></label>
-    <button type="submit" class="bouton" onclick="return confirm('Enregistrer cette promotion spéciale ?');">Enregistrer la promotion spéciale</button>
+    <button type="submit" class="bouton" data-confirmer="Enregistrer cette promotion spéciale ?">Enregistrer la promotion spéciale</button>
   </form>
   <h2>Promotions spéciales accordées</h2>
   <ul class="fonctions">{% for a in actes %}
     <li><a href="{% url 'grades:acte_pdf' a.pk %}">{{ a }}</a> — {{ a.promotions.count }} membre(s)<br><small class="aide">{{ a.motif|truncatechars:120 }}</small></li>
   {% empty %}<li class="aide">Aucune.</li>{% endfor %}</ul>
 </section>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), sel = document.getElementById('selection'), t;
     function txt(s) { return document.createTextNode(s); }

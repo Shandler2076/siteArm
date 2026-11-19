@@ -4,8 +4,8 @@
   <ul id="resultats" hidden></ul>
 </div>
 <ul id="selection" class="selection">{% for m in membres_choisis %}
-  <li id="sel{{ m.pk }}"><input type="hidden" name="membres" value="{{ m.pk }}"><span>{{ m.nom_complet }} — {{ m.matricule }}</span><button type="button" class="retirer" aria-label="Retirer" onclick="this.parentNode.remove()">✕</button></li>{% endfor %}</ul>
-<script>
+  <li id="sel{{ m.pk }}"><input type="hidden" name="membres" value="{{ m.pk }}"><span>{{ m.nom_complet }} — {{ m.matricule }}</span><button type="button" class="retirer" aria-label="Retirer" data-action="retirer-ligne">✕</button></li>{% endfor %}</ul>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), sel = document.getElementById('selection'), t;
     function txt(s) { return document.createTextNode(s); }

@@ -6,8 +6,8 @@
   <ul id="resultats-bureau" hidden></ul>
 </div>
 <ul id="bureaux-choisis" class="selection">{% for b in bureaux_choisis %}
-  <li><input type="hidden" name="bureaux" value="{{ b.cle }}"><span>{{ b.libelle }}</span><button type="button" class="retirer" aria-label="Retirer" onclick="this.parentNode.remove()">✕</button></li>{% endfor %}</ul>
-<script>
+  <li><input type="hidden" name="bureaux" value="{{ b.cle }}"><span>{{ b.libelle }}</span><button type="button" class="retirer" aria-label="Retirer" data-action="retirer-ligne">✕</button></li>{% endfor %}</ul>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var bureaux = JSON.parse(document.getElementById('donnees-bureaux').textContent);
     var champ = document.getElementById('recherche-bureau'), liste = document.getElementById('resultats-bureau');

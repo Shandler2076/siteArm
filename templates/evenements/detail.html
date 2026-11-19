@@ -27,7 +27,7 @@
       <thead><tr><th>Membre</th><th>Matricule</th><th>Rôle</th><th>Présence</th><th></th></tr></thead>
       <tbody>{% for c in g.convocations %}
         <tr><td>{{ c.membre.nom_complet }}</td><td>{{ c.membre.matricule }}</td><td>{{ c.libelle_role }}{% if c.bureau_libelle %}<br><small class="aide">{{ c.bureau_libelle }}</small>{% endif %}</td><td>{{ c.get_presence_display|default:"Non pointé" }}</td>
-          <td>{% if not ev.annule %}<form method="post" class="en-ligne" onsubmit="return confirm('Retirer cette convocation ?');">{% csrf_token %}
+          <td>{% if not ev.annule %}<form method="post" class="en-ligne" data-confirmer="Retirer cette convocation ?">{% csrf_token %}
             <input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}">
             <input name="motif" placeholder="Motif du retrait" required maxlength="300" aria-label="Motif du retrait">
             <button type="submit" class="bouton bouton--secondaire">Retirer</button></form>{% endif %}</td></tr>
@@ -37,7 +37,7 @@
   {% if retires %}<h2>Convocations retirées</h2><ul class="fonctions">{% for c in retires %}<li>{{ c.membre.nom_complet }} — {{ c.motif_retrait }}</li>{% endfor %}</ul>{% endif %}
   {% if not ev.annule %}
   <h2>Annuler l'événement</h2>
-  <form method="post" onsubmit="return confirm('Annuler cet événement ? Tous les convoqués seront avertis.');">{% csrf_token %}
+  <form method="post" data-confirmer="Annuler cet événement ? Tous les convoqués seront avertis.">{% csrf_token %}
     <input type="hidden" name="action" value="annuler">
     <label class="champ champ--requis"><span>Motif</span><input name="motif" required maxlength="300"></label>
     <button type="submit" class="bouton bouton--secondaire">Annuler l'événement</button></form>

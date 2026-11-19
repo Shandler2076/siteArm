@@ -26,6 +26,9 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements-dev.txt
+      # Failles connues dans les bibliothèques (base publique PyPI / OSV) : la suite échoue si une
+      # version figée dans requirements.txt est touchée. Corriger en montant la version.
+      - run: pip install pip-audit==2.9.0 && pip-audit -r requirements.txt
       - run: ruff check .
       - run: python manage.py makemigrations --check --dry-run
       - run: pytest -q

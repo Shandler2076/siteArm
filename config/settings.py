@@ -219,6 +219,8 @@ EMAIL_TIMEOUT = 10  # secondes : un serveur lent ne bloque pas les pages
 if DEBUG and not os.environ.get("DJANGO_EMAIL_HOST"):
     EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
+# Clé de chiffrement des clés de double vérification (facultative ; sinon : clé secrète).
+CLE_DOUBLE_VERIFICATION = os.environ.get("DJANGO_CLE_DOUBLE_VERIFICATION", "")
 # Double vérification (code à 6 chiffres) obligatoire pour les comptes ayant un mandat national.
 DOUBLE_VERIFICATION_BN = os.environ.get("DJANGO_DOUBLE_VERIFICATION_BN", "True") == "True"
 

@@ -45,7 +45,7 @@
     {% include "courrier/_apercu_boutons.html" %}
   </form>
 </section>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var f = document.getElementById('form-courrier'), champ = document.getElementById('champ-fichier');
     var titre = document.getElementById('champ-titre');

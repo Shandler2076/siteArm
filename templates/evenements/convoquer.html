@@ -65,7 +65,7 @@
     </aside>
   </div>
 </section>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var selection = document.getElementById('selection'), vide = document.getElementById('selection-vide');
     var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), minuterie;

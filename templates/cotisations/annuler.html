@@ -5,7 +5,7 @@
   <h1>Annuler un versement</h1>
   <p>{{ versement.membre.nom_complet }} — {{ versement.montant }} F, versé le {{ versement.date_versement|date:"d/m/Y" }} ({{ versement.get_etat_display|lower }}).</p>
   <p class="aide">L'annulation reste visible et est inscrite au journal. Les mois concernés redeviennent à payer.</p>
-  <form method="post" onsubmit="return confirm('Annuler ce versement ?');">
+  <form method="post" data-confirmer="Annuler ce versement ?">
     {% include "grades/_formulaire.html" %}
     <button type="submit" class="bouton">Annuler le versement</button>
   </form>

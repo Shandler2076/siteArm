@@ -6,7 +6,7 @@
   <p class="aide">Choisissez le grade que les membres pourraient recevoir. Le site montre les membres du grade juste en dessous qui remplissent les conditions (art. 78). Exemple : « Capitaine » → les Sous-Capitaines éligibles.</p>
   <form method="get" class="filtres">
     <label class="champ"><span>Éligibles au grade de</span>
-      <select name="grade" onchange="this.form.submit()"><option value="">— Choisir —</option>
+      <select name="grade" data-soumettre-auto><option value="">— Choisir —</option>
         {% for v, lib in grades %}<option value="{{ v }}"{% if v == grade %} selected{% endif %}>{{ lib }}</option>{% endfor %}</select></label>
     <noscript><button class="bouton bouton--secondaire">Afficher</button></noscript>
   </form>
@@ -15,7 +15,7 @@
     <h2>{{ eligibles|length }} membre(s)</h2>
     {% if eligibles %}
     <form method="post">{% csrf_token %}<input type="hidden" name="grade" value="{{ grade }}">
-      <p><label class="case"><input type="checkbox" checked onclick="document.querySelectorAll('input[name=membres]').forEach(function(c){c.checked=this.checked}, this)"> Tout cocher</label></p>
+      <p><label class="case"><input type="checkbox" checked data-action="tout-cocher" data-cases="membres"> Tout cocher</label></p>
       <ul class="propositions">{% for m in eligibles %}
         <li><label><input type="checkbox" name="membres" value="{{ m.pk }}" checked>
           <span>{{ m.nom_complet }}<br><small class="aide">{{ m.matricule }} — grade depuis le {{ m.date_grade|date:"d/m/Y"|default:"—" }}</small></span></label></li>

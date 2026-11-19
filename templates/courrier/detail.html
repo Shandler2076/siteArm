@@ -30,7 +30,7 @@
   {% endfor %}
   {% for u in transmettre %}
     <form method="post" action="{% url 'courrier:action' c.pk %}" class="encadre">{% csrf_token %}<input type="hidden" name="action" value="transmettre"><input type="hidden" name="unite" value="{{ u.cle }}">
-      <button type="submit" class="bouton bouton--secondaire" onclick="return confirm('Transmettre ce communiqué à tous les membres de la paroisse ?');">Transmettre aux membres de {{ u.libelle }}</button></form>
+      <button type="submit" class="bouton bouton--secondaire" data-confirmer="Transmettre ce communiqué à tous les membres de la paroisse ?">Transmettre aux membres de {{ u.libelle }}</button></form>
   {% endfor %}
 
   {% if qualite and c.etat == "a_signer" %}
@@ -38,7 +38,7 @@
       <h2>Vous signez ce courrier</h2>
       {% if a_signature %}
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="valider"><input type="hidden" name="version" value="{{ c.version }}">
-          <button type="submit" class="bouton" onclick="return confirm('Signer et envoyer ce courrier ? Il ne pourra plus être modifié.');">{% if qualite.0 == "po" %}Signer pour ordre et envoyer{% else %}Signer et envoyer{% endif %}</button></form>
+          <button type="submit" class="bouton" data-confirmer="Signer et envoyer ce courrier ? Il ne pourra plus être modifié.">{% if qualite.0 == "po" %}Signer pour ordre et envoyer{% else %}Signer et envoyer{% endif %}</button></form>
       {% else %}<p class="message message--error">Déposez d'abord l'image de votre signature : <a href="{% url 'courrier:ma_signature' %}">Ma signature</a>.</p>{% endif %}
       {% if qualite.0 == "titulaire" and c.prepare_par_id != user.pk %}
       <details class="demande-correction"><summary>Demander une correction au secrétaire</summary>
@@ -65,11 +65,11 @@
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="reprendre">
           <button type="submit" class="bouton">Reprendre ce courrier</button></form>
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="supprimer">
-          <button type="submit" class="bouton bouton--discret" onclick="return confirm('Supprimer définitivement ce courrier abandonné ?');">Supprimer définitivement</button></form>
+          <button type="submit" class="bouton bouton--discret" data-confirmer="Supprimer définitivement ce courrier abandonné ?">Supprimer définitivement</button></form>
       {% endif %}
       {% if c.etat != "annule" %}
         <form method="post" action="{% url 'courrier:action' c.pk %}">{% csrf_token %}<input type="hidden" name="action" value="abandonner">
-          <button type="submit" class="bouton bouton--discret" onclick="return confirm('Abandonner ce courrier ? Il ne sera pas envoyé (vous pourrez le reprendre pendant un mois).');">Abandonner ce courrier</button></form>
+          <button type="submit" class="bouton bouton--discret" data-confirmer="Abandonner ce courrier ? Il ne sera pas envoyé (vous pourrez le reprendre pendant un mois).">Abandonner ce courrier</button></form>
       {% endif %}
     </div>
   {% endif %}

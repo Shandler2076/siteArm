@@ -124,6 +124,10 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (`securite/envois.py`, + Permissions-Policy) ; Pillow : JPEG/PNG seulement ; versions figées ;
   `/gestion/` en lecture seule hors site d'essai (`securite/admin_lecture.py`,
   `DJANGO_ADMIN_LECTURE_SEULE`) ; journal des coordonnées = noms des champs seulement.
+  CSP (`securite/envois.py::politique_contenus`, jeton `request.csp_nonce`) : JAMAIS de onclick=
+  ni de `<script>` sans `nonce="{{ request.csp_nonce }}"` ; gestes par attributs `data-confirmer`,
+  `data-action`, `data-soumettre-auto` (`static/js/site.js`). Clés TOTP chiffrées
+  (`securite/chiffrement.py::SecretChiffre`). `pip-audit` dans les tests GitHub.
 
 - Style coloré (19/11/2026) : variables CSS en tête de `static/css/site.css` (marine #14284B,
   bordeaux #8E1F35, or #F2C230, fond crème #FBF6EA), Poppins (titres) + Inter (texte) servies par

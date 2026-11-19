@@ -6,7 +6,7 @@
   <small class="aide">Sur deux lignes, comme dans les lettres administratives : « À » (ou « Au », « À la ») seul en haut, puis le titre à la ligne. En goun : « Hlan » seul en haut, puis à la ligne le destinataire (une personne, un bureau, une région, toute la communauté…).</small><textarea name="adresse" rows="3" maxlength="500" data-clavier placeholder="Laissez vide en français : le site écrit « À » puis, à la ligne, « Monsieur le … » ou le grade et le nom du destinataire.">{{ v.adresse|default:'' }}</textarea>
   </label>
 {{ police_par_langue|json_script:"police-par-langue" }}
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     var form = document.currentScript.closest('form');
     var parLangue = JSON.parse(document.getElementById('police-par-langue').textContent);

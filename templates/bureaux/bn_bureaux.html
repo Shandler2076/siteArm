@@ -24,7 +24,7 @@
   {% endfor %}
   </div>
 </section>
-<script>
+<script nonce="{{ request.csp_nonce }}">
   (function () {
     // Recherche : n'affiche que les régions, circuits et paroisses qui contiennent le texte.
     var champ = document.getElementById('recherche-bureaux');

@@ -12,7 +12,12 @@ admin.site.index_title = "Administration"
 
 def connexion_de_la_gestion(request):
     """La gestion n'a pas sa propre connexion : tout passe par /connexion/ (limites par
-    identifiant ET par adresse IP, double vérification)."""
+    identifiant ET par adresse IP, double vérification). Un membre déjà connecté qui n'a pas accès
+    à la gestion reçoit un refus (sinon : boucle entre /gestion/ et /connexion/)."""
+    if request.user.is_authenticated:
+        from django.core.exceptions import PermissionDenied
+
+        raise PermissionDenied("La gestion technique est réservée au compte technique.")
     suivant = request.GET.get("next") or "/gestion/"
     return redirect(f"/connexion/?{urlencode({'next': suivant})}")
 
