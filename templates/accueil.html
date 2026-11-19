@@ -1,27 +1,43 @@
 {% extends "base.html" %}
 {% block contenu %}
-<section class="carte">
+<section class="bandeau-page">
   <h1>Bienvenue, {{ user.nom_affiche|default:user.identifiant }}</h1>
-  {% if user.membre %}<p class="matricule accueil-matricule" aria-label="Mon matricule">{{ user.membre.matricule }}</p>{% endif %}
+  {% if user.membre %}<p class="bandeau-page__matricule">Matricule <strong class="accueil-matricule" aria-label="Mon matricule">{{ user.membre.matricule }}</strong></p>{% endif %}
   {% include "_mes_fonctions.html" %}
-  {% if user.membre %}
+</section>
+
+<section class="tuiles" aria-label="En un coup d'œil">
+  {% for t in tuiles %}
+  <a class="tuile tuile--{{ t.variante }}" href="{{ t.url }}">
+    <span class="tuile__libelle">{{ t.libelle }}</span>
+    <span class="tuile__valeur{% if t.texte %} tuile__valeur--texte{% endif %}">{{ t.valeur }}</span>
+  </a>
+  {% endfor %}
+</section>
+
+{% if user.membre %}
+<section class="carte carte--rapide">
   <h2>Mon espace</h2>
-  <ul class="liens">
+  <ul class="liens liens--grille">
     <li><a href="{% url 'membres:ma_fiche' %}">Ma fiche et mon parcours</a></li>
-    <li><a href="{% url 'membres:ma_fiche_pdf' %}">Télécharger ma fiche (PDF)</a></li>
+    <li><a href="{% url 'membres:ma_fiche_pdf' %}">Ma fiche (PDF)</a></li>
   </ul>
-  {% endif %}
-  {% if mes_unites %}
+</section>
+{% endif %}
+{% if mes_unites %}
+<section class="carte carte--rapide">
   <h2>Espace bureau</h2>
-  <ul class="liens">
+  <ul class="liens liens--grille">
     {% for u in mes_unites %}
       <li><a href="{% url 'bureaux:membres' u.cle %}">Espace bureau — {{ u.libelle }}</a></li>
     {% endfor %}
   </ul>
-  {% endif %}
-  {% if est_bn %}
+</section>
+{% endif %}
+{% if est_bn %}
+<section class="carte carte--rapide">
   <h2>Bureau national</h2>
-  <ul class="liens">
+  <ul class="liens liens--grille">
     <li><a href="{% url 'mouvements:bn_decisions' %}">Décisions à prendre ({{ nb_decisions }})</a></li>
     <li><a href="{% url 'membres:bn_enregistrer' %}">Enregistrer un membre</a></li>
     <li><a href="{% url 'lots:liste' %}">Enregistrer par lots (Excel)</a></li>
@@ -36,6 +52,6 @@
     <li><a href="{% url 'listes:tranches' %}">Tranches d'âge des statistiques</a></li>
     <li><a href="{% url 'journal:liste' %}">Journal</a></li>
   </ul>
-  {% endif %}
 </section>
+{% endif %}
 {% endblock %}

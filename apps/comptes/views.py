@@ -34,7 +34,9 @@ def accueil(request):
     """Page d'accueil publique (présentation du mouvement) ; tableau de bord une fois connecté."""
     if not request.user.is_authenticated:
         return _vitrine(request)
-    return render(request, "accueil.html")
+    from apps.comptes.tableau import tuiles
+
+    return render(request, "accueil.html", {"tuiles": tuiles(request.user)})
 
 
 def accueil_du_site(request):

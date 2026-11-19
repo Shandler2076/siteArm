@@ -118,6 +118,11 @@ par identifiant (matricule) et mot de passe personnel.
    communiqués numérotés, signés par le Président ou le Chef, ou pour ordre par le Secrétaire),
    avec accusés de réception et de lecture.
 
+10. **Présenter le mouvement** sur la page d'accueil publique : quelques photos de manifestations
+    (fête annuelle), où des membres sont reconnaissables. Publiées seulement avec l'**accord des
+    personnes photographiées** (et des **parents** pour les enfants) et du photographe ; sans nom,
+    matricule ni autre donnée. Retrait sur simple demande d'une personne photographiée.
+
 Évolutions prévues, dans les mêmes finalités : suivi des **grades** et de l'éligibilité aux passages de
 grade, **activités et présences**, **communication** interne (messages officiels, documents). Toute
 évolution qui modifierait les finalités, les données ou les destinataires fera l'objet d'une mise à
@@ -200,7 +205,8 @@ Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
 | Fichiers Excel déposés pour l'enregistrement par lots | Supprimés 1 an après la validation du lot (proposition) |
 | Courriers abandonnés (jamais envoyés) et leurs pièces jointes | Effacés automatiquement un mois après l'abandon |
 | Courriers envoyés | Conservés au registre du bureau (archives du mouvement) |
-| Sauvegardes | Rotation automatique de l'hébergeur (environ 30 jours) |
+| Sauvegardes | Rotation automatique de l'hébergeur (environ 30 jours) ; sauvegardes chiffrées du BNC : les 10 dernières |
+| Photos de la page d'accueil publique | Tant que l'accord des personnes est maintenu ; retrait sur demande |
 
 ### 3.9 Mesures de sécurité
 
