@@ -57,3 +57,23 @@ def test_entete_permissions_policy(client):
     entete = client.get("/").headers["Permissions-Policy"]
     for api in ("camera=()", "microphone=()", "geolocation=()", "payment=()"):
         assert api in entete
+
+
+def test_pillow_ne_tente_que_jpeg_et_png(monkeypatch):
+    """Relecture : prouver que Pillow reçoit bien la liste des formats permis."""
+    import apps.membres.images as images
+
+    vus = []
+    vrai_open = images.Image.open
+
+    def espion(f, *a, **k):
+        vus.append(k.get("formats"))
+        return vrai_open(f, *a, **k)
+
+    monkeypatch.setattr(images.Image, "open", espion)
+    tampon = io.BytesIO()
+    Image.new("RGB", (400, 400), "white").save(tampon, "PNG")
+    tampon.seek(0)
+    tampon.size = len(tampon.getvalue())
+    verifier_et_preparer_photo(tampon)
+    assert vus and all(set(f) == {"JPEG", "PNG"} for f in vus)

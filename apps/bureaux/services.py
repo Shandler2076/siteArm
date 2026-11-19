@@ -105,6 +105,17 @@ def installer_bureau(
     return nouveaux
 
 
+def _mandat_en_cours_ou_a_venir(membre) -> bool:
+    """Un mandat pas encore terminé (même s'il ne commence que plus tard) protège le compte."""
+    from django.utils import timezone
+
+    return (
+        Mandat.objects.filter(membre=membre)
+        .filter(Q(date_fin__isnull=True) | Q(date_fin__gt=timezone.localdate()))
+        .exists()
+    )
+
+
 def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
     """Nouveau mot de passe provisoire ; renvoie la fiche PDF avec les identifiants.
 
@@ -137,7 +148,7 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
             or bool(compte.get_all_permissions())
             or bool(unites_gerees(compte))
             or est_bn(compte)
-            or Mandat.objects.en_cours().filter(membre=cible).exists()
+            or _mandat_en_cours_ou_a_venir(cible)
         )
         if not dans_ma_paroisse or droits_particuliers:
             raise PermissionDenied("Vous ne pouvez pas réinitialiser ce compte.")

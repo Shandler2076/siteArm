@@ -78,3 +78,17 @@ def test_adresse_ip_derriere_le_relais(rf, settings):
     settings.DERRIERE_RELAIS = True
     # La dernière adresse est celle ajoutée par le relais ; la première peut être inventée.
     assert adresse_ip(r) == "41.85.1.2"
+
+
+def test_connexion_de_la_gestion_renvoie_vers_la_connexion_du_site(client, db):
+    """Relecture : /gestion/login/ contournait la limite par adresse IP."""
+    r = client.post("/gestion/login/", {"username": "x", "password": "y"})
+    assert r.status_code == 302 and r.url.startswith("/connexion/")
+
+
+def test_adresse_relais_invalide_ignoree(rf, settings):
+    from apps.comptes.securite import adresse_ip
+
+    settings.DERRIERE_RELAIS = True
+    r = rf.get("/", REMOTE_ADDR="10.0.0.1", HTTP_X_FORWARDED_FOR="1.2.3.4, abc")
+    assert adresse_ip(r) == "10.0.0.1"

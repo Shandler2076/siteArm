@@ -1,11 +1,24 @@
+from urllib.parse import urlencode
+
 from django.contrib import admin
+from django.shortcuts import redirect
 from django.urls import include, path
 
 admin.site.site_header = "Armée du Salut — Gestion"
 admin.site.site_title = "Armée du Salut — Gestion"
 admin.site.index_title = "Administration"
 
+
+
+def connexion_de_la_gestion(request):
+    """La gestion n'a pas sa propre connexion : tout passe par /connexion/ (limites par
+    identifiant ET par adresse IP, double vérification)."""
+    suivant = request.GET.get("next") or "/gestion/"
+    return redirect(f"/connexion/?{urlencode({'next': suivant})}")
+
+
 urlpatterns = [
+    path("gestion/login/", connexion_de_la_gestion),
     path("gestion/", admin.site.urls),
     path("membres/", include("apps.membres.urls")),
     path("notifications/", include("apps.notifications.urls")),

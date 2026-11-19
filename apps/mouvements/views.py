@@ -82,19 +82,23 @@ def nouvelle_mutation(request, cle):
     form = NouvelleMutationForm(request.POST or None, national=national)
     apercu = None
     if request.method == "POST" and form.is_valid():
-        from apps.journal.recherches import MESSAGE_LIMITE, noter_recherche, recherches_epuisees
+        from apps.journal.recherches import MESSAGE_LIMITE, chercher
 
         saisi = form.cleaned_data["matricule"]
-        if not national and recherches_epuisees(request.user):
+        membre, limite = chercher(
+            request.user,
+            pour="mutation",
+            saisi=saisi,
+            trouver=membre_pour_mutation,
+            illimite=national,
+        )
+        if limite:
             form.add_error("matricule", MESSAGE_LIMITE)
             return render(
                 request,
                 "mouvements/nouvelle_mutation.html",
                 {"unite": unite, "form": form, "apercu": None},
             )
-        membre = membre_pour_mutation(saisi)
-        if not request.POST.get("confirmer"):
-            noter_recherche(request.user, pour="mutation", saisi=saisi, membre=membre)
         arrivee = form.cleaned_data["paroisse_arrivee"] if national else unite.objet
         if membre is None:
             form.add_error("matricule", "Aucun membre avec ce matricule.")

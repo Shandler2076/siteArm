@@ -102,25 +102,39 @@ def payer_pour(request):
     réduite, nombre de mois ou cotisation spéciale."""
     if _membre(request.user) is None and not _bn(request.user):
         raise Http404
-    from apps.journal.recherches import MESSAGE_LIMITE, noter_recherche, recherches_epuisees
+    from apps.journal.recherches import MESSAGE_LIMITE, chercher
 
     matricule = (request.POST.get("matricule") or request.GET.get("matricule") or "").strip()
-    limite = bool(matricule) and not _bn(request.user) and recherches_epuisees(request.user)
-    beneficiaire = (
-        Membre.objects.filter(
-            matricule=matricule.upper(), statut__in=[Statut.ACTIF, Statut.SANCTIONNE]
-        ).first()
-        if matricule and not limite
-        else None
-    )
-    if matricule and not limite and not request.POST.get("confirmer"):
-        noter_recherche(request.user, pour="payer_pour", saisi=matricule, membre=beneficiaire)
+    beneficiaire, limite = None, False
+    if matricule:
+        beneficiaire, limite = chercher(
+            request.user,
+            pour="payer_pour",
+            saisi=matricule,
+            trouver=lambda m: Membre.objects.filter(
+                matricule=m.strip().upper(), statut__in=[Statut.ACTIF, Statut.SANCTIONNE]
+            ).first(),
+            illimite=_bn(request.user),
+        )
     soi_meme = beneficiaire is not None and beneficiaire.compte_id == request.user.pk
+    # Seules les cotisations spéciales demandées à TOUS les membres sont proposées : une
+    # cotisation ciblée révélerait le grade, l'âge ou la catégorie du membre aidé, et une
+    # amende révélerait une sanction (on ne la voit que pour soi-même).
+    speciales = [
+        x["cs"]
+        for x in (s.speciales_du_membre(beneficiaire) if beneficiaire else [])
+        if (x["cs"].pour_membres == PourMembres.TOUS and not x["cs"].sanction_id)
+        or (soi_meme and x["cs"].sanction_id and not x["reglee"])
+    ]
     if request.method == "POST" and beneficiaire and request.POST.get("confirmer"):
         try:
             cs_pk = request.POST.get("speciale", "")
             if cs_pk.isdigit():
-                cs = get_object_or_404(CotisationSpeciale, pk=int(cs_pk))
+                # Seulement une cotisation proposée sur la page : sinon, la réponse dirait si le
+                # membre est concerné (amende, cotisation ciblée).
+                cs = next((x for x in speciales if x.pk == int(cs_pk)), None)
+                if cs is None:
+                    raise s.TresorerieRefusee("Cotisation non proposée pour ce membre.")
                 p = s.initier_paiement_special(
                     request.user, cs, _entier(request.POST.get("montant")), membre=beneficiaire
                 )
@@ -139,15 +153,6 @@ def payer_pour(request):
             )
         else:
             return _vers_plateforme(p)
-    # Seules les cotisations spéciales demandées à TOUS les membres sont proposées : une
-    # cotisation ciblée révélerait le grade, l'âge ou la catégorie du membre aidé, et une
-    # amende révélerait une sanction (on ne la voit que pour soi-même).
-    speciales = [
-        x["cs"]
-        for x in (s.speciales_du_membre(beneficiaire) if beneficiaire else [])
-        if (x["cs"].pour_membres == PourMembres.TOUS and not x["cs"].sanction_id)
-        or (soi_meme and x["cs"].sanction_id and not x["reglee"])
-    ]
     return render(
         request,
         "tresorerie/payer_pour.html",

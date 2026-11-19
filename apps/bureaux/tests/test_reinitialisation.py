@@ -89,3 +89,15 @@ def test_bouton_cache_pour_un_titulaire(client, monde):
     url = f"/bureau/paroisse-{monde['P1'].pk}/membres/{monde['tresorier'].matricule}/"
     page = client.get(url).content.decode()
     assert "/reinitialiser/" not in page and "seul le Bureau national" in page
+
+
+def test_refus_sur_un_futur_titulaire(client, monde, donner_mandat):
+    """Relecture : un mandat qui commence plus tard protège déjà le compte."""
+    import datetime as _d
+
+    cible = monde["m1"]
+    donner_mandat(
+        cible, "Trésorier paroissial", monde["P1"], debut=_d.date.today() + _d.timedelta(days=10)
+    )
+    r = _post(client, monde["sec_p1"], f"paroisse-{monde['P1'].pk}", cible)
+    assert r.status_code == 403

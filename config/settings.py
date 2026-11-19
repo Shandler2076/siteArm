@@ -128,13 +128,12 @@ AXES_RESET_ON_SUCCESS = True
 # Derrière le relais d'alwaysdata, l'adresse du visiteur est la dernière de X-Forwarded-For.
 DERRIERE_RELAIS = _bool("DJANGO_DERRIERE_RELAIS", False)
 AXES_CLIENT_IP_CALLABLE = "apps.comptes.securite.adresse_ip"
-# Échecs tolérés depuis une même adresse IP, tous identifiants confondus (seuil large : au Bénin,
-# beaucoup d'abonnés mobiles partagent la même adresse chez leur opérateur).
 # Recherches d'un membre par matricule (« payer pour », aperçu de mutation) par compte et par jour.
 LIMITE_RECHERCHES_MATRICULE = int(os.environ.get("DJANGO_LIMITE_RECHERCHES_MATRICULE", "30"))
+# axes bloque par identifiant (5 échecs). En plus, une adresse IP est bloquée après
+# LIMITE_ECHECS_PAR_IP échecs, tous identifiants confondus : seuil large, car au Bénin beaucoup
+# d'abonnés mobiles (et les cybercafés) partagent une même adresse.
 LIMITE_ECHECS_PAR_IP = int(os.environ.get("DJANGO_LIMITE_ECHECS_PAR_IP", "30"))
-# Blocage volontairement par identifiant seul : bloquer par adresse IP bloquerait tous les
-# membres d'un même cybercafé ou d'un même réseau mobile après 5 échecs cumulés.
 SILENCED_SYSTEM_CHECKS = [
     "axes.W006",
     # Pas d'inscription à la liste HSTS « preload » : engagement difficile à annuler.

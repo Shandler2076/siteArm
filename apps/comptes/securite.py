@@ -13,13 +13,17 @@ def adresse_ip(request) -> str:
     """Adresse IP du visiteur. Derrière le relais de l'hébergeur (DERRIERE_RELAIS), on prend la
     DERNIÈRE adresse de X-Forwarded-For : c'est celle que le relais a ajoutée ; les précédentes
     viennent du visiteur et peuvent être inventées."""
+    import ipaddress
+
     from django.conf import settings
 
     if getattr(settings, "DERRIERE_RELAIS", False):
         relais = request.META.get("HTTP_X_FORWARDED_FOR", "")
         derniere = relais.split(",")[-1].strip()
-        if derniere:
-            return derniere
+        try:
+            return str(ipaddress.ip_address(derniere))
+        except ValueError:
+            pass  # valeur absente ou invalide : on garde l'adresse de la connexion
     return request.META.get("REMOTE_ADDR", "")
 
 

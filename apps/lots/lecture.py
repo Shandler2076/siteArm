@@ -51,6 +51,7 @@ def lire_classeur(fichier) -> list[tuple[int, dict[str, object]]]:
             "Ce fichier n'est pas un classeur Excel (.xlsx). Utilisez le modèle officiel."
         ) from e
     if "Membres" not in wb.sheetnames:
+        wb.close()
         raise FichierInvalide(
             "La feuille « Membres » est introuvable. Utilisez le modèle officiel."
         )
@@ -67,6 +68,7 @@ def lire_classeur(fichier) -> list[tuple[int, dict[str, object]]]:
         lue = entetes[i] if i < len(entetes) else None
         lue = str(lue).strip() if lue is not None else ""
         if lue != colonne.entete and not (colonne.entete_facultative and not lue):
+            wb.close()
             raise FichierInvalide(
                 "Les colonnes ne correspondent pas au modèle officiel : "
                 f"colonne {get_column_letter(i + 1)} attendue « {colonne.entete} »."
