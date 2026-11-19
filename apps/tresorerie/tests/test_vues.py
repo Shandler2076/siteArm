@@ -230,3 +230,20 @@ def test_pas_d_amende_avec_une_exclusion(tresoriers, compte_technique):
             amende=1000,
         )
     assert not s.CotisationSpeciale.objects.exists()
+
+
+def test_quittance_simulee_porte_la_mention(tresoriers, compte_technique):
+    """Une quittance de la plateforme simulée ne doit pas pouvoir passer pour un vrai reçu."""
+    import io
+
+    from pypdf import PdfReader
+
+    from apps.tresorerie.pdf import quittance_pdf
+
+    cs = s.creer_cotisation_speciale(
+        libelle="Essai", type_montant="fixe", montant=1000, par=compte_technique
+    )
+    m1 = tresoriers["m1"]
+    s.confirmer_paiement(s.initier_paiement_special(m1.compte, cs, 1000, membre=m1))
+    texte = PdfReader(io.BytesIO(quittance_pdf(Contribution.objects.get()))).pages[0].extract_text()
+    assert "SIMULÉ" in texte and "aucun argent" in texte

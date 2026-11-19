@@ -109,7 +109,8 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
     """Nouveau mot de passe provisoire ; renvoie la fiche PDF avec les identifiants.
 
     BNC : tout membre, sauf un compte ayant des droits que l'acteur n'a pas.
-    Bureau de paroisse : ses membres, s'ils ne détiennent aucun mandat de gestion.
+    Bureau de paroisse : ses membres simples seulement. Un membre qui a une fonction en
+    cours (trésorier, secrétaire, chef…) n'est réinitialisé que par le Bureau national.
     """
     from django.core.exceptions import PermissionDenied
     from django.http import Http404
@@ -136,6 +137,7 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
             or bool(compte.get_all_permissions())
             or bool(unites_gerees(compte))
             or est_bn(compte)
+            or Mandat.objects.en_cours().filter(membre=cible).exists()
         )
         if not dans_ma_paroisse or droits_particuliers:
             raise PermissionDenied("Vous ne pouvez pas réinitialiser ce compte.")

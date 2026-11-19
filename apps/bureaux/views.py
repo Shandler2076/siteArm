@@ -64,6 +64,7 @@ def fiche_membre(request, cle, matricule):
             "membre": membre,
             "parcours": parcours,
             "mandats": mandats,
+            "reinitialisation_par_bn": mandats.en_cours().exists(),
             **contexte_fiche(unite, membre),
             **contexte_rubriques(request, membre, avec_evenements=unite.niveau == "national"),
         },

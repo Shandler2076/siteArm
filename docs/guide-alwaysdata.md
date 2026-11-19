@@ -85,7 +85,10 @@ bash ~/siteArm/deploiement/alwaysdata/installer.sh
 Le script demande :
 - le **nom du compte** (Entrée pour accepter la proposition) ;
 - le **nom de la base PostgreSQL** (`COMPTE_site`), l'**utilisateur** et son **mot de passe** —
-  ou rien (Entrée) pour utiliser SQLite.
+  ou rien (Entrée) pour utiliser SQLite ;
+- s'il s'agit du **site d'essai** : répondre `o` pour le site d'essai (données fictives, paiement
+  simulé) ; Entrée (non) pour le vrai site, où le paiement simulé est alors **interdit** (le site
+  refuse de démarrer si `DJANGO_PAIEMENT_SIMULE=True` sans `DJANGO_SITE_DEMO=True`).
 
 Il installe tout (environ 3 à 5 minutes) : programmes Python, réglages secrets dans un fichier
 `.env` protégé, base de données, territoire (13 régions, 87 circuits, 427 paroisses). Il se termine

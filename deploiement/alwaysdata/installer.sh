@@ -41,6 +41,10 @@ else
             DATABASE_URL="sqlite:///$HOME/donnees-siteArm/site.sqlite3"
         fi
     fi
+    if [ -z "${SITE_DEMO:-}" ]; then
+        read -r -p "   Est-ce le SITE D'ESSAI (données fictives, paiement simulé) ? [o/N] : " REPONSE
+        case "$REPONSE" in [oO]*) SITE_DEMO=True ;; *) SITE_DEMO=False ;; esac
+    fi
     CLE="$("$VENV/bin/python" -c 'import secrets;print(secrets.token_urlsafe(50))')"
     umask 077
     cat > .env <<FIN
@@ -52,7 +56,7 @@ DJANGO_CSRF_TRUSTED_ORIGINS=https://$ADRESSE
 DJANGO_SITE_URL=https://$ADRESSE
 DATABASE_URL=$DATABASE_URL
 DJANGO_PRIVATE_MEDIA_ROOT=$PRIVE
-DJANGO_SITE_DEMO=${SITE_DEMO:-True}
+DJANGO_SITE_DEMO=$SITE_DEMO
 DJANGO_DOUBLE_VERIFICATION_BN=True
 DJANGO_SECURE_SSL_REDIRECT=True
 DJANGO_DEFAULT_FROM_EMAIL=Armée du Salut <noreply@$ADRESSE>

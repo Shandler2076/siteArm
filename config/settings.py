@@ -214,6 +214,11 @@ SITE_DEMO = _bool("DJANGO_SITE_DEMO", False)
 # Paiement mobile money SIMULÉ (aucun argent réel) : seulement sur le site d'essai ou en
 # développement. Sur le vrai site, il reste fermé tant qu'aucune plateforme réelle n'est branchée.
 PAIEMENT_SIMULE = _bool("DJANGO_PAIEMENT_SIMULE", SITE_DEMO or DEBUG)
+if PAIEMENT_SIMULE and not (SITE_DEMO or DEBUG or EN_TEST):
+    raise ImproperlyConfigured(
+        "DJANGO_PAIEMENT_SIMULE=True est interdit sur le vrai site : le paiement simulé "
+        "n'encaisse aucun argent. Il n'est permis qu'avec DJANGO_SITE_DEMO=True."
+    )
 
 # Contact pour les questions sur les données personnelles (page « Protection de vos données »).
 CONTACT_DONNEES = os.environ.get("DJANGO_CONTACT_DONNEES", "")

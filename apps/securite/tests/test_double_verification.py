@@ -151,3 +151,11 @@ def test_activation_possible_avec_un_seul_telephone(bn):
     assert "Ajouter à mon application d" in html
     assert "Copier la clé" in html and f'data-cle="{secret}"' in html
     assert html.index("otpauth://") < html.index("<svg")  # le bouton passe avant le QR code
+
+
+@pytest.mark.parametrize("fonction", ["Trésorier national", "Trésorier national adjoint"])
+def test_tresorier_national_concerne(client, monde, donner_mandat, fonction):
+    """Il prépare les reversements : son compte est aussi protégé par le code."""
+    donner_mandat(monde["m1"], fonction)
+    client.force_login(monde["m1"].compte)
+    assert client.get("/").url.startswith("/securite/activer/")
