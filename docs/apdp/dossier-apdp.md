@@ -154,7 +154,7 @@ jour auprès de l'APDP.
 | Cotisations mensuelles | Mois payés, montant, date du versement, paroisse qui a encaissé, validation, numéro de reçu, répartition entre les niveaux | Obligatoire | BNC, bureaux et trésoriers du périmètre ; le membre lui-même |
 | Courrier et communiqués | Courriers adressés au membre ou à son bureau (objet, texte, pièces jointes, courrier importé), dates de réception, d'ouverture et de confirmation ; pour les signataires : **image de leur signature** (stockage privé, visible du seul signataire, utilisée seulement sur les courriers qu'il signe lui-même) | Pour les destinataires et les signataires | Bureaux et BNC ; le signataire lui-même |
 | Discipline interne | Sanctions prévues par le règlement intérieur (type, degré, dates, motif résumé, référence de la décision) | Uniquement si une sanction est prononcée par le BNC | BNC |
-| Données de connexion et journal | Identifiant, date et heure des connexions et des opérations sensibles, actions effectuées | Automatique | Site |
+| Données de connexion et journal | Identifiant, date et heure des connexions et des opérations sensibles, actions effectuées, adresse IP des essais de connexion échoués | Automatique | Site |
 
 **Données sensibles.** L'appartenance au mouvement révèle une appartenance religieuse. Aucune autre
 donnée sensible n'est collectée : ni origine ethnique, ni opinion politique, ni santé, ni données
@@ -225,8 +225,12 @@ Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
 
 **Traçabilité**
 
-- Un **journal** enregistre les connexions, les consultations de fiches, les modifications (avec
-  l'ancienne et la nouvelle valeur), les exports de listes et toutes les décisions.
+- Un **journal** enregistre les connexions, les consultations de fiches, les modifications, les
+  exports de listes, les recherches d'un membre par son matricule et toutes les décisions. Pour
+  les coordonnées (téléphone, e-mail, adresse), il ne garde que le **nom** des champs modifiés,
+  jamais les valeurs (minimisation).
+- Les essais de connexion échoués sont comptés par identifiant et par **adresse IP**, pour bloquer
+  les tentatives d'intrusion (15 minutes) ; ces traces techniques ne servent qu'à ce blocage.
 - Ce journal ne peut être **ni modifié ni effacé**, y compris par l'administration technique : la base
   de données elle-même refuse ces opérations.
 

@@ -116,6 +116,15 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
 - Catégories : exclusives ; pas de signalement « catégorie » ; `statuts.admettre_comme_actif`
   (sympathisant → actif, BNC) et `corriger_categorie` (BN).
 
+- Sécurité (lot du 19/11/2026, `docs/securite/analyse-2026-11-19.md`) : réinitialisation d'un
+  titulaire de mandat par le BN seul ; double vérification aussi pour le Trésorier national ;
+  paiement simulé interdit sans `SITE_DEMO` (refus au démarrage) ; blocage des connexions par
+  identifiant ET par IP (`comptes/securite.py`, `DERRIERE_RELAIS`) ; recherches par matricule
+  journalisées et limitées (`journal/recherches.py`) ; envois > `TAILLE_MAX_ENVOI` refusés tôt
+  (`securite/envois.py`, + Permissions-Policy) ; Pillow : JPEG/PNG seulement ; versions figées ;
+  `/gestion/` en lecture seule hors site d'essai (`securite/admin_lecture.py`,
+  `DJANGO_ADMIN_LECTURE_SEULE`) ; journal des coordonnées = noms des champs seulement.
+
 ## Hébergement
 - Comparatif : `docs/hebergement/comparatif-hebergement.md` ; site d'essai chez alwaysdata (offre
   gratuite) : `docs/guide-alwaysdata.md` + scripts `deploiement/alwaysdata/` (installer, mettre à
