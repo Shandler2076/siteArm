@@ -1,4 +1,4 @@
-"""Pages du Bureau national : événements, convocations, pointage, exports."""
+"""Pages du Bureau National de Commandement : événements, convocations, pointage, exports."""
 
 import io
 

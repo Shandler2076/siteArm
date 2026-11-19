@@ -4,7 +4,7 @@
 <section class="carte">
   <h1>Vérifier un membre</h1>
   <p class="aide">Pour identifier un membre d'une autre paroisse (visite, faute…). Saisissez son
-    <strong>matricule exact</strong> et le motif : la consultation est inscrite au journal du Bureau national.</p>
+    <strong>matricule exact</strong> et le motif : la consultation est inscrite au journal du Bureau National de Commandement.</p>
   <form method="post">{% csrf_token %}
     {% for e in form.non_field_errors %}<p class="message message--error">{{ e }}</p>{% endfor %}
     {% include "evenements/_champ.html" with champ=form.matricule %}

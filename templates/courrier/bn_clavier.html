@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titre %}Clavier goun — Bureau national{% endblock %}
+{% block titre %}Clavier goun — Bureau National de Commandement{% endblock %}
 {% block contenu %}
 <section class="carte">
   <h1>Clavier goun</h1>
@@ -8,7 +8,7 @@
       <small class="aide">Lettres goun : ẹ ọ ṣ. Les tons (◌́ haut, ◌̀ bas, ◌̃ nasale, ◌̂ circonflexe) se posent sur la lettre déjà tapée. Pour ajouter un ton, écrivez « ◌ » suivi du ton.</small></label>
     <button type="submit" class="bouton">Enregistrer les lettres</button>
   </form>
-  <h2>Mots proposés par le Bureau national</h2>
+  <h2>Mots proposés par le Bureau National de Commandement</h2>
   <form method="post">{% csrf_token %}<input type="hidden" name="action" value="mots">
     <label class="champ"><span>Un mot (ou une courte expression) par ligne</span><textarea name="mots" rows="10" data-clavier>{{ mots_bn }}</textarea></label>
     {% include "courrier/_clavier.html" %}

@@ -4,7 +4,7 @@
 <section class="carte">
   <p class="aide">Trésorerie{% if not agit %} — consultation (lecture seule){% endif %}</p>
   <h1>{{ unite.libelle }}</h1>
-  <p>Numéro mobile money du bureau : <strong>{% if numero %}{{ numero.numero }}{% if numero.titulaire %} ({{ numero.titulaire }}){% endif %}{% else %}non enregistré — à demander au Bureau national{% endif %}</strong></p>
+  <p>Numéro mobile money du bureau : <strong>{% if numero %}{{ numero.numero }}{% if numero.titulaire %} ({{ numero.titulaire }}){% endif %}{% else %}non enregistré — à demander au Bureau National de Commandement{% endif %}</strong></p>
   {% if agit and unite.niveau == "paroisse" %}
     <p><a class="bouton" href="{% url 'tresorerie:payer_membres' unite.cle %}">Payer pour des membres (espèces reçues)</a></p>
   {% endif %}
@@ -15,7 +15,7 @@
       {% if agit and not x.reglee or agit and x.cs.type_montant != "fixe" %}<br><a class="bouton bouton--secondaire" href="{% url 'tresorerie:payer_speciale' x.cs.pk %}?bureau={{ unite.cle }}&amp;type={{ x.type }}">Payer au nom de : {{ x.pour }}</a>{% endif %}</li>
   {% empty %}<li class="aide">Aucune.</li>{% endfor %}</ul>
 
-  <h2>Reversements reçus du Bureau national</h2>
+  <h2>Reversements reçus du Bureau National de Commandement</h2>
   <div class="tableau-defilant"><table class="tableau tableau--souple">
     <thead><tr><th>Mois</th><th>Montant</th><th>État</th><th>Référence</th></tr></thead>
     <tbody>{% for r in reversements %}<tr><td>{{ r.mois|date:"m/Y" }}</td><td>{{ r.montant }} F</td><td>{{ r.get_etat_display }}</td><td>{{ r.reference_envoi|default:"—" }}</td></tr>

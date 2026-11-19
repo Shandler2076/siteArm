@@ -325,7 +325,7 @@ def payer_membres(request, cle):
     return render(request, "tresorerie/payer_membres.html", {"unite": unite, "membres": membres})
 
 
-# --- Bureau national ----------------------------------------------------------------------------
+# --- Bureau National de Commandement -------------------------------------------------------
 
 
 CRITERES = (
@@ -418,7 +418,7 @@ def bn_speciales(request):
                 ("paroisse", "Bureaux d'unité paroissiale"),
                 ("circuit", "Bureaux de section circuit"),
                 ("region", "Bureaux d'unité régionale de coordination"),
-                ("national", "Bureau national"),
+                ("national", "Bureau National de Commandement"),
             ],
         },
     )

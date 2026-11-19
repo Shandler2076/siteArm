@@ -105,7 +105,7 @@ def _compte(nom):
 
 class ModeVersement(models.TextChoices):
     ESPECES = "especes", "Espèces (saisie par la paroisse)"
-    MOBILE_MONEY = "mobile_money", "Mobile money (Bureau national)"
+    MOBILE_MONEY = "mobile_money", "Mobile money (Bureau National de Commandement)"
 
 
 class Versement(models.Model):
@@ -177,7 +177,7 @@ class MoisCotise(models.Model):
 class NiveauPart(models.TextChoices):
     CIRCUIT = "circuit", "Circuit"
     REGION = "region", "Région"
-    NATIONAL = "national", "Bureau national"
+    NATIONAL = "national", "Bureau National de Commandement"
 
 
 class PartRecue(models.Model):

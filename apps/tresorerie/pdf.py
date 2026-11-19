@@ -17,6 +17,9 @@ def quittance_pdf(c) -> bytes:
     tampon = io.BytesIO()
     pdf = canvas.Canvas(tampon, pagesize=A5)
     pdf.setTitle(f"Quittance {c.quittance}")
+    from apps.membres.pdf import filigrane
+
+    filigrane(pdf, 0, 0, larg, haut)
     y = entete_officiel(pdf, "Quittance — cotisation spéciale", [c.cotisation.libelle], larg, haut)
     pour = c.membre.nom_complet if c.membre else c.unite_libelle
     matricule = c.membre.matricule if c.membre else ""
@@ -37,13 +40,15 @@ def quittance_pdf(c) -> bytes:
         pdf.drawString(MARGE + 32 * mm, y, str(valeur))
         y -= 8 * mm
     pdf.setFont("Sans", 8)
-    pdf.drawString(MARGE, y - 4 * mm, "Payé au Bureau national de commandement (numéro unique).")
+    pdf.drawString(MARGE, y - 4 * mm, "Payé au Bureau National de Commandement (numéro unique).")
     if c.paiement.plateforme == "simulee":
-        pdf.setFont("Sans-Gras", 11)
+        pdf.setFont("Sans-Gras", 10)
         pdf.setFillColorRGB(0.6, 0.1, 0.1)
-        pdf.drawString(
-            MARGE, y - 12 * mm, "PAIEMENT SIMULÉ — site d'essai, aucun argent n'a été versé."
-        )
+        pdf.drawString(MARGE, y - 12 * mm, "PAIEMENT SIMULÉ — site d'essai :")
+        pdf.drawString(MARGE, y - 17 * mm, "aucun argent n'a été versé.")
+    from apps.membres.pdf import mot_filigrane
+
+    mot_filigrane(pdf, 0, 0, larg, haut, "PAYÉ")
     pied_de_page(pdf, 1, larg)
     pdf.showPage()
     pdf.save()

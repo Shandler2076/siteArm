@@ -12,7 +12,7 @@
       <input name="code" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required autofocus></label>
     <button type="submit" class="bouton">Valider</button>
   </form>
-  <p class="aide">Téléphone perdu ? Demandez à un autre membre du Bureau national de contacter le mainteneur technique.</p>
+  <p class="aide">Téléphone perdu ? Demandez à un autre membre du Bureau National de Commandement de contacter le mainteneur technique.</p>
   <form method="post" action="{% url 'deconnexion' %}">{% csrf_token %}<button type="submit" class="bouton bouton--discret">Se déconnecter</button></form>
 </section>
 {% endblock %}

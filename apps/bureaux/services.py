@@ -350,7 +350,7 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
 
     BNC : tout membre, sauf un compte ayant des droits que l'acteur n'a pas.
     Bureau de paroisse : ses membres simples seulement. Un membre qui a une fonction en
-    cours (trésorier, secrétaire, chef…) n'est réinitialisé que par le Bureau national.
+    cours (trésorier, secrétaire, chef…) n'est réinitialisé que par le BNC.
     """
     from django.core.exceptions import PermissionDenied
     from django.http import Http404
@@ -403,7 +403,7 @@ PALIERS = (30, 14, 7)  # jours avant la fin du mandat d'un bureau (décision du 
 
 
 def nom_du_bureau(unite) -> str:
-    """« du bureau de la Paroisse P1 », « du bureau du Circuit X », « du Bureau National… »."""
+    """« du bureau de la Paroisse P1 », « du bureau du Circuit X », « du BNC… »."""
     from apps.bureaux.perimetre import Niveau
 
     if unite.niveau == Niveau.NATIONAL:
@@ -433,7 +433,7 @@ def bureaux_a_echeance(jour: datetime.date, horizon: datetime.timedelta = DELAI_
 
 
 def alertes_echeances(jour: datetime.date | None = None) -> tuple[int, int]:
-    """Prévient chaque bureau (ses membres et le Bureau national) à 30, 14 et 7 jours de la fin
+    """Prévient chaque bureau (ses membres et le BNC) à 30, 14 et 7 jours de la fin
     de son mandat, puis à l'échéance. Une seule alerte par bureau et par palier. Ne coupe rien."""
     from django.utils import timezone
 

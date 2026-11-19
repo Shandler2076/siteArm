@@ -507,3 +507,12 @@ h2 { color: var(--bordeaux); font-weight: 700; }
 .galerie img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 12px; }
 @media (max-width: 520px) { .galerie { grid-template-columns: 1fr 1fr; } .galerie figure:last-child { grid-column: 1 / -1; } .galerie figure:last-child img { aspect-ratio: 4 / 3; } }
 a.bouton { text-decoration: none; text-align: center; }
+
+/* Menu : une entrée par bureau dans chaque rubrique (19/11/2026) */
+.menu__bureau > summary { list-style: none; cursor: pointer; display: flex; justify-content: space-between;
+  align-items: center; padding: 8px 10px; border-radius: 8px; color: var(--marine); font-weight: 700; font-size: .92rem; }
+.menu__bureau > summary::-webkit-details-marker { display: none; }
+.menu__bureau > summary::after { content: "▸"; font-size: .8rem; transition: transform .15s; }
+.menu__bureau[open] > summary::after { transform: rotate(90deg); }
+.menu__bureau > summary:hover { background: var(--fond); }
+.menu__bureau > ul { margin: 0 0 6px 10px; padding-left: 8px; border-left: 3px solid var(--or); }

@@ -31,6 +31,61 @@ LOGO_CONGREGATION_SANS_TEXTE = STATIQUE / "img" / "logo-congregation-sans-texte.
 _polices_ok = False
 
 
+_LOGO_PALE = None
+
+
+def _logo_pale() -> ImageReader | None:
+    """Logo de l'Armée du Salut très éclairci (filigrane), préparé une seule fois."""
+    global _LOGO_PALE
+    if _LOGO_PALE is None and LOGO_AS.exists():
+        from PIL import Image
+
+        logo = Image.open(LOGO_AS, formats=["PNG"]).convert("RGBA")
+        fond = Image.new("RGBA", logo.size, (255, 255, 255, 0))
+        pale = Image.blend(fond, logo, 0.10)
+        tampon = io.BytesIO()
+        pale.save(tampon, "PNG")
+        tampon.seek(0)
+        _LOGO_PALE = ImageReader(tampon)
+    return _LOGO_PALE
+
+
+def filigrane(c, x: float, y: float, largeur: float, hauteur: float, mot: str = "") -> None:
+    """Fond de page (décision du 19/11/2026) : logo de l'Armée du Salut en filigrane. À dessiner
+    AVANT le contenu. Le mot (« AUTORISÉ », « PAYÉ ») se pose ensuite par `mot_filigrane`."""
+    cote = min(largeur, hauteur) * 0.8
+    logo = _logo_pale()
+    if logo is not None:
+        c.drawImage(
+            logo,
+            x + (largeur - cote) / 2,
+            y + (hauteur - cote) / 2,
+            cote,
+            cote,
+            mask="auto",
+            preserveAspectRatio=True,
+        )
+
+
+def mot_filigrane(c, x: float, y: float, largeur: float, hauteur: float, mot: str) -> None:
+    """Le mot en grand, en bleu, en biais, transparent : posé APRÈS le contenu, il se voit
+    même sur la photo et le code QR, sans gêner la lecture."""
+    import math
+
+    _polices()
+    angle = math.degrees(math.atan2(hauteur, largeur))
+    diagonale = math.hypot(largeur, hauteur)
+    largeur_unite = pdfmetrics.stringWidth(mot, "Sans-Gras", 1)
+    taille = min(diagonale * 0.75 / largeur_unite, min(largeur, hauteur) * 0.35)
+    c.saveState()
+    c.setFillColor(colors.Color(0.08, 0.16, 0.29, alpha=0.12))  # marine #14284B, transparent
+    c.setFont("Sans-Gras", taille)
+    c.translate(x + largeur / 2, y + hauteur / 2)
+    c.rotate(angle)
+    c.drawCentredString(0, -taille / 3, mot)
+    c.restoreState()
+
+
 def _polices():
     global _polices_ok
     if not _polices_ok:

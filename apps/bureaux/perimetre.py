@@ -143,7 +143,7 @@ def peut_voir_cotisations_de(compte, membre: Membre) -> bool:
 
 
 def peut_imprimer_autorisation(compte, convocation) -> bool:
-    """Autorisation d'un événement : le membre lui-même, le Bureau national, ou le bureau de la
+    """Autorisation d'un événement : le membre lui-même, le BNC, ou le bureau de la
     paroisse actuelle du membre (décision du 12/11/2026) — jamais le circuit ni la région."""
     membre = convocation.membre
     if membre.compte_id and membre.compte_id == getattr(compte, "pk", None):

@@ -16,7 +16,7 @@ def test_enregistrement_nomme_le_membre_concerne(monde):
     m = monde["m1"]
     (ligne,) = lire([_entree(j.ENREGISTREMENT, membre=m.matricule)])
     assert ligne.texte == f"A enregistré le membre Camarade Test ADJOVI ({m.matricule})."
-    assert ligne.unite == "Bureau national"
+    assert ligne.unite == "Bureau National de Commandement"
 
 
 def test_promotion_de_grade_lisible(monde):

@@ -58,6 +58,8 @@ def test_autorisation_pdf_contenu(monde, conv):
     assert "Capitaine Test ADJOVI" in texte and monde["m1"].matricule in texte
     assert "autorisé(e) à travailler" in texte and "Session Culte" in texte
     assert "Pèlerinage de la Nativité 2026" in texte and "24/12/2026" in texte
+    # Décision du 19/11/2026 : logo en filigrane et « AUTORISÉ » en grand, en bleu.
+    assert "AUTORISÉ" in texte
 
 
 def test_autorisation_sans_photo(monde, conv):

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
-{% block titre %}Registre du Bureau national{% endblock %}
+{% block titre %}Registre du Bureau National de Commandement{% endblock %}
 {% block contenu %}
 <section class="carte">
-  <h1>Registre du Bureau national</h1>
-  <p class="aide">Courriers et communiqués envoyés par le Bureau national, et courriers adressés au Bureau national. Les courriers échangés entre les autres niveaux restent dans le registre de leur bureau.</p>
+  <h1>Registre du Bureau National de Commandement</h1>
+  <p class="aide">Courriers et communiqués envoyés par le Bureau National de Commandement, et courriers adressés au Bureau National de Commandement. Les courriers échangés entre les autres niveaux restent dans le registre de leur bureau.</p>
   <form method="get" class="date-heure">
     <label class="champ"><span>Courriers</span><select name="bureau"><option value="">Tous</option>
       {% for cle, lib in expediteurs %}<option value="{{ cle }}" {% if cle == bureau %}selected{% endif %}>{{ lib }}</option>{% endfor %}</select></label>

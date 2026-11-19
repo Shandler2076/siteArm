@@ -327,3 +327,20 @@ def test_payer_pour_refuse_une_cotisation_non_proposee(tresoriers, compte_techni
         {"matricule": m1.matricule, "confirmer": "1", "speciale": amende.pk, "montant": "2000"},
     )
     assert r.status_code == 200 and not Paiement.objects.exists()
+
+
+def test_quittance_porte_le_filigrane_paye(tresoriers, compte_technique):
+    """Décision du 19/11/2026 : logo en filigrane et « PAYÉ » en grand, en bleu."""
+    import io
+
+    from pypdf import PdfReader
+
+    from apps.tresorerie.pdf import quittance_pdf
+
+    cs = s.creer_cotisation_speciale(
+        libelle="Essai", type_montant="fixe", montant=1000, par=compte_technique
+    )
+    m1 = tresoriers["m1"]
+    s.confirmer_paiement(s.initier_paiement_special(m1.compte, cs, 1000, membre=m1))
+    page = PdfReader(io.BytesIO(quittance_pdf(Contribution.objects.get()))).pages[0]
+    assert "PAYÉ" in page.extract_text() and "/XObject" in str(page["/Resources"])

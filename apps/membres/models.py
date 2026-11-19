@@ -136,7 +136,7 @@ class Membre(models.Model):
             )
         ]
         permissions = [
-            ("gerer_membres", "Gérer les membres (Bureau national)"),
+            ("gerer_membres", "Gérer les membres (Bureau National de Commandement)"),
             ("voir_cip", "Voir la photo du CIP"),
             # Donnée par mandat au Président et au Secrétaire national ; à la main seulement
             # pour un compte de transition (démarrage du site).

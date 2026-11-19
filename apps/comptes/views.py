@@ -34,9 +34,19 @@ def accueil(request):
     """Page d'accueil publique (présentation du mouvement) ; tableau de bord une fois connecté."""
     if not request.user.is_authenticated:
         return _vitrine(request)
+    from apps.bureaux.menu import nom_bureau
+    from apps.bureaux.perimetre import unites_gerees
     from apps.comptes.tableau import tuiles
 
-    return render(request, "accueil.html", {"tuiles": tuiles(request.user)})
+    # Bureaux locaux seulement : le national a sa propre carte (décision du 19/11/2026).
+    bureaux_locaux = [
+        (nom_bureau(u), u.cle) for u in unites_gerees(request.user) if u.niveau != "national"
+    ]
+    return render(
+        request,
+        "accueil.html",
+        {"tuiles": tuiles(request.user), "bureaux_locaux": bureaux_locaux},
+    )
 
 
 def accueil_du_site(request):

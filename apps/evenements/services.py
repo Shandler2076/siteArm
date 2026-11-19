@@ -1,6 +1,6 @@
-"""Seuls points d'écriture des événements (Bureau national ; cahier des charges § 17).
+"""Seuls points d'écriture des événements (BNC ; cahier des charges § 17).
 
-Les invitations partent directement du Bureau national vers la personne convoquée.
+Les invitations partent directement du Bureau National de Commandement vers la personne convoquée.
 """
 
 import datetime
@@ -148,7 +148,10 @@ def modifier_evenement(ev: Evenement, *, par, sessions: list[str] | None = None,
             lieu = f", {ev.lieu}" if ev.lieu else ""
             _notifier(
                 list(_actives(ev)),
-                lambda c: f"Bureau national — « {ev.nom} » : nouvelle date {quand(ev)}{lieu}.",
+                lambda c: (
+                    "Bureau National de Commandement — "
+                    f"« {ev.nom} » : nouvelle date {quand(ev)}{lieu}."
+                ),
             )
     return ev
 
@@ -166,7 +169,10 @@ def annuler_evenement(ev: Evenement, *, motif: str, par) -> Evenement:
         _journal(par, "annulation", evenement=ev.pk, nom=ev.nom, motif=motif)
         _notifier(
             list(_actives(ev)),
-            lambda c: f"Bureau national — « {ev.nom} » ({quand(ev)}) est annulé : {motif}.",
+            lambda c: (
+                "Bureau National de Commandement — "
+                f"« {ev.nom} » ({quand(ev)}) est annulé : {motif}."
+            ),
         )
     return ev
 
@@ -179,7 +185,10 @@ def _texte_convocation(ev, c) -> str:
         if ev.avec_autorisation
         else ""
     )
-    return f"Bureau national — vous êtes convoqué(e) : « {ev.nom} » {quand(ev)}{lieu}{role}.{suite}"
+    return (
+        "Bureau National de Commandement — "
+        f"vous êtes convoqué(e) : « {ev.nom} » {quand(ev)}{lieu}{role}.{suite}"
+    )
 
 
 def convoquer(
@@ -322,7 +331,12 @@ def retirer(convocation: Convocation, *, motif: str, par) -> Convocation:
         _journal(
             par, "retrait", evenement=ev.pk, nom=ev.nom, membre=c.membre.matricule, motif=motif
         )
-        _notifier([c], lambda c: f"Bureau national — votre convocation à « {ev.nom} » est retirée.")
+        _notifier(
+            [c],
+            lambda c: (
+                f"Bureau National de Commandement — votre convocation à « {ev.nom} » est retirée."
+            ),
+        )
     return c
 
 

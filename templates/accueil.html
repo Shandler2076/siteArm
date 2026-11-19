@@ -24,20 +24,21 @@
   </ul>
 </section>
 {% endif %}
-{% if mes_unites %}
+{% if bureaux_locaux %}
 <section class="carte carte--rapide">
-  <h2>Espace bureau</h2>
+  <h2>Mes bureaux</h2>
   <ul class="liens liens--grille">
-    {% for u in mes_unites %}
-      <li><a href="{% url 'bureaux:membres' u.cle %}">Espace bureau — {{ u.libelle }}</a></li>
+    {% for nom, cle in bureaux_locaux %}
+      <li><a href="{% url 'bureaux:membres' cle %}">{{ nom }}</a></li>
     {% endfor %}
   </ul>
 </section>
 {% endif %}
 {% if est_bn %}
 <section class="carte carte--rapide">
-  <h2>Bureau national</h2>
+  <h2>Bureau National de Commandement</h2>
   <ul class="liens liens--grille">
+    {% if espace_national %}<li><a href="{% url 'bureaux:membres' 'national' %}">Tous les membres</a></li>{% endif %}
     <li><a href="{% url 'mouvements:bn_decisions' %}">Décisions à prendre ({{ nb_decisions }})</a></li>
     {% if perms.membres.enregistrer %}
     <li><a href="{% url 'membres:bn_enregistrer' %}">Enregistrer un membre</a></li>

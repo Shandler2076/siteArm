@@ -46,7 +46,7 @@
   {% include "grades/_historique.html" %}
   {% if unite.niveau == "paroisse" %}{% include "evenements/_autorisations_paroisse.html" %}{% endif %}
   {% include "mouvements/_historique.html" %}
-  <h2>Signalements au Bureau national</h2>
+  <h2>Signalements au Bureau National de Commandement</h2>
   <ul class="liens liens--compacts">
     {% for type, libelle in actions_signalement %}
       <li><a href="{% url 'mouvements:signaler' unite.cle membre.matricule type %}">{{ libelle }}</a></li>
@@ -54,7 +54,7 @@
   </ul>
   {% if blocage_rehabilitation %}<p class="aide">{{ blocage_rehabilitation }}</p>{% endif %}
   {% if unite.niveau == "paroisse" and reinitialisation_par_bn %}
-  <p class="aide">Ce membre a une fonction en cours : en cas de mot de passe oublié, seul le Bureau national peut lui donner un nouveau mot de passe.</p>
+  <p class="aide">Ce membre a une fonction en cours : en cas de mot de passe oublié, seul le Bureau National de Commandement peut lui donner un nouveau mot de passe.</p>
   {% elif unite.niveau == "paroisse" %}
   <div class="actions">
     <form method="post" action="{% url 'bureaux:reinitialiser' unite.cle membre.matricule %}">

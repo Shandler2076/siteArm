@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from apps.journal import models as j
 
-# Actions réservées au Bureau national : sans unité enregistrée, elles relèvent du national.
+# Actions réservées au BNC : sans unité enregistrée, elles relèvent du national.
 ACTIONS_NATIONALES = {
     j.ENREGISTREMENT,
     j.LOT_VALIDE,
@@ -57,7 +57,7 @@ def _date(iso) -> str:
 def _unites(cles: set[str]) -> dict[str, str]:
     from apps.bureaux.perimetre import MODELES, Unite
 
-    noms = {"national": "Bureau national"}
+    noms = {"national": "Bureau National de Commandement"}
     for cle in cles:
         niveau, _, ident = cle.partition("-")
         if niveau in MODELES and ident.isdigit():
@@ -288,7 +288,7 @@ def lire(entrees) -> list[Ligne]:
             )
         if a == j.PART_RECUE:
             niveau = {"circuit": "du circuit", "region": "de la région"}.get(
-                d.get("niveau"), "du Bureau national"
+                d.get("niveau"), "du Bureau National de Commandement"
             )
             mois = datetime.date.fromisoformat(d["mois"]) if d.get("mois") else None
             quand = periode_mois([mois] if mois else [])
@@ -398,6 +398,6 @@ def lire(entrees) -> list[Ligne]:
     def unite(e) -> str:
         if e.unite:
             return unites.get(e.unite, e.unite)
-        return "Bureau national" if e.action in ACTIONS_NATIONALES else "—"
+        return "Bureau National de Commandement" if e.action in ACTIONS_NATIONALES else "—"
 
     return [Ligne(e.date, auteur(e), phrase(e), unite(e), e.details) for e in entrees]

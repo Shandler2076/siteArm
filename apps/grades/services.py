@@ -309,7 +309,8 @@ def creer_session(*, type_epreuve, date, lieu="", grade_vise: int, membres, par)
         _journal(par, "session_epreuve", session=s.pk, epreuve=str(s), candidats=len(membres))
         lieu_txt = f", {s.lieu}" if s.lieu else ""
         texte = (
-            f"Bureau national — vous êtes candidat(e) au {s.get_type_display().lower()} du "
+            "Bureau National de Commandement — "
+            f"vous êtes candidat(e) au {s.get_type_display().lower()} du "
             f"{s.date:%d/%m/%Y}{lieu_txt} pour le grade de {s.get_grade_vise_display()}."
         )
         comptes = [m.compte for m in membres if m.compte_id]

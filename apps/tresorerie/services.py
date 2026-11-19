@@ -307,7 +307,7 @@ def _verifier_ouvert() -> None:
     if not paiement_ouvert():
         raise TresorerieRefusee(
             "Le paiement mobile money n'est pas encore ouvert : la plateforme de paiement n'est "
-            "pas encore choisie par le Bureau national."
+            "pas encore choisie par le Bureau National de Commandement."
         )
 
 
@@ -490,7 +490,7 @@ def confirmer_paiement(paiement: Paiement) -> Paiement:
             _journal(payeur, "paiement_echoue", reference=p.reference, motif=p.message)
             texte = (
                 f"Paiement {p.reference} ({p.montant} F) reçu mais non affecté : {p.message} "
-                "Le Bureau national va régulariser."
+                "Le Bureau National de Commandement va régulariser."
             )
             transaction.on_commit(lambda: notifier([payeur], texte))
             return p
@@ -709,7 +709,8 @@ def marquer_envoye(reversement: Reversement, *, reference: str, par) -> Reversem
         unite = unite_par_cle(r.cle)
         if unite is not None:
             texte = (
-                f"Reversement du Bureau national : {r.montant} F (cotisations de {r.mois:%m/%Y}) "
+                f"Reversement du "
+                f"Bureau National de Commandement : {r.montant} F (cotisations de {r.mois:%m/%Y}) "
                 f"envoyé au {r.numero}, référence {r.reference_envoi}."
             )
             lien = f"/tresorerie/{r.cle}/"
