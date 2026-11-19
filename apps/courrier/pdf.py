@@ -277,7 +277,7 @@ def _signature_reduite(fichier, largeur, hauteur) -> Image:
 
     fichier.open("rb")
     try:
-        image = PilImage.open(io.BytesIO(fichier.read()))
+        image = PilImage.open(io.BytesIO(fichier.read()), formats=["PNG", "JPEG"])
         image.load()
     finally:
         fichier.close()

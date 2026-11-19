@@ -49,6 +49,7 @@ from apps.courrier.models import (
 )
 
 TAILLE_MAX = 10 * 1024 * 1024
+FORMATS_IMAGES = ("JPEG", "PNG")  # Pillow n'essaie aucun autre format
 PIECES_MAX = 5
 SORTIS = {"exclu", "demissionnaire", "decede"}
 SIGLES = {Niveau.PAROISSE: "UP", Niveau.CIRCUIT: "SC", Niveau.REGION: "BRC"}
@@ -154,7 +155,7 @@ def type_fichier(fichier) -> str:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
-            image = Image.open(fichier)
+            image = Image.open(fichier, formats=FORMATS_IMAGES)
             image.verify()
     except (Image.DecompressionBombError, Image.DecompressionBombWarning) as e:
         raise CourrierRefuse("L'image est trop grande (dimensions démesurées).") from e
@@ -193,7 +194,7 @@ def _contenu_nettoye(fichier, extension: str):
     from PIL import ImageOps
 
     fichier.seek(0)
-    image = Image.open(fichier)
+    image = Image.open(fichier, formats=FORMATS_IMAGES)
     image.load()
     image = ImageOps.exif_transpose(image)
     sortie = io.BytesIO()
@@ -826,7 +827,7 @@ def _image_signature(fichier) -> ContentFile:
     """PNG nettoyé, fond blanc rendu transparent, 900 × 360 pixels au plus."""
     if type_fichier(fichier) == "pdf":
         raise CourrierRefuse("La signature doit être une image JPEG ou PNG.")
-    image = Image.open(fichier)
+    image = Image.open(fichier, formats=FORMATS_IMAGES)
     image.load()
     image = image.convert("RGBA")
     image.thumbnail((900, 360))

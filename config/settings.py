@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "apps.securite.envois.TailleDesEnvois",
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -73,6 +74,10 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "axes.middleware.AxesMiddleware",
 ]
+
+# Taille maximale d'un envoi (toutes pièces comprises) : un courrier importé (10 Mo) et ses
+# 5 pièces jointes (10 Mo chacune) tiennent dedans. Au-delà, refus avant réception.
+TAILLE_MAX_ENVOI = int(os.environ.get("DJANGO_TAILLE_MAX_ENVOI_MO", "64")) * 1024 * 1024
 
 ROOT_URLCONF = "config.urls"
 

@@ -10,6 +10,8 @@ TAILLE_MAX = 5 * 1024 * 1024
 COTE_MIN = 300
 COTE_MAX_STOCKE = 800
 FORMATS = {"JPEG", "PNG"}
+# Pillow ne doit même pas essayer de lire un autre format (moins de surface d'attaque).
+FORMATS_IMAGES = ("JPEG", "PNG")
 
 
 class PhotoInvalide(ValueError):
@@ -24,9 +26,9 @@ def verifier_et_preparer_photo(fichier) -> ContentFile:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
             fichier.seek(0)
-            Image.open(fichier).verify()
+            Image.open(fichier, formats=FORMATS_IMAGES).verify()
             fichier.seek(0)
-            image = Image.open(fichier)
+            image = Image.open(fichier, formats=FORMATS_IMAGES)
             image.load()
     except (Image.DecompressionBombError, Image.DecompressionBombWarning) as e:
         raise PhotoInvalide("La photo est trop grande (dimensions démesurées).") from e
@@ -60,7 +62,7 @@ def type_piece_cip(fichier) -> str:
     try:
         with warnings.catch_warnings():
             warnings.simplefilter("error", Image.DecompressionBombWarning)
-            image = Image.open(fichier)
+            image = Image.open(fichier, formats=FORMATS_IMAGES)
             image.verify()
     except Exception as e:  # noqa: BLE001 — tout fichier illisible est refusé
         raise PhotoInvalide(MESSAGE_CIP) from e
