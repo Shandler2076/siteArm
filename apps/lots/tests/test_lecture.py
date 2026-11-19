@@ -142,3 +142,28 @@ def test_telephone_nombre_excel(territoire):
     # Un nombre a pu perdre son 0 initial dans Excel : on demande de l'écrire comme du texte.
     erreurs = normaliser_ligne(_brutes(**{"Téléphone*": 197000000}), territoire["HOULENOU"])[1]
     assert any("0 initial" in e for e in erreurs)
+
+
+def test_bombe_zip_refusee():
+    """Un petit fichier qui se décompresse en un énorme contenu est refusé avant lecture."""
+    import io
+    import zipfile
+
+    tampon = io.BytesIO()
+    with zipfile.ZipFile(tampon, "w", zipfile.ZIP_DEFLATED) as z:
+        z.writestr("xl/worksheets/sheet1.xml", b"0" * (60 * 1024 * 1024))
+    f = SimpleUploadedFile("bombe.xlsx", tampon.getvalue())
+    assert f.size < 1024 * 1024
+    with pytest.raises(FichierInvalide, match="trop volumineux"):
+        lire_classeur(f)
+
+
+def test_lignes_vides_sans_fin_limitees(classeur, monkeypatch):
+    """Des milliers de lignes vides (mise en forme jusqu'en bas de la feuille) ne font pas
+    tourner la lecture indéfiniment : la feuille est refusée, jamais lue à moitié en silence."""
+    import apps.lots.lecture as lecture
+
+    monkeypatch.setattr(lecture, "LIGNES_LUES_MAX", 5)
+    with pytest.raises(FichierInvalide, match="trop longue"):
+        lire_classeur(classeur([LIGNE_OK] + [[None] * 18] * 10 + [LIGNE_OK]))
+    assert len(lire_classeur(classeur([LIGNE_OK, LIGNE_OK]))) == 2

@@ -587,7 +587,10 @@ def verifier(request, jeton):
         c = None
     else:
         c = Courrier.objects.filter(jeton=jeton, etat=Etat.ENVOYE).first()
-    return render(request, "courrier/verifier.html", {"c": c})
+    reponse = render(request, "courrier/verifier.html", {"c": c})
+    reponse["Cache-Control"] = "no-store"
+    reponse["X-Robots-Tag"] = "noindex"
+    return reponse
 
 
 @login_required

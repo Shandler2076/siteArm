@@ -233,5 +233,8 @@ if PAIEMENT_SIMULE and not (SITE_DEMO or DEBUG or EN_TEST):
         "n'encaisse aucun argent. Il n'est permis qu'avec DJANGO_SITE_DEMO=True."
     )
 
+# Gestion technique (/gestion/) en lecture seule sur le vrai site (apps/securite/admin_lecture.py).
+ADMIN_LECTURE_SEULE = _bool("DJANGO_ADMIN_LECTURE_SEULE", not (SITE_DEMO or DEBUG or EN_TEST))
+
 # Contact pour les questions sur les données personnelles (page « Protection de vos données »).
 CONTACT_DONNEES = os.environ.get("DJANGO_CONTACT_DONNEES", "")

@@ -74,6 +74,14 @@ Dans la gestion (`/gestion/`), cochez les éléments, choisissez l'action « Fer
 (ou « Rouvrir ») puis « Envoyer ». La suppression est impossible, c'est voulu : l'historique des
 membres doit rester vrai.
 
+**Sur le vrai site, la gestion est en lecture seule** (on consulte, on ferme ou rouvre une unité,
+mais on n'ajoute, ne modifie ni ne supprime rien) : elle écrit directement en base, sans passer
+par le journal ni les contrôles du site. Pour une opération exceptionnelle (ajouter une région,
+donner l'autorisation de transition…) :
+1. dans `.env`, mettre `DJANGO_ADMIN_LECTURE_SEULE=False`, puis redémarrer le site ;
+2. faire l'opération ;
+3. remettre `DJANGO_ADMIN_LECTURE_SEULE=True` (ou supprimer la ligne) et redémarrer.
+
 ## 8. Variables d'environnement en production
 
 | Variable | Rôle |
@@ -111,7 +119,8 @@ immédiatement ses droits de bureau. Les comptes de bureau sont déconnectés ap
 d'inactivité.
 
 *Transition :* l'autorisation manuelle « Gérer les membres » (gestion → Comptes → Permissions)
-donne encore les pages du BNC. À réserver au démarrage ; préférez les mandats.
+donne encore les pages du BNC. À réserver au démarrage ; préférez les mandats. Sur le vrai site,
+ouvrir d'abord la gestion en écriture (voir § 7).
 
 ## 11. Fichiers privés (photos, CIP)
 
