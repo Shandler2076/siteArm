@@ -45,6 +45,9 @@ de la validation (si la situation a changé, elle est marquée « impossible à 
   depuis **7 jours** ; le Président en est alors notifié.
 - Une demande non traitée expire au bout de **30 jours**. Le Secrétaire peut annuler la sienne.
 - Ce que le **Président** fait lui-même s'applique tout de suite ; le Secrétaire en est informé.
+- Le **compte technique** du mainteneur agit aussi sans validation (pour la maintenance) ; le
+  Président et le Secrétaire national sont prévenus de chacune de ses actions (décision du
+  mainteneur du 19/11/2026).
 
 ## Délégation (Président)
 
