@@ -196,10 +196,15 @@ def ajouter_poste_bureau(ev: Evenement, nom: str, *, par) -> Evenement:
     nom = " ".join((nom or "").split())[:100]
     if not nom:
         raise EvenementRefuse("Écrivez le nom du poste.")
-    if nom in (ev.postes_bureau or []):
-        raise EvenementRefuse(f"Le poste « {nom} » existe déjà.")
-    ev.postes_bureau = [*(ev.postes_bureau or []), nom]
-    ev.save(update_fields=["postes_bureau"])
+    with transaction.atomic():
+        frais = Evenement.objects.select_for_update().get(pk=ev.pk)
+        if frais.annule:
+            raise EvenementRefuse("Cet événement est annulé.")
+        if nom.casefold() in {p.casefold() for p in frais.postes_bureau or []}:
+            raise EvenementRefuse(f"Le poste « {nom} » existe déjà.")
+        frais.postes_bureau = [*(frais.postes_bureau or []), nom]
+        frais.save(update_fields=["postes_bureau"])
+        ev.postes_bureau = frais.postes_bureau
     _journal(par, "modification", evenement=ev.pk, nom=ev.nom, poste_ajoute=nom)
     return ev
 
@@ -262,6 +267,9 @@ def convoquer(
         )
     resultat, a_notifier = [], []
     with transaction.atomic():
+        # Verrou sur l'événement : deux convocations simultanées ne font pas deux chefs ni
+        # deux titulaires du même poste.
+        Evenement.objects.select_for_update().filter(pk=ev.pk).first()
         # Un seul chef par section, un seul titulaire par poste : l'ancien reste convoqué,
         # comme membre de la section ou du bureau d'organisation.
         if role == Role.CHEF_SECTION:
@@ -376,6 +384,8 @@ def retirer(convocation: Convocation, *, motif: str, par) -> Convocation:
         )
         if not c.active:
             raise EvenementRefuse("Cette convocation est déjà retirée.")
+        if c.evenement.annule:  # relu en base : l'annulation est peut-être toute récente
+            raise EvenementRefuse("Cet événement est annulé.")
         c.active, c.motif_retrait = False, motif
         c.save(update_fields=["active", "motif_retrait"])
         ev = c.evenement

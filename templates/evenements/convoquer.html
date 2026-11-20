@@ -43,13 +43,13 @@
         <p><label class="case"><input type="checkbox" id="tout-cocher"> Tout cocher</label></p>
         <ul class="propositions">{% for m in proposes %}
           <li><label><input type="checkbox" class="proposition" name="membres" form="form-convocation" value="{{ m.pk }}"
-            data-nom="{{ m.nom_complet }}" data-matricule="{{ m.matricule }}" data-paroisse="{{ m.affectation_actuelle.paroisse.nom|default:'' }}" data-place="{{ m.place }}">
+            data-nom="{{ m.nom_complet }}" data-matricule="{{ m.matricule }}" data-paroisse="{{ m.affectation_actuelle.paroisse.nom|default:'' }}" data-place="{{ m.place }}" data-bloc="{{ m.bloc }}" data-poste="{{ m.poste }}">
             <span>{{ m.nom_complet }}<br><small class="aide">{{ m.matricule }} — {{ m.affectation_actuelle.paroisse.nom|default:"—" }}{% if m.place %} · déjà : {{ m.place }}{% endif %}</small></span></label></li>
         {% endfor %}</ul>
       {% elif request.GET.envoye %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
     </div>
 
-    <aside class="panneau-selection" id="panneau" data-bloc="{{ bloc.titre }}">
+    <aside class="panneau-selection" id="panneau" data-bloc="{{ bloc.titre }}" data-cle="{{ bloc.cle }}">
       <button type="button" class="panneau-selection__barre" id="barre-selection" aria-expanded="false">
         <span><strong id="compte-selection">0</strong> à ajouter — {{ bloc.titre }}</span><span>Voir / Valider</span></button>
       <div class="panneau-selection__contenu">
@@ -88,7 +88,7 @@
 <template id="choix-postes"><select class="choix-poste" aria-label="Poste"><option value="">Membre du bureau (sans poste)</option>{% for nom, c in postes %}<option value="{{ nom }}">{{ nom }}{% if c %} (remplace {{ c.membre.nom_complet }}){% endif %}</option>{% endfor %}</select></template>
 <script nonce="{{ request.csp_nonce }}">
   (function () {
-    var panneau = document.getElementById('panneau'), bloc = panneau.dataset.bloc;
+    var panneau = document.getElementById('panneau'), bloc = panneau.dataset.bloc, cleBloc = panneau.dataset.cle;
     var estBureau = {{ est_bureau|yesno:"true,false" }}, estSection = {{ session|yesno:"true,false" }};
     var selection = document.getElementById('selection'), vide = document.getElementById('selection-vide');
     var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), minuterie;
@@ -102,7 +102,7 @@
     function proposition(pk) { return document.querySelector('input.proposition[value="' + pk + '"]'); }
     /* Alerte immédiate (20/11/2026) : déjà placé(e) ailleurs → le déplacer ici, ou le laisser. */
     function accepte(m) {
-      if (!m.place || m.place.indexOf(bloc) === 0) return true;
+      if (!m.place || m.bloc === cleBloc) return true;
       return window.confirm(m.nom + ' est déjà convoqué(e) : ' + m.place + '.\n\nOK : le déplacer dans « ' + bloc + ' ».\nAnnuler : le laisser où il est.');
     }
     function ajouter(m) {
@@ -112,11 +112,14 @@
       var h = document.createElement('input'); h.type = 'hidden'; h.name = 'membres'; h.value = m.pk; li.appendChild(h);
       var t = document.createElement('span'); t.appendChild(texte(m.nom + ' '));
       var s = document.createElement('small');
-      s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.place ? ' · déplacé(e) depuis : ' + m.place : '')));
+      var deplace = m.place && m.bloc !== cleBloc;
+      s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (deplace ? ' · déplacé(e) depuis : ' + m.place : '')));
       t.appendChild(s); li.appendChild(t);
       if (estBureau) {
         var choix = document.getElementById('choix-postes').content.firstElementChild.cloneNode(true);
-        choix.name = 'poste_' + m.pk; t.appendChild(choix);
+        choix.name = 'poste_' + m.pk;
+        if (m.bloc === cleBloc && m.poste) choix.value = m.poste;  /* garde son poste actuel */
+        t.appendChild(choix);
       }
       if (estSection) {
         var l = document.createElement('label'); l.className = 'choix-chef';
@@ -135,7 +138,7 @@
       var p = proposition(pk); if (p) p.checked = false;
       compter();
     }
-    function depuis(c) { return {pk: c.value, nom: c.dataset.nom, matricule: c.dataset.matricule, paroisse: c.dataset.paroisse, place: c.dataset.place}; }
+    function depuis(c) { return {pk: c.value, nom: c.dataset.nom, matricule: c.dataset.matricule, paroisse: c.dataset.paroisse, place: c.dataset.place, bloc: c.dataset.bloc, poste: c.dataset.poste}; }
     /* Avec le script, le panneau de droite est la seule source : les cases de gauche ne sont plus envoyées. */
     document.querySelectorAll('input.proposition').forEach(function (c) {
       c.removeAttribute('name'); c.removeAttribute('form');

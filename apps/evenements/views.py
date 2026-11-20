@@ -4,6 +4,7 @@ import io
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
+from django.db import transaction
 from django.http import HttpResponse, QueryDict
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -171,6 +172,39 @@ def detail(request, pk):
     )
 
 
+def _convoquer_bloc(request, ev, cle, session, membres) -> list:
+    """Convoque les membres choisis dans le bloc ouvert (à appeler dans une transaction)."""
+    from apps.evenements.blocs import BUREAU, ROLES_FIXES
+
+    faites = []
+    if cle == BUREAU:
+        sans_poste = []
+        for mpk, m in membres.items():
+            poste = request.POST.get(f"poste_{mpk}", "")
+            if poste:
+                faites += convoquer(
+                    ev, [m], role=ROLES_FIXES[BUREAU], poste=poste, par=request.user
+                )
+            else:
+                sans_poste.append(m)
+        if sans_poste:
+            faites += convoquer(ev, sans_poste, role=ROLES_FIXES[BUREAU], par=request.user)
+    elif session is not None:
+        chef = request.POST.get("chef", "")
+        autres = [m for mpk, m in membres.items() if str(mpk) != chef]
+        if chef.isdigit() and int(chef) in membres:
+            faites += convoquer(
+                ev, [membres[int(chef)]], session=session, role=Role.CHEF_SECTION, par=request.user
+            )
+        if autres:
+            faites += convoquer(
+                ev, autres, session=session, role=Role.TRAVAILLEUR, par=request.user
+            )
+    else:
+        faites += convoquer(ev, list(membres.values()), role=ROLES_FIXES[cle], par=request.user)
+    return faites
+
+
 @login_required
 @bn
 def convoquer_vue(request, pk):
@@ -178,7 +212,6 @@ def convoquer_vue(request, pk):
     puis membres), invitations d'honneur ; recherche à gauche, sélection à droite."""
     from apps.evenements.blocs import (
         BUREAU,
-        ROLES_FIXES,
         blocs,
         convocations_du_bloc,
     )
@@ -189,6 +222,10 @@ def convoquer_vue(request, pk):
     liste_blocs = blocs(ev)
     cles = [b["cle"] for b in liste_blocs]
     source = request.POST if request.method == "POST" else request.GET
+    if request.method == "POST" and source.get("bloc") not in cles:
+        # Jamais de repli silencieux (ex. on convoquerait au bureau d'organisation).
+        messages.error(request, "Ce bloc n'existe plus : rechargez la page.")
+        return redirect(request.path)
     cle = source.get("bloc") if source.get("bloc") in cles else cles[0]
     session = None
     if cle.startswith("section-"):
@@ -202,7 +239,9 @@ def convoquer_vue(request, pk):
                 messages.success(request, "Poste ajouté au bureau d'organisation.")
                 return redirect(retour)
             if action == "retirer":
-                c = get_object_or_404(Convocation, pk=request.POST.get("convocation"), evenement=ev)
+                c = get_object_or_404(
+                    Convocation, pk=_pk(request.POST.get("convocation")), evenement=ev
+                )
                 retirer(c, motif="Retiré(e) de la liste de convocation", par=request.user)
                 messages.success(request, f"{c.membre.nom_complet} retiré(e).")
                 return redirect(retour)
@@ -210,38 +249,17 @@ def convoquer_vue(request, pk):
             membres = {m.pk: m for m in Membre.objects.filter(pk__in=pks).select_related("compte")}
             if not membres:
                 raise EvenementRefuse("Choisissez au moins un membre.")
-            faites = []
             if cle == BUREAU:
-                sans_poste = []
-                for mpk, m in membres.items():
-                    poste = request.POST.get(f"poste_{mpk}", "")
-                    if poste:
-                        faites += convoquer(
-                            ev, [m], role=ROLES_FIXES[BUREAU], poste=poste, par=request.user
-                        )
-                    else:
-                        sans_poste.append(m)
-                if sans_poste:
-                    faites += convoquer(ev, sans_poste, role=ROLES_FIXES[BUREAU], par=request.user)
-            elif session is not None:
-                chef = request.POST.get("chef", "")
-                autres = [m for mpk, m in membres.items() if str(mpk) != chef]
-                if chef.isdigit() and int(chef) in membres:
-                    faites += convoquer(
-                        ev,
-                        [membres[int(chef)]],
-                        session=session,
-                        role=Role.CHEF_SECTION,
-                        par=request.user,
+                choisis = [p for p in (request.POST.get(f"poste_{k}", "") for k in membres) if p]
+                doubles = sorted({p for p in choisis if choisis.count(p) > 1})
+                if doubles:
+                    raise EvenementRefuse(
+                        f"Le poste « {doubles[0]} » est choisi pour plusieurs personnes : "
+                        "un seul titulaire par poste."
                     )
-                if autres:
-                    faites += convoquer(
-                        ev, autres, session=session, role=Role.TRAVAILLEUR, par=request.user
-                    )
-            else:
-                faites += convoquer(
-                    ev, list(membres.values()), role=ROLES_FIXES[cle], par=request.user
-                )
+            # Tout ou rien : si une partie est refusée, rien n'est enregistré (ni notifié).
+            with transaction.atomic():
+                faites = _convoquer_bloc(request, ev, cle, session, membres)
         except EvenementRefuse as e:
             messages.error(request, str(e))
             return redirect(retour)
@@ -303,8 +321,10 @@ def recherche_membres(request, pk):
     from django.http import JsonResponse
 
     ev = get_object_or_404(Evenement, pk=pk)
-    places = {
-        c.membre_id: c.place for c in ev.convocations.filter(active=True).select_related("session")
+    from apps.evenements.blocs import cle_bloc
+
+    actives = {
+        c.membre_id: c for c in ev.convocations.filter(active=True).select_related("session")
     }
     resultats = []
     for m in rechercher_membres(request.GET.get("q", "")):
@@ -315,9 +335,12 @@ def recherche_membres(request, pk):
                 "nom": m.nom_complet,
                 "matricule": m.matricule,
                 "paroisse": a.paroisse.nom if a else "",
-                "deja": m.pk in places,
-                # Pour l'alerte « déjà placé(e) ailleurs » (20/11/2026).
-                "place": places.get(m.pk, ""),
+                "deja": m.pk in actives,
+                # Pour l'alerte « déjà placé(e) ailleurs » (20/11/2026) : la clé du bloc, pas
+                # son libellé (« Culte » et « Culte du soir » ne se confondent pas).
+                "place": actives[m.pk].place if m.pk in actives else "",
+                "bloc": cle_bloc(actives[m.pk]) if m.pk in actives else "",
+                "poste": actives[m.pk].poste if m.pk in actives else "",
             }
         )
     return JsonResponse({"resultats": resultats})

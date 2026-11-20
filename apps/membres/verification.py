@@ -6,7 +6,9 @@ Exception encadrée à la règle du gardien des périmètres :
 - par le matricule EXACT, jamais par le nom ;
 - un motif obligatoire, inscrit au journal avec l'auteur et le bureau ;
 - une carte réduite : photo validée, grade, prénoms et NOM, matricule, statut, catégorie,
-  paroisse / circuit / région actuels et le contact de sa paroisse (Secrétaire paroissial).
+  paroisse / circuit / région actuels et le contact de sa paroisse (Secrétaire paroissial) ;
+- sous la photo, ses fonctions en cours (20/11/2026) : « Trésorier national »,
+  « Chef de Section de Circuit — Ekpe A »…
   Ni téléphone ni adresse du membre, jamais le NPI ni la photo du CIP.
 """
 
@@ -32,6 +34,32 @@ class Carte:
     region: str
     photo: str  # data URI de la photo d'identité validée, ou ""
     contact_paroisse: list  # [(nom complet du secrétaire, téléphone)]
+    fonctions: list  # fonctions en cours, en clair
+
+
+def libelle_fonction(mandat) -> str:
+    """« Trésorier national », « Président — Bureau National de Commandement »,
+    « Chef de Section de Circuit — Ekpe A »."""
+    nom = mandat.fonction.nom
+    unite = mandat.unite
+    if unite is not None:
+        return f"{nom} — {unite.nom}"
+    if "national" in nom.lower():
+        return nom
+    return f"{nom} — Bureau National de Commandement"
+
+
+def fonctions_en_cours(membre) -> list[str]:
+    from apps.bureaux.models import Mandat
+
+    mandats = (
+        Mandat.objects.en_cours()
+        .filter(membre=membre)
+        .select_related("fonction", "paroisse", "circuit", "region")
+    )
+    ordre = {"national": 0, "region": 1, "circuit": 2, "paroisse": 3}
+    mandats = sorted(mandats, key=lambda m: (ordre.get(m.fonction.niveau, 9), m.fonction.ordre))
+    return [libelle_fonction(m) for m in mandats]
 
 
 def _photo_validee(membre) -> str:
@@ -78,4 +106,5 @@ def carte_de(matricule: str) -> Carte | None:
         region=a.paroisse.circuit.region.nom if a else "—",
         photo=_photo_validee(membre),
         contact_paroisse=contact,
+        fonctions=fonctions_en_cours(membre),
     )

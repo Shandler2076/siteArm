@@ -29,14 +29,16 @@ def cle_bloc(c) -> str:
 def blocs(ev) -> list[dict]:
     """[{cle, titre, nombre}] dans l'ordre d'affichage, avec le nombre de convoqués."""
     sessions = list(ev.sessions.all())
-    liste = [(BUREAU, "Bureau d'organisation"), (SUPERVISION, "Supervision")]
-    liste += [(f"section-{s.pk}", s.nom) for s in sessions]
-    if not sessions:
-        liste.append((PARTICIPANTS, "Participants"))
-    liste.append((HONNEUR, "Invitations d'honneur"))
     nombres: dict = {}
     for c in ev.convocations.filter(active=True):
         nombres[cle_bloc(c)] = nombres.get(cle_bloc(c), 0) + 1
+    liste = [(BUREAU, "Bureau d'organisation"), (SUPERVISION, "Supervision")]
+    liste += [(f"section-{s.pk}", s.nom) for s in sessions]
+    # « Participants » : événement sans section, ou anciennes convocations hors section (officiel,
+    # autre…) qui doivent rester visibles et retirables.
+    if not sessions or nombres.get(PARTICIPANTS):
+        liste.append((PARTICIPANTS, "Participants"))
+    liste.append((HONNEUR, "Invitations d'honneur"))
     return [{"cle": cle, "titre": titre, "nombre": nombres.get(cle, 0)} for cle, titre in liste]
 
 
