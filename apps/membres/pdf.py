@@ -20,6 +20,7 @@ ROUGE = colors.HexColor("#B3122E")
 OR = colors.HexColor("#D4A017")
 GRIS = colors.HexColor("#5B6578")
 FOND = colors.HexColor("#F4F6FA")
+FOND_TRANSPARENT = colors.Color(0.957, 0.965, 0.98, alpha=0.7)
 
 STATIQUE = Path(settings.BASE_DIR) / "static"
 LOGO_AS = STATIQUE / "img" / "logo-armee-du-salut.png"
@@ -29,6 +30,11 @@ LOGO_CONGREGATION = STATIQUE / "img" / "logo-congregation-pdf.png"
 LOGO_CONGREGATION_SANS_TEXTE = STATIQUE / "img" / "logo-congregation-sans-texte.png"
 
 _polices_ok = False
+
+# Fiche d'identification seule (20/11/2026) : petits logos de l'Armée du Salut en filigrane,
+# en quinconce, sur toute la page.
+FILIGRANE_FICHE_COLONNES = 5
+FILIGRANE_FICHE_LIGNES = 7
 
 
 _LOGOS_PALES: dict = {}
@@ -87,6 +93,31 @@ def mot_filigrane(c, x: float, y: float, largeur: float, hauteur: float, mot: st
     c.restoreState()
 
 
+def petits_logos_en_filigrane(c, largeur: float, hauteur: float) -> None:
+    """Filigrane de la fiche d'identification : une grille de petits logos très pâles, en
+    quinconce, couvrant toute la page. À dessiner AVANT le contenu."""
+    logo = _logo_pale(0.16)
+    if logo is None:
+        return
+    cote = 17 * mm
+    pas_x = largeur / FILIGRANE_FICHE_COLONNES
+    pas_y = hauteur / FILIGRANE_FICHE_LIGNES
+    for ligne in range(FILIGRANE_FICHE_LIGNES):
+        decalage = pas_x / 2 if ligne % 2 else 0
+        for col in range(FILIGRANE_FICHE_COLONNES):
+            cx = (col * pas_x + pas_x / 2 + decalage) % largeur
+            cy = ligne * pas_y + pas_y / 2
+            c.drawImage(
+                logo,
+                cx - cote / 2,
+                cy - cote / 2,
+                cote,
+                cote,
+                mask="auto",
+                preserveAspectRatio=True,
+            )
+
+
 def _polices():
     global _polices_ok
     if not _polices_ok:
@@ -126,62 +157,53 @@ def _image_photo(membre: Membre):
         return None  # fichier introuvable : « Photo à venir » plutôt qu'une erreur
 
 
-def fiche_identification_pdf(membre: Membre, mot_de_passe: str | None = None) -> bytes:
+def _qr_fiche(fiche) -> ImageReader:
+    import segno
+
+    from apps.membres.authenticite import url_verification
+
+    tampon = io.BytesIO()
+    segno.make(url_verification(fiche), error="m").save(
+        tampon, kind="png", scale=6, dark="#14284B", border=1
+    )
+    tampon.seek(0)
+    return ImageReader(tampon)
+
+
+def fiche_identification_pdf(
+    membre: Membre, mot_de_passe: str | None = None, *, par=None, fiche=None
+) -> bytes:
+    """Fiche d'un membre. Chaque impression est inscrite au registre des fiches émises
+    (numéro, date, code QR) et remplace les précédentes (authenticité, 20/11/2026)."""
+    from apps.membres.authenticite import emettre_fiche
+
+    fiche = fiche or emettre_fiche(membre, par=par)
     _polices()
     tampon = io.BytesIO()
     c = canvas.Canvas(tampon, pagesize=A4)
     c.setTitle(f"Fiche d'identification — {membre.matricule}")
     c.setAuthor("Armée du Salut du Bénin")
-    dessiner_fiche(c, membre, mot_de_passe)
+    dessiner_fiche(c, membre, mot_de_passe, fiche)
     c.save()
     return tampon.getvalue()
 
 
-def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -> None:
-    """Dessine une fiche d'identification sur une page (pour un PDF d'une ou plusieurs fiches)."""
+def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None, fiche) -> None:
+    """Dessine une fiche d'identification sur une page (pour un PDF d'une ou plusieurs fiches).
+    `fiche` : l'inscription au registre (`authenticite.emettre_fiche`)."""
     _polices()
     larg, haut = A4
     marge = 18 * mm
+    petits_logos_en_filigrane(c, larg, haut)
 
-    # En-tête : logos et titre
-    c.setFillColor(MARINE)
-    c.rect(0, haut - 48 * mm, larg, 48 * mm, stroke=0, fill=1)
-    c.setFillColor(ROUGE)
-    c.rect(0, haut - 50 * mm, larg, 2 * mm, stroke=0, fill=1)
-    # Logo de l'Église à gauche, logo de l'Armée du Salut à droite.
-    c.setFillColor(colors.white)
-    c.roundRect(marge - 2 * mm, haut - 44 * mm, 48 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
-    c.drawImage(
-        ImageReader(str(LOGO_CONGREGATION_SANS_TEXTE)),
-        marge - 1 * mm,
-        haut - 41 * mm,
-        46 * mm,
-        34.5 * mm,
-        mask="auto",
-        preserveAspectRatio=True,
-    )
-    c.roundRect(larg - marge - 38 * mm, haut - 44 * mm, 40 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
-    c.drawImage(
-        ImageReader(str(LOGO_AS)),
-        larg - marge - 36 * mm,
-        haut - 42 * mm,
-        36 * mm,
-        36 * mm,
-        mask="auto",
-    )
-    centre = (marge + 46 * mm + larg - marge - 38 * mm) / 2  # milieu entre les deux logos
-    c.setFillColor(colors.white)
-    c.setFont("Sans-Gras", 13.5)
-    c.drawCentredString(centre, haut - 20 * mm, "ARMÉE DU SALUT DU BÉNIN")
-    c.setFillColor(OR)
-    c.setFont("Sans-Gras", 12)
-    c.drawCentredString(centre, haut - 28 * mm, "FICHE D'IDENTIFICATION")
-    c.setFillColor(colors.white)
-    c.setFont("Sans", 9)
-    c.drawCentredString(centre, haut - 36 * mm, "« FOI – AMOUR – JUSTICE »")
+    # En-tête commun de l'Église (`apps/membres/entete.py`) : c'est le modèle de tous les
+    # documents (20/11/2026).
+    from apps.membres.entete import HAUTEUR_FICHE, entete_eglise
+
+    entete_eglise(c, larg, haut, "Fiche d'identification", hauteur=HAUTEUR_FICHE, marge=marge)
 
     # Matricule et photo
-    y = haut - 64 * mm
+    y = haut - 83 * mm
     c.setFillColor(MARINE)
     c.roundRect(marge, y - 4 * mm, 92 * mm, 14 * mm, 3 * mm, stroke=0, fill=1)
     c.setFillColor(colors.white)
@@ -193,7 +215,7 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
     c.setFont("Sans-Gras", taille)
     c.drawString(marge, y - 14 * mm, _ajuste(membre.nom_complet, "Sans-Gras", taille, largeur_nom))
 
-    px, py, pl, ph = larg - marge - 38 * mm, haut - 106 * mm, 38 * mm, 48 * mm
+    px, py, pl, ph = larg - marge - 38 * mm, haut - 125 * mm, 38 * mm, 48 * mm
     c.setStrokeColor(OR)
     c.setLineWidth(1.5)
     c.rect(px, py, pl, ph, stroke=1, fill=0)
@@ -204,6 +226,21 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
         c.setFillColor(GRIS)
         c.setFont("Sans", 9)
         c.drawCentredString(px + pl / 2, py + ph / 2, "Photo à venir")
+
+    # Authenticité (20/11/2026) : code QR, numéro et date d'émission de la fiche.
+    qx, qy, qc = marge, haut - 125 * mm, 23 * mm
+    c.drawImage(_qr_fiche(fiche), qx, qy, qc, qc)
+    emise = timezone.localtime(fiche.emise_le)
+    tx = qx + qc + 4 * mm
+    c.setFillColor(MARINE)
+    c.setFont("Sans-Gras", 10)
+    c.drawString(tx, qy + 16.5 * mm, f"Fiche n° {fiche.numero}")
+    c.setFont("Sans", 9)
+    c.drawString(tx, qy + 12 * mm, f"Émise le {emise:%d/%m/%Y} à {emise:%H:%M}")
+    c.setFillColor(GRIS)
+    c.setFont("Sans", 8)
+    c.drawString(tx, qy + 6.5 * mm, "Scannez le code pour vérifier l'authenticité.")
+    c.drawString(tx, qy + 2.5 * mm, "Une fiche réimprimée remplace les précédentes.")
 
     # Informations
     a = membre.affectation_actuelle
@@ -224,10 +261,10 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
         ("Circuit actuel", a.circuit_a_date.nom if a else "—"),
         ("Région actuelle", a.region_a_date.nom if a else "—"),
     ]
-    y = haut - 112 * mm
+    y = haut - 131 * mm
     for i, (libelle, valeur) in enumerate(lignes):
         if i % 2 == 0:
-            c.setFillColor(FOND)
+            c.setFillColor(FOND_TRANSPARENT)  # le filigrane reste visible dessous
             c.rect(marge, y - 2.5 * mm, larg - 2 * marge, 8 * mm, stroke=0, fill=1)
         c.setFillColor(GRIS)
         c.setFont("Sans", 9.5)
@@ -242,7 +279,7 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
     if mot_de_passe:
         y -= 6 * mm
         hauteur = 34 * mm
-        c.setFillColor(colors.HexColor("#FFF6DD"))
+        c.setFillColor(colors.Color(1, 0.965, 0.867, alpha=0.8))  # #FFF6DD, filigrane visible
         c.setStrokeColor(OR)
         c.roundRect(marge, y - hauteur, larg - 2 * marge, hauteur, 3 * mm, stroke=1, fill=1)
         c.setFillColor(ROUGE)

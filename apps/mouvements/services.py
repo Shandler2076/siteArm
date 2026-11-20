@@ -425,7 +425,7 @@ def decider_signalement(
                 compte.set_password(mot_de_passe)
                 compte.doit_changer_mot_de_passe = True
                 compte.save(update_fields=["password", "doit_changer_mot_de_passe"])
-                pdf = fiche_identification_pdf(membre, mot_de_passe)
+                pdf = fiche_identification_pdf(membre, mot_de_passe, par=par)
                 # Les exclusions encore « en cours » sont levées : sinon la tâche quotidienne
                 # des sanctions exclurait de nouveau le membre réhabilité.
                 membre.sanctions.filter(

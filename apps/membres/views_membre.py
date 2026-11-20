@@ -60,7 +60,8 @@ def mes_coordonnees(request):
 @login_required
 def ma_fiche_pdf(request):
     membre = membre_de(request)
-    r = HttpResponse(fiche_identification_pdf(membre), content_type="application/pdf")
+    pdf = fiche_identification_pdf(membre, par=request.user)
+    r = HttpResponse(pdf, content_type="application/pdf")
     r["Content-Disposition"] = f'attachment; filename="fiche-{membre.matricule}.pdf"'
     r["Cache-Control"] = "private, no-store"
     return r

@@ -257,3 +257,35 @@ class PhotoIdentite(models.Model):
 
     def __str__(self) -> str:
         return f"Photo de {self.membre.matricule} ({self.get_etat_display()})"
+
+
+class FicheEmise(models.Model):
+    """Registre des fiches d'identification imprimées (authenticité, 20/11/2026).
+
+    Chaque fiche porte un numéro, une date d'émission et un code QR (jeton secret) vers une
+    page publique minimale (matricule, statut, numéro et date d'émission ; jamais le nom).
+    Une réimpression remplace les fiches précédentes du membre.
+    Écriture : `apps/membres/authenticite.py::emettre_fiche` seulement.
+    """
+
+    membre = models.ForeignKey(Membre, on_delete=models.PROTECT, related_name="fiches_emises")
+    numero = models.CharField("numéro", max_length=20, unique=True, null=True, blank=True)
+    jeton = models.CharField("jeton de vérification", max_length=64, unique=True)
+    emise_le = models.DateTimeField("émise le", default=timezone.now)
+    emise_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="+",
+        verbose_name="émise par",
+    )
+    remplacee_le = models.DateTimeField("remplacée le", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "fiche émise"
+        verbose_name_plural = "fiches émises"
+        ordering = ["-emise_le", "-pk"]
+
+    def __str__(self) -> str:
+        return f"Fiche {self.numero} — {self.membre.matricule}"

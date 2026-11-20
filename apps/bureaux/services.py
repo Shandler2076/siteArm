@@ -425,7 +425,7 @@ def reinitialiser_mot_de_passe(*, cible: Membre, par) -> bytes:
     from apps.journal.services import journaliser
 
     mot_de_passe = generer_mot_de_passe_provisoire()
-    contenu = fiche_identification_pdf(cible, mot_de_passe)  # avant de toucher au compte
+    contenu = fiche_identification_pdf(cible, mot_de_passe, par=par)  # avant de toucher au compte
     journaliser(par, REINITIALISATION, membre=cible.matricule)
     with transaction.atomic():
         compte.set_password(mot_de_passe)

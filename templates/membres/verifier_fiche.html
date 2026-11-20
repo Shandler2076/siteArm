@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titre %}Vérification d'une fiche d'identification{% endblock %}
+{% block contenu %}
+<section class="carte verification">
+  {% if authentique %}
+    <p class="verification__etat verification__etat--ok">Fiche authentique</p>
+  {% else %}
+    <p class="verification__etat verification__etat--non">Fiche non valable</p>
+  {% endif %}
+  <p><strong>{{ raison }}</strong></p>
+  {% if fiche %}
+    <p class="matricule">{{ fiche.membre.matricule }}</p>
+    {% if authentique %}
+      {% if actif %}
+        <p>Statut : <strong>{{ fiche.membre.get_statut_display }}</strong></p>
+      {% else %}
+        <p class="verification__alerte">Statut : <strong>{{ fiche.membre.get_statut_display }}</strong></p>
+      {% endif %}
+    {% endif %}
+    <dl class="fiche">
+      <dt>Fiche n°</dt><dd>{{ fiche.numero }}</dd>
+      <dt>Émise le</dt><dd>{{ fiche.emise_le|date:"d/m/Y" }}</dd>
+    </dl>
+  {% endif %}
+  <p class="aide">Cette page indique seulement si la fiche a bien été émise par le site de
+    l'Armée du Salut du Bénin. Vérifiez que le matricule et le numéro ci-dessus sont bien ceux
+    écrits sur la fiche. En cas de doute, adressez-vous au bureau de la paroisse.</p>
+</section>
+{% endblock %}

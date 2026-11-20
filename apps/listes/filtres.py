@@ -14,6 +14,7 @@ from apps.listes.colonnes import COLONNES_LISTE, COLONNES_PAR_DEFAUT
 from apps.membres.grades import Grade
 from apps.membres.models import Categorie, Membre, Sexe, Statut
 from apps.organisation.models import Circuit, Paroisse, Region
+from apps.organisation.widgets import ListeAvecRecherche
 
 COTISATIONS = [("", "Toutes"), ("a_jour", "À jour"), ("en_retard", "En retard")]
 
@@ -32,7 +33,7 @@ AGES = [
 ]
 
 
-class _SelectRattache(forms.Select):
+class _SelectRattache(ListeAvecRecherche):
     """Liste d'unités dont chaque option porte sa région et son circuit (cascade côté écran)."""
 
     def create_option(self, name, value, label, selected, index, subindex=None, attrs=None):
