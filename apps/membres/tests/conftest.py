@@ -15,7 +15,9 @@ def paroisse(db):
 @pytest.fixture
 def compte_bn(db):
     c = Compte.objects.create_user("BN1", "MotDePasse!2026", doit_changer_mot_de_passe=False)
-    c.user_permissions.add(*Permission.objects.filter(codename__in=["gerer_membres", "voir_cip"]))
+    c.user_permissions.add(
+        *Permission.objects.filter(codename__in=["gerer_membres", "voir_cip", "enregistrer"])
+    )
     return c
 
 

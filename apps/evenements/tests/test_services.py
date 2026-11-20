@@ -53,7 +53,7 @@ def test_convoquer_notifie_et_ne_double_pas(
     assert len(faites) == 2
     assert Notification.objects.filter(destinataire=monde["m1"].compte).exists()
     texte = Notification.objects.filter(destinataire=monde["m1"].compte).first().message
-    assert "Bureau national" in texte and "Pèlerinage de la Nativité 2026" in texte
+    assert "Bureau National de Commandement" in texte and "Pèlerinage de la Nativité 2026" in texte
     assert "Session Culte" in texte
     convoquer(nativite, [monde["m1"]], session=culte, par=compte_technique)
     assert Convocation.objects.filter(evenement=nativite, membre=monde["m1"]).count() == 1

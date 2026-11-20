@@ -17,7 +17,7 @@ from apps.membres.grades import PAR_NOMINATION, Grade
 from apps.membres.models import Membre, Statut
 from apps.organisation.models import Region
 
-gerer_membres = permission_required("membres.gerer_membres", raise_exception=True)
+gerer_membres = permission_required("grades.gerer", raise_exception=True)
 
 
 @login_required
@@ -345,6 +345,6 @@ def extrait_pdf(request, pk):
     if membre is None or not acte.promotions.filter(membre=membre).exists():
         raise Http404
     soi = membre.compte_id == request.user.pk
-    if not (soi or request.user.has_perm("membres.gerer_membres")):
+    if not (soi or request.user.has_perm("grades.gerer")):
         raise Http404
     return _pdf(acte_pdf(acte, seulement=membre), f"extrait-{membre.matricule}.pdf")

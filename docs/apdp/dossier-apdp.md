@@ -206,6 +206,7 @@ Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
 | Courriers abandonnés (jamais envoyés) et leurs pièces jointes | Effacés automatiquement un mois après l'abandon |
 | Courriers envoyés | Conservés au registre du bureau (archives du mouvement) |
 | Sauvegardes | Rotation automatique de l'hébergeur (environ 30 jours) ; sauvegardes chiffrées du BNC : les 10 dernières |
+| Demandes de validation (deux clés) : résumé de l'action, y compris le motif et la référence d'une sanction | Gardées comme le journal (5 ans, proposition), pour savoir qui a préparé et qui a validé |
 | Photos de la page d'accueil publique | Tant que l'accord des personnes est maintenu ; retrait sur demande |
 
 ### 3.9 Mesures de sécurité
@@ -228,6 +229,15 @@ Aucune donnée n'est **vendue, louée ou cédée** à des tiers.
   fiche.
 - La photo du CIP n'est visible que par le BNC et par le membre lui-même.
 - Les photos sont stockées dans un **espace privé**, et transmises seulement après contrôle des droits.
+
+**Séparation des pouvoirs**
+
+- Installer ou modifier un bureau, régler les droits et inscrire une sanction : seuls le Président
+  et le Secrétaire national ; ce que prépare le Secrétaire n'est appliqué qu'après la validation
+  du Président (« deux clés »), ou du Vice-président si le poste est vacant ou sans réponse depuis
+  7 jours, ou d'une personne à qui le Président délègue, pour une durée limitée.
+- On n'est nommé au bureau d'une paroisse, d'un circuit ou d'une région que si l'on en est membre :
+  un bureau ne voit donc que les membres de sa propre zone.
 
 **Traçabilité**
 

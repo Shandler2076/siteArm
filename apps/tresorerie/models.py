@@ -1,7 +1,7 @@
 """Trésorerie : mobile money, cotisations spéciales, reversements mensuels (13/11/2026).
 
 Seul `apps/tresorerie/services.py` écrit dans ces tables. Rien ne s'efface.
-- Un seul numéro mobile money, au nom du Bureau national ; le paiement part toujours du site.
+- Un seul numéro mobile money, au nom du BNC ; le paiement part toujours du site.
 - Les parts des cotisations mensuelles payées par mobile money sont reversées chaque mois par le
   BN au numéro du Trésorier de chaque paroisse, circuit et région.
 """

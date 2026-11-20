@@ -4,7 +4,7 @@ import datetime
 def test_accueil_selon_les_mandats(client, monde, donner_mandat):
     client.force_login(monde["sec_p1"].compte)
     html = client.get("/").content.decode()
-    assert "Espace bureau — Paroisse P1" in html and "Installer un bureau" not in html
+    assert "Unité paroissiale — P1" in html and "Installer un bureau" not in html
     assert "Ma fiche" in html
     donner_mandat(monde["sec_p1"], "Président", None, debut=datetime.date(2025, 1, 1))
     html = client.get("/").content.decode()
@@ -14,12 +14,15 @@ def test_accueil_selon_les_mandats(client, monde, donner_mandat):
         "Mandats à échéance",
         "Enregistrer un membre",
         "Photos à valider",
-        "Espace bureau — Paroisse P1",
+        "Unité paroissiale — P1",
+        "Tous les membres",
     ]:
         assert lien in html, lien
+    # Plus de doublon « Espace bureau — Bureau National de Commandement » (19/11/2026).
+    assert "Espace bureau" not in html
 
 
 def test_accueil_membre_simple(client, monde):
     client.force_login(monde["m1"].compte)
     html = client.get("/").content.decode()
-    assert "Ma fiche" in html and "Espace bureau" not in html and "Installer" not in html
+    assert "Ma fiche" in html and "Mes bureaux" not in html and "Installer" not in html

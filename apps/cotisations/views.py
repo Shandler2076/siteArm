@@ -310,7 +310,7 @@ def classer_paroisses(paroisses, niveau: str) -> list[dict]:
 
 @login_required
 def annuler_versement(request, pk):
-    """Paroisse : versement en attente ; Bureau national : versement validé."""
+    """Paroisse : versement en attente ; Bureau National de Commandement : versement validé."""
     v = get_object_or_404(Versement.objects.select_related("membre", "paroisse"), pk=pk)
     unites = unites_cotisations(request.user)
     est_national = Unite(Niveau.NATIONAL, None) in unites

@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
-from apps.bureaux.views_bn import bn_requis
+from apps.bureaux.views_bn import bn_requis, permission_requise
 from apps.mouvements.models import EN_COURS, EtatDemande, Mutation, Signalement
 from apps.mouvements.services import (
     MouvementRefuse,
@@ -10,6 +10,9 @@ from apps.mouvements.services import (
     decider_signalement,
     mandats_a_clore,
 )
+
+# Président et Secrétaire national seulement (19/11/2026).
+sanction_requise = permission_requise("mouvements.sanctionner")
 
 
 @bn_requis
@@ -105,38 +108,57 @@ def signalement(request, pk):
     return render(request, "mouvements/bn_signalement.html", {"signalement": sig, "erreur": erreur})
 
 
-@bn_requis
+@sanction_requise
 def nouvelle_sanction(request, matricule):
+    import datetime
+
+    from apps.bureaux.views_bn import appliquer_ou_demander
     from apps.membres.models import Membre
     from apps.mouvements.forms import SanctionForm
-    from apps.mouvements.sanctions import enregistrer_sanction
 
     membre = get_object_or_404(Membre, matricule=matricule)
     form = SanctionForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
+        champs = {
+            k: (v.isoformat() if isinstance(v, datetime.date) else v)
+            for k, v in form.cleaned_data.items()
+        }
         try:
-            enregistrer_sanction(membre=membre, par=request.user, **form.cleaned_data)
+            appliquer_ou_demander(
+                request,
+                "sanction",
+                {"membre": membre.matricule, "champs": champs},
+                f"Sanction ({form.cleaned_data.get('type')}) pour {membre.nom_complet} "
+                f"({membre.matricule}) : {form.cleaned_data.get('motif', '')[:120]}",
+                succes="Sanction inscrite.",
+            )
         except MouvementRefuse as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, "Sanction inscrite.")
             return redirect("membres:bn_fiche", matricule=matricule)
     return render(request, "mouvements/bn_sanction.html", {"membre": membre, "form": form})
 
 
-@bn_requis
+@sanction_requise
 def lever(request, pk):
     from apps.mouvements.models import Sanction
-    from apps.mouvements.sanctions import lever_sanction
 
     sanction = get_object_or_404(Sanction.objects.select_related("membre"), pk=pk)
     if request.method != "POST":
         return redirect("membres:bn_fiche", matricule=sanction.membre.matricule)
+    from apps.bureaux.views_bn import appliquer_ou_demander
+
+    motif = request.POST.get("motif_levee", "")[:300]
     try:
-        lever_sanction(
-            sanction=sanction, motif=request.POST.get("motif_levee", "")[:300], par=request.user
+        if not motif.strip():
+            raise MouvementRefuse("Indiquez le motif de la levée.")
+        appliquer_ou_demander(
+            request,
+            "lever",
+            {"sanction": sanction.pk, "motif": motif},
+            f"Lever la sanction « {sanction.libelle} » de {sanction.membre.nom_complet} : {motif}",
+            succes="Sanction levée.",
         )
-        messages.success(request, "Sanction levée.")
     except MouvementRefuse as exc:
         messages.error(request, str(exc))
     return redirect("membres:bn_fiche", matricule=sanction.membre.matricule)

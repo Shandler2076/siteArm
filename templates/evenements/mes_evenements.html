@@ -3,7 +3,7 @@
 {% block contenu %}
 <section class="carte">
   <h1>Mes événements</h1>
-  <p class="aide">Les convocations du Bureau national. Pour les grands événements, imprimez votre autorisation (ou montrez-la sur votre téléphone).</p>
+  <p class="aide">Les convocations du Bureau National de Commandement. Pour les grands événements, imprimez votre autorisation (ou montrez-la sur votre téléphone).</p>
   <ul class="fonctions">
     {% for c in convocations %}
       <li id="ev{{ c.evenement_id }}"><strong>{{ c.evenement.nom }}</strong> — {{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %}, {{ c.evenement.lieu }}{% endif %}

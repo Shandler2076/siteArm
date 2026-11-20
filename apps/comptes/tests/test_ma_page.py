@@ -44,7 +44,9 @@ def test_pas_d_evenement_annule_ni_passe(monde, compte_technique):
 
     m1 = monde["m1"]
     ev = creer_evenement(
-        nom="Annulé", lieu="X", debut=timezone.now() + datetime.timedelta(days=5),
+        nom="Annulé",
+        lieu="X",
+        debut=timezone.now() + datetime.timedelta(days=5),
         par=compte_technique,
     )
     convoquer(ev, membres=[m1], par=compte_technique)

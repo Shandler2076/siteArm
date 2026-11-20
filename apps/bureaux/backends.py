@@ -1,6 +1,8 @@
-"""Les droits du Bureau national viennent des mandats (et non d'autorisations manuelles)."""
+"""Les droits du Bureau National de Commandement viennent des mandats (et non d'autorisations
+manuelles) : `perimetre.droits_nationaux` (cases de « Fonctions et droits » + droits en dur du
+Président et du Secrétaire national)."""
 
-from apps.bureaux.perimetre import est_bn
+from apps.bureaux.perimetre import droits_nationaux
 
 PERMISSIONS_BN = frozenset({"membres.gerer_membres", "membres.voir_cip"})
 
@@ -16,7 +18,7 @@ class MandatBackend:
         if not getattr(user, "is_active", False) or obj is not None:
             return set()
         if not hasattr(user, "_permissions_mandat"):
-            user._permissions_mandat = set(PERMISSIONS_BN) if est_bn(user) else set()
+            user._permissions_mandat = droits_nationaux(user)
         return user._permissions_mandat
 
     def has_perm(self, user, perm, obj=None) -> bool:

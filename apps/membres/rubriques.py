@@ -1,6 +1,6 @@
 """Fiche d'un membre en rubriques : Profil, Cotisation mensuelle, Participation aux événements.
 
-Les événements ne sont visibles que du Bureau national (décision du 12/11/2026).
+Les événements ne sont visibles que du Bureau National de Commandement (décision du 12/11/2026).
 """
 
 from django.utils import timezone

@@ -86,7 +86,9 @@ def test_page_installer_par_matricule(client_technique, territoire, nouveau_memb
 
 def test_accorder_le_droit_de_gerer(client_technique):
     f = Fonction.objects.get(nom="Trésorier paroissial")
-    r = client_technique.post("/bureau/bn/fonctions/", {"fonction": f.pk, "droit_gerer": "on"})
+    r = client_technique.post(
+        "/bureau/bn/fonctions/", {"fonction": f.pk, "case": "droit_gerer", "valeur": "on"}
+    )
     assert r.status_code == 302
     f.refresh_from_db()
     assert f.droit_gerer

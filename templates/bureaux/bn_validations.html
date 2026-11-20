@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block titre %}Validations — Bureau National de Commandement{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Actions à valider</h1>
+  <p class="aide">Deux clés : ce que prépare le Secrétaire national (bureaux, droits, sanctions) n'est appliqué qu'après la validation du Président — ou du Vice-président si le poste de Président est vacant ou sans réponse depuis 7 jours, ou de la personne à qui le Président a délégué. Une demande non traitée expire au bout de 30 jours.</p>
+  {% if attente %}
+  <ul class="fonctions">
+    {% for d in attente %}
+    <li>
+      <strong>{{ d.resume }}</strong><br>
+      <small class="aide">Demande n° {{ d.pk }} — préparée par {{ d.preparee_par }} le {{ d.date|date:"d/m/Y à H:i" }}</small>
+      {% if d.ma_qualite %}
+      <div class="boutons-courrier" style="margin-top: 8px">
+        <form method="post" action="{% url 'bureaux:bn_decider_validation' d.pk 'valider' %}" data-confirmer="Valider et appliquer : {{ d.resume }} ?">{% csrf_token %}
+          <button type="submit" class="bouton">Valider ({{ d.ma_qualite }})</button></form>
+        <form method="post" action="{% url 'bureaux:bn_decider_validation' d.pk 'refuser' %}" class="recherche">{% csrf_token %}
+          <input name="motif" placeholder="Motif du refus" maxlength="400" required>
+          <button type="submit" class="bouton bouton--secondaire">Refuser</button></form>
+      </div>
+      {% elif d.mienne %}
+      <form method="post" action="{% url 'bureaux:bn_decider_validation' d.pk 'annuler' %}" data-confirmer="Annuler cette demande ?">{% csrf_token %}
+        <button type="submit" class="bouton bouton--secondaire" style="width: auto">Annuler ma demande</button></form>
+      {% else %}<p class="aide">En attente du Président.</p>{% endif %}
+    </li>
+    {% endfor %}
+  </ul>
+  {% else %}<p class="message">Aucune action en attente.</p>{% endif %}
+
+  <h2>Dernières décisions</h2>
+  {% if traitees %}
+  <div class="tableau-defilant"><table class="tableau tableau--souple">
+    <thead><tr><th>Action</th><th>Préparée par</th><th>Décision</th></tr></thead>
+    <tbody>{% for d in traitees %}<tr>
+      <td style="white-space: normal">{{ d.resume }}</td>
+      <td>{{ d.preparee_par }}<br><small>{{ d.date|date:"d/m/Y" }}</small></td>
+      <td style="white-space: normal">{{ d.get_etat_display }}{% if d.decidee_par %}<br><small>{{ d.decidee_par }}{% if d.qualite %} ({{ d.qualite }}){% endif %}, {{ d.date_decision|date:"d/m/Y" }}</small>{% endif %}{% if d.motif %}<br><small>{{ d.motif }}</small>{% endif %}</td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="aide">Aucune décision pour l'instant.</p>{% endif %}
+</section>
+{% endblock %}

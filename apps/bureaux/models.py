@@ -25,7 +25,11 @@ UNITES = ("paroisse", "circuit", "region")
 class Fonction(models.Model):
     nom = models.CharField("nom", max_length=150)
     niveau = models.CharField("niveau", max_length=10, choices=Niveau.choices)
-    droit_gerer = models.BooleanField("droit de gérer le site", default=False)
+    droit_gerer = models.BooleanField("gestion des membres", default=False)
+    # Au Bureau National de Commandement, des cases séparées (décision du 19/11/2026).
+    droit_evenements = models.BooleanField("événements nationaux", default=False)
+    droit_grades = models.BooleanField("grades", default=False)
+    droit_journal = models.BooleanField("journal", default=False)
     duree_mandat_annees = models.PositiveSmallIntegerField("durée du mandat (années)", default=2)
     membre_du_bureau = models.BooleanField("membre du bureau", default=True)
     ordre = models.PositiveSmallIntegerField("ordre", default=0)
@@ -140,3 +144,85 @@ class AlerteBureau(models.Model):
                 fields=["unite_cle", "date_fin", "palier"], name="une_alerte_par_palier"
             )
         ]
+
+
+class DemandeValidation(models.Model):
+    """« Deux clés » (décision du 19/11/2026) : ce que prépare le Secrétaire national (bureaux,
+    droits, sanctions) attend la validation du Président (ou du Vice-président si le poste est
+    vacant ou sans réponse depuis 7 jours, ou d'un délégué du Président)."""
+
+    class Etat(models.TextChoices):
+        ATTENTE = "attente", "En attente de validation"
+        VALIDEE = "validee", "Validée et appliquée"
+        REFUSEE = "refusee", "Refusée"
+        ANNULEE = "annulee", "Annulée par son auteur"
+        EXPIREE = "expiree", "Expirée (30 jours sans réponse)"
+        ECHEC = "echec", "Validée mais impossible à appliquer"
+
+    action = models.CharField("action", max_length=20)
+    resume = models.CharField("résumé", max_length=400)
+    donnees = models.JSONField("données", default=dict)
+    preparee_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name="préparée par",
+    )
+    date = models.DateTimeField("préparée le", auto_now_add=True)
+    etat = models.CharField("état", max_length=10, choices=Etat.choices, default=Etat.ATTENTE)
+    decidee_par = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        null=True,
+        blank=True,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name="décidée par",
+    )
+    qualite = models.CharField("en qualité de", max_length=120, blank=True)
+    date_decision = models.DateTimeField("décidée le", null=True, blank=True)
+    motif = models.CharField("motif du refus ou de l'échec", max_length=400, blank=True)
+
+    class Meta:
+        verbose_name = "demande de validation"
+        verbose_name_plural = "demandes de validation"
+        ordering = ["-date"]
+
+    def __str__(self) -> str:
+        return f"{self.resume} ({self.get_etat_display()})"
+
+
+class Delegation(models.Model):
+    """Le Président délègue une validation précise, à une personne, pour une durée limitée."""
+
+    class Objet(models.TextChoices):
+        DEUX_CLES = "deux_cles", "Valider les actions préparées (bureaux, droits, sanctions)"
+        REVERSEMENTS = "reversements", "Valider les reversements mensuels"
+
+    delegant = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="+",
+        verbose_name="délégant",
+    )
+    delegataire = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+        related_name="delegations_recues",
+        verbose_name="délégataire",
+    )
+    objet = models.CharField("objet", max_length=20, choices=Objet.choices)
+    debut = models.DateTimeField("début", auto_now_add=True)
+    fin = models.DateTimeField("fin")
+    retiree_le = models.DateTimeField("retirée le", null=True, blank=True)
+
+    class Meta:
+        verbose_name = "délégation"
+        verbose_name_plural = "délégations"
+        ordering = ["-debut"]
+
+    def __str__(self) -> str:
+        return f"{self.get_objet_display()} → {self.delegataire}"
+
+    def active(self, maintenant=None) -> bool:
+        maintenant = maintenant or timezone.now()
+        return self.retiree_le is None and self.debut <= maintenant < self.fin

@@ -325,7 +325,7 @@ def payer_membres(request, cle):
     return render(request, "tresorerie/payer_membres.html", {"unite": unite, "membres": membres})
 
 
-# --- Bureau national ----------------------------------------------------------------------------
+# --- Bureau National de Commandement -------------------------------------------------------
 
 
 CRITERES = (
@@ -351,7 +351,7 @@ def _entier_ou_none(valeur):
 def bn_speciales(request):
     """Créer une cotisation spéciale (13/11/2026) : montant juste devant son type ; cibles
     combinables (tous, certains membres, unités, bureaux)."""
-    if not _bn(request.user):
+    if not request.user.has_perm("tresorerie.creer_speciales"):
         raise PermissionDenied
     from apps.listes.filtres import FiltreListeForm
 
@@ -418,7 +418,7 @@ def bn_speciales(request):
                 ("paroisse", "Bureaux d'unité paroissiale"),
                 ("circuit", "Bureaux de section circuit"),
                 ("region", "Bureaux d'unité régionale de coordination"),
-                ("national", "Bureau national"),
+                ("national", "Bureau National de Commandement"),
             ],
         },
     )
@@ -426,10 +426,11 @@ def bn_speciales(request):
 
 @login_required
 def bn_speciale(request, pk):
-    if not (_bn(request.user) or est_tresorier_national(request.user)):
+    peut_creer = request.user.has_perm("tresorerie.creer_speciales")
+    if not (_bn(request.user) or peut_creer or est_tresorier_national(request.user)):
         raise PermissionDenied
     cs = get_object_or_404(CotisationSpeciale, pk=pk)
-    if request.method == "POST" and _bn(request.user):
+    if request.method == "POST" and peut_creer:
         cs.ouverte = not cs.ouverte  # clôture ou réouverture (rien ne s'efface)
         cs.save(update_fields=["ouverte"])
         return redirect("tresorerie:bn_speciale", pk=cs.pk)

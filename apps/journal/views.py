@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from django.db.models import Q
 from django.shortcuts import render
 
-from apps.bureaux.views_bn import bn_requis
+from apps.bureaux.views_bn import permission_requise
 from apps.journal.lecture import lire
 from apps.journal.models import LIBELLES, EntreeJournal
 
@@ -16,7 +16,7 @@ def _date(valeur: str) -> datetime.date | None:
         return None
 
 
-@bn_requis
+@permission_requise("journal.voir")
 def liste(request):
     qs = EntreeJournal.objects.select_related("auteur")
     g = request.GET

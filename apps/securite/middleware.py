@@ -24,11 +24,7 @@ class DoubleVerificationObligatoire:
         self.get_response = get_response
 
     def __call__(self, request):
-        if (
-            not _libre(request)
-            and doit_verifier(request.user)
-            and not est_verifie(request)
-        ):
+        if not _libre(request) and doit_verifier(request.user) and not est_verifie(request):
             page = (
                 "securite:code" if double_verification_active(request.user) else "securite:activer"
             )

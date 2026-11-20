@@ -126,8 +126,9 @@ Un titulaire qui n'est plus « Actif » (sanctionné, exclu, démissionnaire, d�
 immédiatement ses droits de bureau. Les comptes de bureau sont déconnectés après 30 minutes
 d'inactivité.
 
-*Transition :* l'autorisation manuelle « Gérer les membres » (gestion → Comptes → Permissions)
-donne encore les pages du BNC. À réserver au démarrage ; préférez les mandats. Sur le vrai site,
+*Transition :* l'autorisation manuelle « Gérer les membres » (gestion → Comptes → Permissions),
+avec au besoin « Enregistrer des membres », donne encore les pages du BNC (jamais l'installation
+des bureaux, les droits ni les sanctions, réservés au Président et au Secrétaire national). À réserver au démarrage ; préférez les mandats. Sur le vrai site,
 ouvrir d'abord la gestion en écriture (voir § 7).
 
 ## 11. Fichiers privés (photos, CIP)

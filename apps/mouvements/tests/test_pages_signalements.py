@@ -36,7 +36,10 @@ def test_signaler_deces(client, monde):
     assert sig.type == "deces" and sig.date_effet == date(2026, 11, 1)
     assert sig.unite == f"paroisse-{monde['P1'].pk}"
     html = unescape(client.get(r.url).content.decode())
-    assert "Signalement transmis au Bureau national." in html and "En attente du BN" in html
+    assert (
+        "Signalement transmis au Bureau National de Commandement." in html
+        and "En attente du BN" in html
+    )
 
 
 def test_signaler_hors_perimetre_404(client, monde):

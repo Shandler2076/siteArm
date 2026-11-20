@@ -129,6 +129,16 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   `data-action`, `data-soumettre-auto` (`static/js/site.js`). Clés TOTP chiffrées
   (`securite/chiffrement.py::SecretChiffre`). `pip-audit` dans les tests GitHub.
 
+- Bureaux et droits (19/11/2026, guide 14) : nomination seulement dans sa zone
+  (`bureaux/services.py::raison_hors_zone`) ; `installer_bureau` / `remplacer_titulaire` /
+  `pourvoir_poste` ; `mandats_incoherents`. Droits nationaux calculés par
+  `perimetre.droits_nationaux` (en dur : `bureaux.installer`, `mouvements.sanctionner`,
+  `membres.enregistrer` pour Président et Secrétaire national ; `tresorerie.creer_speciales` ;
+  cases `droit_gerer`, `droit_evenements`, `droit_grades`, `droit_journal`). Deux clés et
+  délégation : `bureaux/deux_cles.py` (toute action de bureaux/droits/sanctions passe par
+  `soumettre_ou_executer`, via `views_bn.appliquer_ou_demander`). Menu par bureau :
+  `menu.py::_par_bureau`, `SousGroupe`, `nom_bureau`. Toujours écrire « Bureau National de
+  Commandement » en entier. Filigrane PDF : `membres/pdf.py::filigrane` + `mot_filigrane`.
 - Style coloré (19/11/2026) : variables CSS en tête de `static/css/site.css` (marine #14284B,
   bordeaux #8E1F35, or #F2C230, fond crème #FBF6EA), Poppins (titres) + Inter (texte) servies par
   le site (`static/fonts/site/`, jamais Google Fonts) ; « Ma page » en tuiles

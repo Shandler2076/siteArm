@@ -69,6 +69,12 @@ COURRIER_REPRIS = "courrier_repris"
 COURRIER_SUPPRIME = "courrier_supprime"
 COURRIERS_PURGES = "courriers_purges"
 RECHERCHE_MATRICULE = "recherche_matricule"
+TITULAIRE_REMPLACE = "titulaire_remplace"
+POSTE_POURVU = "poste_pourvu"
+DROITS_MODIFIES = "droits_modifies"
+DEMANDE_PREPAREE = "demande_preparee"
+DEMANDE_DECIDEE = "demande_decidee"
+DELEGATION = "delegation"
 
 LIBELLES = {
     COURRIER_PREPARE: "Courrier préparé",
@@ -111,6 +117,12 @@ LIBELLES = {
     CONSULTATION_FICHE: "Consultation d'une fiche",
     VERIFICATION_MEMBRE: "Vérification d'un membre (hors périmètre)",
     RECHERCHE_MATRICULE: "Recherche d'un membre par matricule",
+    TITULAIRE_REMPLACE: "Titulaire d'un bureau remplacé ou retiré",
+    POSTE_POURVU: "Poste vacant d'un bureau pourvu",
+    DROITS_MODIFIES: "Droits d'une fonction modifiés",
+    DEMANDE_PREPAREE: "Action préparée, en attente de validation",
+    DEMANDE_DECIDEE: "Action validée ou refusée (deux clés)",
+    DELEGATION: "Délégation du Président",
     REINITIALISATION: "Mot de passe réinitialisé",
     PHOTO_DECISION: "Décision sur une photo",
     ENREGISTREMENT: "Membre enregistré",

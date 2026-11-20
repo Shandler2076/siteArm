@@ -8,7 +8,7 @@
   {% with photo=membre.photo_acceptee %}
     {% if photo %}<img class="photo" src="{% url 'membres:photo' photo.pk %}" alt="Ma photo">{% endif %}
   {% endwith %}
-  {% if photo_en_attente %}<p class="aide">Nouvelle photo en attente de validation par le Bureau national.</p>{% endif %}
+  {% if photo_en_attente %}<p class="aide">Nouvelle photo en attente de validation par le Bureau National de Commandement.</p>{% endif %}
   {% if photo_refusee %}<p class="message message--error">Votre dernière photo a été refusée : {{ photo_refusee.motif_refus }}</p>{% endif %}
   <p><a href="{% url 'membres:ma_photo' %}">Déposer ma photo en tenue</a></p>
   <dl class="fiche">

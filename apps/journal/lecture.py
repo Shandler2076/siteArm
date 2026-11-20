@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 from apps.journal import models as j
 
-# Actions réservées au Bureau national : sans unité enregistrée, elles relèvent du national.
+# Actions réservées au BNC : sans unité enregistrée, elles relèvent du national.
 ACTIONS_NATIONALES = {
     j.ENREGISTREMENT,
     j.LOT_VALIDE,
@@ -57,7 +57,7 @@ def _date(iso) -> str:
 def _unites(cles: set[str]) -> dict[str, str]:
     from apps.bureaux.perimetre import MODELES, Unite
 
-    noms = {"national": "Bureau national"}
+    noms = {"national": "Bureau National de Commandement"}
     for cle in cles:
         niveau, _, ident = cle.partition("-")
         if niveau in MODELES and ident.isdigit():
@@ -176,6 +176,47 @@ def lire(entrees) -> list[Ligne]:
         if a == j.INSTALLATION_BUREAU:
             titulaires = "; ".join(f"{f} : {qui(t)}" for f, t in d.get("titulaires", {}).items())
             return f"A installé le bureau à compter du {_date(d.get('date_debut'))} — {titulaires}."
+        if a == j.TITULAIRE_REMPLACE:
+            from apps.bureaux.services import MOTIFS_DEPART
+
+            motif = MOTIFS_DEPART.get(d.get("motif"), d.get("motif", "")).lower()
+            suite = (
+                f", remplacé(e) par {qui(d['remplacant'])}"
+                if d.get("remplacant")
+                else " (poste vacant)"
+            )
+            return (
+                f"A mis fin au mandat de {d.get('fonction')} de {m} le {_date(d.get('date'))} "
+                f"({motif}){suite}."
+            )
+        if a == j.DEMANDE_PREPAREE:
+            n = d.get("demande")
+            return f"A préparé, pour validation : {d.get('resume')} (demande n° {n})."
+        if a == j.DEMANDE_DECIDEE:
+            verbe = {
+                "validee": "A validé",
+                "refusee": "A refusé",
+                "echec": "A validé (sans effet : impossible à appliquer)",
+            }.get(d.get("decision"), "A traité")
+            return (
+                f"{verbe}, en qualité de {d.get('qualite')}, la demande de "
+                f"{qui(d.get('auteur', ''))} : {d.get('resume')}."
+            )
+        if a == j.DELEGATION:
+            if d.get("evenement") == "retiree":
+                return f"A retiré sa délégation à {qui(d.get('delegataire', ''))}."
+            return (
+                f"A délégué à {qui(d.get('delegataire', ''))} ({d.get('objet')}) jusqu'au "
+                f"{_date(d.get('fin', '')[:10])}."
+            )
+        if a == j.DROITS_MODIFIES:
+            etat = "coché" if d.get("valeur") else "décoché"
+            return f"A {etat} le droit « {d.get('case')} » pour la fonction {d.get('fonction')}."
+        if a == j.POSTE_POURVU:
+            return (
+                f"A nommé {m} {d.get('fonction')} à compter du {_date(d.get('date'))} "
+                "(poste vacant)."
+            )
         if a == j.REINITIALISATION:
             return f"A réinitialisé le mot de passe de {m}."
         if a == j.LOT_VALIDE:
@@ -247,7 +288,7 @@ def lire(entrees) -> list[Ligne]:
             )
         if a == j.PART_RECUE:
             niveau = {"circuit": "du circuit", "region": "de la région"}.get(
-                d.get("niveau"), "du Bureau national"
+                d.get("niveau"), "du Bureau National de Commandement"
             )
             mois = datetime.date.fromisoformat(d["mois"]) if d.get("mois") else None
             quand = periode_mois([mois] if mois else [])
@@ -357,6 +398,6 @@ def lire(entrees) -> list[Ligne]:
     def unite(e) -> str:
         if e.unite:
             return unites.get(e.unite, e.unite)
-        return "Bureau national" if e.action in ACTIONS_NATIONALES else "—"
+        return "Bureau National de Commandement" if e.action in ACTIONS_NATIONALES else "—"
 
     return [Ligne(e.date, auteur(e), phrase(e), unite(e), e.details) for e in entrees]

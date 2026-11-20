@@ -125,7 +125,8 @@ class Command(BaseCommand):
         for role, identifiant, mot in comptes:
             self.stdout.write(f"{role:<{largeur}}{identifiant:<17}{mot}")
         self.stdout.write(
-            "\nLes comptes du Bureau national devront activer la double vérification "
+            "\nLes comptes du "
+            "Bureau National de Commandement devront activer la double vérification "
             "(application d'authentification) à leur première connexion."
         )
 
@@ -343,9 +344,9 @@ class Command(BaseCommand):
         convoquer(nativite, choisis[30:32], role="bureau_organisation", par=par)
         convoquer(nativite, choisis[32:], role="officiel", par=par)
         conclave = creer_evenement(
-            nom="Conclave du Bureau national",
+            nom="Conclave du Bureau National de Commandement",
             debut=maintenant - datetime.timedelta(days=20),
-            lieu="Siège du Bureau national",
+            lieu="Siège du Bureau National de Commandement",
             avec_autorisation=False,
             par=par,
         )

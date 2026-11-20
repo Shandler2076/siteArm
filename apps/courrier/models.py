@@ -232,7 +232,7 @@ LETTRES_PAR_DEFAUT = "ẹ ọ ṣ \u25cc\u0301 \u25cc\u0300 \u25cc\u0303 \u25cc\
 
 
 class ReglagesClavier(models.Model):
-    """Lettres et tons du clavier goun (liste réglable par le Bureau national)."""
+    """Lettres et tons du clavier goun (liste réglable par le Bureau National de Commandement)."""
 
     lettres = models.TextField("lettres du clavier", default=LETTRES_PAR_DEFAUT)
 
@@ -253,7 +253,7 @@ class ReglagesClavier(models.Model):
 
 
 class OrigineMot(models.TextChoices):
-    BN = "bn", "Liste du Bureau national"
+    BN = "bn", "Liste du Bureau National de Commandement"
     APPRIS = "appris", "Appris des courriers"
     LEXIQUE = "lexique", "Lexique goun"
 

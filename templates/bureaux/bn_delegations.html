@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block titre %}Délégations du Président{% endblock %}
+{% block contenu %}
+<section class="carte">
+  <h1>Déléguer une validation</h1>
+  <p class="aide">Pendant une absence, vous pouvez confier une validation précise à une personne, pour une durée limitée (un mois au plus). Elle agit avec son propre compte et sa double vérification ; le journal indique « sur délégation du Président » et vous êtes prévenu de chaque action. Vous pouvez retirer la délégation à tout moment.</p>
+  <form method="post">{% csrf_token %}
+    <label class="champ"><span>Matricule de la personne</span><input name="delegataire" placeholder="Ex. 2015-01AS-0157" autocomplete="off" required></label>
+    <label class="champ"><span>Ce que vous déléguez</span><select name="objet">{% for v, l in objets %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></label>
+    <label class="champ"><span>Durée</span><select name="heures">
+      <option value="24">24 heures</option><option value="72" selected>72 heures</option><option value="168">Une semaine</option><option value="336">Deux semaines</option><option value="720">Un mois</option>
+    </select></label>
+    <button type="submit" class="bouton">Déléguer</button>
+  </form>
+  <h2>Mes délégations</h2>
+  {% if delegations %}
+  <ul class="fonctions">{% for d in delegations %}
+    <li><strong>{{ d.delegataire }}</strong> — {{ d.get_objet_display }}<br>
+      <small class="aide">Du {{ d.debut|date:"d/m/Y H:i" }} au {{ d.fin|date:"d/m/Y H:i" }}{% if d.retiree_le %} — retirée le {{ d.retiree_le|date:"d/m/Y H:i" }}{% elif d.fin <= maintenant %} — terminée{% else %} — <strong>en cours</strong>{% endif %}</small>
+      {% if not d.retiree_le and d.fin > maintenant %}
+      <form method="post" data-confirmer="Retirer cette délégation ?">{% csrf_token %}<input type="hidden" name="retirer" value="{{ d.pk }}"><button type="submit" class="bouton bouton--secondaire" style="width: auto">Retirer</button></form>
+      {% endif %}
+    </li>{% endfor %}</ul>
+  {% else %}<p class="aide">Aucune délégation.</p>{% endif %}
+</section>
+{% endblock %}

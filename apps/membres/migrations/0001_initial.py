@@ -8,7 +8,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     initial = True
 
     dependencies = [
@@ -41,15 +40,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_naissance",
-                    models.DateField(
-                        blank=True, null=True, verbose_name="date de naissance"
-                    ),
+                    models.DateField(blank=True, null=True, verbose_name="date de naissance"),
                 ),
                 (
                     "lieu_naissance",
-                    models.CharField(
-                        blank=True, max_length=150, verbose_name="lieu de naissance"
-                    ),
+                    models.CharField(blank=True, max_length=150, verbose_name="lieu de naissance"),
                 ),
                 (
                     "situation_matrimoniale",
@@ -120,9 +115,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "quartier",
-                    models.CharField(
-                        blank=True, max_length=150, verbose_name="quartier"
-                    ),
+                    models.CharField(blank=True, max_length=150, verbose_name="quartier"),
                 ),
                 (
                     "ville",
@@ -130,9 +123,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "profession",
-                    models.CharField(
-                        blank=True, max_length=150, verbose_name="profession"
-                    ),
+                    models.CharField(blank=True, max_length=150, verbose_name="profession"),
                 ),
                 (
                     "urgence_nom",
@@ -158,15 +149,11 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "annee_integration",
-                    models.PositiveSmallIntegerField(
-                        verbose_name="année d'intégration"
-                    ),
+                    models.PositiveSmallIntegerField(verbose_name="année d'intégration"),
                 ),
                 (
                     "matricule",
-                    models.CharField(
-                        max_length=14, unique=True, verbose_name="matricule"
-                    ),
+                    models.CharField(max_length=14, unique=True, verbose_name="matricule"),
                 ),
                 (
                     "categorie",
@@ -207,9 +194,7 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "date_enregistrement",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="date d'enregistrement"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="date d'enregistrement"),
                 ),
                 (
                     "compte",
@@ -357,21 +342,15 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "motif_refus",
-                    models.CharField(
-                        blank=True, max_length=300, verbose_name="motif du refus"
-                    ),
+                    models.CharField(blank=True, max_length=300, verbose_name="motif du refus"),
                 ),
                 (
                     "date_depot",
-                    models.DateTimeField(
-                        auto_now_add=True, verbose_name="date de dépôt"
-                    ),
+                    models.DateTimeField(auto_now_add=True, verbose_name="date de dépôt"),
                 ),
                 (
                     "date_decision",
-                    models.DateTimeField(
-                        blank=True, null=True, verbose_name="date de la décision"
-                    ),
+                    models.DateTimeField(blank=True, null=True, verbose_name="date de la décision"),
                 ),
                 (
                     "decide_par",
@@ -431,9 +410,7 @@ class Migration(migrations.Migration):
                 "verbose_name": "compteur de matricules",
                 "verbose_name_plural": "compteurs de matricules",
                 "constraints": [
-                    models.UniqueConstraint(
-                        fields=("annee", "region"), name="compteur_unique"
-                    )
+                    models.UniqueConstraint(fields=("annee", "region"), name="compteur_unique")
                 ],
             },
         ),

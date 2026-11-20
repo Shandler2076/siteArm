@@ -243,7 +243,7 @@ def signaler_vue(request, cle, matricule, type_signalement):
         except MouvementRefuse as exc:
             form.add_error(None, str(exc))
         else:
-            messages.success(request, "Signalement transmis au Bureau national.")
+            messages.success(request, "Signalement transmis au Bureau National de Commandement.")
             return redirect("bureaux:fiche_membre", cle=cle, matricule=matricule)
     return render(
         request,

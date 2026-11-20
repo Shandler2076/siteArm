@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block titre %}{% if ev %}Modifier{% else %}Créer{% endif %} un événement — Bureau national{% endblock %}
+{% block titre %}{% if ev %}Modifier{% else %}Créer{% endif %} un événement — Bureau National de Commandement{% endblock %}
 {% block contenu %}
 <section class="carte">
   {% if ev %}<p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>{% endif %}

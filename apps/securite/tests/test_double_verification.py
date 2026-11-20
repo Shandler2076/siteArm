@@ -189,3 +189,11 @@ def test_activation_previent_le_compte_et_le_mainteneur(client, monde, donner_ma
         assert Notification.objects.filter(
             destinataire=compte, message__contains="double vérification"
         ).exists()
+
+
+def test_code_qr_entier_et_sur_fond_blanc(bn):
+    """Le code QR se réduit pour tenir dans la page (viewBox) au lieu d'être rogné."""
+    html = bn.get("/securite/activer/").content.decode()
+    svg = html[html.index("<svg") : html.index(">", html.index("<svg"))]
+    assert "viewBox" in svg and 'width="' not in svg
+    assert "#fff" in html[html.index("<svg") : html.index("</svg>")].lower()

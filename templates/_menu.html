@@ -8,8 +8,13 @@
   <details class="menu__groupe"{% if groupe.ouvert %} open{% endif %}>
     <summary class="menu__titre">{{ groupe.titre }}</summary>
     <ul>
-      {% for lien in groupe.liens %}<li><a href="{{ lien.url }}"{% if lien.actif %} class="actif" aria-current="page"{% endif %}>{{ lien.libelle }}{% if lien.compteur %} ({{ lien.compteur }}){% endif %}</a></li>
-      {% endfor %}
+      {% for lien in groupe.liens %}{% if lien.sous_groupe %}<li>
+        <details class="menu__bureau"{% if lien.ouvert %} open{% endif %}>
+          <summary>{{ lien.titre }}</summary>
+          <ul>{% for l in lien.liens %}<li><a href="{{ l.url }}"{% if l.actif %} class="actif" aria-current="page"{% endif %}>{{ l.libelle }}{% if l.compteur %} ({{ l.compteur }}){% endif %}</a></li>{% endfor %}</ul>
+        </details></li>
+      {% else %}<li><a href="{{ lien.url }}"{% if lien.actif %} class="actif" aria-current="page"{% endif %}>{{ lien.libelle }}{% if lien.compteur %} ({{ lien.compteur }}){% endif %}</a></li>
+      {% endif %}{% endfor %}
     </ul>
   </details>
   {% endfor %}

@@ -100,7 +100,10 @@ def activer(request):
         request,
         "securite/activer.html",
         {
-            "qr": segno.make(uri, error="m").svg_inline(scale=5, dark="#14284B"),
+            # omitsize : dessin réduit à la taille de la page (jamais rogné) ; fond blanc et marge.
+            "qr": segno.make(uri, error="m").svg_inline(
+                scale=5, dark="#14284B", light="#ffffff", omitsize=True, border=4
+            ),
             "uri": uri,
             "secret": secret,
             "cle": " ".join(secret[i : i + 4] for i in range(0, len(secret), 4)),

@@ -17,15 +17,21 @@ def _titres(menu):
     return [g.titre for g in menu]
 
 
+def _tous(groupe):
+    """Liens d'un groupe, y compris ceux des entrées par bureau (sous-groupes)."""
+    for element in groupe.liens:
+        yield from getattr(element, "liens", [element]) if hasattr(element, "titre") else [element]
+
+
 def _actifs(menu):
-    return [(g.titre, lien.libelle) for g in menu for lien in g.liens if lien.actif]
+    return [(g.titre, lien.libelle) for g in menu for lien in _tous(g) if lien.actif]
 
 
 def test_menu_bn_groupes_sans_doublon(compte_technique):
     menu = _menu(compte_technique)
     assert _titres(menu) == [
         "Mon espace",
-        "Gestion des membres (BN)",
+        "Mon bureau",
         "Listes et statistiques",
         "Grades",
         "Cotisations mensuelles",
@@ -35,12 +41,10 @@ def test_menu_bn_groupes_sans_doublon(compte_technique):
         "Bureaux et droits",
         "Contrôle",
     ]
-    adresses = [(lien.url, lien.libelle) for g in menu for lien in g.liens]
+    adresses = [(lien.url, lien.libelle) for g in menu for lien in _tous(g)]
     assert len(adresses) == len(set(adresses))
-    libelles = [lien.libelle for g in menu for lien in g.liens]
-    assert len(libelles) == len(set(libelles))
-    gestion = next(g for g in menu if g.titre == "Gestion des membres (BN)")
-    assert [lien.libelle for lien in gestion.liens] == [
+    gestion = next(g for g in menu if g.titre == "Mon bureau")
+    assert [lien.libelle for lien in gestion.liens if lien.libelle != "Vérifier un membre"] == [
         "Tous les membres",
         "Enregistrer un membre",
         "Enregistrer par lots",
@@ -53,15 +57,15 @@ def test_menu_bn_groupes_sans_doublon(compte_technique):
 def test_menu_rubrique_active_sur_sous_page(compte_technique, monde):
     m1 = monde["m1"]
     menu = _menu(compte_technique, f"/bureau/national/membres/{m1.matricule}/")
-    assert _actifs(menu) == [("Gestion des membres (BN)", "Tous les membres")]
+    assert _actifs(menu) == [("Mon bureau", "Tous les membres")]
     ouverts = [g.titre for g in menu if g.ouvert]
-    assert ouverts == ["Gestion des membres (BN)"]
+    assert ouverts == ["Mon bureau"]
     # Fiche BN d'un membre : rattachée aussi à « Tous les membres ».
     menu = _menu(compte_technique, f"/membres/bn/{m1.matricule}/")
-    assert _actifs(menu) == [("Gestion des membres (BN)", "Tous les membres")]
+    assert _actifs(menu) == [("Mon bureau", "Tous les membres")]
     # Le plus long préfixe gagne : « Enregistrer un membre », pas « Tous les membres ».
     menu = _menu(compte_technique, "/membres/bn/enregistrer/")
-    assert _actifs(menu) == [("Gestion des membres (BN)", "Enregistrer un membre")]
+    assert _actifs(menu) == [("Mon bureau", "Enregistrer un membre")]
     menu = _menu(compte_technique, "/cotisations/national/parts/")
     assert _actifs(menu) == [("Cotisations mensuelles", "Parts reçues")]
 
@@ -90,11 +94,12 @@ def test_menu_bureau_paroisse(monde):
     assert "Bureaux et droits" not in titres and "Contrôle" not in titres
     assert "Événements" not in titres and "Courrier" in titres
     bureau = next(g for g in menu if g.titre == "Mon bureau")
+    # « Vérifier un membre » d'abord (décision du 19/11/2026).
     assert [lien.libelle for lien in bureau.liens] == [
+        "Vérifier un membre",
         "Membres",
         "Anciens membres",
         "Demandes",
-        "Vérifier un membre",
     ]
 
 
@@ -114,11 +119,24 @@ def test_rendu_groupes_repliables(client_technique, monde):
     assert 'class="actif" aria-current="page">Tous les membres' in menu
 
 
-def test_bn_avec_un_mandat_local_liens_distincts(monde, donner_mandat):
+def test_bn_avec_un_mandat_local_une_entree_par_bureau(monde, donner_mandat):
+    """Décision du 19/11/2026 : dans chaque rubrique, une entrée par bureau, avec son nom."""
+    from apps.bureaux.menu import SousGroupe
+
     sec = monde["sec_p1"]
     donner_mandat(sec, "Secrétaire national")
     menu = _menu(sec.compte)
-    libelles = [lien.libelle for g in menu for lien in g.liens]
-    assert len(libelles) == len(set(libelles))
-    assert "Demandes — national" in libelles and "Demandes — Paroisse P1" in libelles
-    assert "Listes — Paroisse P1" in libelles
+    for titre in ("Mon bureau", "Listes et statistiques", "Courrier"):
+        groupe = next(g for g in menu if g.titre == titre)
+        bureaux = [e.titre for e in groupe.liens if isinstance(e, SousGroupe)]
+        assert bureaux == ["Bureau National de Commandement", "Unité paroissiale — P1"], titre
+    bureau = next(g for g in menu if g.titre == "Mon bureau")
+    assert bureau.liens[0].libelle == "Vérifier un membre"
+    p1 = bureau.liens[-1]
+    assert [lien.libelle for lien in p1.liens] == ["Membres", "Anciens membres", "Demandes"]
+    # La page ouverte déplie le bon bureau.
+    menu = _menu(sec.compte, f"/bureau/paroisse-{monde['P1'].pk}/membres/")
+    bureau = next(g for g in menu if g.titre == "Mon bureau")
+    assert [e.titre for e in bureau.liens if getattr(e, "ouvert", False)] == [
+        "Unité paroissiale — P1"
+    ]

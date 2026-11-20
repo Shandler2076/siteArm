@@ -42,7 +42,10 @@ def _qr(convocation) -> ImageReader:
 
 def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
     """Carte de 85 × 120 mm dont le coin bas-gauche est (x, y)."""
+    from apps.membres.pdf import filigrane
+
     m, ev = convocation.membre, convocation.evenement
+    filigrane(c, x, y, LARGEUR, HAUTEUR)
     c.setStrokeColor(OR)
     c.setLineWidth(1.2)
     c.roundRect(x, y, LARGEUR, HAUTEUR, 3 * mm)
@@ -126,6 +129,9 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
         y + 9.5 * mm,
         _ajuste(f"En tant que {role}", "Sans", 8, largeur_texte - 4 * mm),
     )
+    from apps.membres.pdf import mot_filigrane
+
+    mot_filigrane(c, x, y, LARGEUR, HAUTEUR, "AUTORISÉ")
 
 
 def autorisation_pdf(convocation) -> bytes:

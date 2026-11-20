@@ -345,7 +345,8 @@ def signaler(
     jour = jour or timezone.localdate()
     if type == TypeSignalement.CATEGORIE:
         raise MouvementRefuse(
-            "Procédure supprimée : la catégorie est fixée par le Bureau national (seul passage "
+            "Procédure supprimée : la catégorie est fixée par le "
+            "Bureau National de Commandement (seul passage "
             "possible : sympathisant → membre actif, par décision du BNC)."
         )
     _verifier(type, membre, date_effet, reference, nouvelle_categorie, jour)

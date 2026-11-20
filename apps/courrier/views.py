@@ -623,7 +623,10 @@ def bn_registre(request):
     annee = request.GET.get("annee", "")
     if annee.isdigit():
         courriers = courriers.filter(annee=int(annee))
-    expediteurs = [("envoyes", "Envoyés par le Bureau national"), ("recus", "Reçus des bureaux")]
+    expediteurs = [
+        ("envoyes", "Envoyés par le Bureau National de Commandement"),
+        ("recus", "Reçus des bureaux"),
+    ]
     return render(
         request,
         "courrier/bn_registre.html",

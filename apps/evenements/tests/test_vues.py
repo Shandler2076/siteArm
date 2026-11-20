@@ -45,7 +45,7 @@ def test_creer_un_evenement(monde, client_technique):
     r = client_technique.post(
         "/evenements/nouveau/",
         {
-            "nom": "Conclave du Bureau national",
+            "nom": "Conclave du Bureau National de Commandement",
             "debut_date": "2026-12-01",
             "debut_heure": "09:00",
             "lieu": "Siège",

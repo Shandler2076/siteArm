@@ -256,7 +256,7 @@ def destinataires_directs(courrier: Courrier):
 def libelle_destinataires(courrier: Courrier, avec_membres: bool = True, membre=None) -> str:
     """Texte « Destinataire ».
 
-    Les noms des membres destinataires ne sont montrés qu'à l'expéditeur et au Bureau national
+    Les noms des membres destinataires ne sont montrés qu'à l'expéditeur et au BNC
     (`avec_membres`) ; un membre destinataire ne voit que son propre nom (un membre ne voit jamais
     un autre membre).
     """
@@ -1079,7 +1079,7 @@ def peut_voir(compte, courrier: Courrier) -> bool:
         return True
     if courrier.etat in (Etat.A_SIGNER, Etat.A_CORRIGER) and peut_signer(compte, courrier):
         return True
-    # Décision du 18/11/2026 : pas de droit de regard du Bureau national sur les courriers des
+    # Décision du 18/11/2026 : pas de droit de regard du BNC sur les courriers des
     # autres niveaux ; il ne voit que ce qu'il envoie ou ce qui lui est adressé.
     return bool(destinataires_du_compte(compte, courrier))
 

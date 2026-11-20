@@ -62,7 +62,7 @@ def test_bn_reinitialise_un_secretaire_de_paroisse(client_technique, monde):
 
 def test_paroisse_ne_reinitialise_pas_son_tresorier(client, monde):
     """Faille H1 : un membre qui a une fonction (même sans droit de gestion, comme un
-    trésorier) ne peut être réinitialisé que par le Bureau national."""
+    trésorier) ne peut être réinitialisé que par le Bureau National de Commandement."""
     cible = monde["tresorier"]
     ancien_hash = cible.compte.password
     r = _post(client, monde["sec_p1"], f"paroisse-{monde['P1'].pk}", cible)
@@ -88,7 +88,7 @@ def test_bouton_cache_pour_un_titulaire(client, monde):
     client.force_login(monde["sec_p1"].compte)
     url = f"/bureau/paroisse-{monde['P1'].pk}/membres/{monde['tresorier'].matricule}/"
     page = client.get(url).content.decode()
-    assert "/reinitialiser/" not in page and "seul le Bureau national" in page
+    assert "/reinitialiser/" not in page and "seul le Bureau National de Commandement" in page
 
 
 def test_refus_sur_un_futur_titulaire(client, monde, donner_mandat):

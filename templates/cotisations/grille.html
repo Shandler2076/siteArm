@@ -5,7 +5,7 @@
 <section class="carte">
   {% include "cotisations/_entete.html" %}
   {% if not ouvert %}
-    <p class="message message--error">Les cotisations ne sont pas encore ouvertes : le Bureau national doit fixer le mois de départ.</p>
+    <p class="message message--error">Les cotisations ne sont pas encore ouvertes : le Bureau National de Commandement doit fixer le mois de départ.</p>
   {% endif %}
   <form method="get" class="filtres"><label class="champ"><span>Année</span>
     <input type="number" name="annee" value="{{ annee }}" min="2020" max="2100"></label>
