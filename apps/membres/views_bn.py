@@ -117,7 +117,7 @@ def fiche_identifiants_pdf(request, matricule):
 @gerer_membres
 def fiche_pdf(request, matricule):
     membre = get_object_or_404(Membre, matricule=matricule)
-    return _reponse_pdf(fiche_identification_pdf(membre), matricule)
+    return _reponse_pdf(fiche_identification_pdf(membre, par=request.user), matricule)
 
 
 @login_required

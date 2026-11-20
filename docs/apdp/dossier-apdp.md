@@ -185,6 +185,7 @@ publicitaire ou de mesure d'audience.
 | Prestataire d'envoi des e-mails de notification (sous-traitant, si utilisé) | Adresse e-mail et texte de la notification | Envoi des notifications |
 | Chef et Secrétaire d'un bureau (vérification hors périmètre) | Carte réduite d'un membre désigné par son matricule exact, avec motif journalisé | Identifier un membre en visite ou mis en cause |
 | Responsables des bureaux destinataires d'un courrier (Chef, Secrétaire ; Président, Secrétaire national) | Courriers adressés à leur bureau, nom du signataire ; le Bureau national ne voit pas les courriers échangés entre les autres niveaux ni ceux adressés par un bureau à ses membres | Correspondance officielle |
+| Toute personne qui scanne le QR code d'une fiche d'identification | Authentique ou non, matricule, statut, numéro et date d'émission de la fiche (jamais le nom, la photo, le téléphone ni la date de naissance) | Repérer une fausse fiche d'identification |
 | Toute personne qui scanne le QR code d'un courrier | Numéro, date, objet, bureau expéditeur, fonction et nom du signataire (jamais le texte) | Vérifier l'authenticité d'un courrier |
 | Trésoriers des bureaux | Cotisations et paiements des membres de leur périmètre ; numéro mobile money du bureau | Trésorerie du bureau |
 | Plateforme de paiement mobile money (sous-traitant, à désigner : FedaPay, KkiaPay, CinetPay…) | Numéro de téléphone du payeur, montant, référence du paiement | Encaissement des cotisations au numéro du BN |

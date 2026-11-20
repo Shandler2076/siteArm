@@ -43,8 +43,10 @@ def fiches_du_lot_pdf(lot: Lot, par, debut: int = 1, fin: int | None = None) -> 
     tampon = io.BytesIO()
     c = canvas.Canvas(tampon, pagesize=A4)
     c.setTitle(f"Fiches d'identification — lot n° {lot.pk}")
+    from apps.membres.authenticite import emettre_fiche
+
     for m in membres:
-        dessiner_fiche(c, m, mots.get(m.pk))
+        dessiner_fiche(c, m, mots.get(m.pk), emettre_fiche(m, par=par))
     c.save()
     contenu = tampon.getvalue()  # construit avant de toucher aux comptes
     with transaction.atomic():

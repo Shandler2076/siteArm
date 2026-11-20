@@ -107,6 +107,14 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   aperçu sans enregistrement (`services.apercu`, `/courrier/<cle>/apercu/`) ; nature « autre » + titre ; états : à signer → en correction
   (`mettre_en_correction`, `soumettre_a_la_signature`) → envoyé ; abandonné (`reprendre`, `supprimer`,
   effacé après 30 jours : `purger_courriers_abandonnes`, tâche quotidienne).
+- Fiche d'identification (20/11/2026) : en-tête = marques de l'Église (Congrégation, Comité National
+  de Coordination, Bureau National de Commandement), titre + devise dessous ; petits logos AS en
+  filigrane (`pdf.petits_logos_en_filigrane`, fiche seule). Authenticité : registre `FicheEmise`
+  (`membres/authenticite.py::emettre_fiche`, SEUL point d'écriture ; chaque impression remplace les
+  précédentes), numéro FI-AAAA-NNNNNN + QR → `/membres/verifier/<jeton>/` public : authentique ou
+  non, matricule, statut, numéro, date — JAMAIS le nom ni la photo.
+- Listes déroulantes longues : `organisation/widgets.py::ListeAvecRecherche` + `site.js::listeAvecRecherche`
+  (filet : toute liste de plus de 15 choix).
 - Logos : `LOGO_CONGREGATION_SANS_TEXTE` (triangle + anges, sans texte) là où le nom de la
   Congrégation est déjà écrit (courriers, fiche du membre, accueil) ; l'ancien logo avec le texte en
   arc reste sur les autres PDF (listes, statistiques, autorisations).

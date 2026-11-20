@@ -1,11 +1,12 @@
 from django.urls import path
 
-from apps.membres import views_bn, views_fichiers, views_membre
+from apps.membres import views_bn, views_fichiers, views_membre, views_verification
 
 app_name = "membres"
 
 urlpatterns = [
     path("ma-fiche/", views_membre.ma_fiche, name="ma_fiche"),
+    path("verifier/<str:jeton>/", views_verification.verifier_fiche, name="verifier"),
     path("ma-fiche/coordonnees/", views_membre.mes_coordonnees, name="mes_coordonnees"),
     path("ma-fiche/fiche.pdf", views_membre.ma_fiche_pdf, name="ma_fiche_pdf"),
     path("ma-fiche/photo/", views_membre.ma_photo, name="ma_photo"),

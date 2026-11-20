@@ -60,6 +60,11 @@ def test_fiches_du_lot_une_page_par_membre(client_technique, lot_valide):
         mots = [w for w in page.split() if len(w) == 10 and membre.compte.check_password(w)]
         assert len(mots) == 1
         assert membre.compte.doit_changer_mot_de_passe
+        # Chaque fiche porte son numéro (authenticité, 20/11/2026).
+        from apps.membres.models import FicheEmise
+
+        f = FicheEmise.objects.get(membre=membre, remplacee_le__isnull=True)
+        assert f.numero in page
 
 
 def test_recapitulatif_sans_mot_de_passe(client_technique, lot_valide):
