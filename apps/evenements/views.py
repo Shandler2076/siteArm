@@ -11,7 +11,7 @@ from django.utils import timezone
 from apps.bureaux.models import Niveau
 from apps.bureaux.perimetre import Unite
 from apps.evenements.forms import EvenementForm
-from apps.evenements.models import Convocation, Evenement, Formule, Presence, Role, Session
+from apps.evenements.models import Convocation, Evenement, Presence, Role, Session
 from apps.evenements.services import (
     EvenementRefuse,
     annuler_evenement,
@@ -120,12 +120,16 @@ def modifier(request, pk):
 
 
 def _par_session(ev):
+    """Convoqués regroupés par bloc (20/11/2026) : bureau d'organisation, supervision,
+    sections, participants, invitations d'honneur."""
+    from apps.evenements.blocs import blocs, cle_bloc
+
     convocations = list(ev.convocations.filter(active=True).select_related("membre", "session"))
     groupes = []
-    for session in [*ev.sessions.all(), None]:
-        membres = [c for c in convocations if c.session_id == (session.pk if session else None)]
+    for b in blocs(ev):
+        membres = [c for c in convocations if cle_bloc(c) == b["cle"]]
         if membres:
-            groupes.append({"session": session, "convocations": membres})
+            groupes.append({"titre": b["titre"], "cle": b["cle"], "convocations": membres})
     presents = sum(1 for c in convocations if c.presence == Presence.PRESENT)
     pointes = sum(1 for c in convocations if c.presence)
     return groupes, len(convocations), presents, pointes
@@ -170,33 +174,79 @@ def detail(request, pk):
 @login_required
 @bn
 def convoquer_vue(request, pk):
-    ev = get_object_or_404(Evenement, pk=pk)
-    if request.method == "POST":
-        pks = [int(x) for x in request.POST.getlist("membres") if x.isdigit()]
-        session = None
-        if request.POST.get("session", "").isdigit():
-            session = get_object_or_404(Session, pk=request.POST["session"], evenement=ev)
-        from apps.membres.models import Membre
+    """Convocation par blocs (20/11/2026) : bureau d'organisation, supervision, sections (chef
+    puis membres), invitations d'honneur ; recherche à gauche, sélection à droite."""
+    from apps.evenements.blocs import (
+        BUREAU,
+        ROLES_FIXES,
+        blocs,
+        convocations_du_bloc,
+    )
+    from apps.evenements.services import ajouter_poste_bureau
+    from apps.membres.models import Membre
 
-        membres = list(Membre.objects.filter(pk__in=pks).select_related("compte"))
+    ev = get_object_or_404(Evenement, pk=pk)
+    liste_blocs = blocs(ev)
+    cles = [b["cle"] for b in liste_blocs]
+    source = request.POST if request.method == "POST" else request.GET
+    cle = source.get("bloc") if source.get("bloc") in cles else cles[0]
+    session = None
+    if cle.startswith("section-"):
+        session = get_object_or_404(Session, pk=int(cle.split("-", 1)[1]), evenement=ev)
+    retour = f"{request.path}?bloc={cle}"
+    if request.method == "POST":
+        action = request.POST.get("action", "convoquer")
         try:
+            if action == "poste":
+                ajouter_poste_bureau(ev, request.POST.get("nom_poste", ""), par=request.user)
+                messages.success(request, "Poste ajouté au bureau d'organisation.")
+                return redirect(retour)
+            if action == "retirer":
+                c = get_object_or_404(Convocation, pk=request.POST.get("convocation"), evenement=ev)
+                retirer(c, motif="Retiré(e) de la liste de convocation", par=request.user)
+                messages.success(request, f"{c.membre.nom_complet} retiré(e).")
+                return redirect(retour)
+            pks = [int(x) for x in request.POST.getlist("membres") if x.isdigit()]
+            membres = {m.pk: m for m in Membre.objects.filter(pk__in=pks).select_related("compte")}
             if not membres:
-                raise EvenementRefuse("Cochez au moins un membre.")
-            faites = convoquer(
-                ev,
-                membres,
-                session=session,
-                sans_session=session is None,
-                role=request.POST.get("role", Role.TRAVAILLEUR),
-                formule=request.POST.get("formule", ""),
-                role_autre=request.POST.get("role_autre", ""),
-                par=request.user,
-            )
+                raise EvenementRefuse("Choisissez au moins un membre.")
+            faites = []
+            if cle == BUREAU:
+                sans_poste = []
+                for mpk, m in membres.items():
+                    poste = request.POST.get(f"poste_{mpk}", "")
+                    if poste:
+                        faites += convoquer(
+                            ev, [m], role=ROLES_FIXES[BUREAU], poste=poste, par=request.user
+                        )
+                    else:
+                        sans_poste.append(m)
+                if sans_poste:
+                    faites += convoquer(ev, sans_poste, role=ROLES_FIXES[BUREAU], par=request.user)
+            elif session is not None:
+                chef = request.POST.get("chef", "")
+                autres = [m for mpk, m in membres.items() if str(mpk) != chef]
+                if chef.isdigit() and int(chef) in membres:
+                    faites += convoquer(
+                        ev,
+                        [membres[int(chef)]],
+                        session=session,
+                        role=Role.CHEF_SECTION,
+                        par=request.user,
+                    )
+                if autres:
+                    faites += convoquer(
+                        ev, autres, session=session, role=Role.TRAVAILLEUR, par=request.user
+                    )
+            else:
+                faites += convoquer(
+                    ev, list(membres.values()), role=ROLES_FIXES[cle], par=request.user
+                )
         except EvenementRefuse as e:
             messages.error(request, str(e))
-            return redirect(request.get_full_path())
+            return redirect(retour)
         messages.success(request, f"{len(faites)} membre(s) convoqué(s) ; ils sont notifiés.")
-        return redirect("evenements:detail", pk=ev.pk)
+        return redirect(retour)
     form = FiltreListeForm(NATIONAL, request.GET or QueryDict(""))
     proposes, trop = [], False
     if request.GET.get("envoye") and form.is_valid():
@@ -204,13 +254,35 @@ def convoquer_vue(request, pk):
         proposes = list(qs.select_related("compte")[: MAX_PROPOSES + 1])
         trop = len(proposes) > MAX_PROPOSES
         proposes = proposes[:MAX_PROPOSES]
-    deja = set(ev.convocations.filter(active=True).values_list("membre_id", flat=True))
+    places = {
+        c.membre_id: c.place for c in ev.convocations.filter(active=True).select_related("session")
+    }
+    for m in proposes:
+        m.place = places.get(m.pk, "")
     principaux = [n for n in FILTRES_PRINCIPAUX if n in form.fields]
+    bloc = next(b for b in liste_blocs if b["cle"] == cle)
+    # Le chef de section en tête, puis les membres par nom.
+    presents = sorted(
+        convocations_du_bloc(ev, cle),
+        key=lambda c: (c.role != Role.CHEF_SECTION, c.membre.nom, c.membre.prenoms),
+    )
+    postes = []
+    if cle == BUREAU:
+        par_poste = {c.poste: c for c in presents if c.poste}
+        postes = [(p, par_poste.get(p)) for p in ev.postes_bureau]
     return render(
         request,
         "evenements/convoquer.html",
         {
             "ev": ev,
+            "blocs": liste_blocs,
+            "bloc": bloc,
+            "session": session,
+            "est_bureau": cle == BUREAU,
+            "presents": presents,
+            "postes": postes,
+            "sans_poste": [c for c in presents if cle == BUREAU and not c.poste],
+            "chef": next((c for c in presents if c.role == Role.CHEF_SECTION), None),
             "form": form,
             "principaux": [form[n] for n in principaux],
             "autres": [
@@ -220,12 +292,6 @@ def convoquer_vue(request, pk):
             ],
             "proposes": proposes,
             "trop": trop,
-            "deja": deja,
-            "roles": Role.choices,
-            "formules": Formule.choices,
-            "roles_autres": sorted(
-                set(ev.convocations.exclude(role_autre="").values_list("role_autre", flat=True))
-            ),
         },
     )
 
@@ -237,7 +303,9 @@ def recherche_membres(request, pk):
     from django.http import JsonResponse
 
     ev = get_object_or_404(Evenement, pk=pk)
-    deja = set(ev.convocations.filter(active=True).values_list("membre_id", flat=True))
+    places = {
+        c.membre_id: c.place for c in ev.convocations.filter(active=True).select_related("session")
+    }
     resultats = []
     for m in rechercher_membres(request.GET.get("q", "")):
         a = m.affectation_actuelle
@@ -247,7 +315,9 @@ def recherche_membres(request, pk):
                 "nom": m.nom_complet,
                 "matricule": m.matricule,
                 "paroisse": a.paroisse.nom if a else "",
-                "deja": m.pk in deja,
+                "deja": m.pk in places,
+                # Pour l'alerte « déjà placé(e) ailleurs » (20/11/2026).
+                "place": places.get(m.pk, ""),
             }
         )
     return JsonResponse({"resultats": resultats})

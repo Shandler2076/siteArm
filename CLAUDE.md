@@ -76,8 +76,11 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   les droits) ; clic = lue (`/notifications/<pk>/`).
 - Vérifier un membre hors périmètre : Chef et Secrétaire seulement (`perimetre.unites_verification`),
   matricule exact, motif journalisé, carte réduite (`membres/verification.py`).
-- Événements : sections facultatives (`avec_sections`, modèle `Session`), rôle (travailleur,
-  superviseur, bureau) et formule de l'autorisation sur la convocation.
+- Événements par blocs (20/11/2026, `apps/evenements/blocs.py`) : bureau d'organisation
+  (`Evenement.postes_bureau`, `Convocation.poste`, un titulaire par poste), supervision, sections
+  (`Role.CHEF_SECTION` unique, `TRAVAILLEUR`), participants (sans section), invitations d'honneur ;
+  autorisation : qualité en grand (`Convocation.qualite_autorisation` / `precision_autorisation`),
+  plus de « Est autorisé(e) à… » ; en-tête `LOGO_EN_TETE` sans texte ; page Convoquer en onglets.
 - Trésorerie (`apps/tresorerie`, `services.py` SEUL point d'écriture) : paiement mobile money parti du
   site (plateforme simulée sur le site d'essai), cotisations spéciales, quittances, reversements
   mensuels (Trésorier national prépare, Président ou Secrétaire national valide) ; rôles dans

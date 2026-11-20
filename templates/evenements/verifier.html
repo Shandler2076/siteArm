@@ -16,8 +16,7 @@
     {% if etat == "valable" or etat == "pas_encore" %}
       <p class="matricule">{{ c.membre.matricule }}</p>
       <p><strong>{{ c.evenement.nom }}</strong><br>{{ c.evenement.debut|date:"d/m/Y à H:i" }}{% if c.evenement.lieu %} — {{ c.evenement.lieu }}{% endif %}</p>
-      <p>{{ c.texte_formule }}.</p>
-      <p><strong>{{ c.texte_role }}</strong></p>
+      <p><strong>{{ c.qualite_autorisation }}</strong>{% if c.precision_autorisation %}<br>{{ c.precision_autorisation }}{% endif %}</p>
     {% else %}
       <p>{{ c.evenement.nom }}</p>
     {% endif %}

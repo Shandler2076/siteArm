@@ -15,7 +15,7 @@ from apps.evenements.services import autorisation_valable
 from apps.membres.pdf import (
     GRIS,
     LOGO_AS,
-    LOGO_CONGREGATION,
+    LOGO_CONGREGATION_SANS_TEXTE,
     MARINE,
     OR,
     _ajuste,
@@ -24,6 +24,8 @@ from apps.membres.pdf import (
 )
 
 LARGEUR, HAUTEUR = 85 * mm, 120 * mm
+# En-tête : triangle et anges SANS le texte en courbe (le nom est écrit à côté ; 20/11/2026).
+LOGO_EN_TETE = LOGO_CONGREGATION_SANS_TEXTE
 
 
 def url_verification(convocation) -> str:
@@ -45,18 +47,22 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
     from apps.membres.pdf import filigrane
 
     m, ev = convocation.membre, convocation.evenement
-    filigrane(c, x, y, LARGEUR, HAUTEUR)
+    # Logo de l'Armée du Salut bien visible en filigrane ; AUTORISÉ passe dessus (20/11/2026).
+    filigrane(c, x, y, LARGEUR, HAUTEUR, intensite=0.2)
     c.setStrokeColor(OR)
     c.setLineWidth(1.2)
     c.roundRect(x, y, LARGEUR, HAUTEUR, 3 * mm)
     haut = y + HAUTEUR
-    for logo, lx in ((LOGO_CONGREGATION, x + 4 * mm), (LOGO_AS, x + LARGEUR - 15 * mm)):
+    for logo, lx, larg in (
+        (LOGO_EN_TETE, x + 2.5 * mm, 14.5 * mm),
+        (LOGO_AS, x + LARGEUR - 15 * mm, 11 * mm),
+    ):
         if logo.exists():
             c.drawImage(
                 ImageReader(str(logo)),
                 lx,
                 haut - 15 * mm,
-                11 * mm,
+                larg,
                 11 * mm,
                 mask="auto",
                 preserveAspectRatio=True,
@@ -116,19 +122,22 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
             f"Valable du {debut_v:%d/%m/%Y %H:%M} au {fin:%d/%m/%Y %H:%M}", "Sans", 7, largeur_texte
         ),
     )
-    # Mention
-    role = convocation.texte_role.removeprefix("Invité(e) en tant que ")
+    # Qualité, en grand (20/11/2026) : plus de « Est autorisé(e) à… » (AUTORISÉ est en
+    # filigrane) ; en petit dessous, le poste au bureau d'organisation ou la section.
+    from reportlab.pdfbase import pdfmetrics
+
+    qualite, precision = convocation.qualite_autorisation, convocation.precision_autorisation
     c.setFillColor(MARINE)
     c.roundRect(x + 4 * mm, y + 6 * mm, LARGEUR - 8 * mm, 14 * mm, 2 * mm, stroke=0, fill=1)
     c.setFillColorRGB(1, 1, 1)
-    c.setFont("Sans-Gras", 8.5)
-    c.drawCentredString(x + LARGEUR / 2, y + 14.5 * mm, convocation.texte_formule)
-    c.setFont("Sans", 8)
-    c.drawCentredString(
-        x + LARGEUR / 2,
-        y + 9.5 * mm,
-        _ajuste(f"En tant que {role}", "Sans", 8, largeur_texte - 4 * mm),
-    )
+    utile = largeur_texte - 6 * mm
+    taille = min(14, 14 * utile / max(pdfmetrics.stringWidth(qualite, "Sans-Gras", 14), 1))
+    c.setFont("Sans-Gras", taille)
+    hauteur_qualite = y + (13.5 if precision else 11.5) * mm
+    c.drawCentredString(x + LARGEUR / 2, hauteur_qualite, qualite)
+    if precision:
+        c.setFont("Sans", 8)
+        c.drawCentredString(x + LARGEUR / 2, y + 8.5 * mm, _ajuste(precision, "Sans", 8, utile))
     from apps.membres.pdf import mot_filigrane
 
     mot_filigrane(c, x, y, LARGEUR, HAUTEUR, "AUTORISÉ")
