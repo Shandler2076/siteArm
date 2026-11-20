@@ -80,13 +80,8 @@ def recu_pdf(versement) -> bytes:
     c = canvas.Canvas(tampon, pagesize=(larg, haut))
     c.setTitle(f"Reçu {versement.numero_recu}")
     marge = 8 * mm
-    c.setFillColor(MARINE)
-    c.setFont("Sans-Gras", 11)
-    c.drawString(marge, haut - 12 * mm, "ARMÉE DU SALUT DU BÉNIN")
-    c.setFont("Sans-Gras", 10)
-    c.drawString(marge, haut - 18 * mm, f"Reçu de cotisation n° {versement.numero_recu}")
-    c.setStrokeColor(OR)
-    c.line(marge, haut - 21 * mm, larg - marge, haut - 21 * mm)
+    # En-tête commun de l'Église (20/11/2026).
+    y_contenu = entete_officiel(c, f"Reçu de cotisation n° {versement.numero_recu}", [], larg, haut)
     mois = list(versement.mois.values_list("mois", flat=True))
     lignes = [
         ("Membre", f"{versement.membre.nom_complet} ({versement.membre.matricule})"),
@@ -96,7 +91,7 @@ def recu_pdf(versement) -> bytes:
         ("Encaissé par", f"Paroisse {versement.paroisse.nom}"),
         ("Validé le", f"{timezone.localtime(versement.date_validation):%d/%m/%Y} par le circuit"),
     ]
-    y = haut - 28 * mm
+    y = y_contenu
     for libelle, valeur in lignes:
         c.setFont("Sans-Gras", 8.5)
         c.setFillColor(GRIS)

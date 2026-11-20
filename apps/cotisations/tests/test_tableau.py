@@ -64,6 +64,9 @@ def test_etat_pdf_contient_total_et_mention(donnees):
     texte = _texte_pdf(_client(donnees["m1"]).get("/cotisations/moi/etat.pdf").content)
     assert "ÉTAT DES COTISATIONS MENSUELLES" in texte.upper() and "300 F CFA" in texte
     assert "À jour au mars 2026" in texte
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    assert marques_presentes(texte)
     texte = _texte_pdf(_client(donnees["tresorier"]).get("/cotisations/moi/etat.pdf").content)
     assert "En retard de 3 mois (300 F CFA)" in texte
 
@@ -79,6 +82,9 @@ def test_recu_pdf_apres_validation_seulement(donnees):
     v = donnees["recu"]
     texte = _texte_pdf(_client(donnees["m1"]).get(f"/cotisations/recu/{v.pk}.pdf").content)
     assert v.numero_recu in texte and "300 F" in texte and "janvier à mars 2026" in texte
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    assert marques_presentes(texte)
     attente = donnees["sec_p1"].versements.get()
     assert _client(donnees["sec_p1"]).get(f"/cotisations/recu/{attente.pk}.pdf").status_code == 404
     assert _client(donnees["m2"]).get(f"/cotisations/recu/{v.pk}.pdf").status_code == 404

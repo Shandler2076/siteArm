@@ -9,7 +9,7 @@ from reportlab.lib.units import mm
 from reportlab.pdfgen import canvas
 
 from apps.lots.models import Lot
-from apps.membres.pdf import GRIS, MARINE, OR, _ajuste, _polices, dessiner_fiche
+from apps.membres.pdf import GRIS, MARINE, _ajuste, _polices, dessiner_fiche
 from apps.membres.services import generer_mot_de_passe_provisoire
 
 
@@ -74,23 +74,20 @@ def recapitulatif_pdf(lot: Lot) -> bytes:
     ]
 
     def entete():
-        c.setFillColor(MARINE)
-        c.setFont("Sans-Gras", 13)
-        c.drawString(marge, haut - 20 * mm, "ARMÉE DU SALUT DU BÉNIN — LISTE RÉCAPITULATIVE")
-        c.setFont("Sans", 10)
+        # En-tête commun de l'Église (20/11/2026).
+        from apps.listes.exports import entete_officiel
+
         valide = timezone.localtime(lot.date_validation) if lot.date_validation else None
-        c.drawString(
-            marge,
-            haut - 27 * mm,
+        sous = [
             f"Lot n° {lot.pk} — Région {lot.region.code} {lot.region.nom}"
-            + (f" — validé le {valide:%d/%m/%Y}" if valide else ""),
-        )
-        c.setStrokeColor(OR)
-        c.line(marge, haut - 31 * mm, larg - marge, haut - 31 * mm)
+            + (f" — validé le {valide:%d/%m/%Y}" if valide else "")
+        ]
+        y = entete_officiel(c, "Liste récapitulative", sous, larg, haut)
+        c.setFillColor(MARINE)
         c.setFont("Sans-Gras", 9)
         for x, titre in colonnes:
-            c.drawString(x, haut - 37 * mm, titre)
-        return haut - 44 * mm
+            c.drawString(x, y, titre)
+        return y - 7 * mm
 
     def pied():
         c.setFillColor(GRIS)

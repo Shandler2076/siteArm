@@ -8,14 +8,13 @@ from openpyxl import Workbook
 from openpyxl.styles import Font
 from reportlab.lib.pagesizes import A4, landscape
 from reportlab.lib.units import mm
-from reportlab.lib.utils import ImageReader
 from reportlab.pdfgen import canvas
 
 from apps.bureaux.perimetre import Unite
 from apps.listes.colonnes import COLONNES_LISTE, lignes, preparer
 from apps.listes.filtres import membres_filtres, resume_filtres
 from apps.membres.models import Statut
-from apps.membres.pdf import GRIS, LOGO_AS, LOGO_CONGREGATION, MARINE, OR, _ajuste, _polices
+from apps.membres.pdf import GRIS, MARINE, OR, _ajuste, _polices
 
 MARGE = 16 * mm
 LARGEUR_PORTRAIT = A4[0] - 2 * MARGE  # 178 mm
@@ -32,40 +31,22 @@ def _texte(v) -> str:
 
 
 def entete_officiel(c: canvas.Canvas, titre: str, sous_titres: list[str], larg, haut) -> float:
-    # Logo de l'Église à gauche, logo de l'Armée du Salut à droite.
-    if LOGO_CONGREGATION.exists():
-        c.drawImage(
-            ImageReader(str(LOGO_CONGREGATION)),
-            MARGE,
-            haut - 26 * mm,
-            16 * mm,
-            14 * mm,
-            mask="auto",
-            preserveAspectRatio=True,
-        )
-    if LOGO_AS.exists():
-        c.drawImage(
-            ImageReader(str(LOGO_AS)),
-            larg - MARGE - 14 * mm,
-            haut - 26 * mm,
-            14 * mm,
-            14 * mm,
-            mask="auto",
-        )
-    x = MARGE + 18 * mm
+    """En-tête commun de l'Église (`apps/membres/entete.py`, 20/11/2026), puis les sous-titres
+    et un filet doré. Renvoie la hauteur où commence le contenu."""
+    from apps.membres.entete import entete_eglise
+
+    petit = min(larg, haut) < 140 * mm  # reçu (A6)
+    hauteur = 22 * mm if petit else 30 * mm
+    marge = 8 * mm if petit else MARGE
+    y = entete_eglise(c, larg, haut, titre, hauteur=hauteur, marge=marge) - 2 * mm
     c.setFillColor(MARINE)
-    c.setFont("Sans-Gras", 13)
-    c.drawString(x, haut - 17 * mm, "ARMÉE DU SALUT DU BÉNIN")
-    c.setFont("Sans-Gras", 11)
-    c.drawString(x, haut - 23 * mm, _ajuste(titre, "Sans-Gras", 11, larg - x - MARGE - 18 * mm))
-    y = haut - 31 * mm
     c.setFont("Sans", 9)
     for ligne in sous_titres:
-        c.drawString(MARGE, y, _ajuste(ligne, "Sans", 9, larg - 2 * MARGE))
+        c.drawString(marge, y, _ajuste(ligne, "Sans", 9, larg - 2 * marge))
         y -= 4.5 * mm
     c.setStrokeColor(OR)
     c.setLineWidth(1.2)
-    c.line(MARGE, y, larg - MARGE, y)
+    c.line(marge, y, larg - marge, y)
     return y - 6 * mm
 
 
@@ -137,23 +118,29 @@ def liste_excel(unite: Unite, form, aujourdhui: datetime.date) -> tuple[bytes, i
     classeur = Workbook()
     ws = classeur.active
     ws.title = "Membres"
-    ws["A1"] = f"Armée du Salut du Bénin — Liste des membres — {unite.libelle}"
-    ws["A1"].font = Font(bold=True, size=13)
-    ws["A2"] = _horodatage()
-    ws["A3"] = "Filtres : " + " ; ".join(resume_filtres(form))
+    # En-tête commun de l'Église (20/11/2026), puis le tableau.
+    from apps.membres.entete import entete_excel
+
+    ligne = entete_excel(
+        ws,
+        f"Liste des membres — {unite.libelle}",
+        [_horodatage(), "Filtres : " + " ; ".join(resume_filtres(form))],
+        len(colonnes),
+    )
     for i, k in enumerate(colonnes, start=1):
-        cellule = ws.cell(row=5, column=i, value=COLONNES_LISTE[k][0])
+        cellule = ws.cell(row=ligne, column=i, value=COLONNES_LISTE[k][0])
         cellule.font = Font(bold=True)
-        ws.column_dimensions[cellule.column_letter].width = COLONNES_LISTE[k][1] * 0.6
+        colonne = ws.column_dimensions[cellule.column_letter]
+        colonne.width = max(colonne.width or 0, COLONNES_LISTE[k][1] * 0.6)  # place des logos
     total = 0
     rangees = lignes(preparer(qs, aujourdhui).iterator(chunk_size=500), colonnes, aujourdhui)
-    for n, rangee in enumerate(rangees, start=6):
+    for n, rangee in enumerate(rangees, start=ligne + 1):
         total += 1
         for i, v in enumerate(rangee, start=1):
             cellule = ws.cell(row=n, column=i, value=v)
             if isinstance(v, str):
                 cellule.data_type = "s"  # jamais de formule (ex. nom saisi « =… »)
-    ws.freeze_panes = "A6"
+    ws.freeze_panes = f"A{ligne + 1}"
     tampon = io.BytesIO()
     classeur.save(tampon)
     return tampon.getvalue(), total

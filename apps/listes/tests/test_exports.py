@@ -21,6 +21,15 @@ def _texte(contenu):
     return "\n".join(p.extract_text() for p in PdfReader(io.BytesIO(contenu)).pages)
 
 
+def _ligne_titres(ws) -> int:
+    """Ligne des titres de colonnes (sous l'en-tête commun)."""
+    return next(
+        r
+        for r in range(1, ws.max_row + 1)
+        if ws.cell(row=r, column=1).value in ("Matricule", "Nom")
+    )
+
+
 def test_pdf(client_sec, monde):
     r = client_sec.get(_base(monde) + "pdf/")
     assert r["Content-Type"] == "application/pdf"
@@ -28,6 +37,9 @@ def test_pdf(client_sec, monde):
     assert "no-store" in r["Cache-Control"]
     texte = _texte(r.content)
     assert "ARMÉE DU SALUT DU BÉNIN" in texte and "Généré le" in texte
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    assert marques_presentes(texte)  # en-tête commun de l'Église (20/11/2026)
     assert "Adjovi" in texte and "Bio" not in texte and "3 membres" in texte
     page = PdfReader(io.BytesIO(r.content)).pages[0]
     assert page.mediabox.width < page.mediabox.height
@@ -53,11 +65,15 @@ def test_excel(client_sec, monde):
     )
     assert r["Content-Type"].startswith("application/vnd.openxmlformats")
     ws = load_workbook(io.BytesIO(r.content)).active
-    assert ws["A1"].value.startswith("Armée du Salut du Bénin")
-    assert ws["A2"].value.startswith("Généré le")
-    assert "Statut : Actif" in ws["A3"].value
-    assert [c.value for c in ws[5]] == ["Matricule", "Nom"]
-    assert sorted(ws.cell(row=i, column=2).value for i in range(6, ws.max_row + 1)) == [
+    # En-tête commun de l'Église (20/11/2026), puis le tableau.
+    entete = " ".join(str(c.value) for rangee in ws.iter_rows() for c in rangee if c.value)
+    from apps.membres.tests.test_entete_commun import MARQUES_TEXTE
+
+    assert all(m in entete for m in MARQUES_TEXTE)
+    assert "Généré le" in entete and "Statut : Actif" in entete
+    t = _ligne_titres(ws)
+    assert [c.value for c in ws[t]][:2] == ["Matricule", "Nom"]
+    assert sorted(ws.cell(row=i, column=2).value for i in range(t + 1, ws.max_row + 1)) == [
         "Adjovi",
         "Secretaire",
         "Tresorier",
@@ -70,10 +86,13 @@ def test_excel_pas_de_formule(client_sec, monde):
     m1.save()
     r = client_sec.get(_base(monde) + "excel/?envoye=1&colonnes=nom&colonnes=telephone")
     ws = load_workbook(io.BytesIO(r.content)).active
-    valeurs = {ws.cell(row=i, column=1).value: ws.cell(row=i, column=1) for i in range(6, 9)}
+    t = _ligne_titres(ws)
+    valeurs = {
+        ws.cell(row=i, column=1).value: ws.cell(row=i, column=1) for i in range(t + 1, t + 4)
+    }
     cellule = valeurs['=HYPERLINK("http://x","clic")']
     assert cellule.data_type == "s"
-    assert ws.cell(row=6, column=2).data_type == "s"  # téléphone en texte
+    assert ws.cell(row=t + 1, column=2).data_type == "s"  # téléphone en texte
 
 
 def test_journal(client_sec, monde):

@@ -196,61 +196,11 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None, f
     marge = 18 * mm
     petits_logos_en_filigrane(c, larg, haut)
 
-    # En-tête : logos et titre
-    c.setFillColor(MARINE)
-    c.rect(0, haut - 48 * mm, larg, 48 * mm, stroke=0, fill=1)
-    c.setFillColor(ROUGE)
-    c.rect(0, haut - 50 * mm, larg, 2 * mm, stroke=0, fill=1)
-    # Logo de l'Église à gauche, logo de l'Armée du Salut à droite.
-    c.setFillColor(colors.white)
-    c.roundRect(marge - 2 * mm, haut - 44 * mm, 48 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
-    c.drawImage(
-        ImageReader(str(LOGO_CONGREGATION_SANS_TEXTE)),
-        marge - 1 * mm,
-        haut - 41 * mm,
-        46 * mm,
-        34.5 * mm,
-        mask="auto",
-        preserveAspectRatio=True,
-    )
-    c.roundRect(larg - marge - 38 * mm, haut - 44 * mm, 40 * mm, 40 * mm, 4 * mm, stroke=0, fill=1)
-    c.drawImage(
-        ImageReader(str(LOGO_AS)),
-        larg - marge - 36 * mm,
-        haut - 42 * mm,
-        36 * mm,
-        36 * mm,
-        mask="auto",
-    )
-    # Entre les deux logos, les marques de l'Église comme sur les courriers (20/11/2026) :
-    # la Congrégation, le Comité National de Coordination, le Bureau National de Commandement.
-    gauche, droite = marge + 49 * mm, larg - marge - 41 * mm
-    centre, utile = (gauche + droite) / 2, droite - gauche
-    for texte, couleur, taille, hauteur in (
-        ("CONGRÉGATION CHRÉTIENNE DE L'ORDRE SACRÉ ÉTERNEL", colors.white, 8.5, 12),
-        ("DES CHÉRUBINS ET SÉRAPHINS « MONT SION » DU BÉNIN", colors.white, 8.5, 16.5),
-        ("COMITÉ NATIONAL DE COORDINATION", OR, 10.5, 27),
-        ("BUREAU NATIONAL DE COMMANDEMENT", colors.white, 12.5, 35.5),
-    ):
-        taille = taille_pour_largeur(texte, "Sans-Gras", taille, utile, taille_min=6)
-        c.setFillColor(couleur)
-        c.setFont("Sans-Gras", taille)
-        c.drawCentredString(centre, haut - hauteur * mm, texte)
-    c.setStrokeColor(OR)
-    c.setLineWidth(0.8)
-    c.line(centre - 22 * mm, haut - 21 * mm, centre + 22 * mm, haut - 21 * mm)
+    # En-tête commun de l'Église (`apps/membres/entete.py`) : c'est le modèle de tous les
+    # documents (20/11/2026).
+    from apps.membres.entete import HAUTEUR_FICHE, entete_eglise
 
-    # Sous l'en-tête : le titre de la fiche et la devise.
-    centre_page = larg / 2
-    c.setFillColor(MARINE)
-    c.setFont("Sans-Gras", 14)
-    c.drawCentredString(centre_page, haut - 58 * mm, "ARMÉE DU SALUT DU BÉNIN")
-    c.setFillColor(ROUGE)
-    c.setFont("Sans-Gras", 12.5)
-    c.drawCentredString(centre_page, haut - 64.5 * mm, "FICHE D'IDENTIFICATION")
-    c.setFillColor(GRIS)
-    c.setFont("Sans", 9.5)
-    c.drawCentredString(centre_page, haut - 70 * mm, "« FOI – AMOUR – JUSTICE »")
+    entete_eglise(c, larg, haut, "Fiche d'identification", hauteur=HAUTEUR_FICHE, marge=marge)
 
     # Matricule et photo
     y = haut - 83 * mm

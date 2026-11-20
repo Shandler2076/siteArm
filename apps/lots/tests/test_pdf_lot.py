@@ -73,6 +73,9 @@ def test_recapitulatif_sans_mot_de_passe(client_technique, lot_valide):
     assert r.status_code == 200
     assert "2015-03AS-0001" in texte and "AGBO" in texte and f"Lot n° {lot_valide.pk}" in texte
     assert "Mot de passe" not in texte
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    assert marques_presentes(texte)
 
 
 def test_lot_brouillon_404(client_technique, territoire, compte_technique, classeur):

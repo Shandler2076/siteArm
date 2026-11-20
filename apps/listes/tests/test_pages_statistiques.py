@@ -57,7 +57,10 @@ def test_export_pdf_statistiques(client, monde):
     r = client.get(_url(monde, "paroisse", "P1") + "pdf/")
     assert r["Content-Type"] == "application/pdf" and "no-store" in r["Cache-Control"]
     texte = "\n".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
-    assert "ARMÉE DU SALUT DU BÉNIN" in texte and "Statistiques —" in texte
+    assert "ARMÉE DU SALUT DU BÉNIN" in texte and "STATISTIQUES —" in texte
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    assert marques_presentes(texte)
     assert "Généré le" in texte and "Total des membres" in texte and "Statut : Actif" in texte
     (e,) = EntreeJournal.objects.filter(
         action__in=["liste_pdf", "liste_excel", "statistiques_pdf", "tranches_age"]

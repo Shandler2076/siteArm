@@ -113,6 +113,9 @@ sanctions, puis grades, événements, communication et médias (modules 2 à 5).
   (`membres/authenticite.py::emettre_fiche`, SEUL point d'écriture ; chaque impression remplace les
   précédentes), numéro FI-AAAA-NNNNNN + QR → `/membres/verifier/<jeton>/` public : authentique ou
   non, matricule, statut, numéro, date — JAMAIS le nom ni la photo.
+- En-tête commun de TOUS les documents (20/11/2026) : `membres/entete.py` (`entete_eglise`,
+  `entete_excel`) via `listes/exports.py::entete_officiel` ; seuls les courriers (modèle national)
+  et la carte d'autorisation gardent le leur. Aucun document ne dessine son propre en-tête (test).
 - Listes déroulantes longues : `organisation/widgets.py::ListeAvecRecherche` + `site.js::listeAvecRecherche`
   (filet : toute liste de plus de 15 choix).
 - Logos : `LOGO_CONGREGATION_SANS_TEXTE` (triangle + anges, sans texte) là où le nom de la

@@ -1,5 +1,6 @@
 """Pages de la trésorerie : droits, parcours de paiement simulé, confidentialité."""
 
+import io
 from html import unescape
 
 import pytest
@@ -88,7 +89,14 @@ def test_bn_cree_une_cotisation_et_bureau_paie_en_son_nom(tresoriers, client_tec
     c.post(f"/tresorerie/paiement/{p.reference}/", {"action": "confirmer"})
     q = Contribution.objects.get()
     assert q.unite_cle == cle
-    assert c.get(f"/tresorerie/quittance/{q.pk}.pdf").status_code == 200
+    r = c.get(f"/tresorerie/quittance/{q.pk}.pdf")
+    assert r.status_code == 200
+    from pypdf import PdfReader
+
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    texte = " ".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
+    assert marques_presentes(texte)
     # Le secrétaire d'une autre paroisse ne peut pas payer au nom de P1.
     autre = _c(tresoriers["sec_p1"])
     r = autre.post(f"/tresorerie/speciale/{cs.pk}/payer/", {"bureau": cle, "montant": "1"})

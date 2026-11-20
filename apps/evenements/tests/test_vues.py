@@ -111,8 +111,17 @@ def test_export_convoques_sans_npi(monde, ev, client_technique):
         c.value for ligne in load_workbook(io.BytesIO(r.content)).active.iter_rows() for c in ligne
     ]
     assert "Test" in valeurs and "1234567890" not in [str(v) for v in valeurs]
+    from apps.membres.tests.test_entete_commun import MARQUES_TEXTE, marques_presentes
+
+    entete = " ".join(str(v) for v in valeurs if v)
+    assert all(m in entete for m in MARQUES_TEXTE)
     r = client_technique.get(f"/evenements/{ev.pk}/convoques.pdf")
     assert r.status_code == 200 and r.content.startswith(b"%PDF")
+    from pypdf import PdfReader
+
+    assert marques_presentes(
+        " ".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
+    )
 
 
 # --- Décisions du 13/11/2026 : formulaire, sections, rôles, recherche ---------------------------

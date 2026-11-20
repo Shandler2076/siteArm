@@ -73,7 +73,10 @@ def test_parcours_complet_jusqu_a_l_acte(sous_capitaines, compte_technique, clie
 
     r = client_technique.get(f"/grades/bn/actes/{acte.pk}.pdf")
     texte = "".join(p.extract_text() for p in PdfReader(io.BytesIO(r.content)).pages)
-    assert "Décision n° 6" in texte and "après l'examen" in texte
+    assert "DÉCISION N° 6" in texte.upper() and "après l'examen" in texte
+    from apps.membres.tests.test_entete_commun import marques_presentes
+
+    assert marques_presentes(texte)
     assert m1.matricule in texte.replace("\n", "")
     c = Client()
     c.force_login(m1.compte)

@@ -400,9 +400,12 @@ def export_excel(request, pk):
     wb = Workbook()
     ws = wb.active
     ws.title = "Convoqués"
-    ws.append([ev.nom])
-    ws["A1"].data_type = "s"  # jamais de formule
-    ws.append(ENTETES)
+    # En-tête commun de l'Église (20/11/2026), puis le tableau.
+    from apps.membres.entete import entete_excel
+
+    ligne = entete_excel(ws, f"Convoqués — {ev.nom}", [], len(ENTETES))
+    for i, titre in enumerate(ENTETES, start=1):
+        ws.cell(row=ligne, column=i, value=titre)
     for ligne in _lignes(ev):
         ws.append(ligne)
         for cellule in ws[ws.max_row]:
