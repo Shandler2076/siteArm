@@ -19,6 +19,7 @@ from apps.membres.services import (
     enregistrer_membre,
 )
 from apps.organisation.models import Paroisse
+from apps.organisation.widgets import ListeAvecRecherche
 
 gerer_membres = permission_required("membres.gerer_membres", raise_exception=True)
 # Président et Secrétaire national seulement (19/11/2026).
@@ -156,7 +157,9 @@ def photos(request):
 class FormulaireCorrection(forms.Form):
     annee = forms.IntegerField(label="Année d'intégration", min_value=1900)
     paroisse = forms.ModelChoiceField(
-        label="Paroisse d'intégration", queryset=Paroisse.objects.order_by("nom")
+        label="Paroisse d'intégration",
+        queryset=Paroisse.objects.order_by("nom"),
+        widget=ListeAvecRecherche,
     )
     motif = forms.CharField(label="Motif de la correction", max_length=200)
 

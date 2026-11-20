@@ -1,10 +1,14 @@
 from django import forms
 from django.utils import timezone
 
+from apps.organisation.widgets import ListeAvecRecherche
+
 _DATE = forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d")
 
 
 class _ChoixMembre(forms.ModelChoiceField):
+    widget = ListeAvecRecherche
+
     def label_from_instance(self, m):
         return f"{m.nom_complet} — {m.matricule}"
 

@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from apps.membres.grades import Grade
 from apps.membres.models import Categorie, Membre
 from apps.organisation.models import Paroisse
+from apps.organisation.widgets import ListeAvecRecherche
 
 
 def valider_futur_membre(
@@ -30,6 +31,8 @@ def valider_futur_membre(
 
 
 class ChoixParoisse(forms.ModelChoiceField):
+    widget = ListeAvecRecherche
+
     def label_from_instance(self, p):
         return f"{p.nom} — {p.circuit} — {p.circuit.region.nom}"
 

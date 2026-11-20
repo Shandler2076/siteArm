@@ -62,6 +62,144 @@
     });
   }
 
+  /* Liste déroulante avec recherche (demande du 20/11/2026) : on ne fouille jamais une longue
+     liste (paroisses…) ; on tape quelques lettres, sans souci des accents. Toute liste marquée
+     data-recherche, et en filet de sécurité toute liste de plus de SEUIL_RECHERCHE choix. La
+     vraie liste reste dans la page (envoi du formulaire, cascade région → circuit → paroisse). */
+  var SEUIL_RECHERCHE = 15;
+  var MAX_PROPOSITIONS = 80;
+
+  function sansAccents(t) {
+    return t.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  }
+
+  function listeAvecRecherche(select) {
+    if (select.dataset.rechercheActive || select.multiple || select.size > 1) return;
+    select.dataset.rechercheActive = "1";
+    var bloc = document.createElement("span");
+    bloc.className = "choix-recherche";
+    select.parentNode.insertBefore(bloc, select);
+    var saisie = document.createElement("input");
+    saisie.type = "text";
+    saisie.className = "choix-recherche__saisie";
+    saisie.placeholder = "Tapez quelques lettres pour rechercher…";
+    saisie.autocomplete = "off";
+    saisie.setAttribute("role", "combobox");
+    saisie.setAttribute("aria-expanded", "false");
+    saisie.setAttribute("aria-autocomplete", "list");
+    var etiquette = select.closest("label");
+    var titre = etiquette && etiquette.querySelector("span");
+    saisie.setAttribute("aria-label", "Rechercher " + (titre ? titre.textContent.trim().toLowerCase() : "dans la liste"));
+    var resultats = document.createElement("ul");
+    resultats.className = "choix-recherche__resultats";
+    resultats.setAttribute("role", "listbox");
+    resultats.hidden = true;
+    bloc.appendChild(saisie);
+    bloc.appendChild(resultats);
+    bloc.appendChild(select);
+    select.tabIndex = -1;
+    select.setAttribute("aria-hidden", "true");
+    var actif = -1;
+
+    function texteChoisi() {
+      var o = select.options[select.selectedIndex];
+      return o && o.value ? o.textContent.trim() : "";
+    }
+    function majTexte() { saisie.value = texteChoisi(); }
+    function fermer() {
+      resultats.hidden = true;
+      saisie.setAttribute("aria-expanded", "false");
+      actif = -1;
+    }
+    function choisir(o) {
+      select.value = o.value;
+      saisie.value = o.value ? o.textContent.trim() : "";
+      fermer();
+      select.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    function surligner(i) {
+      var lignes = resultats.querySelectorAll("li[data-i]");
+      if (!lignes.length) return;
+      actif = (i + lignes.length) % lignes.length;
+      lignes.forEach(function (l, k) { l.classList.toggle("actif", k === actif); });
+      lignes[actif].scrollIntoView({ block: "nearest" });
+    }
+    function proposer(texte) {
+      var mots = sansAccents(texte.trim()).split(/\s+/).filter(Boolean);
+      resultats.replaceChildren();
+      var total = 0;
+      Array.prototype.forEach.call(select.options, function (o, i) {
+        if (o.disabled || o.hidden) return;
+        if (!o.value && (select.required || mots.length)) return;
+        var lib = sansAccents(o.textContent);
+        if (!mots.every(function (m) { return lib.indexOf(m) !== -1; })) return;
+        total += 1;
+        if (total > MAX_PROPOSITIONS) return;
+        var li = document.createElement("li");
+        li.setAttribute("role", "option");
+        li.dataset.i = i;
+        li.textContent = o.value ? o.textContent.trim() : "— Aucun choix —";
+        resultats.appendChild(li);
+      });
+      if (!total) {
+        var rien = document.createElement("li");
+        rien.className = "info";
+        rien.textContent = "Aucun résultat : vérifiez l'orthographe.";
+        resultats.appendChild(rien);
+      } else if (total > MAX_PROPOSITIONS) {
+        var info = document.createElement("li");
+        info.className = "info";
+        info.textContent = total + " résultats : tapez quelques lettres de plus pour affiner.";
+        resultats.appendChild(info);
+      }
+      resultats.hidden = false;
+      saisie.setAttribute("aria-expanded", "true");
+      actif = -1;
+    }
+
+    saisie.addEventListener("focus", function () { saisie.select(); proposer(""); });
+    saisie.addEventListener("input", function () { proposer(saisie.value); });
+    saisie.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        if (resultats.hidden) proposer(saisie.value);
+        surligner(actif + (e.key === "ArrowDown" ? 1 : -1));
+      } else if (e.key === "Enter" && !resultats.hidden) {
+        e.preventDefault();  // jamais d'envoi du formulaire par erreur
+        var lignes = resultats.querySelectorAll("li[data-i]");
+        var l = lignes[actif >= 0 ? actif : 0];
+        if (l && (actif >= 0 || lignes.length === 1)) choisir(select.options[l.dataset.i]);
+      } else if (e.key === "Escape") {
+        fermer();
+        majTexte();
+      }
+    });
+    saisie.addEventListener("blur", function () {
+      setTimeout(function () {
+        if (document.activeElement === saisie) return;
+        fermer();
+        if (!saisie.value.trim() && !select.required && select.value) {
+          choisir({ value: "", textContent: "" });
+        } else {
+          majTexte();
+        }
+      }, 150);
+    });
+    // mousedown : la saisie garde la main ; click : pas d'activation de l'étiquette.
+    resultats.addEventListener("mousedown", function (e) { e.preventDefault(); });
+    resultats.addEventListener("click", function (e) {
+      e.preventDefault();
+      var li = e.target.closest("li[data-i]");
+      if (li) choisir(select.options[li.dataset.i]);
+    });
+    // La cascade (région → circuit → paroisse) peut vider le choix : on suit.
+    if (select.form) select.form.addEventListener("change", function () {
+      if (document.activeElement !== saisie) majTexte();
+    });
+    select.addEventListener("invalid", function () { saisie.focus(); });
+    majTexte();
+  }
+
   /* « Voir » à côté de chaque mot de passe (décision du 19/11/2026). */
   function voirMotDePasse(champ) {
     if (champ.dataset.voir) return;
@@ -206,5 +344,9 @@
     document.querySelectorAll("form").forEach(cascade);
     document.querySelectorAll(".deroulant").forEach(deroulant);
     document.querySelectorAll("input[data-filtre]").forEach(filtreListe);
+    document.querySelectorAll("select[data-recherche]").forEach(listeAvecRecherche);
+    document.querySelectorAll("select:not([multiple])").forEach(function (s) {
+      if (s.options.length > SEUIL_RECHERCHE) listeAvecRecherche(s);
+    });
   });
 })();

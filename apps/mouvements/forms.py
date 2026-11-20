@@ -2,6 +2,7 @@ from django import forms
 
 from apps.mouvements.models import Sanction, TypeSanction
 from apps.organisation.models import Paroisse
+from apps.organisation.widgets import ListeAvecRecherche
 
 
 class NouvelleMutationForm(forms.Form):
@@ -10,6 +11,7 @@ class NouvelleMutationForm(forms.Form):
         label="Paroisse d'arrivée",
         queryset=Paroisse.objects.filter(active=True).order_by("nom"),
         required=False,
+        widget=ListeAvecRecherche,
     )
     motif = forms.CharField(label="Motif (facultatif)", max_length=300, required=False)
 

@@ -2,11 +2,14 @@ from django import forms
 
 from apps.lots.colonnes import COLONNES
 from apps.organisation.models import Region
+from apps.organisation.widgets import ListeAvecRecherche
 
 
 class FormulaireDepot(forms.Form):
     region = forms.ModelChoiceField(
-        queryset=Region.objects.filter(active=True).order_by("code"), label="Région"
+        queryset=Region.objects.filter(active=True).order_by("code"),
+        label="Région",
+        widget=ListeAvecRecherche,
     )
     fichier = forms.FileField(label="Fichier Excel rempli (.xlsx)")
 

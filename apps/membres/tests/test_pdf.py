@@ -41,3 +41,35 @@ def test_impression_avec_identifiants_change_le_mot_de_passe(client_bn, membre_e
 def test_fiche_sans_identifiants_bn(client_bn, membre_enregistre):
     r = client_bn.get(f"/membres/bn/{membre_enregistre.membre.matricule}/fiche.pdf")
     assert r.status_code == 200 and "Mot de passe" not in _texte(r.content)
+
+
+def test_en_tete_de_l_eglise_puis_titre_dessous(membre_enregistre):
+    """Demande du 20/11/2026 : l'en-tête garde les marques de l'Église (Congrégation, Comité
+    National de Coordination, Bureau National de Commandement) ; « Armée du Salut du Bénin »,
+    « Fiche d'identification » et la devise viennent EN DESSOUS de l'en-tête."""
+    from pypdf import PdfReader
+
+    pdf = fiche_identification_pdf(membre_enregistre.membre)
+    page = PdfReader(io.BytesIO(pdf)).pages[0]
+    hauteurs = {}
+
+    def noter(texte, cm, tm, police, taille):
+        texte = texte.strip()
+        if texte and texte not in hauteurs:
+            hauteurs[texte] = tm[5]
+
+    page.extract_text(visitor_text=noter)
+
+    def y(debut):
+        return next(v for k, v in hauteurs.items() if k.startswith(debut))
+
+    assert y("CONGRÉGATION CHRÉTIENNE") > y("COMITÉ NATIONAL DE COORDINATION")
+    assert y("COMITÉ NATIONAL DE COORDINATION") > y("BUREAU NATIONAL DE COMMANDEMENT")
+    assert y("BUREAU NATIONAL DE COMMANDEMENT") > y("ARMÉE DU SALUT DU BÉNIN")
+    assert y("ARMÉE DU SALUT DU BÉNIN") > y("FICHE D'IDENTIFICATION") > y("« FOI")
+    # Le titre est sous le bandeau de l'en-tête (48 mm + filet de 2 mm).
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import mm
+
+    assert y("ARMÉE DU SALUT DU BÉNIN") < A4[1] - 50 * mm
+    assert y("FICHE D'IDENTIFICATION") > y(membre_enregistre.membre.matricule)

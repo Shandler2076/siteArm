@@ -169,19 +169,38 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
         36 * mm,
         mask="auto",
     )
-    centre = (marge + 46 * mm + larg - marge - 38 * mm) / 2  # milieu entre les deux logos
-    c.setFillColor(colors.white)
-    c.setFont("Sans-Gras", 13.5)
-    c.drawCentredString(centre, haut - 20 * mm, "ARMÉE DU SALUT DU BÉNIN")
-    c.setFillColor(OR)
-    c.setFont("Sans-Gras", 12)
-    c.drawCentredString(centre, haut - 28 * mm, "FICHE D'IDENTIFICATION")
-    c.setFillColor(colors.white)
-    c.setFont("Sans", 9)
-    c.drawCentredString(centre, haut - 36 * mm, "« FOI – AMOUR – JUSTICE »")
+    # Entre les deux logos, les marques de l'Église comme sur les courriers (20/11/2026) :
+    # la Congrégation, le Comité National de Coordination, le Bureau National de Commandement.
+    gauche, droite = marge + 49 * mm, larg - marge - 41 * mm
+    centre, utile = (gauche + droite) / 2, droite - gauche
+    for texte, couleur, taille, hauteur in (
+        ("CONGRÉGATION CHRÉTIENNE DE L'ORDRE SACRÉ ÉTERNEL", colors.white, 8.5, 12),
+        ("DES CHÉRUBINS ET SÉRAPHINS « MONT SION » DU BÉNIN", colors.white, 8.5, 16.5),
+        ("COMITÉ NATIONAL DE COORDINATION", OR, 10.5, 27),
+        ("BUREAU NATIONAL DE COMMANDEMENT", colors.white, 12.5, 35.5),
+    ):
+        taille = taille_pour_largeur(texte, "Sans-Gras", taille, utile, taille_min=6)
+        c.setFillColor(couleur)
+        c.setFont("Sans-Gras", taille)
+        c.drawCentredString(centre, haut - hauteur * mm, texte)
+    c.setStrokeColor(OR)
+    c.setLineWidth(0.8)
+    c.line(centre - 22 * mm, haut - 21 * mm, centre + 22 * mm, haut - 21 * mm)
+
+    # Sous l'en-tête : le titre de la fiche et la devise.
+    centre_page = larg / 2
+    c.setFillColor(MARINE)
+    c.setFont("Sans-Gras", 14)
+    c.drawCentredString(centre_page, haut - 58 * mm, "ARMÉE DU SALUT DU BÉNIN")
+    c.setFillColor(ROUGE)
+    c.setFont("Sans-Gras", 12.5)
+    c.drawCentredString(centre_page, haut - 64.5 * mm, "FICHE D'IDENTIFICATION")
+    c.setFillColor(GRIS)
+    c.setFont("Sans", 9.5)
+    c.drawCentredString(centre_page, haut - 70 * mm, "« FOI – AMOUR – JUSTICE »")
 
     # Matricule et photo
-    y = haut - 64 * mm
+    y = haut - 83 * mm
     c.setFillColor(MARINE)
     c.roundRect(marge, y - 4 * mm, 92 * mm, 14 * mm, 3 * mm, stroke=0, fill=1)
     c.setFillColor(colors.white)
@@ -193,7 +212,7 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
     c.setFont("Sans-Gras", taille)
     c.drawString(marge, y - 14 * mm, _ajuste(membre.nom_complet, "Sans-Gras", taille, largeur_nom))
 
-    px, py, pl, ph = larg - marge - 38 * mm, haut - 106 * mm, 38 * mm, 48 * mm
+    px, py, pl, ph = larg - marge - 38 * mm, haut - 125 * mm, 38 * mm, 48 * mm
     c.setStrokeColor(OR)
     c.setLineWidth(1.5)
     c.rect(px, py, pl, ph, stroke=1, fill=0)
@@ -224,7 +243,7 @@ def dessiner_fiche(c: canvas.Canvas, membre: Membre, mot_de_passe: str | None) -
         ("Circuit actuel", a.circuit_a_date.nom if a else "—"),
         ("Région actuelle", a.region_a_date.nom if a else "—"),
     ]
-    y = haut - 112 * mm
+    y = haut - 131 * mm
     for i, (libelle, valeur) in enumerate(lignes):
         if i % 2 == 0:
             c.setFillColor(FOND)
