@@ -191,6 +191,24 @@ def _texte_convocation(ev, c) -> str:
     )
 
 
+def ajouter_poste_bureau(ev: Evenement, nom: str, *, par) -> Evenement:
+    """Crée un poste du bureau d'organisation propre à cet événement."""
+    nom = " ".join((nom or "").split())[:100]
+    if not nom:
+        raise EvenementRefuse("Écrivez le nom du poste.")
+    with transaction.atomic():
+        frais = Evenement.objects.select_for_update().get(pk=ev.pk)
+        if frais.annule:
+            raise EvenementRefuse("Cet événement est annulé.")
+        if nom.casefold() in {p.casefold() for p in frais.postes_bureau or []}:
+            raise EvenementRefuse(f"Le poste « {nom} » existe déjà.")
+        frais.postes_bureau = [*(frais.postes_bureau or []), nom]
+        frais.save(update_fields=["postes_bureau"])
+        ev.postes_bureau = frais.postes_bureau
+    _journal(par, "modification", evenement=ev.pk, nom=ev.nom, poste_ajoute=nom)
+    return ev
+
+
 def convoquer(
     ev: Evenement,
     membres,
@@ -201,6 +219,7 @@ def convoquer(
     role: str = Role.TRAVAILLEUR,
     formule: str = "",
     role_autre: str = "",
+    poste: str = "",
 ) -> list[Convocation]:
     """Convoque (ou change de section, de rôle, de formule) ; jamais deux fois le même membre.
 
@@ -217,6 +236,24 @@ def convoquer(
         raise EvenementRefuse("Formule inconnue.")
     if session is not None and session.evenement_id != ev.pk:
         raise EvenementRefuse("Cette section n'appartient pas à l'événement.")
+    # Les quatre blocs (20/11/2026) : bureau d'organisation, supervision et invitations
+    # d'honneur sont hors section ; le chef de section et le membre travailleur sont dans une
+    # section ; un événement sans section a des participants.
+    if role in (
+        Role.BUREAU_ORGANISATION,
+        Role.SUPERVISEUR,
+        Role.INVITE_HONNEUR,
+        Role.PARTICIPANT,
+    ):
+        session, sans_session = None, True
+    if role == Role.CHEF_SECTION and session is None:
+        raise EvenementRefuse("Choisissez la section dont il sera le chef.")
+    poste = (poste or "").strip() if role == Role.BUREAU_ORGANISATION else ""
+    if poste and poste not in (ev.postes_bureau or []):
+        raise EvenementRefuse(f"Le poste « {poste} » n'existe pas dans le bureau d'organisation.")
+    membres = list(membres)
+    if poste and len(membres) != 1:
+        raise EvenementRefuse("Un poste du bureau d'organisation revient à une seule personne.")
     role_autre = (role_autre or "").strip()[:100] if role == Role.AUTRE else ""
     if role == Role.AUTRE and not role_autre:
         raise EvenementRefuse("Écrivez le rôle (« Autre ») : par exemple « Protocole ».")
@@ -230,6 +267,19 @@ def convoquer(
         )
     resultat, a_notifier = [], []
     with transaction.atomic():
+        # Verrou sur l'événement : deux convocations simultanées ne font pas deux chefs ni
+        # deux titulaires du même poste.
+        Evenement.objects.select_for_update().filter(pk=ev.pk).first()
+        # Un seul chef par section, un seul titulaire par poste : l'ancien reste convoqué,
+        # comme membre de la section ou du bureau d'organisation.
+        if role == Role.CHEF_SECTION:
+            ev.convocations.filter(active=True, session=session, role=Role.CHEF_SECTION).exclude(
+                membre__in=membres
+            ).update(role=Role.TRAVAILLEUR)
+        if poste:
+            ev.convocations.filter(active=True, poste=poste).exclude(membre__in=membres).update(
+                poste=""
+            )
         for membre in membres:
             existante = ev.convocations.filter(membre=membre, active=True).first()
             if existante:
@@ -237,21 +287,29 @@ def convoquer(
                 change_section = (
                     session is not None or sans_session
                 ) and existante.session_id != nouvelle
-                nouveau = (role, formule, role_autre)
+                nouveau = (role, formule, role_autre, poste)
                 if (
                     change_section
                     or (
                         existante.role,
                         existante.formule,
                         existante.role_autre,
+                        existante.poste,
                     )
                     != nouveau
                 ):
                     ancienne = existante.session.nom if existante.session else ""
                     if session is not None or sans_session:
                         existante.session = session
-                    existante.role, existante.formule, existante.role_autre = nouveau
-                    existante.save(update_fields=["session", "role", "formule", "role_autre"])
+                    (
+                        existante.role,
+                        existante.formule,
+                        existante.role_autre,
+                        existante.poste,
+                    ) = nouveau
+                    existante.save(
+                        update_fields=["session", "role", "formule", "role_autre", "poste"]
+                    )
                     a_notifier.append(existante)
                     _journal(
                         par,
@@ -274,6 +332,7 @@ def convoquer(
                         role=role,
                         formule=formule,
                         role_autre=role_autre,
+                        poste=poste,
                         convoque_par=par,
                     )
             except IntegrityError:
@@ -325,6 +384,8 @@ def retirer(convocation: Convocation, *, motif: str, par) -> Convocation:
         )
         if not c.active:
             raise EvenementRefuse("Cette convocation est déjà retirée.")
+        if c.evenement.annule:  # relu en base : l'annulation est peut-être toute récente
+            raise EvenementRefuse("Cet événement est annulé.")
         c.active, c.motif_retrait = False, motif
         c.save(update_fields=["active", "motif_retrait"])
         ev = c.evenement

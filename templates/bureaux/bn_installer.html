@@ -24,7 +24,15 @@
     </form>
   {% else %}
     <h2>{{ unite.libelle }}</h2>
-    <p class="aide">Saisissez le matricule de chaque titulaire. L'ancien bureau sera clôturé à la date de début.</p>
+    {% if bureau_en_place %}
+    <div class="alerte">
+      <h2>Un bureau est déjà en place</h2>
+      <p>« Installer » commence un <strong>nouveau mandat pour tous les postes</strong> : les mandats en cours sont fermés. Pour <strong>ajouter ou changer une seule personne</strong>, sans toucher aux autres :</p>
+      <p><a class="bouton bouton--secondaire" href="{% url 'bureaux:bn_pourvoir' unite.cle %}">Pourvoir un poste vacant</a>
+        <a class="bouton bouton--secondaire" href="{% url 'bureaux:bn_bureau' unite.cle %}">Remplacer / retirer un titulaire</a></p>
+    </div>
+    {% endif %}
+    <p class="aide">Les cases sont remplies avec les titulaires actuels : gardez-les, changez-les, ou videz une case pour laisser le poste vacant. L'ancien bureau sera clôturé à la date de début.</p>
     <form method="post" novalidate>
       {% csrf_token %}
       <input type="hidden" name="niveau" value="{{ unite.niveau }}">

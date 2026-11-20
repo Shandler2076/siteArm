@@ -100,3 +100,37 @@ def test_accorder_le_droit_de_gerer(client_technique):
 def test_page_fonctions_reservee_au_bn(client, territoire, nouveau_membre):
     client.force_login(nouveau_membre(territoire["P1"], "X").compte)
     assert client.get("/bureau/bn/fonctions/").status_code == 403
+
+
+def test_installer_prerempli_et_averti(client_technique, monde, donner_mandat):
+    """Remarque du 20/11/2026 : cases préremplies avec les titulaires actuels, avertissement
+    vers « Pourvoir » et « Remplacer » quand un bureau est déjà en place."""
+    import datetime as _d
+
+    donner_mandat(monde["m1"], "Président", debut=_d.date(2025, 1, 1))
+    page = client_technique.get("/bureau/bn/installer/?niveau=national").content.decode()
+    assert f'value="{monde["m1"].matricule}"' in page
+    assert "Un bureau est déjà en place" in page
+    assert (
+        "/bureau/bn/bureaux/national/pourvoir/" in page and "/bureau/bn/bureaux/national/" in page
+    )
+
+
+def test_installer_message_clair_si_president_retire(client_technique, monde, donner_mandat):
+    import datetime as _d
+
+    from apps.bureaux.models import Fonction
+
+    donner_mandat(monde["m1"], "Président", debut=_d.date(2025, 1, 1))
+    vp = Fonction.objects.get(nom="Vice-président")
+    r = client_technique.post(
+        "/bureau/bn/installer/",
+        {
+            "niveau": "national",
+            "date_debut": "2026-04-25",
+            f"fonction_{vp.pk}": monde["m2"].matricule,
+        },
+    )
+    page = r.content.decode()
+    assert "Les cases Président et Secrétaire national sont vides" in page
+    assert monde["m1"].matricule in page and "Pourvoir un poste vacant" in page

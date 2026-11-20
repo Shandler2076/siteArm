@@ -89,3 +89,32 @@ def test_lien_dans_le_menu(scene):
     req.user = scene["tres_p4"].compte
     libelles = [lien.libelle for g in construire_menu(req) for lien in g.liens]
     assert "Vérifier un membre" not in libelles
+
+
+def test_fonctions_sous_la_photo(scene, donner_mandat):
+    """Demande du 20/11/2026 : les fonctions en cours de la personne, sous sa photo."""
+    import datetime
+
+    t = scene
+    m1 = t["m1"]
+    donner_mandat(m1, "Trésorier national")
+    donner_mandat(m1, "Président")
+    donner_mandat(m1, "Chef de Section de Circuit", t["C1"] if "C1" in t else t["P1"].circuit)
+    # Un mandat terminé n'apparaît pas.
+    donner_mandat(m1, "Secrétaire paroissial", t["P1"], fin=datetime.date(2025, 6, 1))
+    c = _client(t["sec_p4"])
+    html = unescape(c.post(URL, {"matricule": m1.matricule, "motif": "visite"}).content.decode())
+    assert 'class="carte-identite__fonctions"' in html
+    assert "Trésorier national" in html
+    assert "Président — Bureau National de Commandement" in html
+    circuit = t["P1"].circuit.nom
+    assert f"Chef de Section de Circuit — {circuit}" in html
+    assert f"Secrétaire paroissial — {t['P1'].nom}" not in html
+
+
+def test_sans_fonction_rien_sous_la_photo(scene):
+    c = _client(scene["sec_p4"])
+    m2 = scene["m2"]
+    html = unescape(c.post(URL, {"matricule": m2.matricule, "motif": "visite"}).content.decode())
+    assert m2.nom_complet in html
+    assert 'class="carte-identite__fonctions"' not in html

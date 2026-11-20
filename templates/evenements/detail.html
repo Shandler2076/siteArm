@@ -22,7 +22,7 @@
     <a class="bouton bouton--secondaire" href="{% url 'evenements:export_excel' ev.pk %}">Liste des convoqués (Excel)</a>
   </div>
   {% for g in groupes %}
-    <h2>{% if g.session %}{{ g.session.nom }}{% else %}Sans section{% endif %} ({{ g.convocations|length }})</h2>
+    <h2>{{ g.titre }} ({{ g.convocations|length }}) <a class="lien-discret" href="{% url 'evenements:convoquer' ev.pk %}?bloc={{ g.cle }}">Convoquer dans ce bloc</a></h2>
     <div class="tableau-defilant"><table class="tableau">
       <thead><tr><th>Membre</th><th>Matricule</th><th>Rôle</th><th>Présence</th><th></th></tr></thead>
       <tbody>{% for c in g.convocations %}

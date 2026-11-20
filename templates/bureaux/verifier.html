@@ -15,7 +15,10 @@
   {% if introuvable %}<p class="message message--error">Aucun membre ne porte ce matricule. Vérifiez-le auprès de la personne.</p>{% endif %}
   {% if carte %}
   <div class="carte-identite">
-    {% if carte.photo %}<img src="{{ carte.photo }}" alt="Photo d'identité">{% else %}<div class="carte-identite__sans-photo">Photo à venir</div>{% endif %}
+    <div class="carte-identite__portrait">
+      {% if carte.photo %}<img src="{{ carte.photo }}" alt="Photo d'identité">{% else %}<div class="carte-identite__sans-photo">Photo à venir</div>{% endif %}
+      {% if carte.fonctions %}<ul class="carte-identite__fonctions">{% for f in carte.fonctions %}<li>{{ f }}</li>{% endfor %}</ul>{% endif %}
+    </div>
     <div>
       <p class="matricule">{{ carte.matricule }}</p>
       <h2>{{ carte.nom_complet }}</h2>

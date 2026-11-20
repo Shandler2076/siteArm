@@ -6,6 +6,7 @@ import segno
 from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
+from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.units import mm
 from reportlab.lib.utils import ImageReader
@@ -15,7 +16,7 @@ from apps.evenements.services import autorisation_valable
 from apps.membres.pdf import (
     GRIS,
     LOGO_AS,
-    LOGO_CONGREGATION,
+    LOGO_CONGREGATION_SANS_TEXTE,
     MARINE,
     OR,
     _ajuste,
@@ -24,6 +25,9 @@ from apps.membres.pdf import (
 )
 
 LARGEUR, HAUTEUR = 85 * mm, 120 * mm
+BORDEAUX = colors.HexColor("#8E1F35")
+# En-tête : triangle et anges SANS le texte en courbe (le nom est écrit à côté ; 20/11/2026).
+LOGO_EN_TETE = LOGO_CONGREGATION_SANS_TEXTE
 
 
 def url_verification(convocation) -> str:
@@ -45,29 +49,54 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
     from apps.membres.pdf import filigrane
 
     m, ev = convocation.membre, convocation.evenement
-    filigrane(c, x, y, LARGEUR, HAUTEUR)
+    # Logo de l'Armée du Salut bien visible en filigrane ; AUTORISÉ passe dessus (20/11/2026).
+    filigrane(c, x, y, LARGEUR, HAUTEUR, intensite=0.2)
     c.setStrokeColor(OR)
     c.setLineWidth(1.2)
     c.roundRect(x, y, LARGEUR, HAUTEUR, 3 * mm)
     haut = y + HAUTEUR
-    for logo, lx in ((LOGO_CONGREGATION, x + 4 * mm), (LOGO_AS, x + LARGEUR - 15 * mm)):
+    for logo, lx, larg in (
+        (LOGO_EN_TETE, x + 2.5 * mm, 15 * mm),
+        (LOGO_AS, x + LARGEUR - 14.5 * mm, 11 * mm),
+    ):
         if logo.exists():
             c.drawImage(
                 ImageReader(str(logo)),
                 lx,
-                haut - 15 * mm,
-                11 * mm,
+                haut - 14.5 * mm,
+                larg,
                 11 * mm,
                 mask="auto",
                 preserveAspectRatio=True,
             )
+    # En-tête comme les courriers (20/11/2026), sans leur fond : entre les deux logos, la
+    # Congrégation, le Comité National de Coordination, le Bureau National de Commandement.
+    from reportlab.pdfbase import pdfmetrics
+
+    gauche, droite = x + 18 * mm, x + LARGEUR - 16 * mm
+    centre, largeur_max = (gauche + droite) / 2, droite - gauche
+    lignes = [
+        ("CONGRÉGATION CHRÉTIENNE DE L'ORDRE SACRÉ ÉTERNEL", MARINE, 5.2),
+        ("DES CHÉRUBINS ET SÉRAPHINS « MONT SION » DU BÉNIN", MARINE, 5.2),
+        ("COMITÉ NATIONAL DE COORDINATION", BORDEAUX, 5.6),
+        ("BUREAU NATIONAL DE COMMANDEMENT", MARINE, 6.6),
+    ]
+    ly = haut - 5.6 * mm
+    for texte, couleur, taille in lignes:
+        while taille > 4 and pdfmetrics.stringWidth(texte, "Sans-Gras", taille) > largeur_max:
+            taille -= 0.1
+        c.setFillColor(couleur)
+        c.setFont("Sans-Gras", taille)
+        c.drawCentredString(centre, ly, texte)
+        ly -= 2.9 * mm
+    c.setStrokeColor(OR)
+    c.setLineWidth(0.8)
+    c.line(x + 4 * mm, haut - 16.6 * mm, x + LARGEUR - 4 * mm, haut - 16.6 * mm)
     c.setFillColor(MARINE)
-    c.setFont("Sans-Gras", 8.5)
-    c.drawCentredString(x + LARGEUR / 2, haut - 8 * mm, "ARMÉE DU SALUT DU BÉNIN")
     c.setFont("Sans-Gras", 9.5)
-    c.drawCentredString(x + LARGEUR / 2, haut - 13 * mm, "AUTORISATION")
+    c.drawCentredString(x + LARGEUR / 2, haut - 20.6 * mm, "AUTORISATION")
     # Photo
-    px, py, pl, ph = x + 4 * mm, haut - 52 * mm, 28 * mm, 34 * mm
+    px, py, pl, ph = x + 4 * mm, haut - 52 * mm, 26 * mm, 29 * mm
     c.setStrokeColor(MARINE)
     c.setLineWidth(0.6)
     c.rect(px, py, pl, ph)
@@ -79,7 +108,7 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
         c.setFont("Sans", 7.5)
         c.drawCentredString(px + pl / 2, py + ph / 2, "Photo à venir")
     # QR code
-    c.drawImage(_qr(convocation), x + LARGEUR - 34 * mm, haut - 52 * mm, 30 * mm, 30 * mm)
+    c.drawImage(_qr(convocation), x + LARGEUR - 32 * mm, haut - 51 * mm, 28 * mm, 28 * mm)
     c.setFillColor(GRIS)
     c.setFont("Sans", 6)
     c.drawCentredString(x + LARGEUR - 19 * mm, haut - 55 * mm, "Scanner pour vérifier")
@@ -116,19 +145,24 @@ def dessiner_carte(c: canvas.Canvas, convocation, x: float, y: float) -> None:
             f"Valable du {debut_v:%d/%m/%Y %H:%M} au {fin:%d/%m/%Y %H:%M}", "Sans", 7, largeur_texte
         ),
     )
-    # Mention
-    role = convocation.texte_role.removeprefix("Invité(e) en tant que ")
+    # Qualité, en grand (20/11/2026) : plus de « Est autorisé(e) à… » (AUTORISÉ est en
+    # filigrane) ; en petit dessous, le poste au bureau d'organisation ou la section.
+    from reportlab.pdfbase import pdfmetrics
+
+    qualite, precision = convocation.qualite_autorisation, convocation.precision_autorisation
     c.setFillColor(MARINE)
     c.roundRect(x + 4 * mm, y + 6 * mm, LARGEUR - 8 * mm, 14 * mm, 2 * mm, stroke=0, fill=1)
     c.setFillColorRGB(1, 1, 1)
-    c.setFont("Sans-Gras", 8.5)
-    c.drawCentredString(x + LARGEUR / 2, y + 14.5 * mm, convocation.texte_formule)
-    c.setFont("Sans", 8)
-    c.drawCentredString(
-        x + LARGEUR / 2,
-        y + 9.5 * mm,
-        _ajuste(f"En tant que {role}", "Sans", 8, largeur_texte - 4 * mm),
-    )
+    utile = largeur_texte - 6 * mm
+    taille = min(14, 14 * utile / max(pdfmetrics.stringWidth(qualite, "Sans-Gras", 14), 1))
+    taille = max(8, taille)  # jamais illisible ; au-delà, le texte est coupé avec « … »
+    qualite = _ajuste(qualite, "Sans-Gras", taille, utile)
+    c.setFont("Sans-Gras", taille)
+    hauteur_qualite = y + (13.5 if precision else 11.5) * mm
+    c.drawCentredString(x + LARGEUR / 2, hauteur_qualite, qualite)
+    if precision:
+        c.setFont("Sans", 8)
+        c.drawCentredString(x + LARGEUR / 2, y + 8.5 * mm, _ajuste(precision, "Sans", 8, utile))
     from apps.membres.pdf import mot_filigrane
 
     mot_filigrane(c, x, y, LARGEUR, HAUTEUR, "AUTORISÉ")

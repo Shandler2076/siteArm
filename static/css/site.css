@@ -287,6 +287,11 @@ ul.pointage li { padding: 10px 0; border-bottom: 1px solid #DDE3EE; }
 .carte-identite img, .carte-identite__sans-photo { width: 110px; height: 140px; object-fit: cover; border-radius: 8px; }
 .carte-identite__sans-photo { display: flex; align-items: center; justify-content: center; background: #EEF1F6; color: var(--gris); text-align: center; font-size: .85rem; }
 .carte-identite h2 { margin: 4px 0 8px; }
+.carte-identite { grid-template-columns: 150px 1fr; }
+.carte-identite__portrait { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+.carte-identite__fonctions { list-style: none; margin: 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 4px; }
+.carte-identite__fonctions li { background: var(--marine, #14284B); color: #fff; border-left: 3px solid var(--or, #F2C230);
+  border-radius: 6px; padding: 4px 8px; font-size: .78rem; font-weight: 600; line-height: 1.25; text-align: center; }
 @media (max-width: 480px) { .carte-identite { grid-template-columns: 1fr; } }
 /* Statistiques à paramètres (13/11/2026). */
 .resultat { display: flex; gap: 14px; align-items: center; margin: 16px 0 8px; padding: 14px 16px;
@@ -591,3 +596,19 @@ a.bouton { text-decoration: none; text-align: center; }
   }
   .diaporama img.visible { transform: none; }
 }
+
+/* Convocation par blocs (20/11/2026) : onglets, postes, chef de section */
+.onglets-blocs { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 6px; }
+.onglets-blocs a { display: inline-flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px;
+  background: var(--bleu-pale); color: var(--marine); font-weight: 600; text-decoration: none; transition: background-color .18s, transform .18s; }
+.onglets-blocs a:hover { background: #DFE6F3; transform: translateY(-1px); }
+.onglets-blocs a.actif { background: var(--marine); color: #fff; box-shadow: inset 0 -3px 0 var(--or); }
+.onglets-blocs__nombre { min-width: 22px; padding: 0 6px; border-radius: 11px; background: var(--or); color: var(--marine);
+  font-size: .8rem; font-weight: 800; text-align: center; }
+.selection small { color: var(--gris); }
+.selection--postes strong { color: var(--marine); }
+.selection li form { margin: 0; }
+.choix-poste { display: block; margin-top: 4px; width: 100%; padding: 6px; border: 1px solid #C9D1DE; border-radius: 8px; font: inherit; font-size: .9rem; }
+.choix-chef { display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; font-weight: 700; color: var(--bordeaux); }
+.choix-chef input { width: 18px; height: 18px; accent-color: var(--bordeaux); }
+.panneau-selection h3 { margin: 14px 0 6px; font-size: 1rem; color: var(--marine); }

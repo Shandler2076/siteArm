@@ -56,7 +56,8 @@ def test_autorisation_pdf_contenu(monde, conv):
     r = _client(monde["m1"]).get(f"/evenements/autorisation/{conv.pk}.pdf")
     texte = _texte(r.content)
     assert "Capitaine Test ADJOVI" in texte and monde["m1"].matricule in texte
-    assert "autorisé(e) à travailler" in texte and "Session Culte" in texte
+    # 20/11/2026 : la qualité en grand, plus « Est autorisé(e) à… ».
+    assert "MEMBRE TRAVAILLEUR" in texte and "Session Culte" in texte
     assert "Pèlerinage de la Nativité 2026" in texte and "24/12/2026" in texte
     # Décision du 19/11/2026 : logo en filigrane et « AUTORISÉ » en grand, en bleu.
     assert "AUTORISÉ" in texte

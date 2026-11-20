@@ -63,7 +63,7 @@ def test_creer_puis_convoquer_par_filtres(monde, ev, client_technique):
     html = _html(client_technique.get(url + f"?envoye=1&grade=5&region={monde['HOULENOU'].pk}"))
     assert "Test ADJOVI" in html and "Test DOSSOU" not in html
     culte = ev.sessions.get(nom="Session Culte")
-    r = client_technique.post(url, {"membres": [monde["m1"].pk], "session": culte.pk})
+    r = client_technique.post(url, {"membres": [monde["m1"].pk], "bloc": f"section-{culte.pk}"})
     assert r.status_code == 302
     c = Convocation.objects.get()
     assert c.membre == monde["m1"] and c.session == culte
@@ -175,40 +175,19 @@ def test_recherche_reservee_au_bn(monde, ev):
 
 
 def test_convoquer_superviseur_et_bureau(monde, ev, client_technique, donner_mandat):
+    """Depuis le 20/11/2026, la place vient du bloc choisi (plus de liste « rôle »)."""
     from apps.evenements.models import Role
 
-    culte = ev.sessions.get(nom="Session Culte")
     url = f"/evenements/{ev.pk}/convoquer/"
-    client_technique.post(
-        url, {"membres": [monde["m1"].pk], "session": culte.pk, "role": "superviseur"}
-    )
+    client_technique.post(url, {"membres": [monde["m1"].pk], "bloc": "supervision"})
     c = Convocation.objects.get(membre=monde["m1"])
-    assert c.role == Role.SUPERVISEUR and c.session == culte
-    assert c.texte_formule == "Est autorisé(e) à participer"
-    assert c.texte_role == "Invité(e) en tant que superviseur — Session Culte"
-    # Rôles du 13/11/2026 : bureau d'organisation, officiel, autre écrit à la main.
-    client_technique.post(url, {"membres": [monde["sec_p1"].pk], "role": "bureau_organisation"})
+    assert c.role == Role.SUPERVISEUR and c.session is None
+    assert c.qualite_autorisation == "SUPERVISEUR"
+    client_technique.post(url, {"membres": [monde["sec_p1"].pk], "bloc": "bureau"})
     b = Convocation.objects.get(membre=monde["sec_p1"])
-    assert b.role == Role.BUREAU_ORGANISATION and b.session is None
-    assert b.texte_role == "Invité(e) en tant que bureau d'organisation"
-    assert b.texte_formule == "Est autorisé(e) à participer"
-    client_technique.post(url, {"membres": [monde["m3"].pk], "role": "officiel"})
-    assert Convocation.objects.get(membre=monde["m3"]).libelle_role == "Officiel"
-    # « Autre » : le rôle est obligatoire, écrit à la main.
-    client_technique.post(url, {"membres": [monde["m4"].pk], "role": "autre"})
-    assert not Convocation.objects.filter(membre=monde["m4"]).exists()
-    client_technique.post(
-        url, {"membres": [monde["m4"].pk], "role": "autre", "role_autre": "Protocole"}
-    )
-    p = Convocation.objects.get(membre=monde["m4"])
-    assert p.texte_role == "Invité(e) en tant que protocole" and p.libelle_role == "Protocole"
-    # Formule choisie : elle l'emporte sur celle du rôle.
-    client_technique.post(
-        url, {"membres": [monde["m2"].pk], "role": "superviseur", "formule": "travailler"}
-    )
-    assert Convocation.objects.get(membre=monde["m2"]).texte_formule == (
-        "Est autorisé(e) à travailler"
-    )
+    assert b.role == Role.BUREAU_ORGANISATION and b.session is None and b.poste == ""
+    client_technique.post(url, {"membres": [monde["m3"].pk], "bloc": "honneur"})
+    assert Convocation.objects.get(membre=monde["m3"]).role == Role.INVITE_HONNEUR
 
 
 def test_page_convoquer_filtres_ranges_et_cascade(monde, ev, client_technique):

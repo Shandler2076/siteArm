@@ -26,6 +26,22 @@ def _compte(nom):
     )
 
 
+# Bureau d'organisation de chaque événement (décision du 20/11/2026) : postes proposés d'office,
+# tous facultatifs ; d'autres postes peuvent être créés pour un événement précis.
+POSTES_BUREAU_PAR_DEFAUT = (
+    "Président",
+    "Vice-président",
+    "Secrétaire",
+    "Secrétaire adjoint",
+    "Organisateur",
+    "Organisateur adjoint",
+)
+
+
+def postes_par_defaut() -> list:
+    return list(POSTES_BUREAU_PAR_DEFAUT)
+
+
 class EtatEvenement(models.TextChoices):
     PREVU = "prevu", "Prévu"
     ANNULE = "annule", "Annulé"
@@ -38,6 +54,7 @@ class Evenement(models.Model):
     lieu = models.CharField("lieu", max_length=200, blank=True)
     description = models.TextField("description", blank=True)
     avec_sections = models.BooleanField("organiser en sections", default=False)
+    postes_bureau = models.JSONField("postes du bureau d'organisation", default=postes_par_defaut)
     avec_autorisation = models.BooleanField("générer une autorisation", default=False)
     validite_debut = models.DateTimeField("autorisation valable à partir du", null=True, blank=True)
     validite_heures = models.PositiveSmallIntegerField(
@@ -97,13 +114,31 @@ class Presence(models.TextChoices):
 
 
 class Role(models.TextChoices):
-    """« Invité(e) en tant que » (décisions du 13/11/2026)."""
+    """La place de la personne dans l'événement (décisions du 13 et du 20/11/2026) : bureau
+    d'organisation, supervision, section (chef ou membre travailleur), invitation d'honneur, ou
+    participant (événement sans sections). Officiel et « autre » : anciennes convocations."""
 
-    TRAVAILLEUR = "travailleur", "Travailleur"
+    TRAVAILLEUR = "travailleur", "Membre travailleur"
+    CHEF_SECTION = "chef_section", "Chef de section"
     SUPERVISEUR = "superviseur", "Superviseur"
     BUREAU_ORGANISATION = "bureau_organisation", "Bureau d'organisation"
+    INVITE_HONNEUR = "invite_honneur", "Invité(e) d'honneur"
+    PARTICIPANT = "participant", "Participant(e)"
     OFFICIEL = "officiel", "Officiel"
     AUTRE = "autre", "Autre (à préciser)"
+
+
+# Qualité imprimée en grand sur l'autorisation (20/11/2026) : plus de « Est autorisé(e) à… »,
+# le mot AUTORISÉ est déjà en filigrane.
+QUALITES = {
+    Role.TRAVAILLEUR: "MEMBRE TRAVAILLEUR",
+    Role.CHEF_SECTION: "CHEF DE SECTION",
+    Role.SUPERVISEUR: "SUPERVISEUR",
+    Role.BUREAU_ORGANISATION: "BUREAU D'ORGANISATION",
+    Role.INVITE_HONNEUR: "INVITÉ(E) D'HONNEUR",
+    Role.PARTICIPANT: "PARTICIPANT(E)",
+    Role.OFFICIEL: "OFFICIEL",
+}
 
 
 class Formule(models.TextChoices):
@@ -112,7 +147,9 @@ class Formule(models.TextChoices):
 
 
 def formule_par_defaut(role: str) -> str:
-    return Formule.TRAVAILLER if role == Role.TRAVAILLEUR else Formule.PARTICIPER
+    return (
+        Formule.TRAVAILLER if role in (Role.TRAVAILLEUR, Role.CHEF_SECTION) else Formule.PARTICIPER
+    )
 
 
 def nouveau_jeton() -> str:
@@ -140,6 +177,7 @@ class Convocation(models.Model):
         "formule de l'autorisation", max_length=12, choices=Formule.choices, blank=True
     )
     bureau_libelle = models.CharField("bureau représenté", max_length=200, blank=True)
+    poste = models.CharField("poste au bureau d'organisation", max_length=100, blank=True)
     active = models.BooleanField("active", default=True)
     jeton = models.CharField("jeton de vérification", max_length=64, unique=True)
     presence = models.CharField(
@@ -189,9 +227,41 @@ class Convocation(models.Model):
         """« Superviseur », « Bureau d'organisation », ou le rôle écrit à la main."""
         if self.role == Role.AUTRE:
             return self.role_autre or "Autre"
-        if self.role == "bureau":  # ancien rôle (avant le 13/11/2026)
-            return "Bureau d'organisation"
+        if self.role in (Role.BUREAU_ORGANISATION, "bureau"):  # « bureau » : avant le 13/11
+            return "Bureau d'organisation" + (f" — {self.poste}" if self.poste else "")
         return self.get_role_display()
+
+    @property
+    def qualite_autorisation(self) -> str:
+        """En grand dans le bandeau bleu de l'autorisation : « SUPERVISEUR »…"""
+        if self.role == Role.AUTRE:
+            return (self.role_autre or "Autre").upper()
+        if self.role == "bureau":  # ancien rôle (avant le 13/11/2026)
+            return QUALITES[Role.BUREAU_ORGANISATION]
+        return QUALITES.get(self.role, self.get_role_display().upper())
+
+    @property
+    def precision_autorisation(self) -> str:
+        """En petit sous la qualité : le poste au bureau, ou la section."""
+        if self.role in (Role.BUREAU_ORGANISATION, "bureau"):
+            return self.poste
+        if self.session_id and self.role in (Role.TRAVAILLEUR, Role.CHEF_SECTION):
+            return f"Section {self.session.nom}"
+        return self.session.nom if self.session_id else ""
+
+    @property
+    def place(self) -> str:
+        """Où la personne est placée : « Bureau d'organisation (Président) », « Culte (chef…) »."""
+        if self.role in (Role.BUREAU_ORGANISATION, "bureau"):
+            return "Bureau d'organisation" + (f" ({self.poste})" if self.poste else "")
+        if self.role == Role.SUPERVISEUR:
+            return "Supervision"
+        if self.role == Role.INVITE_HONNEUR:
+            return "Invitations d'honneur"
+        if self.session_id:
+            suffixe = " (chef de section)" if self.role == Role.CHEF_SECTION else ""
+            return f"{self.session.nom}{suffixe}"
+        return "Participants"
 
     @property
     def texte_role(self) -> str:

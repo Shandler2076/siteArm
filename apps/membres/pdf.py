@@ -31,30 +31,31 @@ LOGO_CONGREGATION_SANS_TEXTE = STATIQUE / "img" / "logo-congregation-sans-texte.
 _polices_ok = False
 
 
-_LOGO_PALE = None
+_LOGOS_PALES: dict = {}
 
 
-def _logo_pale() -> ImageReader | None:
-    """Logo de l'Armée du Salut très éclairci (filigrane), préparé une seule fois."""
-    global _LOGO_PALE
-    if _LOGO_PALE is None and LOGO_AS.exists():
+def _logo_pale(intensite: float = 0.10) -> ImageReader | None:
+    """Logo de l'Armée du Salut éclairci (filigrane), préparé une seule fois par intensité."""
+    if intensite not in _LOGOS_PALES and LOGO_AS.exists():
         from PIL import Image
 
         logo = Image.open(LOGO_AS, formats=["PNG"]).convert("RGBA")
         fond = Image.new("RGBA", logo.size, (255, 255, 255, 0))
-        pale = Image.blend(fond, logo, 0.10)
+        pale = Image.blend(fond, logo, intensite)
         tampon = io.BytesIO()
         pale.save(tampon, "PNG")
         tampon.seek(0)
-        _LOGO_PALE = ImageReader(tampon)
-    return _LOGO_PALE
+        _LOGOS_PALES[intensite] = ImageReader(tampon)
+    return _LOGOS_PALES.get(intensite)
 
 
-def filigrane(c, x: float, y: float, largeur: float, hauteur: float, mot: str = "") -> None:
+def filigrane(
+    c, x: float, y: float, largeur: float, hauteur: float, mot: str = "", intensite: float = 0.10
+) -> None:
     """Fond de page (décision du 19/11/2026) : logo de l'Armée du Salut en filigrane. À dessiner
     AVANT le contenu. Le mot (« AUTORISÉ », « PAYÉ ») se pose ensuite par `mot_filigrane`."""
     cote = min(largeur, hauteur) * 0.8
-    logo = _logo_pale()
+    logo = _logo_pale(intensite)
     if logo is not None:
         c.drawImage(
             logo,

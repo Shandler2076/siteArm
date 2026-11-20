@@ -4,6 +4,16 @@
 <section class="carte carte--large">
   <p><a href="{% url 'evenements:detail' ev.pk %}">← {{ ev.nom }}</a></p>
   <h1>Convoquer des membres</h1>
+  {# Les blocs de l'événement (décisions du 20/11/2026), en onglets. #}
+  <nav class="onglets-blocs" aria-label="Blocs de l'événement">
+    {% for b in blocs %}<a href="?bloc={{ b.cle }}"{% if b.cle == bloc.cle %} class="actif" aria-current="page"{% endif %}>{{ b.titre }} <span class="onglets-blocs__nombre">{{ b.nombre }}</span></a>{% endfor %}
+  </nav>
+  <p class="aide">{% if est_bureau %}Bureau d'organisation : nommez aux postes (tous facultatifs). L'autorisation porte « Bureau d'organisation » et le poste.
+    {% elif bloc.cle == "supervision" %}Supervision : autant de superviseurs que nécessaire, même pendant l'événement. L'autorisation porte « Superviseur ».
+    {% elif bloc.cle == "honneur" %}Invitations d'honneur : l'autorisation porte « Invité(e) d'honneur ».
+    {% elif session %}Section {{ session.nom }} : un chef de section (facultatif), puis les membres. L'autorisation porte « Chef de section » ou « Membre travailleur ».
+    {% else %}Participants : l'autorisation porte « Participant(e) ».{% endif %}</p>
+
   <div class="convocation-grille">
     <div class="convocation-gauche">
       <h2>Trouver des membres</h2>
@@ -13,9 +23,10 @@
             data-url="{% url 'evenements:recherche_membres' ev.pk %}"></label>
         <ul id="resultats" hidden></ul>
       </div>
-      <p class="aide">Touchez un membre trouvé : il passe dans « Membres sélectionnés ».</p>
+      <p class="aide">Touchez un membre trouvé : il passe dans la liste de droite.</p>
 
       <form method="get" class="filtres">
+        <input type="hidden" name="bloc" value="{{ bloc.cle }}">
         <input type="hidden" name="envoye" value="1">
         <details class="plus-filtres"{% if not proposes %} open{% endif %}><summary>Afficher des membres par filtres</summary>
           <div class="grille-filtres">{% for champ in principaux %}{% include "listes/_filtre.html" %}{% endfor %}</div>
@@ -32,41 +43,53 @@
         <p><label class="case"><input type="checkbox" id="tout-cocher"> Tout cocher</label></p>
         <ul class="propositions">{% for m in proposes %}
           <li><label><input type="checkbox" class="proposition" name="membres" form="form-convocation" value="{{ m.pk }}"
-            data-nom="{{ m.nom_complet }}" data-matricule="{{ m.matricule }}" data-paroisse="{{ m.affectation_actuelle.paroisse.nom|default:'' }}" data-deja="{% if m.pk in deja %}1{% endif %}">
-            <span>{{ m.nom_complet }}<br><small class="aide">{{ m.matricule }} — {{ m.affectation_actuelle.paroisse.nom|default:"—" }}{% if m.pk in deja %} · déjà convoqué{% endif %}</small></span></label></li>
+            data-nom="{{ m.nom_complet }}" data-matricule="{{ m.matricule }}" data-paroisse="{{ m.affectation_actuelle.paroisse.nom|default:'' }}" data-place="{{ m.place }}" data-bloc="{{ m.bloc }}" data-poste="{{ m.poste }}">
+            <span>{{ m.nom_complet }}<br><small class="aide">{{ m.matricule }} — {{ m.affectation_actuelle.paroisse.nom|default:"—" }}{% if m.place %} · déjà : {{ m.place }}{% endif %}</small></span></label></li>
         {% endfor %}</ul>
       {% elif request.GET.envoye %}<p class="aide">Aucun membre ne correspond à ces filtres.</p>{% endif %}
     </div>
 
-    <aside class="panneau-selection" id="panneau">
+    <aside class="panneau-selection" id="panneau" data-bloc="{{ bloc.titre }}" data-cle="{{ bloc.cle }}">
       <button type="button" class="panneau-selection__barre" id="barre-selection" aria-expanded="false">
-        <span><strong id="compte-selection">0</strong> membre(s) sélectionné(s)</span><span>Voir / Convoquer</span></button>
-      <form method="post" id="form-convocation" class="panneau-selection__contenu">{% csrf_token %}
-        <h2>Membres sélectionnés (<span id="compte-selection-2">0</span>)</h2>
-        <ul id="selection" class="selection"></ul>
-        <p class="aide" id="selection-vide">Aucun membre sélectionné pour l'instant.</p>
-        <label class="champ"><span>Invité(e) en tant que</span><select name="role" id="role">
-          {% for v, l in roles %}<option value="{{ v }}">{{ l }}</option>{% endfor %}</select></label>
-        <label class="champ" id="champ-autre" hidden><span>Rôle (écrit à la main)</span>
-          <input name="role_autre" maxlength="100" list="roles-autres" placeholder="Ex. Protocole, Chorale">
-          <datalist id="roles-autres">{% for r in roles_autres %}<option value="{{ r }}">{% endfor %}</datalist></label>
-        {% if ev.avec_sections %}
-        <label class="champ"><span>Section</span><select name="session"><option value="">Sans section</option>
-          {% for s in ev.sessions.all %}<option value="{{ s.pk }}">{{ s.nom }}</option>{% endfor %}</select></label>
+        <span><strong id="compte-selection">0</strong> à ajouter — {{ bloc.titre }}</span><span>Voir / Valider</span></button>
+      <div class="panneau-selection__contenu">
+        <h2>{{ bloc.titre }}</h2>
+        {% if est_bureau %}
+          <ul class="selection selection--postes">
+            {% for nom, c in postes %}<li><span><strong>{{ nom }}</strong><small>{% if c %}{{ c.membre.nom_complet }} — {{ c.membre.matricule }}{% else %}à pourvoir{% endif %}</small></span>
+              {% if c %}<form method="post" data-confirmer="Retirer {{ c.membre.nom_complet }} ?">{% csrf_token %}<input type="hidden" name="bloc" value="{{ bloc.cle }}"><input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}"><button type="submit" class="retirer" aria-label="Retirer {{ c.membre.nom_complet }}">✕</button></form>{% endif %}</li>{% endfor %}
+            {% for c in sans_poste %}<li><span>{{ c.membre.nom_complet }}<small>Membre du bureau (sans poste) — {{ c.membre.matricule }}</small></span>
+              <form method="post" data-confirmer="Retirer {{ c.membre.nom_complet }} ?">{% csrf_token %}<input type="hidden" name="bloc" value="{{ bloc.cle }}"><input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}"><button type="submit" class="retirer" aria-label="Retirer {{ c.membre.nom_complet }}">✕</button></form></li>{% endfor %}
+          </ul>
+          <details class="plus-filtres"><summary>Ajouter un poste</summary>
+            <form method="post" class="recherche">{% csrf_token %}<input type="hidden" name="bloc" value="{{ bloc.cle }}"><input type="hidden" name="action" value="poste">
+              <input name="nom_poste" maxlength="100" placeholder="Ex. Trésorier de l'événement" required aria-label="Nom du poste">
+              <button type="submit" class="bouton bouton--secondaire">Ajouter</button></form>
+          </details>
+        {% else %}
+          {% if presents %}<p class="aide">Déjà convoqués ({{ presents|length }}) :</p>
+          <ul class="selection">{% for c in presents %}<li><span>{% if c.role == "chef_section" %}<strong>Chef de section</strong> — {% endif %}{{ c.membre.nom_complet }}<small>{{ c.membre.matricule }}</small></span>
+            <form method="post" data-confirmer="Retirer {{ c.membre.nom_complet }} ?">{% csrf_token %}<input type="hidden" name="bloc" value="{{ bloc.cle }}"><input type="hidden" name="action" value="retirer"><input type="hidden" name="convocation" value="{{ c.pk }}"><button type="submit" class="retirer" aria-label="Retirer {{ c.membre.nom_complet }}">✕</button></form></li>{% endfor %}</ul>
+          {% else %}<p class="aide">Personne pour l'instant.</p>{% endif %}
         {% endif %}
-        {% if ev.avec_autorisation %}
-        <label class="champ"><span>Formule de l'autorisation</span><select name="formule">
-          <option value="">Selon le rôle</option>
-          {% for v, l in formules %}<option value="{{ v }}">{{ l|capfirst }}</option>{% endfor %}</select></label>
-        <p class="aide">Travailleur : « à travailler » ; les autres rôles : « à participer », sauf autre choix.</p>
-        {% endif %}
-        <button type="submit" class="bouton">Convoquer les membres sélectionnés</button>
-      </form>
+
+        <form method="post" id="form-convocation">{% csrf_token %}
+          <input type="hidden" name="bloc" value="{{ bloc.cle }}">
+          <h3>À ajouter (<span id="compte-selection-2">0</span>)</h3>
+          {% if session %}<p class="aide">Cochez « Chef » pour le chef de section{% if chef %} (actuellement : {{ chef.membre.nom_complet }}){% endif %}.</p>{% endif %}
+          <ul id="selection" class="selection"></ul>
+          <p class="aide" id="selection-vide">Aucun membre choisi pour l'instant.</p>
+          <button type="submit" class="bouton">Valider — {{ bloc.titre }}</button>
+        </form>
+      </div>
     </aside>
   </div>
 </section>
+<template id="choix-postes"><select class="choix-poste" aria-label="Poste"><option value="">Membre du bureau (sans poste)</option>{% for nom, c in postes %}<option value="{{ nom }}">{{ nom }}{% if c %} (remplace {{ c.membre.nom_complet }}){% endif %}</option>{% endfor %}</select></template>
 <script nonce="{{ request.csp_nonce }}">
   (function () {
+    var panneau = document.getElementById('panneau'), bloc = panneau.dataset.bloc, cleBloc = panneau.dataset.cle;
+    var estBureau = {{ est_bureau|yesno:"true,false" }}, estSection = {{ session|yesno:"true,false" }};
     var selection = document.getElementById('selection'), vide = document.getElementById('selection-vide');
     var champ = document.getElementById('recherche'), liste = document.getElementById('resultats'), minuterie;
     function texte(t) { return document.createTextNode(t); }
@@ -77,26 +100,45 @@
       vide.hidden = n > 0;
     }
     function proposition(pk) { return document.querySelector('input.proposition[value="' + pk + '"]'); }
+    /* Alerte immédiate (20/11/2026) : déjà placé(e) ailleurs → le déplacer ici, ou le laisser. */
+    function accepte(m) {
+      if (!m.place || m.bloc === cleBloc) return true;
+      return window.confirm(m.nom + ' est déjà convoqué(e) : ' + m.place + '.\n\nOK : le déplacer dans « ' + bloc + ' ».\nAnnuler : le laisser où il est.');
+    }
     function ajouter(m) {
-      if (document.getElementById('sel' + m.pk)) return;
+      if (document.getElementById('sel' + m.pk)) return true;
+      if (!accepte(m)) { var p0 = proposition(m.pk); if (p0) p0.checked = false; return false; }
       var li = document.createElement('li'); li.id = 'sel' + m.pk;
       var h = document.createElement('input'); h.type = 'hidden'; h.name = 'membres'; h.value = m.pk; li.appendChild(h);
       var t = document.createElement('span'); t.appendChild(texte(m.nom + ' '));
-      var s = document.createElement('small'); s.className = 'aide';
-      s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.deja ? ' · déjà convoqué' : '')));
+      var s = document.createElement('small');
+      var deplace = m.place && m.bloc !== cleBloc;
+      s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (deplace ? ' · déplacé(e) depuis : ' + m.place : '')));
       t.appendChild(s); li.appendChild(t);
+      if (estBureau) {
+        var choix = document.getElementById('choix-postes').content.firstElementChild.cloneNode(true);
+        choix.name = 'poste_' + m.pk;
+        if (m.bloc === cleBloc && m.poste) choix.value = m.poste;  /* garde son poste actuel */
+        t.appendChild(choix);
+      }
+      if (estSection) {
+        var l = document.createElement('label'); l.className = 'choix-chef';
+        var r = document.createElement('input'); r.type = 'radio'; r.name = 'chef'; r.value = m.pk;
+        l.appendChild(r); l.appendChild(texte(' Chef')); t.appendChild(l);
+      }
       var b = document.createElement('button'); b.type = 'button'; b.className = 'retirer'; b.setAttribute('aria-label', 'Retirer ' + m.nom); b.textContent = '✕';
       b.addEventListener('click', function () { retirer(m.pk); });
       li.appendChild(b); selection.appendChild(li);
       var p = proposition(m.pk); if (p) p.checked = true;
       compter();
+      return true;
     }
     function retirer(pk) {
       var li = document.getElementById('sel' + pk); if (li) li.remove();
       var p = proposition(pk); if (p) p.checked = false;
       compter();
     }
-    function depuis(c) { return {pk: c.value, nom: c.dataset.nom, matricule: c.dataset.matricule, paroisse: c.dataset.paroisse, deja: !!c.dataset.deja}; }
+    function depuis(c) { return {pk: c.value, nom: c.dataset.nom, matricule: c.dataset.matricule, paroisse: c.dataset.paroisse, place: c.dataset.place, bloc: c.dataset.bloc, poste: c.dataset.poste}; }
     /* Avec le script, le panneau de droite est la seule source : les cases de gauche ne sont plus envoyées. */
     document.querySelectorAll('input.proposition').forEach(function (c) {
       c.removeAttribute('name'); c.removeAttribute('form');
@@ -117,11 +159,11 @@
           .then(function (r) { return r.json(); })
           .then(function (d) {
             liste.innerHTML = '';
-            if (!d.resultats.length) { var li = document.createElement('li'); li.className = 'aide'; li.style.padding = '10px'; li.appendChild(texte('Aucun membre trouvé.')); liste.appendChild(li); }
+            if (!d.resultats.length) { var li = document.createElement('li'); li.className = 'aide'; li.appendChild(texte('Aucun membre trouvé.')); liste.appendChild(li); }
             d.resultats.forEach(function (m) {
               var li = document.createElement('li'), b = document.createElement('button');
               b.type = 'button'; b.appendChild(texte(m.nom + ' '));
-              var s = document.createElement('small'); s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.deja ? ' (déjà convoqué)' : '')));
+              var s = document.createElement('small'); s.appendChild(texte(m.matricule + (m.paroisse ? ' — ' + m.paroisse : '') + (m.place ? ' (déjà : ' + m.place + ')' : '')));
               b.appendChild(s); b.addEventListener('click', function () { ajouter(m); liste.hidden = true; champ.value = ''; });
               li.appendChild(b); liste.appendChild(li);
             });
@@ -129,11 +171,8 @@
           });
       }, 250);
     });
-    var role = document.getElementById('role'), autre = document.getElementById('champ-autre');
-    function majRole() { autre.hidden = role.value !== 'autre'; autre.querySelector('input').required = role.value === 'autre'; }
-    role.addEventListener('change', majRole); majRole();
     /* Téléphone : la barre du bas ouvre et ferme le panneau. */
-    var barre = document.getElementById('barre-selection'), panneau = document.getElementById('panneau');
+    var barre = document.getElementById('barre-selection');
     barre.addEventListener('click', function () {
       var o = panneau.classList.toggle('panneau-selection--ouvert'); barre.setAttribute('aria-expanded', o);
     });
