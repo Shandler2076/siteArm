@@ -1,3 +1,4 @@
+# ruff: noqa: F811  (fixtures importées puis demandées en paramètres)
 """Fiche (remarque du 20/11/2026) : « Catégorie » seule ; la ligne « Statut » n'apparaît que si
 le membre n'est plus actif (sanctionné, exclu, démissionnaire, décédé)."""
 

@@ -87,7 +87,14 @@ def installer(request):
     actuels = {
         m.fonction_id: m for m in _mandats_de_l_unite(unite).en_cours().select_related("membre")
     }
-    saisies = {f.pk: (source.get(f"fonction_{f.pk}") or "").strip() for f in fonctions}
+    if request.method == "POST":
+        saisies = {f.pk: (source.get(f"fonction_{f.pk}") or "").strip() for f in fonctions}
+    else:
+        # Préremplies avec les titulaires actuels (20/11/2026) : vider une case = retirer.
+        saisies = {
+            f.pk: actuels[f.pk].membre.matricule if f.pk in actuels else "" for f in fonctions
+        }
+    contexte["bureau_en_place"] = bool(actuels)
     contexte.update(
         fonctions=[(f, actuels.get(f.pk), saisies[f.pk]) for f in fonctions],
         date_debut=source.get("date_debut", ""),
@@ -109,6 +116,23 @@ def installer(request):
             else:
                 titulaires[f] = membre
         if not contexte["erreurs"]:
+            direction = [f for f in fonctions if f.nom in ("Président", "Secrétaire national")]
+            if (
+                unite.niveau == Niveau.NATIONAL
+                and not any(saisies[f.pk] for f in direction)
+                and any(f.pk in actuels for f in direction)
+            ):
+                garde = ", ".join(
+                    f"{actuels[f.pk].membre.matricule} ({f.nom})"
+                    for f in direction
+                    if f.pk in actuels
+                )
+                contexte["erreurs"].append(
+                    "Les cases Président et Secrétaire national sont vides : le bureau en place "
+                    f"serait retiré ({garde}). Retapez leur matricule pour garder le bureau, ou, "
+                    "pour ajouter une seule personne, utilisez « Pourvoir un poste vacant »."
+                )
+                return render(request, "bureaux/bn_installer.html", contexte)
             try:
                 # Vérifié tout de suite (zone, statut…), même si la validation vient après.
                 _verifier_installation(unite, titulaires, date_debut)
